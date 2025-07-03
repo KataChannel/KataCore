@@ -265,14 +265,36 @@ check_prerequisites() {
     # Check if SSH key exists
     if [[ ! -f "$SSH_KEY_PATH" ]]; then
         warning "SSH key not found at $SSH_KEY_PATH"
-        echo "Available options:"
-        echo "1. Create a new SSH key: ssh-keygen -t rsa -b 4096 -C 'your_email@example.com'"
-        echo "2. Use existing key: ./deploy-remote.sh --key /path/to/your/key IP DOMAIN"
-        echo "3. Use password authentication (not recommended for production)"
-        exit 1
+        
+        # Try to auto-generate SSH key
+        if [[ -f "./ssh-keygen-setup.sh" ]]; then
+            warning "Attempting to auto-generate SSH key..."
+            
+            # Extract IP from SERVER_IP for key generation
+            local key_name="katacore-deploy-${SERVER_IP//\./-}"
+            
+            info "Generating SSH key for $SERVER_IP..."
+            ./ssh-keygen-setup.sh --name "$key_name" --server "$SERVER_IP" --user "$SSH_USER" --force
+            
+            # Update SSH_KEY_PATH to the newly generated key
+            SSH_KEY_PATH="$HOME/.ssh/$key_name"
+            
+            if [[ -f "$SSH_KEY_PATH" ]]; then
+                success "SSH key auto-generated: $SSH_KEY_PATH"
+            else
+                error "Failed to auto-generate SSH key"
+            fi
+        else
+            echo "Available options:"
+            echo "1. Generate SSH key automatically: ./auto-ssh-deploy.sh --auto-deploy $SERVER_IP"
+            echo "2. Generate SSH key manually: ./ssh-keygen-setup.sh --server $SERVER_IP --user $SSH_USER"
+            echo "3. Use existing key: ./deploy-remote.sh --key /path/to/your/key $SERVER_IP DOMAIN"
+            echo "4. Create SSH key manually: ssh-keygen -t ed25519 -f ~/.ssh/katacore-deploy -C 'KataCore-deploy'"
+            exit 1
+        fi
+    else
+        success "SSH key found at $SSH_KEY_PATH"
     fi
-    
-    success "SSH key found at $SSH_KEY_PATH"
     
     # Check if docker-compose file exists
     if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then

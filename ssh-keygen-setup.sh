@@ -25,7 +25,7 @@ readonly NC='\033[0m'
 # Logging functions
 log() { echo -e "${GREEN}[$(date +'%H:%M:%S')]${NC} $1"; }
 info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
-success() { echo -e "${GREEN}✅ $1${NC}"; }
+success() { echo -e "${GREEN}✅ $1${NC}; }
 warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 error() { echo -e "${RED}❌ $1${NC}"; exit 1; }
 
@@ -351,6 +351,64 @@ EOF
     success "Created deployment helper: $helper_script"
 }
 
+# Auto-deploy SSH key to server
+auto_deploy_to_server() {
+    if [[ -z "${SERVER_IP:-}" ]]; then
+        return
+    fi
+    
+    local private_key="$SSH_KEY_PATH/$SSH_KEY_NAME"
+    local public_key="$SSH_KEY_PATH/$SSH_KEY_NAME.pub"
+    
+    log "🚀 Auto-deploying SSH key to server..."
+    
+    # Try to copy key to server using ssh-copy-id
+    if command -v ssh-copy-id &> /dev/null; then
+        info "Attempting to copy SSH key to ${SERVER_IP}..."
+        info "You may be prompted for the server password"
+        
+        if ssh-copy-id -i "$public_key" "${SSH_USER:-$DEFAULT_USER}@${SERVER_IP}"; then
+            success "SSH key successfully deployed to ${SERVER_IP}"
+            
+            # Test connection
+            log "Testing SSH connection..."
+            if ssh -i "$private_key" -o ConnectTimeout=10 "${SSH_USER:-$DEFAULT_USER}@${SERVER_IP}" "echo 'SSH connection test successful'"; then
+                success "SSH connection test passed - Password-less SSH now working!"
+                return 0
+            else
+                warning "SSH key deployed but connection test failed"
+            fi
+        else
+            warning "Failed to auto-deploy SSH key using ssh-copy-id"
+            echo ""
+            echo "📋 Manual deployment options:"
+            echo "1. Copy public key content:"
+            echo "   cat $public_key"
+            echo ""
+            echo "2. SSH to server and add to authorized_keys:"
+            echo "   ssh ${SSH_USER:-$DEFAULT_USER}@${SERVER_IP}"
+            echo "   mkdir -p ~/.ssh"
+            echo "   echo 'PASTE_PUBLIC_KEY_HERE' >> ~/.ssh/authorized_keys"
+            echo "   chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+            echo ""
+            echo "3. Or use this one-liner:"
+            echo "   cat $public_key | ssh ${SSH_USER:-$DEFAULT_USER}@${SERVER_IP} 'mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'"
+        fi
+    else
+        warning "ssh-copy-id not found. Installing openssh-client..."
+        
+        # Try to install openssh-client
+        if command -v apt &> /dev/null; then
+            sudo apt update && sudo apt install -y openssh-client
+            success "openssh-client installed"
+            # Retry deployment
+            auto_deploy_to_server
+        else
+            error "Please install openssh-client manually and run this script again"
+        fi
+    fi
+}
+
 # Main function
 main() {
     show_banner
@@ -384,6 +442,9 @@ main() {
     
     # Create deployment helper
     create_deployment_helper
+    
+    # Auto-deploy SSH key to server
+    auto_deploy_to_server
     
     # Show usage instructions
     show_usage_instructions
