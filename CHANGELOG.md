@@ -11,6 +11,10 @@
 - **Cleanup Support**: Easy cleanup of remote deployments
 
 ### ✨ New Features
+- **SSH Key Generation**: Automated SSH key generation with `./ssh-keygen-setup.sh`
+- **SSH Config Management**: Automatic SSH config file creation for servers
+- **Multiple Key Types**: Support for ED25519 and RSA keys with custom bits
+- **Deployment Integration**: Generated keys work seamlessly with deploy-remote.sh
 - Remote deployment: `./deploy-remote.sh SERVER_IP DOMAIN`
 - Simple deployment: `./deploy-remote.sh --simple SERVER_IP DOMAIN`
 - Cleanup deployment: `./deploy-remote.sh --cleanup SERVER_IP`

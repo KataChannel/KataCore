@@ -109,6 +109,21 @@ bun run build:api   # Build NestJS application
 
 **For deployment to remote servers:**
 
+#### SSH Key Setup 🔑
+```bash
+# Generate SSH key for deployment
+./ssh-keygen-setup.sh
+
+# Generate key with custom name and server configuration
+./ssh-keygen-setup.sh --name myproject-key --server 116.118.85.41 --user ubuntu
+
+# Generate RSA key with custom bits
+./ssh-keygen-setup.sh --type rsa --bits 4096 --copy-key
+
+# Force overwrite existing key
+./ssh-keygen-setup.sh --force --name existing-key
+```
+
 #### Simple Deployment (IP-based)
 ```bash
 # Deploy to server with IP only (no SSL)
@@ -239,6 +254,8 @@ KataCore/
 ├── 📄 .gitignore             # Git ignore rules
 ├── 📄 docker-compose.startkitv1.yml # Full deployment stack
 ├── 📄 deploy-remote.sh        # Deployment automation script
+├── 📄 ssh-keygen-setup.sh     # SSH key generation and setup
+├── 📄 generate-security.sh    # Security configuration generator
 ├── 📄 test-deployment.sh      # Deployment testing script
 ├── 📄 CHANGELOG.md           # Version history
 ├── 📄 LICENSE                # MIT License
