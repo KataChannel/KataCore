@@ -52,10 +52,10 @@ EXAMPLES:
     ./quick-deploy.sh 116.118.85.41
 
     # Full deployment with domain and SSL
-    ./quick-deploy.sh 116.118.85.41 mydomain.com
+    ./quick-deploy.sh 116.118.85.41 innerbright.vn
 
     # Deploy with custom SSH user
-    ./quick-deploy.sh --user ubuntu 116.118.85.41 mydomain.com
+    ./quick-deploy.sh --user ubuntu 116.118.85.41 innerbright.vn
 
 WHAT THIS SCRIPT DOES:
     1. ✅ Checks prerequisites
@@ -216,9 +216,9 @@ echo -e "   ssh katacore-$SERVER_IP"
 echo ""
 
 echo -e "${BLUE}📋 Management Commands:${NC}"
-echo -e "   Check status:     ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/katacore && docker-compose ps'"
-echo -e "   View logs:        ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/katacore && docker-compose logs'"
-echo -e "   Restart services: ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/katacore && docker-compose restart'"
+echo -e "   Check status:     ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/katacore && docker compose ps'"
+echo -e "   View logs:        ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/katacore && docker compose logs'"
+echo -e "   Restart services: ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/katacore && docker compose restart'"
 echo ""
 
 echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"

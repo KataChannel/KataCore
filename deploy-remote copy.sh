@@ -628,15 +628,15 @@ configure_ssl() {
         # Build Nginx config blocks based on flags
         local nginx_conf=""
         nginx_conf+="server {
-        listen 80;
-        server_name $DOMAIN www.$DOMAIN;
-        add_header X-Frame-Options \"SAMEORIGIN\" always;
-        add_header X-Content-Type-Options \"nosniff\" always;
-        add_header X-XSS-Protection \"1; mode=block\" always;
-        add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
-        client_max_body_size 50M;
+    listen 80;
+    server_name \$DOMAIN www.\$DOMAIN;
+    add_header X-Frame-Options \"SAMEORIGIN\" always;
+    add_header X-Content-Type-Options \"nosniff\" always;
+    add_header X-XSS-Protection \"1; mode=block\" always;
+    add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
+    client_max_body_size 50M;
 
-        location / {
+    location / {
         proxy_pass http://localhost:3000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -644,21 +644,21 @@ configure_ssl() {
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_buffering off;
         proxy_http_version 1.1;
-        }
     }
-    "
+}
+"
         if [[ "$NGINX_API" == "true" ]]; then
             nginx_conf+="
-    server {
-        listen 80;
-        server_name api.$DOMAIN;
-        add_header X-Frame-Options \"SAMEORIGIN\" always;
-        add_header X-Content-Type-Options \"nosniff\" always;
-        add_header X-XSS-Protection \"1; mode=block\" always;
-        add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
-        client_max_body_size 50M;
+server {
+    listen 80;
+    server_name api.\$DOMAIN;
+    add_header X-Frame-Options \"SAMEORIGIN\" always;
+    add_header X-Content-Type-Options \"nosniff\" always;
+    add_header X-XSS-Protection \"1; mode=block\" always;
+    add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
+    client_max_body_size 50M;
 
-        location / {
+    location / {
         proxy_pass http://localhost:3001;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -666,22 +666,22 @@ configure_ssl() {
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_buffering off;
         proxy_http_version 1.1;
-        }
     }
-    "
+}
+"
         fi
         if [[ "$NGINX_PGADMIN" == "true" ]]; then
             nginx_conf+="
-    server {
-        listen 80;
-        server_name pgadmin.$DOMAIN;
-        add_header X-Frame-Options \"SAMEORIGIN\" always;
-        add_header X-Content-Type-Options \"nosniff\" always;
-        add_header X-XSS-Protection \"1; mode=block\" always;
-        add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
-        client_max_body_size 50M;
+server {
+    listen 80;
+    server_name pgadmin.\$DOMAIN;
+    add_header X-Frame-Options \"SAMEORIGIN\" always;
+    add_header X-Content-Type-Options \"nosniff\" always;
+    add_header X-XSS-Protection \"1; mode=block\" always;
+    add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
+    client_max_body_size 50M;
 
-        location / {
+    location / {
         proxy_pass http://localhost:5050;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -689,22 +689,22 @@ configure_ssl() {
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_buffering off;
         proxy_http_version 1.1;
-        }
     }
-    "
+}
+"
         fi
         if [[ "$NGINX_MINIO" == "true" ]]; then
             nginx_conf+="
-    server {
-        listen 80;
-        server_name minio.$DOMAIN;
-        add_header X-Frame-Options \"SAMEORIGIN\" always;
-        add_header X-Content-Type-Options \"nosniff\" always;
-        add_header X-XSS-Protection \"1; mode=block\" always;
-        add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
-        client_max_body_size 50M;
+server {
+    listen 80;
+    server_name minio.\$DOMAIN;
+    add_header X-Frame-Options \"SAMEORIGIN\" always;
+    add_header X-Content-Type-Options \"nosniff\" always;
+    add_header X-XSS-Protection \"1; mode=block\" always;
+    add_header Referrer-Policy \"strict-origin-when-cross-origin\" always;
+    client_max_body_size 50M;
 
-        location / {
+    location / {
         proxy_pass http://localhost:9000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -712,10 +712,11 @@ configure_ssl() {
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_buffering off;
         proxy_http_version 1.1;
-        }
     }
-    "
+}
+"
         fi
+
         # Prepare certbot domains
         local certbot_domains="-d $DOMAIN -d www.$DOMAIN"
         [[ "$NGINX_API" == "true" ]] && certbot_domains+=" -d api.$DOMAIN"
@@ -845,20 +846,20 @@ show_deployment_summary() {
     echo -e "${CYAN}🔗 Service URLs:${NC}"
     if [[ "$DEPLOY_TYPE" == "simple" ]]; then
         echo -e "   🌐 Main App:      http://$SERVER_IP:3000"
-        echo -e "   🚀 API:           http://$SERVER_IP:3001"
-        echo -e "   📦 MinIO:         http://$SERVER_IP:9000"
+        echo -e "   🚀 API:          http://$SERVER_IP:3001"
+        echo -e "   📦 MinIO:        http://$SERVER_IP:9000"
         echo -e "   🗄️  MinIO Console: http://$SERVER_IP:9001"
         echo -e "   🗄️  pgAdmin:      http://$SERVER_IP:5050"
         echo -e "   🗄️  Database:     $SERVER_IP:5432"
         echo -e "   🗄️  Redis:        $SERVER_IP:6379"
     else
-        echo -e "   🌐 Main App:      https://$DOMAIN (IP: http://$SERVER_IP:3000)"
-        echo -e "   🚀 API:           https://api.$DOMAIN (IP: http://$SERVER_IP:3001)"
-        echo -e "   📦 MinIO:         https://minio.$DOMAIN (IP: http://$SERVER_IP:9000)"
-        echo -e "   🗄️  MinIO Console: https://minio.$DOMAIN (IP: http://$SERVER_IP:9001)"
-        echo -e "   🗄️  pgAdmin:      https://pgadmin.$DOMAIN (IP: http://$SERVER_IP:5050)"
-        echo -e "   🗄️  Database:     $DOMAIN:5432 (IP: $SERVER_IP:5432)"
-        echo -e "   🗄️  Redis:        $DOMAIN:6379 (IP: $SERVER_IP:6379)"
+        echo -e "   🌐 Main App:      https://$DOMAIN"
+        echo -e "   🚀 API:          https://api.$DOMAIN"
+        echo -e "   📦 MinIO:        https://minio.$DOMAIN"
+        echo -e "   🗄️  MinIO Console: https://minio.$DOMAIN"
+        echo -e "   🗄️  pgAdmin:      https://pgadmin.$DOMAIN"
+        echo -e "   🗄️  Database:     $DOMAIN:5432"
+        echo -e "   🗄️  Redis:        $DOMAIN:6379"
     fi
     echo ""
     

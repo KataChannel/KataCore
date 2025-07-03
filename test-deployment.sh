@@ -57,7 +57,7 @@ test_syntax() {
 test_docker_compose() {
     log "Testing docker-compose file syntax..."
     
-    if docker-compose -f docker-compose.startkitv1.yml config >/dev/null 2>&1; then
+    if docker compose -f docker-compose.yml config >/dev/null 2>&1; then
         success "Docker compose file syntax is valid"
     else
         warning "Docker compose file syntax check failed (Docker may not be installed)"
