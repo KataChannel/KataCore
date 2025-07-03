@@ -125,9 +125,33 @@ echo ""
 
 # Step 1: Generate SSH key and deploy
 echo -e "${YELLOW}Step 1: Setting up SSH key...${NC}"
-if ! ./auto-ssh-deploy.sh --auto-deploy --user "$SSH_USER" --force "$SERVER_IP"; then
-    echo -e "${RED}❌ Failed to setup SSH key${NC}"
-    exit 1
+
+# Check if SSH key already exists and is working
+SSH_KEY_NAME="katacore-deploy"
+SSH_KEY_PATH="$HOME/.ssh/$SSH_KEY_NAME"
+
+if [[ -f "$SSH_KEY_PATH" ]]; then
+    echo -e "${BLUE}🔍 Testing existing SSH key...${NC}"
+    if ssh -i "$SSH_KEY_PATH" -o ConnectTimeout=10 -o BatchMode=yes "$SSH_USER@$SERVER_IP" "echo 'SSH test successful'" &>/dev/null; then
+        echo -e "${GREEN}✅ Existing SSH key works, skipping generation${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Existing SSH key not working, regenerating...${NC}"
+        if ! ./auto-ssh-deploy.sh --auto-deploy --user "$SSH_USER" --force "$SERVER_IP"; then
+            echo -e "${RED}❌ Failed to setup SSH key${NC}"
+            echo -e "${YELLOW}💡 Try manual SSH key setup:${NC}"
+            echo "   ssh-copy-id -i ~/.ssh/katacore-deploy.pub $SSH_USER@$SERVER_IP"
+            exit 1
+        fi
+    fi
+else
+    echo -e "${BLUE}🔑 Generating new SSH key...${NC}"
+    if ! ./auto-ssh-deploy.sh --auto-deploy --user "$SSH_USER" --force "$SERVER_IP"; then
+        echo -e "${RED}❌ Failed to setup SSH key${NC}"
+        echo -e "${YELLOW}💡 Try manual SSH key setup:${NC}"
+        echo "   ./ssh-keygen-setup.sh --server $SERVER_IP --user $SSH_USER"
+        echo "   ssh-copy-id -i ~/.ssh/katacore-deploy.pub $SSH_USER@$SERVER_IP"
+        exit 1
+    fi
 fi
 
 echo -e "${GREEN}✅ SSH key setup completed${NC}"

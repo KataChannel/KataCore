@@ -6,11 +6,12 @@
 set -euo pipefail
 
 # Configuration
-SSH_KEY_NAME="katacore-deploy"
+DEFAULT_SSH_KEY_NAME="katacore-deploy"
 SSH_KEY_PATH="$HOME/.ssh"
 SSH_KEY_TYPE="ed25519"
 SSH_KEY_BITS="4096"
 DEFAULT_USER="root"
+DEFAULT_SERVER="116.118.85.41"
 CONFIG_FILE="$HOME/.ssh/config"
 
 # Color codes
@@ -25,7 +26,7 @@ readonly NC='\033[0m'
 # Logging functions
 log() { echo -e "${GREEN}[$(date +'%H:%M:%S')]${NC} $1"; }
 info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
-success() { echo -e "${GREEN}✅ $1${NC}; }
+success() { echo -e "${GREEN}✅ $1${NC}"; }
 warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 error() { echo -e "${RED}❌ $1${NC}"; exit 1; }
 
@@ -43,6 +44,142 @@ EOF
     echo -e "${NC}"
 }
 
+# Get user input for SSH key name
+get_ssh_key_name() {
+    echo -e "${CYAN}🔑 SSH Key Configuration${NC}"
+    echo
+    
+    # Get SSH key name
+    while true; do
+        read -p "Enter SSH key name (default: $DEFAULT_SSH_KEY_NAME): " input_key_name
+        SSH_KEY_NAME="${input_key_name:-$DEFAULT_SSH_KEY_NAME}"
+        
+        # Validate key name (no spaces, special characters)
+        if [[ "$SSH_KEY_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            break
+        else
+            echo -e "${RED}❌ Invalid key name. Use only letters, numbers, hyphens, and underscores.${NC}"
+        fi
+    done
+    
+    info "SSH key name: $SSH_KEY_NAME"
+    echo
+}
+
+# Get user input for connection details
+get_connection_details() {
+    echo -e "${CYAN}🔗 SSH Connection Setup${NC}"
+    echo
+    
+    # Get server IP
+    while true; do
+        read -p "Enter server IP (default: $DEFAULT_SERVER): " input_server
+        SERVER_IP="${input_server:-$DEFAULT_SERVER}"
+        
+        # Validate IP format
+        if [[ $SERVER_IP =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            break
+        else
+            echo -e "${RED}❌ Invalid IP format. Please enter a valid IP address.${NC}"
+        fi
+    done
+    
+    # Get username
+    read -p "Enter SSH username (default: $DEFAULT_USER): " input_user
+    SSH_USER="${input_user:-$DEFAULT_USER}"
+    
+    # Get password for initial connection
+    while true; do
+        read -s -p "Enter SSH password for $SSH_USER@$SERVER_IP: " SSH_PASSWORD
+        echo
+        if [[ -n "$SSH_PASSWORD" ]]; then
+            break
+        else
+            echo -e "${RED}❌ Password cannot be empty.${NC}"
+        fi
+    done
+    
+    echo
+    info "Connection details:"
+    info "  Server: $SERVER_IP"
+    info "  User: $SSH_USER"
+    info "  SSH Key: $SSH_KEY_NAME"
+    info "  Password: [HIDDEN]"
+    echo
+}
+
+# Check if sshpass is installed
+check_sshpass() {
+    if ! command -v sshpass &> /dev/null; then
+        warning "sshpass is not installed. Installing..."
+        
+        # Try to install sshpass
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y sshpass
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y sshpass
+        elif command -v brew &> /dev/null; then
+            brew install sshpass
+        else
+            error "Cannot install sshpass. Please install it manually."
+        fi
+        
+        if ! command -v sshpass &> /dev/null; then
+            error "Failed to install sshpass. Please install it manually."
+        fi
+        
+        success "sshpass installed successfully"
+    fi
+}
+
+# Test SSH connection
+test_ssh_connection() {
+    log "🔍 Testing SSH connection to $SSH_USER@$SERVER_IP..."
+    
+    # Test connection with password
+    if sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 \
+       "$SSH_USER@$SERVER_IP" "echo 'Connection successful'" &> /dev/null; then
+        success "SSH connection test successful"
+    else
+        error "SSH connection failed. Please check your credentials and server availability."
+    fi
+}
+
+# Copy public key to server
+copy_key_to_server() {
+    local public_key="$SSH_KEY_PATH/$SSH_KEY_NAME.pub"
+    
+    if [[ ! -f "$public_key" ]]; then
+        error "Public key not found: $public_key"
+    fi
+    
+    log "📤 Copying public key to server..."
+    
+    # Copy key using sshpass
+    if sshpass -p "$SSH_PASSWORD" ssh-copy-id -o StrictHostKeyChecking=no \
+       -i "$public_key" "$SSH_USER@$SERVER_IP"; then
+        success "Public key copied to server successfully"
+    else
+        error "Failed to copy public key to server"
+    fi
+}
+
+# Test passwordless SSH
+test_passwordless_ssh() {
+    log "🔐 Testing passwordless SSH connection..."
+    
+    local private_key="$SSH_KEY_PATH/$SSH_KEY_NAME"
+    
+    if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 \
+       -i "$private_key" "$SSH_USER@$SERVER_IP" "echo 'Passwordless SSH successful'" &> /dev/null; then
+        success "Passwordless SSH connection successful"
+        return 0
+    else
+        error "Passwordless SSH connection failed"
+        return 1
+    fi
+}
+
 # Show help
 show_help() {
     cat << 'EOF'
@@ -56,25 +193,23 @@ OPTIONS:
     --type TYPE           Key type: ed25519 or rsa (default: ed25519)
     --bits BITS           Key bits for RSA (default: 4096)
     --path PATH           SSH directory path (default: ~/.ssh)
-    --server IP           Server IP to configure
+    --server IP           Server IP (default: 116.118.85.41)
     --user USER           SSH user (default: root)
     --force               Force overwrite existing keys
     --no-config           Skip SSH config file creation
     --copy-key            Copy public key to clipboard
+    --auto-deploy         Automatically deploy key to server
     --help                Show this help
 
 EXAMPLES:
-    # Generate default ED25519 key
+    # Interactive setup with prompts
     ./ssh-keygen-setup.sh
+
+    # Generate key and auto-deploy to server
+    ./ssh-keygen-setup.sh --auto-deploy
 
     # Generate RSA key with custom name
     ./ssh-keygen-setup.sh --type rsa --name myproject-key
-
-    # Generate key and configure for specific server
-    ./ssh-keygen-setup.sh --server 116.118.85.41 --user ubuntu
-
-    # Generate key with custom bits and copy to clipboard
-    ./ssh-keygen-setup.sh --type rsa --bits 2048 --copy-key
 
     # Force overwrite existing key
     ./ssh-keygen-setup.sh --force --name existing-key
@@ -122,6 +257,10 @@ parse_arguments() {
                 COPY_KEY=true
                 shift
                 ;;
+            --auto-deploy)
+                AUTO_DEPLOY=true
+                shift
+                ;;
             --help)
                 show_help
                 exit 0
@@ -145,6 +284,11 @@ validate_inputs() {
         if [[ ! "$SSH_KEY_BITS" =~ ^[0-9]+$ ]] || [[ "$SSH_KEY_BITS" -lt 2048 ]]; then
             error "Invalid RSA key bits: $SSH_KEY_BITS. Minimum 2048 bits required"
         fi
+    fi
+    
+    # Validate SSH key name
+    if [[ ! "$SSH_KEY_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        error "Invalid SSH key name: $SSH_KEY_NAME. Use only letters, numbers, hyphens, and underscores."
     fi
     
     # Validate SSH directory
@@ -214,7 +358,7 @@ create_ssh_config() {
     
     local config_entry="
 # KataCore Deployment Server - Generated $(date)
-Host katacore-${SERVER_IP}
+Host ${SSH_KEY_NAME}-${SERVER_IP}
     HostName ${SERVER_IP}
     User ${SSH_USER:-$DEFAULT_USER}
     IdentityFile $SSH_KEY_PATH/$SSH_KEY_NAME
@@ -231,11 +375,11 @@ Host katacore-${SERVER_IP}
     fi
     
     # Check if entry already exists
-    if grep -q "Host katacore-${SERVER_IP}" "$CONFIG_FILE"; then
-        warning "SSH config entry already exists for katacore-${SERVER_IP}"
+    if grep -q "Host ${SSH_KEY_NAME}-${SERVER_IP}" "$CONFIG_FILE"; then
+        warning "SSH config entry already exists for ${SSH_KEY_NAME}-${SERVER_IP}"
     else
         echo "$config_entry" >> "$CONFIG_FILE"
-        success "SSH config entry created for katacore-${SERVER_IP}"
+        success "SSH config entry created for ${SSH_KEY_NAME}-${SERVER_IP}"
     fi
 }
 
@@ -295,47 +439,35 @@ display_key_info() {
 
 # Show usage instructions
 show_usage_instructions() {
-    echo -e "${PURPLE}📋 Next Steps:${NC}"
+    echo -e "${PURPLE}📋 Connection Ready:${NC}"
     echo
     
     local private_key="$SSH_KEY_PATH/$SSH_KEY_NAME"
-    local public_key="$SSH_KEY_PATH/$SSH_KEY_NAME.pub"
     
-    echo -e "${YELLOW}1. Copy public key to your server:${NC}"
-    echo "   ssh-copy-id -i $public_key ${SSH_USER:-$DEFAULT_USER}@${SERVER_IP:-SERVER_IP}"
+    echo -e "${YELLOW}Connect to your server:${NC}"
+    echo "   ssh -i $private_key ${SSH_USER}@${SERVER_IP}"
+    echo "   # Or using config alias:"
+    echo "   ssh ${SSH_KEY_NAME}-${SERVER_IP}"
     echo
     
-    echo -e "${YELLOW}2. Or manually add to authorized_keys:${NC}"
-    echo "   cat $public_key | ssh ${SSH_USER:-$DEFAULT_USER}@${SERVER_IP:-SERVER_IP} 'mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'"
-    echo
-    
-    echo -e "${YELLOW}3. Test SSH connection:${NC}"
-    if [[ -n "${SERVER_IP:-}" ]]; then
-        echo "   ssh -i $private_key ${SSH_USER:-$DEFAULT_USER}@${SERVER_IP}"
-        echo "   # Or using config alias:"
-        echo "   ssh katacore-${SERVER_IP}"
-    else
-        echo "   ssh -i $private_key ${SSH_USER:-$DEFAULT_USER}@SERVER_IP"
-    fi
-    echo
-    
-    echo -e "${YELLOW}4. Use with KataCore deployment:${NC}"
-    echo "   ./deploy-remote.sh --key $private_key --user ${SSH_USER:-$DEFAULT_USER} SERVER_IP DOMAIN"
+    echo -e "${YELLOW}Use with KataCore deployment:${NC}"
+    echo "   ./deploy-remote.sh --key $private_key --user ${SSH_USER} ${SERVER_IP} DOMAIN"
     echo
 }
 
 # Create deployment helper
 create_deployment_helper() {
-    local helper_script="deploy-with-generated-key.sh"
+    local helper_script="deploy-with-${SSH_KEY_NAME}.sh"
     
     cat > "$helper_script" << EOF
 #!/bin/bash
 
 # 🚀 KataCore Deployment Helper with Generated SSH Key
-# Auto-generated helper script for deployment
+# Auto-generated helper script for deployment with key: $SSH_KEY_NAME
 
 SSH_KEY="$SSH_KEY_PATH/$SSH_KEY_NAME"
 SSH_USER="${SSH_USER:-$DEFAULT_USER}"
+SERVER_IP="${SERVER_IP}"
 
 # Check if key exists
 if [[ ! -f "\$SSH_KEY" ]]; then
@@ -344,69 +476,11 @@ if [[ ! -f "\$SSH_KEY" ]]; then
 fi
 
 # Run deployment with generated key
-exec ./deploy-remote.sh --key "\$SSH_KEY" --user "\$SSH_USER" "\$@"
+exec ./deploy-remote.sh --key "\$SSH_KEY" --user "\$SSH_USER" "\$SERVER_IP" "\$@"
 EOF
     
     chmod +x "$helper_script"
     success "Created deployment helper: $helper_script"
-}
-
-# Auto-deploy SSH key to server
-auto_deploy_to_server() {
-    if [[ -z "${SERVER_IP:-}" ]]; then
-        return
-    fi
-    
-    local private_key="$SSH_KEY_PATH/$SSH_KEY_NAME"
-    local public_key="$SSH_KEY_PATH/$SSH_KEY_NAME.pub"
-    
-    log "🚀 Auto-deploying SSH key to server..."
-    
-    # Try to copy key to server using ssh-copy-id
-    if command -v ssh-copy-id &> /dev/null; then
-        info "Attempting to copy SSH key to ${SERVER_IP}..."
-        info "You may be prompted for the server password"
-        
-        if ssh-copy-id -i "$public_key" "${SSH_USER:-$DEFAULT_USER}@${SERVER_IP}"; then
-            success "SSH key successfully deployed to ${SERVER_IP}"
-            
-            # Test connection
-            log "Testing SSH connection..."
-            if ssh -i "$private_key" -o ConnectTimeout=10 "${SSH_USER:-$DEFAULT_USER}@${SERVER_IP}" "echo 'SSH connection test successful'"; then
-                success "SSH connection test passed - Password-less SSH now working!"
-                return 0
-            else
-                warning "SSH key deployed but connection test failed"
-            fi
-        else
-            warning "Failed to auto-deploy SSH key using ssh-copy-id"
-            echo ""
-            echo "📋 Manual deployment options:"
-            echo "1. Copy public key content:"
-            echo "   cat $public_key"
-            echo ""
-            echo "2. SSH to server and add to authorized_keys:"
-            echo "   ssh ${SSH_USER:-$DEFAULT_USER}@${SERVER_IP}"
-            echo "   mkdir -p ~/.ssh"
-            echo "   echo 'PASTE_PUBLIC_KEY_HERE' >> ~/.ssh/authorized_keys"
-            echo "   chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
-            echo ""
-            echo "3. Or use this one-liner:"
-            echo "   cat $public_key | ssh ${SSH_USER:-$DEFAULT_USER}@${SERVER_IP} 'mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'"
-        fi
-    else
-        warning "ssh-copy-id not found. Installing openssh-client..."
-        
-        # Try to install openssh-client
-        if command -v apt &> /dev/null; then
-            sudo apt update && sudo apt install -y openssh-client
-            success "openssh-client installed"
-            # Retry deployment
-            auto_deploy_to_server
-        else
-            error "Please install openssh-client manually and run this script again"
-        fi
-    fi
 }
 
 # Main function
@@ -417,10 +491,23 @@ main() {
     FORCE_OVERWRITE=${FORCE_OVERWRITE:-false}
     NO_CONFIG=${NO_CONFIG:-false}
     COPY_KEY=${COPY_KEY:-false}
+    AUTO_DEPLOY=${AUTO_DEPLOY:-false}
     SSH_USER=${SSH_USER:-$DEFAULT_USER}
+    SERVER_IP=${SERVER_IP:-}
+    SSH_KEY_NAME=${SSH_KEY_NAME:-}
     
     # Parse arguments
     parse_arguments "$@"
+    
+    # Get SSH key name if not provided via command line
+    if [[ -z "$SSH_KEY_NAME" ]]; then
+        get_ssh_key_name
+    fi
+    
+    # Get connection details if not provided
+    if [[ -z "$SERVER_IP" ]] || [[ "$AUTO_DEPLOY" == "true" ]]; then
+        get_connection_details
+    fi
     
     # Validate inputs
     validate_inputs
@@ -437,14 +524,19 @@ main() {
     # Copy key to clipboard
     copy_key_to_clipboard
     
+    # Auto-deploy key to server if requested
+    if [[ "$AUTO_DEPLOY" == "true" ]] || [[ -n "$SSH_PASSWORD" ]]; then
+        check_sshpass
+        test_ssh_connection
+        copy_key_to_server
+        test_passwordless_ssh
+    fi
+    
     # Display key information
     display_key_info
     
     # Create deployment helper
     create_deployment_helper
-    
-    # Auto-deploy SSH key to server
-    auto_deploy_to_server
     
     # Show usage instructions
     show_usage_instructions

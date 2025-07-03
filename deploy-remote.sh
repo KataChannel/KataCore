@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 KataCore Remote Deployment Helper
+# [DEPLOY] KataCore Remote Deployment Helper
 # Quick deployment script for remote servers
 
 set -euo pipefail
@@ -28,15 +28,26 @@ readonly NC='\033[0m'
 # Logging functions
 log() { echo -e "${GREEN}[$(date +'%H:%M:%S')]${NC} $1"; }
 info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
-success() { echo -e "${GREEN}✅ $1${NC}"; }
-warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
-error() { echo -e "${RED}❌ $1${NC}"; exit 1; }
+success() { echo -e "${GREEN}[OK] $1${NC}"; }
+warning() { echo -e "${YELLOW}[WARN]  $1${NC}"; }
+error() { echo -e "${RED}[ERROR] $1${NC}"; exit 1; }
+
+# Helper function to get the correct docker compose command
+get_docker_compose_cmd() {
+    if command -v docker &> /dev/null && docker compose version &> /dev/null 2>&1; then
+        echo "docker compose"
+    elif command -v docker-compose &> /dev/null; then
+        echo "docker-compose"
+    else
+        error "Docker Compose not found. Please install Docker Compose."
+    fi
+}
 
 show_banner() {
     echo -e "${BLUE}"
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                        🚀 KataCore Remote Deploy                            ║
+║                        [DEPLOY] KataCore Remote Deploy                            ║
 ║                                                                              ║
 ║    Deploy to any server with dynamic IP and domain configuration           ║
 ║    Supports both simple (IP only) and full (domain + SSL) deployments     ║
@@ -45,13 +56,13 @@ EOF
     echo -e "${NC}"
     
     if [[ -n "$SERVER_IP" && -n "$DOMAIN" ]]; then
-        echo -e "${CYAN}📋 Deployment Details:${NC}"
+        echo -e "${CYAN}[INFO] Deployment Details:${NC}"
         echo -e "   📍 Server IP: $SERVER_IP"
         echo -e "   🌍 Domain: $DOMAIN"
         echo -e "   👤 SSH User: $SSH_USER"
         echo -e "   🔐 SSH Key: ${SSH_KEY_PATH:-'default'}"
-        echo -e "   🚀 Deploy Type: $DEPLOY_TYPE"
-        echo -e "   🐳 Docker Compose: $DOCKER_COMPOSE_FILE"
+        echo -e "   [DEPLOY] Deploy Type: $DEPLOY_TYPE"
+        echo -e "   [DOCKER] Docker Compose: $DOCKER_COMPOSE_FILE"
         echo ""
     fi
 }
@@ -59,7 +70,7 @@ EOF
 # Show help
 show_help() {
     cat << 'EOF'
-🚀 KataCore Remote Deployment Script
+[DEPLOY] KataCore Remote Deployment Script
 
 USAGE:
     ./deploy-remote.sh [OPTIONS] IP DOMAIN
@@ -196,7 +207,7 @@ validate_inputs() {
 
 # Select Docker Compose file
 select_docker_compose_file() {
-    log "🐳 Selecting Docker Compose file..."
+    log "[DOCKER] Selecting Docker Compose file..."
     
     # Available compose files
     local compose_files=(
@@ -214,9 +225,9 @@ select_docker_compose_file() {
         info "Available files:"
         for file in "${compose_files[@]}"; do
             if [[ -f "$file" ]]; then
-                info "  ✅ $file"
+                info "  Found: $file"
             else
-                info "  ❌ $file (not found)"
+                info "  Missing: $file"
             fi
         done
         exit 1
@@ -227,28 +238,36 @@ select_docker_compose_file() {
 
 # Enhanced Docker Compose validation
 validate_docker_compose() {
-    log "🔍 Validating Docker Compose configuration..."
+    log "[CHECK] Validating Docker Compose configuration..."
     
-    # Check Docker Compose version
-    if ! command -v docker-compose &> /dev/null; then
+    # Check Docker Compose version - try both docker-compose and docker compose
+    local compose_cmd=""
+    if command -v docker &> /dev/null && docker compose version &> /dev/null 2>&1; then
+        compose_cmd="docker compose"
+    elif command -v docker-compose &> /dev/null; then
+        compose_cmd="docker-compose"
+    else
         error "Docker Compose not found. Please install Docker Compose."
     fi
     
     # Validate compose file syntax
-    if ! docker-compose -f "$DOCKER_COMPOSE_FILE" config --quiet 2>/dev/null; then
+    log "Testing Docker Compose configuration with command: $compose_cmd"
+    if eval "$compose_cmd -f \"$DOCKER_COMPOSE_FILE\" config --quiet" > /dev/null 2>&1; then
+        log "Docker Compose configuration is valid"
+    else
         error "Invalid Docker Compose file: $DOCKER_COMPOSE_FILE"
     fi
     
     # Check required services
     local required_services=("api" "site" "postgres" "redis" "minio")
     for service in "${required_services[@]}"; do
-        if ! docker-compose -f "$DOCKER_COMPOSE_FILE" config --services | grep -q "^$service$"; then
+        if ! eval "$compose_cmd -f \"$DOCKER_COMPOSE_FILE\" config --services" | grep -q "^$service$"; then
             warning "Service '$service' not found in Docker Compose file"
         fi
     done
     
     # Check for build contexts
-    local build_contexts=$(docker-compose -f "$DOCKER_COMPOSE_FILE" config | grep -E "context:" | awk '{print $2}')
+    local build_contexts=$(eval "$compose_cmd -f \"$DOCKER_COMPOSE_FILE\" config" | grep -E "context:" | awk '{print $2}')
     for context in $build_contexts; do
         if [[ ! -d "$context" ]]; then
             error "Build context directory not found: $context"
@@ -260,7 +279,7 @@ validate_docker_compose() {
 
 # Check prerequisites
 check_prerequisites() {
-    log "🔍 Checking prerequisites..."
+    log "[CHECK] Checking prerequisites..."
     
     # Check if SSH key exists
     if [[ ! -f "$SSH_KEY_PATH" ]]; then
@@ -302,7 +321,8 @@ check_prerequisites() {
     fi
     
     # Validate Docker Compose file syntax
-    if ! docker-compose -f "$DOCKER_COMPOSE_FILE" config --quiet; then
+    local compose_cmd=$(get_docker_compose_cmd)
+    if ! eval "$compose_cmd -f \"$DOCKER_COMPOSE_FILE\" config --quiet" 2>/dev/null; then
         error "Invalid Docker Compose file: $DOCKER_COMPOSE_FILE"
     fi
     
@@ -349,7 +369,7 @@ check_ssh_connection() {
 
 # Prepare remote server
 prepare_remote_server() {
-    log "🛠️  Preparing remote server..."
+    log "[SETUP]  Preparing remote server..."
     
     ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << 'EOF'
         set -e
@@ -357,7 +377,7 @@ prepare_remote_server() {
         echo "🔄 Updating system..."
         apt update && apt upgrade -y
         
-        echo "🐳 Installing Docker..."
+        echo "[DOCKER] Installing Docker..."
         if ! command -v docker &> /dev/null; then
             curl -fsSL https://get.docker.com -o get-docker.sh
             sh get-docker.sh
@@ -366,7 +386,7 @@ prepare_remote_server() {
             rm get-docker.sh
         fi
         
-        echo "🔧 Installing Docker Compose..."
+        echo "[CONFIG] Installing Docker Compose..."
         if ! command -v docker-compose &> /dev/null; then
             curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
@@ -388,7 +408,7 @@ prepare_remote_server() {
         ufw allow 5432/tcp
         ufw allow 6379/tcp
         
-        echo "✅ Remote server preparation completed"
+        echo "[OK] Remote server preparation completed"
 EOF
     
     success "Remote server prepared successfully"
@@ -396,7 +416,7 @@ EOF
 
 # Transfer project files to remote server
 transfer_project() {
-    log "📤 Transferring project files to remote server..."
+    log "[UPLOAD] Transferring project files to remote server..."
     
     # Create deployment directory on remote server
     ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" "mkdir -p /opt/$PROJECT_NAME"
@@ -423,7 +443,7 @@ transfer_project() {
 
 # Generate environment configuration
 generate_environment() {
-    log "🔧 Generating environment configuration..."
+    log "[CONFIG] Generating environment configuration..."
     
     ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << EOF
         set -e
@@ -442,7 +462,7 @@ generate_environment() {
             PGADMIN_PASSWORD=\$(openssl rand -base64 16)
             
             # Create .env file
-            cat > .env << 'ENVEOF'
+            cat > .env << ENVEOF
 # Generated on \$(date)
 # KataCore Production Environment Configuration
 
@@ -500,7 +520,7 @@ ENVEOF
 
             # Append deployment-specific configuration
             if [[ "$DEPLOY_TYPE" == "simple" ]]; then
-                cat >> .env << 'ENVEOF'
+                cat >> .env << ENVEOF
 
 # ===== CORS Configuration =====
 CORS_ORIGIN=http://$SERVER_IP:3000
@@ -510,7 +530,7 @@ NEXT_PUBLIC_MINIO_ENDPOINT=http://$SERVER_IP:9000
 PGADMIN_DEFAULT_EMAIL=admin@$SERVER_IP
 ENVEOF
             else
-                cat >> .env << 'ENVEOF'
+                cat >> .env << ENVEOF
 
 # ===== CORS Configuration =====
 CORS_ORIGIN=https://$DOMAIN,http://$SERVER_IP:3000
@@ -521,9 +541,9 @@ PGADMIN_DEFAULT_EMAIL=admin@$DOMAIN
 ENVEOF
             fi
             
-            echo "✅ Environment file generated"
+            echo "[OK] Environment file generated"
         else
-            echo "📋 Using existing .env file"
+            echo "[INFO] Using existing .env file"
         fi
 EOF
     
@@ -532,54 +552,66 @@ EOF
 
 # Build and run Docker Compose
 run_docker_compose() {
-    log "🚀 Building and running Docker Compose..."
+    log "[DEPLOY] Building and running Docker Compose..."
     
     ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << EOF
         set -e
         cd /opt/$PROJECT_NAME
         
-        echo "🧹 Cleaning up existing containers..."
-        docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down --remove-orphans 2>/dev/null || true
-        
-        echo "🗑️  Cleaning up Docker system..."
-        docker system prune -f
-        
-        echo "🔍 Checking Docker Compose file..."
-        if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
-            echo "❌ Docker Compose file not found: $DOCKER_COMPOSE_FILE"
+        # Detect Docker Compose command on remote server
+        if command -v docker-compose &> /dev/null; then
+            COMPOSE_CMD="docker-compose"
+        elif command -v docker &> /dev/null && docker compose version &> /dev/null 2>&1; then
+            COMPOSE_CMD="docker compose"
+        else
+            echo "[ERROR] Docker Compose not found on remote server"
             exit 1
         fi
         
-        echo "📋 Validating Docker Compose configuration..."
-        docker-compose -f $DOCKER_COMPOSE_FILE config --quiet
+        echo "[INFO] Using Docker Compose command: \$COMPOSE_CMD"
         
-        echo "🔨 Building Docker images..."
-        docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME build --no-cache --parallel
+        echo "[CLEAN] Cleaning up existing containers..."
+        \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down --remove-orphans 2>/dev/null || true
         
-        echo "🚀 Starting services..."
-        docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME up -d
+        echo "[REMOVE]  Cleaning up Docker system..."
+        docker system prune -f
         
-        echo "⏳ Waiting for services to start..."
+        echo "[CHECK] Checking Docker Compose file..."
+        if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
+            echo "[ERROR] Docker Compose file not found: $DOCKER_COMPOSE_FILE"
+            exit 1
+        fi
+        
+        echo "[INFO] Validating Docker Compose configuration..."
+        \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE config --quiet
+        
+        echo "[BUILD] Building Docker images..."
+        \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME build --no-cache --parallel
+        
+        echo "[DEPLOY] Starting services..."
+        \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME up -d
+        
+        echo "[WAIT] Waiting for services to start..."
         sleep 30
         
-        echo "🔍 Checking service health..."
+        echo "[CHECK] Checking service health..."
         # Check if services are running
         for i in {1..10}; do
-            if docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps | grep -q "Up"; then
-                echo "✅ Services are starting up..."
+            if \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps | grep -q "Up"; then
+                echo "[OK] Services are starting up..."
                 break
             fi
-            echo "⏳ Waiting for services... (\$i/10)"
+            echo "[WAIT] Waiting for services... (\$i/10)"
             sleep 3
         done
         
-        echo "📊 Checking service status..."
-        docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps
+        echo "[STATUS] Checking service status..."
+        \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps
         
-        echo "📋 Checking service logs for errors..."
-        docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME logs --tail=50
+        echo "[INFO] Checking service logs for errors..."
+        \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME logs --tail=50
         
-        echo "✅ Docker Compose deployment completed!"
+        echo "[OK] Docker Compose deployment completed!"
 EOF
     
     success "Docker Compose services are running"
@@ -588,13 +620,13 @@ EOF
 # Configure SSL (for full deployment)
 configure_ssl() {
     if [[ "$DEPLOY_TYPE" == "full" ]]; then
-        log "🔒 Configuring SSL certificates..."
+        log "[SSL] Configuring SSL certificates..."
         
         ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << EOF
             set -e
             
-            echo "🌐 Configuring Nginx..."
-            cat > /etc/nginx/sites-available/$DOMAIN << 'NGINXEOF'
+            echo "[WEB] Configuring Nginx..."
+            cat > /etc/nginx/sites-available/$DOMAIN << NGINXEOF
 server {
     listen 80;
     server_name $DOMAIN;
@@ -697,10 +729,10 @@ NGINXEOF
             rm -f /etc/nginx/sites-enabled/default
             nginx -t && systemctl reload nginx
             
-            echo "🔒 Obtaining SSL certificate..."
+            echo "[SSL] Obtaining SSL certificate..."
             certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN
             
-            echo "✅ SSL configuration completed"
+            echo "[OK] SSL configuration completed"
 EOF
         
         success "SSL certificates configured"
@@ -709,62 +741,72 @@ EOF
 
 # Check service health
 check_service_health() {
-    log "🔍 Checking service health..."
+    log "[CHECK] Checking service health..."
     
     ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << EOF
         set -e
         cd /opt/$PROJECT_NAME
         
-        echo "🔍 Checking Docker container status..."
-        docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps
+        # Detect Docker Compose command on remote server
+        if command -v docker-compose &> /dev/null; then
+            COMPOSE_CMD="docker-compose"
+        elif command -v docker &> /dev/null && docker compose version &> /dev/null 2>&1; then
+            COMPOSE_CMD="docker compose"
+        else
+            echo "[ERROR] Docker Compose not found on remote server"
+            exit 1
+        fi
+        
+        echo "[CHECK] Checking Docker container status..."
+        \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps
         
         echo ""
-        echo "🔍 Checking service health..."
+        echo "[CHECK] Checking service health..."
         
         # Check main app
         if curl -sf http://localhost:3000 > /dev/null 2>&1; then
-            echo "✅ Main App (port 3000): Healthy"
+            echo "[OK] Main App (port 3000): Healthy"
         else
-            echo "❌ Main App (port 3000): Not responding"
+            echo "[ERROR] Main App (port 3000): Not responding"
         fi
         
         # Check API
         if curl -sf http://localhost:3001/health > /dev/null 2>&1; then
-            echo "✅ API (port 3001): Healthy"
+            echo "[OK] API (port 3001): Healthy"
         else
-            echo "❌ API (port 3001): Not responding"
+            echo "[ERROR] API (port 3001): Not responding"
         fi
         
         # Check MinIO
         if curl -sf http://localhost:9000/minio/health/live > /dev/null 2>&1; then
-            echo "✅ MinIO (port 9000): Healthy"
+            echo "[OK] MinIO (port 9000): Healthy"
         else
-            echo "❌ MinIO (port 9000): Not responding"
+            echo "[ERROR] MinIO (port 9000): Not responding"
         fi
         
         # Check pgAdmin
         if curl -sf http://localhost:5050/misc/ping > /dev/null 2>&1; then
-            echo "✅ pgAdmin (port 5050): Healthy"
+            echo "[OK] pgAdmin (port 5050): Healthy"
         else
-            echo "❌ pgAdmin (port 5050): Not responding"
+            echo "[ERROR] pgAdmin (port 5050): Not responding"
         fi
         
         # Check database connection
-        if docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME exec -T postgres pg_isready -U $PROJECT_NAME > /dev/null 2>&1; then
-            echo "✅ PostgreSQL: Connection healthy"
+        if \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME exec -T postgres pg_isready -U $PROJECT_NAME > /dev/null 2>&1; then
+            echo "[OK] PostgreSQL: Connection healthy"
         else
-            echo "❌ PostgreSQL: Connection failed"
+            echo "[ERROR] PostgreSQL: Connection failed"
         fi
         
         # Check Redis connection
-        if docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME exec -T redis redis-cli ping > /dev/null 2>&1; then
-            echo "✅ Redis: Connection healthy"
+        if \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME exec -T redis redis-cli ping > /dev/null 2>&1; then
+            echo "[OK] Redis: Connection healthy"
         else
-            echo "❌ Redis: Connection failed"
+            echo "[ERROR] Redis: Connection failed"
         fi
         
         echo ""
-        echo "📊 Docker container resource usage:"
+        echo "[STATUS] Docker container resource usage:"
         docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}"
 EOF
     
@@ -784,38 +826,45 @@ show_deployment_summary() {
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
-    echo -e "${CYAN}🌐 Server Information:${NC}"
+    echo -e "${CYAN}[WEB] Server Information:${NC}"
     echo -e "   📍 IP Address:    $SERVER_IP"
     echo -e "   🌍 Domain:        $DOMAIN"
     echo -e "   👤 User:          $SSH_USER"
     echo -e "   🔐 SSH Key:       $SSH_KEY_PATH"
-    echo -e "   🐳 Docker File:   $DOCKER_COMPOSE_FILE"
+    echo -e "   [DOCKER] Docker File:   $DOCKER_COMPOSE_FILE"
     echo -e "   📦 Project:       $PROJECT_NAME"
     echo ""
     
-    echo -e "${CYAN}📊 Services Status:${NC}"
-    ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME && docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps"
+    echo -e "${CYAN}[STATUS] Services Status:${NC}"
+    ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME && \
+        if command -v docker-compose &> /dev/null; then \
+            docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps; \
+        elif command -v docker &> /dev/null && docker compose version &> /dev/null 2>&1; then \
+            docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME ps; \
+        else \
+            echo 'Docker Compose not found'; \
+        fi"
     echo ""
     
     echo -e "${CYAN}🔗 Service URLs:${NC}"
     if [[ "$DEPLOY_TYPE" == "simple" ]]; then
-        echo -e "   🌐 Main App:      http://$SERVER_IP:3000"
-        echo -e "   🚀 API:          http://$SERVER_IP:3001"
+        echo -e "   [WEB] Main App:      http://$SERVER_IP:3000"
+        echo -e "   [DEPLOY] API:          http://$SERVER_IP:3001"
         echo -e "   📦 MinIO:        http://$SERVER_IP:9000"
         echo -e "   🗄️  Database:     $SERVER_IP:5432"
     else
-        echo -e "   🌐 Main App:      https://$DOMAIN"
-        echo -e "   🚀 API:          https://$DOMAIN/api"
+        echo -e "   [WEB] Main App:      https://$DOMAIN"
+        echo -e "   [DEPLOY] API:          https://$DOMAIN/api"
         echo -e "   📦 MinIO:        https://$DOMAIN:9000"
         echo -e "   🗄️  Database:     $DOMAIN:5432"
     fi
     echo ""
     
-    echo -e "${CYAN}📋 Management Commands:${NC}"
-    echo -e "   🔍 Check logs:    ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/$PROJECT_NAME && docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME logs'"
+    echo -e "${CYAN}[INFO] Management Commands:${NC}"
+    echo -e "   [CHECK] Check logs:    ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/$PROJECT_NAME && docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME logs'"
     echo -e "   🔄 Restart:       ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/$PROJECT_NAME && docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME restart'"
     echo -e "   ⏹️  Stop:         ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/$PROJECT_NAME && docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME stop'"
-    echo -e "   🗑️  Remove:       ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/$PROJECT_NAME && docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down'"
+    echo -e "   [REMOVE]  Remove:       ssh -i $SSH_KEY_PATH $SSH_USER@$SERVER_IP 'cd /opt/$PROJECT_NAME && docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down'"
     echo ""
     
     echo -e "${YELLOW}🔐 Important: Check .env file on server for generated passwords${NC}"
@@ -833,7 +882,7 @@ deploy() {
     
     check_prerequisites
     
-    log "🚀 Starting remote deployment..."
+    log "[DEPLOY] Starting remote deployment..."
     
     # Check SSH connection
     check_ssh_connection
@@ -870,7 +919,7 @@ cleanup_deployment() {
         error "Server IP is required for cleanup. Usage: ./deploy-remote.sh --cleanup SERVER_IP"
     fi
     
-    log "🧹 Starting cleanup of remote deployment..."
+    log "[CLEAN] Starting cleanup of remote deployment..."
     
     # Set default SSH key if not provided
     if [[ -z "$SSH_KEY_PATH" ]]; then
@@ -884,28 +933,38 @@ cleanup_deployment() {
     ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << EOF
         set -e
         
-        echo "🧹 Cleaning up KataCore deployment..."
+        echo "[CLEAN] Cleaning up KataCore deployment..."
         
         # Stop and remove Docker containers
         if [[ -d "/opt/$PROJECT_NAME" ]]; then
             cd /opt/$PROJECT_NAME
             
-            if [[ -f "$DOCKER_COMPOSE_FILE" ]]; then
-                echo "🛑 Stopping Docker containers..."
-                docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down --remove-orphans -v || true
-                
-                echo "🗑️  Removing Docker images..."
-                docker-compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down --rmi all || true
+            # Detect Docker Compose command on remote server
+            if command -v docker-compose &> /dev/null; then
+                COMPOSE_CMD="docker-compose"
+            elif command -v docker &> /dev/null && docker compose version &> /dev/null 2>&1; then
+                COMPOSE_CMD="docker compose"
+            else
+                echo "[WARN] Docker Compose not found, skipping container cleanup"
+                COMPOSE_CMD=""
             fi
             
-            echo "🧹 Removing project directory..."
+            if [[ -f "$DOCKER_COMPOSE_FILE" && -n "\$COMPOSE_CMD" ]]; then
+                echo "🛑 Stopping Docker containers..."
+                \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down --remove-orphans -v || true
+                
+                echo "[REMOVE]  Removing Docker images..."
+                \$COMPOSE_CMD -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME down --rmi all || true
+            fi
+            
+            echo "[CLEAN] Removing project directory..."
             cd /
             rm -rf /opt/$PROJECT_NAME
         fi
         
         # Remove Nginx configuration (if exists)
         if [[ -f "/etc/nginx/sites-available/$PROJECT_NAME" ]]; then
-            echo "🌐 Removing Nginx configuration..."
+            echo "[WEB] Removing Nginx configuration..."
             rm -f /etc/nginx/sites-available/$PROJECT_NAME
             rm -f /etc/nginx/sites-enabled/$PROJECT_NAME
             nginx -t && systemctl reload nginx || true
@@ -913,12 +972,12 @@ cleanup_deployment() {
         
         # Clean up SSL certificates (if exists)
         if command -v certbot &> /dev/null; then
-            echo "🔒 Removing SSL certificates..."
+            echo "[SSL] Removing SSL certificates..."
             certbot delete --cert-name $DOMAIN --non-interactive || true
         fi
         
         # Clean up Docker system
-        echo "🧹 Cleaning Docker system..."
+        echo "[CLEAN] Cleaning Docker system..."
         docker system prune -af || true
         docker volume prune -f || true
         
@@ -930,18 +989,18 @@ cleanup_deployment() {
         ufw delete allow 9001/tcp || true
         ufw delete allow 5050/tcp || true
         
-        echo "✅ Cleanup completed successfully!"
+        echo "[OK] Cleanup completed successfully!"
 EOF
     
     success "🎉 Remote deployment cleanup completed!"
     
     echo ""
-    echo -e "${CYAN}📋 Cleanup Summary:${NC}"
+    echo -e "${CYAN}[INFO] Cleanup Summary:${NC}"
     echo -e "   🛑 Docker containers stopped and removed"
-    echo -e "   🗑️  Project files deleted from /opt/$PROJECT_NAME"
-    echo -e "   🌐 Nginx configuration removed"
-    echo -e "   🔒 SSL certificates removed"
-    echo -e "   🧹 Docker system cleaned"
+    echo -e "   [REMOVE]  Project files deleted from /opt/$PROJECT_NAME"
+    echo -e "   [WEB] Nginx configuration removed"
+    echo -e "   [SSL] SSL certificates removed"
+    echo -e "   [CLEAN] Docker system cleaned"
     echo -e "   🔥 Firewall rules cleaned"
     echo ""
 }
