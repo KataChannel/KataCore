@@ -9,19 +9,41 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.4"
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@heroicons/react": "^2.2.0",
+    "@kataoffical/nextjs": "^1.0.5",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
+    "@mui/x-data-grid": "^8.5.2",
+    "@prisma/client": "^6.10.0",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/postcss": "^4.1.11",
+    "autoprefixer": "10.4.20",
+    "axios": "^1.10.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.517.0",
+    "next": "latest",
+    "next-auth": "5.0.0-beta.25",
+    "next-pwa": "^5.6.0",
+    "postcss": "^8.5.1",
+    "postgres": "^3.4.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "5.7.3",
+    "use-debounce": "^10.0.4",
+    "zod": "^3.25.17"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.4",
-    "@eslint/eslintrc": "^3"
+    "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/lodash": "^4.17.18",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "prisma": "^6.10.0",
+    "tailwindcss": "^4.1.11"
   }
 }

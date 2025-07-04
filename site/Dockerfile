@@ -3,24 +3,30 @@ FROM oven/bun:1-alpine AS base
 
 # Install security updates and necessary packages for health checks
 RUN apk update && apk upgrade && \
-    apk add --no-cache libc6-compat dumb-init curl wget && \
+    apk add --no-cache libc6-compat curl wget && \
     rm -rf /var/cache/apk/*
-
-# Install dependencies stage
-FROM base AS deps
-WORKDIR /app
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+# Copy package.json and install dependencies
+COPY package.json ./
+RUN bun install
+
+# Copy source code
 COPY . .
 
-# Disable Next.js telemetry for production
+# Set build environment
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+
+# Generate Prisma client before building
+RUN if [ -f "src/prisma/schema.prisma" ]; then \
+    echo "Generating Prisma client..."; \
+    bun run prisma generate --schema=src/prisma/schema.prisma || \
+    bunx prisma generate --schema=src/prisma/schema.prisma; \
+    fi
 
 # Build the application
 RUN bun run build
@@ -32,6 +38,9 @@ WORKDIR /app
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs --ingroup nodejs
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -59,4 +68,4 @@ ENV HOSTNAME="0.0.0.0"
 
 # Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]

@@ -1,0 +1,294 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource postgres {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Enum definitions
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+  CHANNEL
+}
+
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  AWAY
+  BUSY
+}
+
+// Role model - Quản lý quyền hạn
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions String[] // JSON array of permissions
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users User[]
+
+  @@map("roles")
+}
+
+// User model - Người dùng
+model User {
+  id          String     @id @default(cuid())
+  email       String     @unique
+  username    String     @unique
+  displayName String
+  password    String
+  avatar      String?
+  bio         String?
+  status      UserStatus @default(OFFLINE)
+  isVerified  Boolean    @default(false)
+  isActive    Boolean    @default(true)
+  lastSeen    DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Foreign keys
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  // Relations
+  messages              Message[]
+  conversationsCreated  Conversation[] @relation("ConversationCreator")
+  conversationsJoined   Conversation[] @relation("ConversationParticipants")
+  messageReactions      MessageReaction[]
+  notifications         Notification[]
+  sentFriendRequests    FriendRequest[] @relation("FriendRequestSender")
+  receivedFriendRequests FriendRequest[] @relation("FriendRequestReceiver")
+  friends               User[]          @relation("UserFriends")
+  friendsOf             User[]          @relation("UserFriends")
+  blockedUsers          User[]          @relation("BlockedUsers")
+  blockedByUsers        User[]          @relation("BlockedUsers")
+  settings              UserSettings?
+  sessions              Session[]
+  auditLogs             AuditLog[]
+  reportsMade           Report[]        @relation("ReportReporter")
+  reportsReceived       Report[]        @relation("ReportedUser")
+
+  @@map("users")
+}
+
+// Conversation model - Cuộc trò chuyện
+model Conversation {
+  id          String           @id @default(cuid())
+  title       String?
+  description String?
+  avatar      String?
+  type        ConversationType @default(GROUP)
+  isPublic    Boolean          @default(false)
+  isArchived  Boolean          @default(false)
+  lastActivity DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Foreign keys
+  createdById String
+  createdBy   User   @relation("ConversationCreator", fields: [createdById], references: [id])
+
+  // Relations
+  participants User[]    @relation("ConversationParticipants")
+  messages     Message[]
+
+  @@map("conversations")
+}
+
+// Message model - Tin nhắn
+model Message {
+  id        String      @id @default(cuid())
+  content   String
+  type      MessageType @default(TEXT)
+  fileUrl   String?
+  fileName  String?
+  fileSize  Int?
+  isEdited  Boolean     @default(false)
+  isDeleted Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Foreign keys
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Self-referencing for replies
+  parentId String?
+  parent   Message?  @relation("MessageReplies", fields: [parentId], references: [id])
+  replies  Message[] @relation("MessageReplies")
+
+  // Relations
+  reactions MessageReaction[]
+  reports   Report[]
+
+  @@map("messages")
+}
+
+// MessageReaction model - Reaction cho tin nhắn
+model MessageReaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  createdAt DateTime @default(now())
+
+  // Foreign keys
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Unique constraint: một user chỉ có thể react một emoji cho một message
+  @@unique([messageId, userId, emoji])
+  @@map("message_reactions")
+}
+
+// FriendRequest model - Lời mời kết bạn
+model FriendRequest {
+  id        String   @id @default(cuid())
+  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys
+  senderId String
+  sender   User   @relation("FriendRequestSender", fields: [senderId], references: [id])
+
+  receiverId String
+  receiver   User   @relation("FriendRequestReceiver", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
+  @@map("friend_requests")
+}
+
+// Notification model - Thông báo
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  type      String   // MESSAGE, FRIEND_REQUEST, SYSTEM, etc.
+  isRead    Boolean  @default(false)
+  data      Json?    // Additional data as JSON
+  createdAt DateTime @default(now())
+
+  // Foreign keys
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+// ConversationMember model - Thành viên cuộc trò chuyện với thông tin chi tiết
+model ConversationMember {
+  id         String   @id @default(cuid())
+  joinedAt   DateTime @default(now())
+  leftAt     DateTime?
+  role       String   @default("MEMBER") // ADMIN, MODERATOR, MEMBER
+  isMuted    Boolean  @default(false)
+  isBlocked  Boolean  @default(false)
+  lastRead   DateTime?
+
+  // Foreign keys
+  conversationId String
+  userId         String
+
+  @@unique([conversationId, userId])
+  @@map("conversation_members")
+}
+
+// Settings model - Cài đặt người dùng
+model UserSettings {
+  id                    String  @id @default(cuid())
+  theme                 String  @default("LIGHT") // LIGHT, DARK, AUTO
+  language              String  @default("vi")
+  notificationEnabled   Boolean @default(true)
+  soundEnabled          Boolean @default(true)
+  showOnlineStatus      Boolean @default(true)
+  allowFriendRequests   Boolean @default(true)
+  allowDirectMessages   Boolean @default(true)
+  emailNotifications    Boolean @default(false)
+  pushNotifications     Boolean @default(true)
+
+  // Foreign keys
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("user_settings")
+}
+
+// Session model - Quản lý phiên đăng nhập
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  device    String?
+  ipAddress String?
+  userAgent String?
+  isActive  Boolean  @default(true)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Foreign keys
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+// AuditLog model - Lịch sử hoạt động
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, etc.
+  entity    String   // USER, MESSAGE, CONVERSATION, etc.
+  entityId  String?
+  oldValues Json?
+  newValues Json?
+  createdAt DateTime @default(now())
+
+  // Foreign keys
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+// Report model - Báo cáo vi phạm
+model Report {
+  id          String   @id @default(cuid())
+  type        String   // SPAM, HARASSMENT, INAPPROPRIATE, etc.
+  description String?
+  status      String   @default("PENDING") // PENDING, REVIEWING, RESOLVED, DISMISSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Foreign keys
+  reporterId String
+  reporter   User   @relation("ReportReporter", fields: [reporterId], references: [id])
+
+  reportedUserId String?
+  reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id])
+
+  messageId String?
+  message   Message? @relation(fields: [messageId], references: [id])
+
+  @@map("reports")
+}

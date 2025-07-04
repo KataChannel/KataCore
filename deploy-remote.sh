@@ -15,6 +15,11 @@ FORCE_REGEN=false
 CLEANUP_MODE=false
 PROJECT_NAME="katacore"
 DOCKER_COMPOSE_FILE="docker-compose.yml"
+INSTALL_API=false
+INSTALL_PGADMIN=false
+INSTALL_MINIO=false
+INSTALL_REDIS=false
+INSTALL_POSTGRES=false
 NGINX_API=false
 NGINX_PGADMIN=false
 NGINX_MINIO=false
@@ -147,6 +152,26 @@ parse_arguments() {
                 ;;
             --nginxminio)
                 NGINX_MINIO=true
+                shift
+                ;;
+            --install-api)
+                INSTALL_API=true
+                shift
+                ;;
+            --install-pgadmin)
+                INSTALL_PGADMIN=true
+                shift
+                ;;
+            --install-minio)
+                INSTALL_MINIO=true
+                shift
+                ;;
+            --install-redis)
+                INSTALL_REDIS=true
+                shift
+                ;;
+            --install-postgres)
+                INSTALL_POSTGRES=true
                 shift
                 ;;
             --help)
@@ -303,8 +328,33 @@ check_prerequisites() {
     fi
     
     # Validate Docker Compose file syntax
-    if ! docker compose -f "$DOCKER_COMPOSE_FILE" config --quiet; then
-        error "Invalid Docker Compose file: $DOCKER_COMPOSE_FILE"
+    # Check Docker version
+    if ! command -v docker &> /dev/null; then
+        error "Docker is not installed. Please install Docker."
+    fi
+    docker_version=$(docker --version | awk '{print $3}' | sed 's/,//')
+    log "Docker version: $docker_version"
+
+    # Check Docker Compose version (support both plugin and standalone)
+    if docker compose version &> /dev/null; then
+        compose_version=$(docker compose version --short)
+        log "Docker Compose (plugin) version: $compose_version"
+    elif command -v docker-compose &> /dev/null; then
+        compose_version=$(docker-compose --version | awk '{print $3}' | sed 's/,//')
+        log "Docker Compose (standalone) version: $compose_version"
+    else
+        error "Docker Compose is not installed. Please install Docker Compose."
+    fi
+
+    # Validate Docker Compose file syntax
+    if docker compose version &> /dev/null; then
+        if ! docker compose -f "$DOCKER_COMPOSE_FILE" config --quiet; then
+            error "Invalid Docker Compose file: $DOCKER_COMPOSE_FILE"
+        fi
+    else
+        if ! docker-compose -f "$DOCKER_COMPOSE_FILE" config --quiet; then
+            error "Invalid Docker Compose file: $DOCKER_COMPOSE_FILE"
+        fi
     fi
     
     success "Docker Compose file found and validated: $DOCKER_COMPOSE_FILE"
@@ -452,13 +502,13 @@ generate_environment() {
             echo "🔐 Generating environment variables..."
             
             # Generate random passwords and keys
-            DB_PASSWORD=\$(openssl rand -hex 16)
-            REDIS_PASSWORD=\$(openssl rand -hex 16)
+            DB_PASSWORD=\$(openssl rand -hex 6)
+            REDIS_PASSWORD=\$(openssl rand -hex 6)
             JWT_SECRET=\$(openssl rand -hex 32)
-            ENCRYPTION_KEY=\$(openssl rand -hex 16)
-            MINIO_ROOT_PASSWORD=\$(openssl rand -hex 16)
-            PGADMIN_PASSWORD=\$(openssl rand -hex 12)
-            GRAFANA_ADMIN_PASSWORD=\$(openssl rand -hex 12)
+            ENCRYPTION_KEY=\$(openssl rand -hex 6)
+            MINIO_ROOT_PASSWORD=\$(openssl rand -hex 6)
+            PGADMIN_PASSWORD=\$(openssl rand -hex 6)
+            GRAFANA_ADMIN_PASSWORD=\$(openssl rand -hex 6)
            
             # Create .env.prod file
             cat > .env.prod << EOF
@@ -568,55 +618,77 @@ EOSSH
 # Build and run Docker Compose
 run_docker_compose() {
     log "🚀 Building and running Docker Compose..."
-    
-    ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << EOF
-        set -e
-        cd /opt/$PROJECT_NAME
-        
-        echo "🧹 Cleaning up existing containers..."
-        docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME --env-file .env.prod down --remove-orphans 2>/dev/null || true
-        
-        echo "🗑️  Cleaning up Docker system..."
-        docker system prune -f
-        
-        echo "🔍 Checking Docker Compose file..."
-        if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
-            echo "❌ Docker Compose file not found: $DOCKER_COMPOSE_FILE"
-            exit 1
-        fi
-        
-        echo "📋 Validating Docker Compose configuration..."
-        docker compose -f $DOCKER_COMPOSE_FILE --env-file .env.prod config --quiet
-        
-        echo "🔨 Building Docker images..."
-        docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME --env-file .env.prod build --no-cache --parallel
-        
-        echo "🚀 Starting services..."
-        docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME --env-file .env.prod up -d
-        
-        echo "⏳ Waiting for services to start..."
-        sleep 30
-        
-        echo "🔍 Checking service health..."
-        # Check if services are running
-        for i in {1..10}; do
-            if docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME --env-file .env.prod ps | grep -q "Up"; then
-                echo "✅ Services are starting up..."
-                break
-            fi
-            echo "⏳ Waiting for services... (\$i/10)"
-            sleep 3
-        done
-        
-        echo "📊 Checking service status..."
-        docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME --env-file .env.prod ps
-        
-        echo "📋 Checking service logs for errors..."
-        docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME --env-file .env.prod logs --tail=50
-        
-        echo "✅ Docker Compose deployment completed!"
+
+    # Determine which services to include based on install flags
+    local enabled_services=()
+    [[ "$INSTALL_API" == "true" ]] && enabled_services+=("api")
+    [[ "$INSTALL_PGADMIN" == "true" ]] && enabled_services+=("pgadmin")
+    [[ "$INSTALL_MINIO" == "true" ]] && enabled_services+=("minio")
+    [[ "$INSTALL_REDIS" == "true" ]] && enabled_services+=("redis")
+    [[ "$INSTALL_POSTGRES" == "true" ]] && enabled_services+=("postgres")
+
+    # If no install flags are set to true, run all services (default behavior)
+    local compose_cmd="docker compose -f $DOCKER_COMPOSE_FILE -p $PROJECT_NAME --env-file .env.prod"
+    local run_services=""
+    if [[ ${#enabled_services[@]} -gt 0 ]]; then
+        run_services="${enabled_services[*]}"
+    fi
+
+    ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" bash -s <<EOF
+set -e
+cd /opt/$PROJECT_NAME
+
+echo "🧹 Cleaning up existing containers..."
+$compose_cmd down --remove-orphans 2>/dev/null || true
+
+echo "🗑️  Cleaning up Docker system..."
+docker system prune -f
+
+echo "🔍 Checking Docker Compose file..."
+if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
+    echo "❌ Docker Compose file not found: $DOCKER_COMPOSE_FILE"
+    exit 1
+fi
+
+echo "📋 Validating Docker Compose configuration..."
+docker compose -f $DOCKER_COMPOSE_FILE --env-file .env.prod config --quiet
+
+echo "🔨 Building Docker images..."
+if [[ -n "$run_services" ]]; then
+    $compose_cmd build --no-cache --parallel $run_services
+else
+    $compose_cmd build --no-cache --parallel
+fi
+
+echo "🚀 Starting services..."
+if [[ -n "$run_services" ]]; then
+    $compose_cmd up -d $run_services
+else
+    $compose_cmd up -d
+fi
+
+echo "⏳ Waiting for services to start..."
+sleep 30
+
+echo "🔍 Checking service health..."
+for i in {1..10}; do
+    if $compose_cmd ps | grep -q "Up"; then
+        echo "✅ Services are starting up..."
+        break
+    fi
+    echo "⏳ Waiting for services... (\$i/10)"
+    sleep 3
+done
+
+echo "📊 Checking service status..."
+$compose_cmd ps
+
+echo "📋 Checking service logs for errors..."
+$compose_cmd logs --tail=50
+
+echo "✅ Docker Compose deployment completed!"
 EOF
-    
+
     success "Docker Compose services are running"
 }
 

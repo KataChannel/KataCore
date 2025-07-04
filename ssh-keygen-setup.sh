@@ -6,12 +6,13 @@
 set -euo pipefail
 
 # Configuration
-DEFAULT_SSH_KEY_NAME="katacore-deploy"
+DEFAULT_SSH_KEY_NAME="default"
 SSH_KEY_PATH="$HOME/.ssh"
 SSH_KEY_TYPE="ed25519"
 SSH_KEY_BITS="4096"
 DEFAULT_USER="root"
-DEFAULT_SERVER="116.118.85.41"
+DEFAULT_SERVER="116.118.85.23"
+DOMAIN="kataoffical.online"
 CONFIG_FILE="$HOME/.ssh/config"
 
 # Color codes
@@ -189,11 +190,11 @@ USAGE:
     ./ssh-keygen-setup.sh [OPTIONS]
 
 OPTIONS:
-    --name NAME           SSH key name (default: katacore-deploy)
+    --name NAME           SSH key name (default: default)
     --type TYPE           Key type: ed25519 or rsa (default: ed25519)
     --bits BITS           Key bits for RSA (default: 4096)
     --path PATH           SSH directory path (default: ~/.ssh)
-    --server IP           Server IP (default: 116.118.85.41)
+    --domain DOMAIN       Server domain (default: kataoffical.online)
     --user USER           SSH user (default: root)
     --force               Force overwrite existing keys
     --no-config           Skip SSH config file creation
@@ -239,6 +240,10 @@ parse_arguments() {
                 ;;
             --server)
                 SERVER_IP="$2"
+                shift 2
+                ;;
+            --domain)
+                DOMAIN="$2"
                 shift 2
                 ;;
             --user)
@@ -451,7 +456,7 @@ show_usage_instructions() {
     echo
     
     echo -e "${YELLOW}Use with KataCore deployment:${NC}"
-    echo "   ./deploy-remote.sh --key $private_key --user ${SSH_USER} ${SERVER_IP} DOMAIN"
+    echo "   ./deploy-remote.sh --key $private_key --user ${SSH_USER} ${SERVER_IP} ${DOMAIN}"
     echo
 }
 
