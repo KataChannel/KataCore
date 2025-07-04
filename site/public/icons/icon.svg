@@ -1,0 +1,35 @@
+
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#grad1)" stroke="white" stroke-width="16"/>
+  
+  <!-- HR Icon - People/Users -->
+  <g fill="white">
+    <!-- Person 1 -->
+    <circle cx="200" cy="180" r="30"/>
+    <ellipse cx="200" cy="280" rx="50" ry="40"/>
+    
+    <!-- Person 2 -->
+    <circle cx="312" cy="180" r="30"/>
+    <ellipse cx="312" cy="280" rx="50" ry="40"/>
+    
+    <!-- Building/Department icon -->
+    <rect x="220" y="350" width="72" height="80" rx="8" fill="white"/>
+    <rect x="235" y="365" width="12" height="12" fill="#4f46e5"/>
+    <rect x="255" y="365" width="12" height="12" fill="#4f46e5"/>
+    <rect x="275" y="365" width="12" height="12" fill="#4f46e5"/>
+    <rect x="235" y="385" width="12" height="12" fill="#4f46e5"/>
+    <rect x="255" y="385" width="12" height="12" fill="#4f46e5"/>
+    <rect x="275" y="385" width="12" height="12" fill="#4f46e5"/>
+    
+    <!-- HR Text -->
+    <text x="256" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">HR</text>
+  </g>
+</svg>

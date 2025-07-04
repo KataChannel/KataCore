@@ -2,7 +2,7 @@
 
 > **Production-ready full-stack application with automated deployment**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/chikiet/KataCore)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/chikiet/KataCore)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Bun](https://img.shields.io/badge/bun-1.0+-yellow.svg)](https://bun.sh)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://docker.com)
@@ -37,6 +37,16 @@
 - 🐳 **Docker Stack** - Complete containerized deployment
 - 🧹 **Easy Cleanup** - Simple cleanup of remote deployments
 - 📝 **TypeScript** - Full type safety across the stack
+
+### Human Resource Management (HRM) System
+- 🏢 **Employee Management** - Complete CRUD operations for employee records
+- 🏛️ **Department Management** - Organizational structure with hierarchies
+- 👥 **Role Management** - Flexible role-based permission system
+- 🔐 **Authentication System** - JWT-based authentication with secure login
+- 📊 **Data Seeding** - Automated database seeding with realistic test data
+- 🔑 **Permission Framework** - Granular access control with role-based permissions
+- 🎯 **RESTful API** - Comprehensive API endpoints for all HR operations
+- 📱 **Modern UI** - React-based interface with Material-UI components
 
 ## 🏗️ Technology Stack
 
@@ -94,6 +104,17 @@ bun run dev:api     # Backend (NestJS) on http://localhost:3001
 - 🌐 **Frontend**: http://localhost:3000
 - 🔌 **API**: http://localhost:3001
 - ❤️ **Health Check**: http://localhost:3001/health
+- 🏢 **HRM System**: http://localhost:3000/hr
+
+**HRM System Setup:**
+```bash
+# Seed the HRM database with test data
+curl -X POST http://localhost:3001/api/seed/hrm
+
+# Login with test credentials (HR Manager)
+# Email: hr.manager@company.com
+# Password: hr123456
+```
 
 ### 3. Build for Production
 ```bash
@@ -268,14 +289,85 @@ KataCore/
 - Authentication endpoints (JWT-based) - *Ready for implementation*
 - RESTful CRUD operations with Prisma ORM - *Ready for implementation*
 
+### HRM System API Endpoints
+The Human Resource Management system provides comprehensive API endpoints:
+
+#### Authentication
+- `POST /api/auth/login` - User authentication with JWT tokens
+- `POST /api/auth/logout` - User logout and token invalidation
+- `POST /api/auth/refresh` - Token refresh for extended sessions
+
+#### Employee Management
+- `GET /api/hrm/employees` - List all employees with pagination and filters
+- `POST /api/hrm/employees` - Create new employee record
+- `PUT /api/hrm/employees/{id}` - Update employee information
+- `DELETE /api/hrm/employees/{id}` - Remove employee record
+
+#### Department Management
+- `GET /api/hrm/departments` - List all departments with employee counts
+- `POST /api/hrm/departments` - Create new department
+- `PUT /api/hrm/departments/{id}` - Update department information
+- `DELETE /api/hrm/departments/{id}` - Remove department
+
+#### Role & Permission Management
+- `GET /api/hrm/roles` - List all roles with permissions
+- `POST /api/hrm/roles` - Create new role with permissions
+- `PUT /api/hrm/roles/{id}` - Update role permissions
+- `DELETE /api/hrm/roles/{id}` - Remove role
+
+#### Data Seeding
+- `POST /api/seed/hrm` - Seed database with test data (7 employees, 3 departments, 6 positions)
+
+### HRM System Features
+The HRM system includes:
+
+#### Core Functionality
+- **Employee Lifecycle Management**: From hiring to termination with complete record keeping
+- **Organizational Structure**: Department and position hierarchies
+- **Role-Based Access Control**: Granular permissions for different user types
+- **Authentication & Security**: JWT-based authentication with bcrypt password hashing
+
+#### User Roles & Permissions
+- **HR Manager**: Full access to all HRM functions (READ, WRITE, DELETE, MANAGE_*)
+- **Department Manager**: Team management and employee oversight
+- **Employee**: Basic read access to organizational information
+
+#### Test Data & Credentials
+The system comes with realistic test data:
+- **7 Employees** across 3 departments (HR, IT, Sales)
+- **6 Positions** with different levels and responsibilities
+- **3 Departments** with hierarchical structure
+- **Role-based permissions** for realistic access control testing
+
+**Available Test Accounts:**
+```
+HR Manager: hr.manager@company.com / hr123456
+IT Manager: it.manager@company.com / it123456
+Sales Manager: sales.manager@company.com / sales123456
+John Doe (Developer): john.doe@company.com / john123456
+Jane Smith (Developer): jane.smith@company.com / jane123456
+Mike Wilson (Sales): mike.wilson@company.com / mike123456
+Sarah Jones (Sales): sarah.jones@company.com / sarah123456
+```
+
 ### Database Schema (Prisma)
-- **Users** - User management with roles and authentication
-- **Posts** - Content management with publishing workflow
-- **Comments** - Nested commenting system
-- **Likes** - Post engagement tracking
-- **Tags** - Content categorization
-- **Sessions** - User session management
-- **File Uploads** - Media file tracking
+#### HRM System Schema
+- **Users** - User accounts with authentication and role assignment
+- **Roles** - Role definitions with JSON-based permissions
+- **Employees** - Complete employee records with personal and professional information
+- **Departments** - Organizational departments with hierarchical structure
+- **Positions** - Job positions with levels and department associations
+- **Attendance** - Employee attendance tracking
+- **LeaveRequests** - Leave request management with approval workflows
+- **Payroll** - Salary and compensation records
+- **PerformanceReviews** - Employee performance evaluation system
+
+#### Core Features
+- **Authentication**: JWT-based with bcrypt password hashing
+- **Authorization**: Role-based access control with granular permissions
+- **Data Integrity**: Foreign key relationships and validation constraints
+- **Audit Trail**: Created/updated timestamps for all records
+- **Scalability**: Optimized for both SQLite (development) and PostgreSQL (production)
 
 ## 📋 Available Scripts
 
