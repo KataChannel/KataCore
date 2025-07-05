@@ -1,7 +1,7 @@
 {
-  "name": "katacore-startkitv1",
-  "version": "1.0.0",
-  "description": "KataCore StartKit v1 - Production-ready remote deployment system",
+  "name": "katacore-enterprise",
+  "version": "2.0.0",
+  "description": "KataCore Enterprise Platform - Production-ready full-stack platform with automated deployment & Human Resource Management",
   "private": true,
   "workspaces": [
     "site",
@@ -23,38 +23,61 @@
     "lint": "bun run lint:site && bun run lint:api",
     "lint:site": "cd site && bun run lint",
     "lint:api": "cd api && bun run lint",
-    "deploy:remote": "./deploy-remote.sh",
-    "deploy:simple": "./deploy-remote.sh --simple",
-    "deploy:cleanup": "./deploy-remote.sh --cleanup",
-    "security:generate": "./generate-security.sh",
-    "docker:up": "docker-compose -f docker-compose.startkitv1.yml up -d",
-    "docker:down": "docker-compose -f docker-compose.startkitv1.yml down",
-    "docker:logs": "docker-compose -f docker-compose.startkitv1.yml logs -f"
+    "deploy": "./scripts/deployment/deploy.sh",
+    "deploy:remote": "./scripts/deployment/deploy.sh remote",
+    "deploy:production": "./scripts/deployment/deploy.sh production",
+    "deploy:staging": "./scripts/deployment/deploy.sh staging",
+    "deploy:wizard": "./scripts/deployment/deploy.sh wizard",
+    "deploy:cleanup": "./scripts/deployment/deploy.sh cleanup",
+    "security:generate": "./scripts/setup/generate-security.sh",
+    "optimize:structure": "./optimize-structure.sh",
+    "docker:up": "docker-compose -f configs/docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f configs/docker/docker-compose.yml down",
+    "docker:logs": "docker-compose -f configs/docker/docker-compose.yml logs -f",
+    "docker:build": "docker-compose -f configs/docker/docker-compose.yml build",
+    "docker:restart": "docker-compose -f configs/docker/docker-compose.yml restart"
   },
   "keywords": [
     "katacore",
-    "startkitv1",
+    "enterprise",
+    "hrm",
+    "human-resource-management",
+    "full-stack",
+    "nextjs",
+    "nestjs",
+    "typescript",
     "remote-deployment",
     "docker",
     "nginx",
     "ssl",
     "production",
-    "nestjs",
-    "nextjs",
     "postgresql",
     "redis",
-    "minio"
+    "minio",
+    "jwt-auth",
+    "role-based-access",
+    "bun",
+    "prisma",
+    "automated-deployment"
   ],
   "author": "KataCore Team",
   "license": "MIT",
+  "homepage": "https://github.com/chikiet/KataCore",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chikiet/KataCore"
+    "url": "https://github.com/chikiet/KataCore.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chikiet/KataCore/issues"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
   "engines": {
+    "node": ">=18.0.0",
     "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@types/minimatch": "^6.0.0"
   }
 }

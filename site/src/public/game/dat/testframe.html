@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Island Sprite Animation</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a2a44;
+            overflow: hidden;
+        }
+        #canvas {
+            width: 512px;
+            height: 512px;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <img id="canvas" src="dathoa.jpg" alt="Island Animation">
+    <script>
+        const canvas = document.getElementById('canvas');
+        const frames = [
+            'dathoa.jpg',
+            'dathoa_1.jpg',
+            'dathoa_2.jpg'
+        ];
+        let currentFrame = 0;
+
+        function animate() {
+            canvas.src = frames[currentFrame];
+            currentFrame = (currentFrame + 1) % frames.length;
+        }
+
+        // Animate every 500ms
+        setInterval(animate, 500);
+
+        // Preload images to avoid flickering
+        frames.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+    </script>
+</body>
+</html>
