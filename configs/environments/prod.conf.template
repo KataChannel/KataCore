@@ -1,0 +1,229 @@
+# KataCore Production Environment Configuration Template
+# Copy this file to prod.conf and customize for your production environment
+# Generated on $(date)
+
+# ================================
+# SERVER CONFIGURATION
+# ================================
+
+# Server Details
+SERVER_IP="YOUR_SERVER_IP"           # e.g., "192.168.1.100" or "116.118.85.41"
+DOMAIN="YOUR_DOMAIN"                 # e.g., "app.example.com" or leave as SERVER_IP for IP-based
+SSH_USER="root"                      # SSH username for server access
+SSH_KEY_PATH="$HOME/.ssh/katacore-prod"  # Path to SSH private key
+
+# ================================
+# DEPLOYMENT CONFIGURATION
+# ================================
+
+# Deployment Settings
+DEPLOY_TYPE="full"                   # Options: simple, full, cluster
+PROJECT_NAME="katacore-prod"         # Project name for Docker containers
+DOCKER_COMPOSE_FILE="docker-compose.yml"  # Docker Compose file to use
+
+# ================================
+# FEATURE CONFIGURATION
+# ================================
+
+# Service Installation Flags
+INSTALL_API="true"                   # Install API backend service
+INSTALL_POSTGRES="true"              # Install PostgreSQL database
+INSTALL_REDIS="true"                 # Install Redis cache
+INSTALL_MINIO="true"                 # Install MinIO object storage
+INSTALL_PGADMIN="false"              # Install pgAdmin (set to false for production)
+
+# ================================
+# SSL/TLS CONFIGURATION
+# ================================
+
+# SSL Settings (for domain-based deployments)
+ENABLE_SSL="true"                    # Enable SSL/TLS certificates
+SSL_EMAIL="admin@YOUR_DOMAIN"        # Email for Let's Encrypt certificates
+FORCE_SSL="true"                     # Force HTTPS redirects
+
+# Manual SSL (if not using Let's Encrypt)
+# SSL_CERT_PATH="/path/to/ssl/cert.pem"
+# SSL_KEY_PATH="/path/to/ssl/private.key"
+
+# ================================
+# NGINX CONFIGURATION
+# ================================
+
+# Reverse Proxy Settings
+NGINX_API="true"                     # Enable API reverse proxy
+NGINX_PGADMIN="false"                # Enable pgAdmin reverse proxy (production: false)
+NGINX_MINIO="true"                   # Enable MinIO reverse proxy
+
+# ================================
+# DATABASE CONFIGURATION
+# ================================
+
+# PostgreSQL Settings
+POSTGRES_USER="katacore"
+POSTGRES_PASSWORD="$(openssl rand -base64 32)"  # Generate random password
+POSTGRES_DB="katacore"
+POSTGRES_PORT="5432"
+
+# Database Backup Settings
+BACKUP_RETENTION_DAYS="30"           # Keep backups for 30 days
+BACKUP_SCHEDULE="0 2 * * *"          # Daily backup at 2 AM
+
+# ================================
+# REDIS CONFIGURATION
+# ================================
+
+# Redis Settings
+REDIS_PASSWORD="$(openssl rand -base64 32)"  # Generate random password
+REDIS_PORT="6379"
+REDIS_MAXMEMORY="256mb"              # Maximum memory for Redis
+
+# ================================
+# MINIO CONFIGURATION
+# ================================
+
+# MinIO Settings
+MINIO_ROOT_USER="minioadmin"
+MINIO_ROOT_PASSWORD="$(openssl rand -base64 32)"  # Generate random password
+MINIO_PORT="9000"
+MINIO_CONSOLE_PORT="9001"
+
+# ================================
+# APPLICATION CONFIGURATION
+# ================================
+
+# Application URLs
+APP_URL="https://$DOMAIN"            # Main application URL
+API_URL="https://$DOMAIN/api"        # API base URL
+
+# Security Settings
+JWT_SECRET="$(openssl rand -base64 64)"  # JWT signing secret
+SESSION_SECRET="$(openssl rand -base64 32)"  # Session secret
+ENCRYPTION_KEY="$(openssl rand -base64 32)"  # Encryption key
+
+# ================================
+# MONITORING & LOGGING
+# ================================
+
+# Logging Configuration
+LOG_LEVEL="info"                     # Options: debug, info, warn, error
+ENABLE_ACCESS_LOGS="true"            # Enable Nginx access logs
+ENABLE_ERROR_LOGS="true"             # Enable application error logs
+
+# Monitoring Settings
+ENABLE_HEALTH_CHECKS="true"          # Enable health check endpoints
+HEALTH_CHECK_INTERVAL="30"           # Health check interval in seconds
+
+# ================================
+# PERFORMANCE CONFIGURATION
+# ================================
+
+# Resource Limits
+MAX_UPLOAD_SIZE="100M"               # Maximum file upload size
+WORKER_PROCESSES="auto"              # Nginx worker processes
+WORKER_CONNECTIONS="1024"            # Nginx worker connections
+
+# Caching Settings
+ENABLE_STATIC_CACHE="true"           # Enable static file caching
+CACHE_DURATION="7d"                  # Static file cache duration
+
+# ================================
+# BACKUP CONFIGURATION
+# ================================
+
+# Backup Settings
+ENABLE_AUTO_BACKUP="true"            # Enable automatic backups
+BACKUP_TYPE="full"                   # Options: database, files, full
+BACKUP_STORAGE="local"               # Options: local, s3, gcs
+
+# S3 Backup Configuration (if using S3)
+# AWS_ACCESS_KEY_ID="your-access-key"
+# AWS_SECRET_ACCESS_KEY="your-secret-key"
+# S3_BUCKET="katacore-backups"
+# S3_REGION="us-east-1"
+
+# ================================
+# MAINTENANCE CONFIGURATION
+# ================================
+
+# Maintenance Settings
+MAINTENANCE_MODE="false"             # Enable/disable maintenance mode
+MAINTENANCE_MESSAGE="System maintenance in progress. We'll be back shortly."
+
+# Update Settings
+AUTO_UPDATE="false"                  # Enable automatic updates (not recommended for production)
+UPDATE_CHANNEL="stable"              # Options: stable, beta, alpha
+
+# ================================
+# NOTIFICATION CONFIGURATION
+# ================================
+
+# Email Notifications
+ENABLE_EMAIL_NOTIFICATIONS="true"    # Enable email notifications
+SMTP_HOST="smtp.gmail.com"          # SMTP server host
+SMTP_PORT="587"                     # SMTP server port
+SMTP_USER="notifications@YOUR_DOMAIN"  # SMTP username
+SMTP_PASSWORD="your-smtp-password"   # SMTP password
+FROM_EMAIL="noreply@YOUR_DOMAIN"    # From email address
+
+# Slack Notifications (optional)
+# SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."
+# SLACK_CHANNEL="#alerts"
+
+# ================================
+# SECURITY CONFIGURATION
+# ================================
+
+# Security Settings
+ENABLE_RATE_LIMITING="true"          # Enable rate limiting
+RATE_LIMIT_REQUESTS="100"           # Requests per minute per IP
+ENABLE_FIREWALL="true"              # Enable basic firewall rules
+
+# CORS Settings
+CORS_ORIGINS="https://$DOMAIN"      # Allowed CORS origins
+ENABLE_CORS="true"                  # Enable CORS
+
+# Security Headers
+ENABLE_SECURITY_HEADERS="true"      # Enable security headers (HSTS, CSP, etc.)
+
+# ================================
+# ADVANCED CONFIGURATION
+# ================================
+
+# Container Resource Limits
+API_MEMORY_LIMIT="1g"               # API container memory limit
+DB_MEMORY_LIMIT="2g"                # Database container memory limit
+REDIS_MEMORY_LIMIT="256m"           # Redis container memory limit
+
+# Container Restart Policy
+RESTART_POLICY="unless-stopped"     # Options: no, always, unless-stopped, on-failure
+
+# Docker Network
+DOCKER_NETWORK="katacore_network"   # Docker network name
+
+# ================================
+# CUSTOM CONFIGURATION
+# ================================
+
+# Custom Environment Variables
+# Add any custom environment variables here
+# CUSTOM_VAR="custom_value"
+
+# ================================
+# VALIDATION NOTES
+# ================================
+
+# Before using this configuration:
+# 1. Replace YOUR_SERVER_IP with your actual server IP
+# 2. Replace YOUR_DOMAIN with your actual domain name
+# 3. Update email addresses to use your domain
+# 4. Review and adjust resource limits based on your server capacity
+# 5. Set secure passwords for all services
+# 6. Configure SMTP settings for email notifications
+# 7. Review security settings and adjust as needed
+# 8. Test the configuration in a staging environment first
+
+# To validate this configuration:
+# ./scripts/setup/validate-config.sh env
+
+# To deploy using this configuration:
+# ./deploy.sh deploy --env prod --server YOUR_SERVER_IP
