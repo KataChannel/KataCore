@@ -1,4 +1,3 @@
-# Multi-stage build for Next.js Frontend - Fixed version with better error handling
 FROM oven/bun:1-alpine AS base
 
 # Install security updates and necessary packages for health checks
@@ -34,10 +33,8 @@ ENV DATABASE_URL="file:./dev.db"
 # Generate Prisma client before building
 RUN if [ -f "src/prisma/schema.prisma" ]; then \
     echo "Generating Prisma client..."; \
-    cd src && bunx prisma generate --schema=prisma/schema.prisma || \
-    bun run prisma generate --schema=src/prisma/schema.prisma || \
-    bunx prisma generate --schema=src/prisma/schema.prisma; \
-    cd ..; \
+    bunx prisma generate --schema=src/prisma/schema.prisma || \
+    { echo "Prisma client generation failed"; exit 1; }; \
     fi
 
 # Debug: Show environment and package info
@@ -49,7 +46,6 @@ RUN echo "Build environment:" && env | grep -E "(NODE_ENV|NEXT_|DOCKER_|DATABASE
 RUN set -e; \
     echo "Starting Next.js build..."; \
     bun run build 2>&1 | tee /tmp/build.log && BUILD_SUCCESS=true || BUILD_SUCCESS=false; \
-    \
     if [ "$BUILD_SUCCESS" = "false" ]; then \
         echo "=== BUILD FAILED ==="; \
         echo "Last 50 lines of build output:"; \
@@ -66,31 +62,19 @@ RUN set -e; \
         rm -rf node_modules/.cache .next; \
         bun install --force; \
         bun run build || { \
-            echo "Second build attempt failed, trying without standalone mode"; \
-            export DOCKER_BUILD=false; \
-            bun run build; \
+            echo "Second build attempt failed"; \
+            exit 1; \
         }; \
     fi
 
-# Prepare build output structure
-RUN echo "Preparing build output..." && \
-    ls -la .next/ && \
-    echo "Build completed successfully"
-
-# Create fallback structure for production
-RUN if [ ! -d ".next/standalone" ]; then \
-        echo "Creating standalone structure manually..."; \
-        mkdir -p .next/standalone; \
-        cp package.json .next/standalone/ || true; \
-        cp -r .next/server .next/standalone/ 2>/dev/null || true; \
-        cp -r public .next/standalone/ 2>/dev/null || true; \
-        echo '{"name":"site","scripts":{"start":"next start"}}' > .next/standalone/package.json; \
-        echo 'const { createServer } = require("http"); const { parse } = require("url"); const next = require("next"); const app = next({ dev: false }); const handle = app.getRequestHandler(); app.prepare().then(() => { createServer((req, res) => { const parsedUrl = parse(req.url, true); handle(req, res, parsedUrl); }).listen(3000, (err) => { if (err) throw err; console.log("> Ready on http://localhost:3000"); }); });' > .next/standalone/server.js; \
+# Validate build output
+RUN echo "Validating build output..." && \
+    if [ ! -f ".next/BUILD_ID" ]; then \
+        echo "Error: BUILD_ID file not found in .next directory"; \
+        ls -la .next/ || true; \
+        exit 1; \
     fi && \
-    if [ ! -d ".next/static" ]; then \
-        echo "Creating static directory..."; \
-        mkdir -p .next/static; \
-    fi
+    echo "Build output validated successfully"
 
 # Production stage - Minimal image
 FROM base AS production
@@ -112,14 +96,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=builder /app/public ./public
 
 # Create .next directory and set permissions
-RUN mkdir -p .next/static && chown -R nextjs:nodejs .next
+RUN mkdir -p .next && chown -R nextjs:nodejs .next
 
 # Copy build output
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static/
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 
-# Copy node_modules if using non-standalone mode
+# Copy node_modules for non-standalone mode
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 USER nextjs
 
@@ -134,4 +118,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "server.js"]
+CMD ["bun", "run", "start"]

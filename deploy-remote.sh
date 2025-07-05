@@ -126,14 +126,9 @@ interactive_setup() {
     
     # Deployment type
     echo -e "\n${BLUE}🚀 Deployment Type${NC}"
-    DEPLOY_TYPE=$(prompt_choice "Select deployment type:" "simple (IP only, no SSL)" "full (domain + SSL)")
+    local use_full_deploy=$(prompt_yes_no "Use full deployment with domain and SSL?" "y")
     
-    # Extract the type name from the choice
-    if [[ "$DEPLOY_TYPE" == "simple"* ]]; then
-        DEPLOY_TYPE="simple"
-        info "Selected: Simple deployment (IP only, no SSL)"
-        DOMAIN="$SERVER_IP"
-    else
+    if [[ "$use_full_deploy" == "true" ]]; then
         DEPLOY_TYPE="full"
         info "Selected: Full deployment (domain + SSL)"
         DOMAIN=$(prompt_input "Enter domain name (e.g., example.com)" "$DOMAIN")
@@ -143,6 +138,10 @@ interactive_setup() {
             echo "Invalid domain format!"
             DOMAIN=$(prompt_input "Enter domain name (e.g., example.com)" "$DOMAIN")
         done
+    else
+        DEPLOY_TYPE="simple"
+        info "Selected: Simple deployment (IP only, no SSL)"
+        DOMAIN="$SERVER_IP"
     fi
     
     # SSH configuration
@@ -839,6 +838,7 @@ run_docker_compose() {
 
     # Determine which services to include based on install flags
     local enabled_services=()
+    enabled_services+=("site")
     [[ "$INSTALL_API" == "true" ]] && enabled_services+=("api")
     [[ "$INSTALL_PGADMIN" == "true" ]] && enabled_services+=("pgadmin")
     [[ "$INSTALL_MINIO" == "true" ]] && enabled_services+=("minio")
@@ -1014,16 +1014,20 @@ server {
         [[ "$NGINX_PGADMIN" == "true" ]] && certbot_domains+=" -d pgadmin.$DOMAIN"
         [[ "$NGINX_MINIO" == "true" ]] && certbot_domains+=" -d minio.$DOMAIN"
         
-        ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" bash -s <<EOF
+     ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" bash -s <<EOF
 set -e
 DOMAIN="$DOMAIN"
 echo "🌐 Configuring Nginx..."
+echo "nginx_conf=\"$nginx_conf\""
 cat > /etc/nginx/sites-available/\$DOMAIN <<'NGINXEOF'
 $nginx_conf
 NGINXEOF
-
 ln -sf /etc/nginx/sites-available/\$DOMAIN /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
+
+echo "🔄 Starting nginx service..."
+systemctl enable nginx
+systemctl start nginx
 nginx -t && systemctl reload nginx
 
 echo "🔒 Obtaining SSL certificate..."
