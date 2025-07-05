@@ -1,54 +1,127 @@
-# 🚀 KataCore: Automatic SSH Key & Deployment Solution
+# ⚡ KataCore Quick Start Guide
 
-## ✨ Problem Solved!
+Hướng dẫn bắt đầu nhanh cho KataCore - Deploy trong 5 phút!
 
-You no longer need to manually handle SSH keys or enter passwords repeatedly. The KataCore deployment system now automatically:
+## 🎯 Prerequisites
 
-- ✅ **Generates SSH keys** for your server
-- ✅ **Deploys keys automatically** (one password prompt only)
-- ✅ **Sets up password-less SSH** access
-- ✅ **Deploys KataCore** with full automation
+- Server với Ubuntu 20.04+ hoặc Debian 11+
+- SSH access với public key
+- Domain name (tùy chọn, cho SSL)
 
-## 🎯 For Your Server: `root@116.118.85.41`
+## 🚀 5-Minute Deployment
 
-### Option 1: One-Command Complete Deployment ⚡
+### Bước 1: Clone và Setup
 ```bash
-# Complete deployment in one command
-./quick-deploy.sh 116.118.85.41
+# Clone repository
+git clone https://github.com/your-org/KataCore.git
+cd KataCore
 
-# Or with a custom domain
-./quick-deploy.sh 116.118.85.41 yourdomain.com
+# Cấp quyền thực thi
+chmod +x deploy-remote.sh autopush.sh
 ```
 
-**What happens:**
-1. 🔑 Generates SSH key automatically
-2. 📤 Deploys key to server (you enter password ONCE)
-3. 🚀 Deploys complete KataCore stack
-4. 🎉 Shows access URLs
-
-### Option 2: Step-by-Step Approach 📋
+### Bước 2: Deploy Interactive (Khuyến nghị)
 ```bash
-# Step 1: Generate and deploy SSH key
-./auto-ssh-deploy.sh --auto-deploy 116.118.85.41
-
-# Step 2: Deploy KataCore (password-less!)
-./deploy-remote.sh --simple 116.118.85.41 116.118.85.41
+./deploy-remote.sh --interactive
 ```
 
-### Option 3: Custom SSH User 👤
+Hoặc deploy nhanh:
 ```bash
-# If your server uses a different user (like ubuntu)
-./quick-deploy.sh --user ubuntu 116.118.85.41
+# Simple deployment (HTTP only)
+./deploy-remote.sh --simple YOUR_SERVER_IP
+
+# Full deployment (HTTPS + SSL)
+./deploy-remote.sh YOUR_SERVER_IP YOUR_DOMAIN.COM
 ```
 
-## 🔧 What Gets Generated
+### Bước 3: Truy cập ứng dụng
+- **Frontend**: `https://your-domain.com` hoặc `http://server-ip:3000`
+- **API**: `https://api.your-domain.com` hoặc `http://server-ip:3001`
+- **Database Admin**: `https://pgadmin.your-domain.com` hoặc `http://server-ip:5050`
 
-After running any of these commands, you'll have:
+## 📝 Git Workflow với autopush.sh
 
+### Push code thường
+```bash
+# Auto commit và push
+./autopush.sh "feat: add new feature"
 ```
-~/.ssh/
-├── katacore-deploy       # Your private SSH key
-├── katacore-deploy.pub   # Your public SSH key  
+
+### Merge vào main branch
+```bash
+# Auto merge với dynamic branch detection
+./autopush.sh --merge "release: version 1.0"
+```
+
+## 🔍 Kiểm tra sau deploy
+
+### Health Check
+```bash
+# Kiểm tra services
+curl -f http://your-server:3000/health
+curl -f http://your-server:3001/health
+```
+
+### Xem logs
+```bash
+ssh root@YOUR_SERVER_IP 'cd /opt/katacore && docker compose logs -f'
+```
+
+### Credentials
+```bash
+# Xem passwords được tạo tự động
+ssh root@YOUR_SERVER_IP 'cat /opt/katacore/.env.prod'
+```
+
+## 🛠️ Management Commands
+
+```bash
+# Restart services
+ssh root@SERVER_IP 'cd /opt/katacore && docker compose restart'
+
+# Update deployment
+./deploy-remote.sh --force-regen SERVER_IP DOMAIN
+
+# Cleanup deployment
+./deploy-remote.sh --cleanup SERVER_IP
+```
+
+## 🆘 Troubleshooting
+
+### Lỗi SSH Connection
+```bash
+# Test SSH connection
+ssh -i ~/.ssh/id_rsa root@SERVER_IP
+
+# Generate SSH key if needed
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+ssh-copy-id root@SERVER_IP
+```
+
+### Services không start
+```bash
+# Xem logs chi tiết
+ssh root@SERVER_IP 'cd /opt/katacore && docker compose logs'
+
+# Rebuild containers
+ssh root@SERVER_IP 'cd /opt/katacore && docker compose down && docker compose up -d --build'
+```
+
+### SSL Certificate issues
+```bash
+# Renew certificates
+ssh root@SERVER_IP 'certbot renew --force-renewal'
+```
+
+## 📖 Next Steps
+
+- Đọc [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) để hiểu chi tiết
+- Tham khảo [API Documentation](docs/api/) 
+- Xem [Development Guide](docs/guides/DEVELOPMENT.md)
+
+---
+
+**🎉 Congratulations! KataCore is now running!**  
 └── config               # SSH configuration
 
 # SSH Access Commands:

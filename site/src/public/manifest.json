@@ -1,11 +1,13 @@
 {
-  "name": "Kata Offical Online",
-  "short_name": "Kata Offical",
-  "theme_color": "#3154A1",
+  "name": "KataCore HR Management System",
+  "short_name": "KataCore HR",
+  "description": "Professional HR management system for employee, department, and attendance management",
+  "theme_color": "#4F46E5",
   "background_color": "#ffffff",
   "display": "standalone",
   "scope": "/",
-  "start_url": "/",
+  "start_url": "/hr",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
@@ -54,6 +56,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Employee Management",
+      "url": "/hr/employees",
+      "description": "Manage employees and their information"
+    },
+    {
+      "name": "Attendance",
+      "url": "/hr/attendance",
+      "description": "Track employee attendance and hours"
+    },
+    {
+      "name": "Departments",
+      "url": "/hr/departments",
+      "description": "Manage organizational departments"
+    },
+    {
+      "name": "Leave Requests",
+      "url": "/hr/leave-requests",
+      "description": "Review and manage leave requests"
     }
   ]
 }

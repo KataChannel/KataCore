@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🧪 KataCore Deployment Test Script
+# 🧪 Innerbright Deployment Test Script
 # Test various deployment scenarios
 
 set -euo pipefail
@@ -23,7 +23,7 @@ show_banner() {
     echo -e "${BLUE}"
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    🧪 KataCore Deployment Test Suite                       ║
+║                    🧪 Innerbright Deployment Test Suite                     ║
 ║                                                                              ║
 ║               Test deployment script functionality                           ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
@@ -57,7 +57,7 @@ test_syntax() {
 test_docker_compose() {
     log "Testing docker-compose file syntax..."
     
-    if docker compose -f docker-compose.yml config >/dev/null 2>&1; then
+    if docker-compose -f docker-compose.yml config >/dev/null 2>&1; then
         success "Docker compose file syntax is valid"
     else
         warning "Docker compose file syntax check failed (Docker may not be installed)"
@@ -68,7 +68,7 @@ test_docker_compose() {
 test_env_file() {
     log "Testing environment file template..."
     
-    if [[ -f .env.example ]]; then
+    if [[ -f .env.prod ]]; then
         success "Environment template file exists"
     else
         error "Environment template file missing"
@@ -80,7 +80,7 @@ test_project_structure() {
     log "Testing project structure..."
     
     local dirs=("api" "site" "api/src" "site/src")
-    local files=("package.json" "README.md" "deploy-remote.sh" "docker-compose.startkitv1.yml")
+    local files=("package.json" "README.md" "deploy-remote.sh" "docker-compose.yml")
     
     for dir in "${dirs[@]}"; do
         if [[ -d "$dir" ]]; then
@@ -122,7 +122,7 @@ test_package_json() {
 run_tests() {
     show_banner
     
-    log "Starting KataCore deployment tests..."
+    log "Starting Innerbright deployment tests..."
     
     test_project_structure
     test_env_file
