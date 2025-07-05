@@ -5,11 +5,11 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_ENV: production
-    image: katacore/api:${API_VERSION:-latest}
+    image: katacore/api:${API_VERSION}
     container_name: katacore-api
-    restart: ${RESTART_POLICY:-unless-stopped}
+    restart: ${RESTART_POLICY}
     ports:
-      - "${API_PORT:-3001}:3001"
+      - "${API_PORT}:3001"
     environment:
       NODE_ENV: production
       API_PORT: 3001
@@ -18,12 +18,12 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       CORS_ORIGIN: ${CORS_ORIGIN}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_LEVEL: ${LOG_LEVEL}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT}
       MINIO_PORT: ${MINIO_PORT}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
     networks:
       - katacore-network
     depends_on:
@@ -50,18 +50,18 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_ENV: production
-    image: katacore/site:${SITE_VERSION:-latest}
+    image: katacore/site:${SITE_VERSION}
     container_name: katacore-site
-    restart: ${RESTART_POLICY:-unless-stopped}
+    restart: ${RESTART_POLICY}
     ports:
-      - "${SITE_PORT:-3000}:3000"
+      - "${SITE_PORT}:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
-      INTERNAL_API_URL: ${INTERNAL_API_URL:-http://api:3001}
+      INTERNAL_API_URL: ${INTERNAL_API_URL}
     networks:
       - katacore-network
     depends_on:
@@ -130,10 +130,10 @@ services:
   minio:
     image: minio/minio:latest
     container_name: katacore-minio
-    restart: ${RESTART_POLICY:-unless-stopped}
+    restart: ${RESTART_POLICY}
     ports:
-      - "${MINIO_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -156,9 +156,9 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: katacore-pgadmin
-    restart: ${RESTART_POLICY:-unless-stopped}
+    restart: ${RESTART_POLICY}
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - "${PGADMIN_PORT}:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}

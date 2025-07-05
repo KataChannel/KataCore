@@ -6,8 +6,8 @@
 set -euo pipefail
 
 # Configuration - Dynamic parameters
-SERVER_IP="116.118.48.143"
-DOMAIN="kataoffical.online"
+SERVER_IP=""
+DOMAIN=""
 SSH_USER="root"
 SSH_KEY_PATH=""
 DEPLOY_TYPE="full"
@@ -23,7 +23,6 @@ INSTALL_POSTGRES=false
 NGINX_API=false
 NGINX_PGADMIN=false
 NGINX_MINIO=false
-INTERACTIVE_MODE=false
 
 # Color codes
 readonly RED='\033[0;31m'
@@ -40,246 +39,6 @@ info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
 success() { echo -e "${GREEN}✅ $1${NC}"; }
 warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 error() { echo -e "${RED}❌ $1${NC}"; exit 1; }
-
-# User input functions
-prompt_input() {
-    local prompt="$1"
-    local default="$2"
-    local value=""
-    
-    if [[ -n "$default" ]]; then
-        read -p "$prompt [$default]: " value
-        value="${value:-$default}"
-    else
-        read -p "$prompt: " value
-    fi
-    
-    echo "$value"
-}
-
-prompt_password() {
-    local prompt="$1"
-    local value=""
-    
-    read -s -p "$prompt: " value
-    echo ""
-    echo "$value"
-}
-
-prompt_yes_no() {
-    local prompt="$1"
-    local default="$2"
-    local value=""
-    
-    while true; do
-        if [[ -n "$default" ]]; then
-            read -p "$prompt [y/n, default: $default]: " value
-            value="${value:-$default}"
-        else
-            read -p "$prompt [y/n]: " value
-        fi
-        
-        case "$value" in
-            [Yy]|[Yy]es|true) echo "true"; return ;;
-            [Nn]|[Nn]o|false) echo "false"; return ;;
-            *) echo "Please answer yes or no." ;;
-        esac
-    done
-}
-
-prompt_choice() {
-    local prompt="$1"
-    shift
-    local options=("$@")
-    local choice=""
-    
-    echo "$prompt"
-    for i in "${!options[@]}"; do
-        echo "  $((i+1)). ${options[$i]}"
-    done
-    
-    while true; do
-        read -p "Choose an option [1-${#options[@]}]: " choice
-        if [[ "$choice" =~ ^[0-9]+$ ]] && [[ "$choice" -ge 1 && "$choice" -le "${#options[@]}" ]]; then
-            echo "${options[$((choice-1))]}"
-            return
-        else
-            echo "Invalid choice. Please enter a number between 1 and ${#options[@]}."
-        fi
-    done
-}
-
-# Interactive configuration
-interactive_setup() {
-    echo -e "${CYAN}🔧 Interactive Setup${NC}"
-    echo -e "Let's configure your deployment step by step...\n"
-    
-    # Server configuration
-    echo -e "${BLUE}📍 Server Configuration${NC}"
-    SERVER_IP=$(prompt_input "Enter server IP address" "$SERVER_IP")
-    
-    # Validate IP
-    while [[ ! $SERVER_IP =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; do
-        echo "Invalid IP address format!"
-        SERVER_IP=$(prompt_input "Enter server IP address" "$SERVER_IP")
-    done
-    
-    # Deployment type
-    echo -e "\n${BLUE}🚀 Deployment Type${NC}"
-    DEPLOY_TYPE=$(prompt_choice "Select deployment type:" "simple (IP only, no SSL)" "full (domain + SSL)")
-    
-    # Extract the type name from the choice
-    if [[ "$DEPLOY_TYPE" == "simple"* ]]; then
-        DEPLOY_TYPE="simple"
-        info "Selected: Simple deployment (IP only, no SSL)"
-    else
-        DEPLOY_TYPE="full"
-        info "Selected: Full deployment (domain + SSL)"
-    fi
-    if [[ "$DEPLOY_TYPE" == "full"* ]]; then
-        DEPLOY_TYPE="full"
-        DOMAIN=$(prompt_input "Enter domain name (e.g., example.com)" "$DOMAIN")
-        
-        # Validate domain
-        while [[ ! $DOMAIN =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$ ]]; do
-            echo "Invalid domain format!"
-            DOMAIN=$(prompt_input "Enter domain name (e.g., example.com)" "$DOMAIN")
-        done
-    else
-        DEPLOY_TYPE="simple"
-        DOMAIN="$SERVER_IP"
-    fi
-    
-    # SSH configuration
-    echo -e "\n${BLUE}🔐 SSH Configuration${NC}"
-    SSH_USER=$(prompt_input "SSH username" "$SSH_USER")
-    
-    # SSH key selection
-    local default_key="$HOME/.ssh/id_rsa"
-    local current_key="${SSH_KEY_PATH:-$default_key}"
-    if [[ -f "$default_key" ]]; then
-        SSH_KEY_PATH=$(prompt_input "SSH private key path" "$current_key")
-    else
-        SSH_KEY_PATH=$(prompt_input "SSH private key path" "${SSH_KEY_PATH:-$HOME/.ssh/default}")
-    fi
-    
-    # Project configuration
-    echo -e "\n${BLUE}📦 Project Configuration${NC}"
-    PROJECT_NAME=$(prompt_input "Project name" "$PROJECT_NAME")
-    
-    # Docker Compose file selection
-    echo -e "\n${BLUE}🐳 Docker Configuration${NC}"
-    local compose_files=()
-    if [[ -f "docker-compose.startkitv1.yml" ]]; then
-        compose_files+=("docker-compose.startkitv1.yml")
-    fi
-    if [[ -f "docker-compose.yml" ]]; then
-        compose_files+=("docker-compose.yml")
-    fi
-    
-    if [[ ${#compose_files[@]} -eq 0 ]]; then
-        error "No Docker Compose files found!"
-    elif [[ ${#compose_files[@]} -eq 1 ]]; then
-        DOCKER_COMPOSE_FILE="${compose_files[0]}"
-        info "Using Docker Compose file: $DOCKER_COMPOSE_FILE"
-    else
-        DOCKER_COMPOSE_FILE=$(prompt_choice "Select Docker Compose file:" "${compose_files[@]}")
-    fi
-    
-    # Service selection
-    echo -e "\n${BLUE}🛠️ Service Configuration${NC}"
-    echo "Select which services to install:"
-    
-    INSTALL_API=$(prompt_yes_no "Install API service?" "$([ "$INSTALL_API" = "true" ] && echo "y" || echo "n")")
-    INSTALL_POSTGRES=$(prompt_yes_no "Install PostgreSQL database?" "$([ "$INSTALL_POSTGRES" = "true" ] && echo "y" || echo "n")")
-    INSTALL_REDIS=$(prompt_yes_no "Install Redis cache?" "$([ "$INSTALL_REDIS" = "true" ] && echo "y" || echo "n")")
-    INSTALL_MINIO=$(prompt_yes_no "Install MinIO object storage?" "$([ "$INSTALL_MINIO" = "true" ] && echo "y" || echo "n")")
-    INSTALL_PGADMIN=$(prompt_yes_no "Install pgAdmin database management?" "$([ "$INSTALL_PGADMIN" = "true" ] && echo "y" || echo "n")")
-    
-    # Nginx configuration (only for full deployment)
-    if [[ "$DEPLOY_TYPE" == "full" ]]; then
-        echo -e "\n${BLUE}🌐 Nginx Configuration${NC}"
-        echo "Configure Nginx reverse proxy for:"
-        
-        if [[ "$INSTALL_API" == "true" ]]; then
-            NGINX_API=$(prompt_yes_no "Enable API subdomain (api.$DOMAIN)?" "$([ "$NGINX_API" = "true" ] && echo "y" || echo "n")")
-        fi
-        
-        if [[ "$INSTALL_PGADMIN" == "true" ]]; then
-            NGINX_PGADMIN=$(prompt_yes_no "Enable pgAdmin subdomain (pgadmin.$DOMAIN)?" "$([ "$NGINX_PGADMIN" = "true" ] && echo "y" || echo "n")")
-        fi
-        
-        if [[ "$INSTALL_MINIO" == "true" ]]; then
-            NGINX_MINIO=$(prompt_yes_no "Enable MinIO subdomain (minio.$DOMAIN)?" "$([ "$NGINX_MINIO" = "true" ] && echo "y" || echo "n")")
-        fi
-        
-        # Validate that at least one nginx service is enabled if any services are selected
-        if [[ "$INSTALL_API" == "true" || "$INSTALL_PGADMIN" == "true" || "$INSTALL_MINIO" == "true" ]]; then
-            if [[ "$NGINX_API" != "true" && "$NGINX_PGADMIN" != "true" && "$NGINX_MINIO" != "true" ]]; then
-                warning "No Nginx subdomains enabled. Services will only be accessible via IP:PORT"
-                local enable_nginx=$(prompt_yes_no "Do you want to enable at least one Nginx subdomain?" "y")
-                if [[ "$enable_nginx" == "true" ]]; then
-                    if [[ "$INSTALL_API" == "true" ]]; then
-                        NGINX_API=$(prompt_yes_no "Enable API subdomain (api.$DOMAIN)?" "y")
-                    fi
-                    if [[ "$INSTALL_PGADMIN" == "true" && "$NGINX_API" != "true" ]]; then
-                        NGINX_PGADMIN=$(prompt_yes_no "Enable pgAdmin subdomain (pgadmin.$DOMAIN)?" "y")
-                    fi
-                    if [[ "$INSTALL_MINIO" == "true" && "$NGINX_API" != "true" && "$NGINX_PGADMIN" != "true" ]]; then
-                        NGINX_MINIO=$(prompt_yes_no "Enable MinIO subdomain (minio.$DOMAIN)?" "y")
-                    fi
-                fi
-            fi
-        fi
-    fi
-    
-    # Additional options
-    echo -e "\n${BLUE}⚙️ Additional Options${NC}"
-    FORCE_REGEN=$(prompt_yes_no "Force regenerate environment files?" "$([ "$FORCE_REGEN" = "true" ] && echo "y" || echo "n")")
-    
-    # Configuration summary
-    echo -e "\n${CYAN}📋 Configuration Summary${NC}"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "📍 Server IP:          $SERVER_IP"
-    echo -e "🌍 Domain:             $DOMAIN"
-    echo -e "🚀 Deployment Type:    $DEPLOY_TYPE"
-    echo -e "👤 SSH User:           $SSH_USER"
-    echo -e "🔐 SSH Key:            $SSH_KEY_PATH"
-    echo -e "📦 Project Name:       $PROJECT_NAME"
-    echo -e "🐳 Docker Compose:     $DOCKER_COMPOSE_FILE"
-    echo -e "🔄 Force Regenerate:   $FORCE_REGEN"
-    echo ""
-    echo -e "${CYAN}🛠️ Services to Install:${NC}"
-    [[ "$INSTALL_API" == "true" ]] && echo -e "  ✅ API Service" || echo -e "  ❌ API Service"
-    [[ "$INSTALL_POSTGRES" == "true" ]] && echo -e "  ✅ PostgreSQL Database" || echo -e "  ❌ PostgreSQL Database"
-    [[ "$INSTALL_REDIS" == "true" ]] && echo -e "  ✅ Redis Cache" || echo -e "  ❌ Redis Cache"
-    [[ "$INSTALL_MINIO" == "true" ]] && echo -e "  ✅ MinIO Object Storage" || echo -e "  ❌ MinIO Object Storage"
-    [[ "$INSTALL_PGADMIN" == "true" ]] && echo -e "  ✅ pgAdmin Database Management" || echo -e "  ❌ pgAdmin Database Management"
-    
-    if [[ "$DEPLOY_TYPE" == "full" ]]; then
-        echo ""
-        echo -e "${CYAN}🌐 Nginx Subdomains:${NC}"
-        [[ "$NGINX_API" == "true" ]] && echo -e "  ✅ API: api.$DOMAIN" || echo -e "  ❌ API: api.$DOMAIN"
-        [[ "$NGINX_PGADMIN" == "true" ]] && echo -e "  ✅ pgAdmin: pgadmin.$DOMAIN" || echo -e "  ❌ pgAdmin: pgadmin.$DOMAIN"
-        [[ "$NGINX_MINIO" == "true" ]] && echo -e "  ✅ MinIO: minio.$DOMAIN" || echo -e "  ❌ MinIO: minio.$DOMAIN"
-        
-        # Show access URLs
-        echo ""
-        echo -e "${CYAN}🔗 Access URLs (after deployment):${NC}"
-        echo -e "  🌐 Main App: https://$DOMAIN"
-        [[ "$NGINX_API" == "true" ]] && echo -e "  🚀 API: https://api.$DOMAIN"
-        [[ "$NGINX_PGADMIN" == "true" ]] && echo -e "  🗄️ pgAdmin: https://pgadmin.$DOMAIN"
-        [[ "$NGINX_MINIO" == "true" ]] && echo -e "  📦 MinIO: https://minio.$DOMAIN"
-    fi
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
-    # Confirmation
-    local confirm=$(prompt_yes_no "\n Do you want to proceed with this configuration?" "y")
-    if [[ "$confirm" != "true" ]]; then
-        echo "Deployment cancelled."
-        exit 0
-    fi
-}
 
 show_banner() {
     echo -e "${BLUE}"
@@ -311,39 +70,25 @@ show_help() {
 🚀 KataCore Remote Deployment Script
 
 USAGE:
-    ./deploy-remote.sh [OPTIONS] [IP] [DOMAIN]
+    ./deploy-remote.sh [OPTIONS] IP DOMAIN
 
 ARGUMENTS:
     IP                  Server IP address (e.g., 116.118.85.41)
     DOMAIN             Domain name (e.g., innerbright.vn)
 
 OPTIONS:
-    -i, --interactive  Interactive mode (recommended for first-time users)
     --user USER        SSH user (default: root)
     --key PATH         SSH private key path (default: ~/.ssh/default)
     --simple           Simple deployment (no SSL/domain config)
     --force-regen      Force regenerate environment files
     --compose FILE     Docker compose file (default: docker-compose.startkitv1.yml)
+                       Available files:
+                       - docker-compose.startkitv1.yml (full stack)
     --project NAME     Project name (default: katacore)
     --cleanup          Cleanup deployment on remote server
     --help             Show this help
 
-SERVICE OPTIONS:
-    --install-api      Install API service
-    --install-postgres Install PostgreSQL database
-    --install-redis    Install Redis cache
-    --install-minio    Install MinIO object storage
-    --install-pgadmin  Install pgAdmin database management
-
-NGINX OPTIONS (for full deployment):
-    --nginxapi         Enable API subdomain
-    --nginxpgadmin     Enable pgAdmin subdomain
-    --nginxminio       Enable MinIO subdomain
-
 EXAMPLES:
-    # Interactive mode (recommended)
-    ./deploy-remote.sh --interactive
-
     # Full deployment with domain and SSL
     ./deploy-remote.sh 116.118.85.41 innerbright.vn
 
@@ -353,8 +98,11 @@ EXAMPLES:
     # Custom SSH user and key
     ./deploy-remote.sh --user ubuntu --key ~/.ssh/my-key.pem 116.118.85.41 innerbright.vn
 
-    # With specific services
-    ./deploy-remote.sh --install-api --install-postgres --install-redis 116.118.85.41 innerbright.vn
+    # Custom docker-compose file
+    ./deploy-remote.sh --compose docker-compose.startkitv1.yml 116.118.85.41 innerbright.vn
+
+    # With force regeneration
+    ./deploy-remote.sh --force-regen 116.118.85.41 innerbright.vn
 
     # Cleanup remote deployment
     ./deploy-remote.sh --cleanup 116.118.85.41
@@ -366,10 +114,6 @@ EOF
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -i|--interactive)
-                INTERACTIVE_MODE=true
-                shift
-                ;;
             --user)
                 SSH_USER="$2"
                 shift 2
@@ -450,20 +194,7 @@ parse_arguments() {
         esac
     done
     
-    # Interactive mode setup
-    if [[ "$INTERACTIVE_MODE" == "true" ]]; then
-        interactive_setup
-        return
-    fi
-    
-    # Validate required arguments for non-interactive mode
-    if [[ -z "$SERVER_IP" && "$CLEANUP_MODE" != "true" ]]; then
-        echo -e "${YELLOW}No arguments provided. Starting interactive mode...${NC}\n"
-        INTERACTIVE_MODE=true
-        interactive_setup
-        return
-    fi
-    
+    # Validate required arguments
     if [[ -z "$SERVER_IP" ]]; then
         error "Server IP is required. Use --help for usage."
     fi
@@ -503,16 +234,13 @@ validate_inputs() {
     fi
 }
 
-# Rest of the functions remain the same...
-# (I'll keep the rest of the functions from the original code for brevity)
-
 # Select Docker Compose file
 select_docker_compose_file() {
     log "🐳 Selecting Docker Compose file..."
     
     # Available compose files
     local compose_files=(
-        "docker-compose.yml"
+        "docker-compose.startkitv1.yml"
     )
     
     # If compose file not specified, use default
@@ -620,11 +348,11 @@ check_prerequisites() {
 
     # Validate Docker Compose file syntax
     if docker compose version &> /dev/null; then
-        if ! docker compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.prod config --quiet; then
+        if ! docker compose -f "$DOCKER_COMPOSE_FILE" config --quiet; then
             error "Invalid Docker Compose file: $DOCKER_COMPOSE_FILE"
         fi
     else
-        if ! docker-compose -f "$DOCKER_COMPOSE_FILE" --env-file .env.prod config --quiet; then
+        if ! docker-compose -f "$DOCKER_COMPOSE_FILE" config --quiet; then
             error "Invalid Docker Compose file: $DOCKER_COMPOSE_FILE"
         fi
     fi
@@ -735,6 +463,12 @@ transfer_project() {
     fi
     
     # Transfer files to remote server using rsync for better performance
+    # Sử dụng rsync để truyền file từ thư mục tạm đến server từ xa
+    # -a: chế độ archive (bảo toàn quyền, thời gian, liên kết tượng trưng)
+    # -v: hiển thị chi tiết quá trình truyền file
+    # -z: nén dữ liệu trong quá trình truyền để tăng tốc độ
+    # -e: chỉ định lệnh SSH với key riêng tư
+    # Truyền từ thư mục tạm đến thư mục project trên server
     rsync -avz -e "ssh -i $SSH_KEY_PATH" "$temp_dir/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/"
     
     # Cleanup
@@ -1354,8 +1088,8 @@ main() {
     # Parse arguments first
     parse_arguments "$@"
     
-    # If no arguments provided and not in interactive mode, show help
-    if [[ -z "$SERVER_IP" && "$INTERACTIVE_MODE" != "true" ]]; then
+    # If no arguments provided, show help
+    if [[ -z "$SERVER_IP" ]]; then
         show_help
         exit 0
     fi

@@ -1,6 +1,6 @@
 export const siteConfig = {
     title: "Tên Website",
-    offline: true, // Chỉ sử dụng khi website không cần kết nối internet
+    offline: false, // Chỉ sử dụng khi website không cần kết nối internet
     maintenance: {
         enabled: false, // Bật/tắt chế độ bảo trì
         message: "Website đang trong quá trình bảo trì. Vui lòng quay lại sau!",
@@ -8,7 +8,7 @@ export const siteConfig = {
         estimatedTime: "8/7/2025"
     },
     auth: {
-        loginRequired: true, // Yêu cầu đăng nhập để truy cập
+        loginRequired: false, // Yêu cầu đăng nhập để truy cập
         redirectAfterLogin: "/dashboard", // Trang chuyển hướng sau khi đăng nhập thành công
         redirectAfterLogout: "/login"
     },
