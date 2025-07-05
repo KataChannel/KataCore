@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 🚀 KataCore Auto Git Push - Enhanced Version
-# Improved autopush with smart commit messages and validation
-# Version: 2.0.0
+# Improved autopush with better commit messages and validation
+# Version: 2.1.0 - Dynamic main branch support
 
 set -euo pipefail
 
@@ -26,12 +26,29 @@ show_banner() {
     echo -e "${PURPLE}"
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    🚀 KataCore Auto Git Push v2.0                           ║
+║                    🚀 KataCore Auto Git Push v2.1                           ║
 ║                                                                              ║
-║    Enhanced version with smart commit messages and validation               ║
+║    Enhanced version with dynamic main branch and merge support              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 EOF
     echo -e "${NC}"
+}
+
+# Show help
+show_help() {
+    echo "Usage: $0 [OPTIONS] [COMMIT_MESSAGE]"
+    echo
+    echo "Options:"
+    echo "  --merge         Merge current branch to main/master branch"
+    echo "  --main-branch   Specify main branch name (default: auto-detect)"
+    echo "  --help, -h      Show this help message"
+    echo
+    echo "Examples:"
+    echo "  $0                                    # Auto-commit and push to current branch"
+    echo "  $0 \"feat: add new feature\"           # Commit with custom message"
+    echo "  $0 --merge                            # Merge to main branch"
+    echo "  $0 --merge \"release v2.0\"            # Merge to main with custom message"
+    echo "  $0 --main-branch develop --merge      # Merge to specific branch"
 }
 
 # Check if we're in a git repository
@@ -40,6 +57,45 @@ check_git_repo() {
         error "Not in a git repository!"
         exit 1
     fi
+}
+
+# Detect main branch dynamically
+detect_main_branch() {
+    local main_branch=""
+    
+    # Check for common main branch names in order of preference
+    local branch_candidates=("main" "master" "develop" "dev")
+    
+    for branch in "${branch_candidates[@]}"; do
+        if git show-ref --verify --quiet "refs/heads/$branch"; then
+            main_branch="$branch"
+            break
+        fi
+    done
+    
+    # If no local branch found, check remote branches
+    if [ -z "$main_branch" ]; then
+        for branch in "${branch_candidates[@]}"; do
+            if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+                main_branch="$branch"
+                info "Found remote branch: origin/$branch"
+                break
+            fi
+        done
+    fi
+    
+    # If still no branch found, check default branch from remote
+    if [ -z "$main_branch" ] && git remote | grep -q origin; then
+        main_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "")
+    fi
+    
+    # Fallback to 'main' if nothing found
+    if [ -z "$main_branch" ]; then
+        main_branch="main"
+        warning "No main branch detected. Using 'main' as default."
+    fi
+    
+    echo "$main_branch"
 }
 
 # Generate smart commit message based on changes
