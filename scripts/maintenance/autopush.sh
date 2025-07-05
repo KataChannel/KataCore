@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 🚀 KataCore Auto Git Push - Enhanced Version
-# Improved autopush with better commit messages and validation
+# Improved autopush with smart commit messages and validation
 # Version: 2.0.0
 
 set -euo pipefail

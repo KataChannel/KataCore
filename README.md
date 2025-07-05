@@ -1,103 +1,278 @@
-# 🚀 KataCore StartKit v1
+# 🚀 KataCore Enterprise Platform
 
-> **Production-ready full-stack application with automated deployment**
+<div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/chikiet/KataCore)
+**Production-ready full-stack platform with automated deployment & Human Resource Management**
+
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/chikiet/KataCore)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Bun](https://img.shields.io/badge/bun-1.0+-yellow.svg)](https://bun.sh)
 [![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://docker.com)
-[![Next.js](https://img.shields.io/badge/next.js-15.3.4-black.svg)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/next.js-15.3.5-black.svg)](https://nextjs.org)
 [![NestJS](https://img.shields.io/badge/nestjs-11.1.3-red.svg)](https://nestjs.com)
 
-**KataCore StartKit v1** is a modern full-stack application built with Next.js 15, React 19, NestJS 11, and Bun.js. It provides automated remote deployment with Docker, SSL support, and production-ready infrastructure out of the box.
+[🚀 Quick Start](#-quick-start) • 
+[📖 Documentation](#-documentation) • 
+[🌟 Features](#-features) • 
+[🎯 Live Demo](#-live-demo) • 
+[🤝 Contributing](#-contributing)
+
+</div>
+
+---
+
+## 📋 Overview
+
+**KataCore** is a modern enterprise platform that combines cutting-edge technology with practical business solutions. Built with Next.js 15, React 19, NestJS 11, and powered by Bun.js, it delivers a complete full-stack experience with automated deployment capabilities.
+
+### 🎯 What Makes KataCore Special
+
+- **🏢 Complete HRM System** - Full-featured Human Resource Management with employee lifecycle, departments, and role-based access
+- **🚀 One-Command Deployment** - Deploy to any server with automated SSL, Docker orchestration, and environment setup  
+- **⚡ Ultra-Fast Development** - Bun.js runtime with Turbopack for lightning-fast builds and hot reloading
+- **🔒 Enterprise Security** - JWT authentication, role-based permissions, and automated security configurations
+- **🐳 Cloud-Ready Architecture** - Containerized services with PostgreSQL, Redis, MinIO, and monitoring
+
+---
 
 ## 🌟 Features
 
-### Full-Stack Application
-- 🚀 **Next.js 15** - Modern React framework with Turbopack for ultra-fast development
-- ⚛️ **React 19** - Latest React with improved concurrent features
-- 🎨 **Tailwind CSS 4** - Utility-first CSS framework for rapid UI development
-- 🏗️ **NestJS 11** - Scalable TypeScript backend framework
-- ⚡ **Bun.js Runtime** - Ultra-fast JavaScript runtime for both frontend and backend
-- 🗄️ **Prisma ORM** - Type-safe database access with PostgreSQL
-- 🔐 **Authentication** - JWT-based auth with bcrypt password hashing
+### 🏢 Human Resource Management System
+- **👥 Employee Lifecycle Management** - Complete CRUD operations with status tracking (Active, Probation, Leave, Terminated)
+- **🏛️ Organizational Structure** - Multi-level departments with hierarchical management and budget tracking
+- **🔑 Role-Based Access Control** - Granular permissions system with manager overrides and department-specific access
+- **📊 Comprehensive Data Management** - Automated seeding with 7 employees, 3 departments, and realistic test data
+- **🔐 Secure Authentication** - JWT-based login with bcrypt password hashing and session management
+- **📱 Modern Interface** - React-based UI with Material-UI components and responsive design
 
-### Database & Infrastructure
-- 🐘 **PostgreSQL** - Robust relational database with full SQL support
-- 🗃️ **Redis** - High-performance caching and session storage
-- 📦 **MinIO** - S3-compatible object storage for file uploads
-- 🔧 **pgAdmin** - Web-based PostgreSQL administration
-- 📊 **Health Monitoring** - Built-in health checks for all services
+### 🚀 Platform Infrastructure
+- **⚛️ Next.js 15 Frontend** - Latest React 19 with Turbopack, App Router, and TypeScript
+- **🏗️ NestJS 11 Backend** - Scalable API with Prisma ORM, dependency injection, and modular architecture
+- **⚡ Bun.js Runtime** - Ultra-fast JavaScript runtime for both frontend and backend development
+- **🗄️ Production Database** - PostgreSQL with Redis caching and MinIO object storage
+- **🔧 Development Tools** - Hot reloading, TypeScript support, ESLint, and automated testing
 
-### Development & Deployment
-- 🎯 **Remote Deployment** - One-command deployment to any server
-- 🔒 **Auto-SSL Configuration** - Let's Encrypt certificates with auto-renewal
-- 🛡️ **Security-First** - Auto-generated secure passwords and secrets
-- 🚀 **Two Deployment Modes** - Simple (IP-based) and Full (Domain + SSL)
-- 🐳 **Docker Stack** - Complete containerized deployment
-- 🧹 **Easy Cleanup** - Simple cleanup of remote deployments
-- 📝 **TypeScript** - Full type safety across the stack
+### 🚀 Automated Deployment System
+- **🎯 One-Command Deploy** - Deploy to any server with single command
+- **🔒 Automated SSL** - Let's Encrypt certificates with auto-renewal
+- **🐳 Docker Orchestration** - Multi-container setup with health checks
+- **🌐 Nginx Proxy** - Reverse proxy with subdomain routing
+- **📊 Monitoring Stack** - Optional Grafana and Prometheus integration
+- **🔐 Security Hardening** - Automated firewall, SSH key management, and system updates
+- **🗄️ PostgreSQL Database** - Production-ready with Redis caching and MinIO object storage
+- **🐳 Docker Orchestration** - Complete containerized stack with health monitoring and auto-restart
 
-### Human Resource Management (HRM) System
-- 🏢 **Employee Management** - Complete CRUD operations for employee records
-- 🏛️ **Department Management** - Organizational structure with hierarchies
-- 👥 **Role Management** - Flexible role-based permission system
-- 🔐 **Authentication System** - JWT-based authentication with secure login
-- 📊 **Data Seeding** - Automated database seeding with realistic test data
-- 🔑 **Permission Framework** - Granular access control with role-based permissions
-- 🎯 **RESTful API** - Comprehensive API endpoints for all HR operations
-- 📱 **Modern UI** - React-based interface with Material-UI components
+### 🎯 Deployment & DevOps
+- **🔄 Automated Deployment** - One-command deployment with SSH key generation and environment setup
+- **🔒 SSL Certificate Management** - Automatic Let's Encrypt certificates with domain configuration
+- **📊 Health Monitoring** - Built-in health checks, logging, and service status monitoring
+- **🛡️ Security-First Design** - Auto-generated passwords, secure configurations, and production hardening
+- **🌐 Multi-Environment Support** - Development, staging, and production configurations with environment-specific settings
+
+---
 
 ## 🏗️ Technology Stack
 
-| Layer | Component | Technology | Version | Purpose |
-|-------|-----------|------------|---------|---------|
-| **Frontend** | Web Framework | Next.js | 15.3.4 | React-based web framework with SSR/SSG |
-| | UI Library | React | 19.0.0 | Modern UI library with concurrent features |
-| | Styling | Tailwind CSS | 4.x | Utility-first CSS framework |
-| | Build Tool | Turbopack | Latest | Ultra-fast bundler for development |
-| **Backend** | API Framework | NestJS | 11.1.3 | Scalable TypeScript framework |
-| | Runtime | Bun.js | 1.x | High-performance JavaScript runtime |
-| | Database ORM | Prisma | 5.20.0 | Type-safe database client |
-| | Authentication | JWT + bcryptjs | 9.0.2 + 2.4.3 | Secure token-based authentication |
-| **Database** | Primary DB | PostgreSQL | 15-alpine | Reliable relational database |
-| | Cache/Session | Redis | 7-alpine | In-memory data structure store |
-| | Object Storage | MinIO | Latest | S3-compatible file storage |
-| | DB Admin | pgAdmin | Latest | Web-based PostgreSQL management |
-| **Infrastructure** | Containerization | Docker | Latest | Application containerization |
-| | Orchestration | Docker Compose | Latest | Multi-container deployment |
-| | Reverse Proxy | Nginx | Latest | Load balancing and SSL termination |
-| | SSL Certificates | Let's Encrypt | Latest | Free SSL certificate automation |
+<table>
+<tr>
+<td><strong>Frontend</strong></td>
+<td>Next.js 15, React 19, TypeScript, Tailwind CSS 4, Material-UI</td>
+</tr>
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Bun.js** (v1.0+) - [Install Bun](https://bun.sh)
-- **Docker** & **Docker Compose** (for deployment)
-- **Node.js** (v18+) as fallback runtime
-- **Git** for version control
+- **Bun.js** >= 1.0.0 ([Install Bun](https://bun.sh/docs/installation))
+- **Docker** & **Docker Compose** ([Install Docker](https://docs.docker.com/get-docker/))
+- **Node.js** >= 18.0.0 (for compatibility)
 
-### 1. Clone & Setup
+### 1. Clone & Install
+```bash
+git clone https://github.com/chikiet/KataCore.git
+cd KataCore
+bun install:all
+```
+
+### 2. Environment Setup
+```bash
+# Copy environment templates
+cp site/.env.example site/.env.local
+cp api/.env.example api/.env
+
+# Generate security keys
+bun run security:generate
+```
+
+### 3. Database Setup
+```bash
+# Start database services
+bun run docker:up
+
+# Setup database schema
+cd api && bun run prisma:migrate
+cd api && bun run prisma:seed
+```
+
+### 4. Start Development
+```bash
+# Start both frontend and backend
+bun run dev
+
+# Or start individually
+bun run dev:site  # Frontend on http://localhost:3000
+bun run dev:api   # Backend on http://localhost:3001
+```
+
+### 5. Production Deployment
+```bash
+# Quick deployment to server
+./quick-deploy-enhanced.sh
+
+# Or interactive deployment wizard
+./deploy-wizard.sh
+
+# Or professional deployment with options
+./deploy-production.sh --help
+```
+
+---
+
+## 📖 Documentation
+
+### 📚 Core Guides
+- [**🚀 Quick Start Guide**](docs/guides/QUICK-START.md) - Get up and running in 5 minutes
+- [**🏗️ Architecture Overview**](docs/guides/ARCHITECTURE.md) - System design and components
+- [**🔧 Development Guide**](docs/guides/DEVELOPMENT.md) - Development workflow and best practices
+- [**📦 Deployment Guide**](docs/guides/DEPLOYMENT-GUIDE.md) - Complete deployment instructions
+
+### 📋 API References
+- [**🏢 HRM API**](docs/api/HRM-API.md) - Employee and department management endpoints
+- [**🔐 Authentication API**](docs/api/AUTH-API.md) - JWT authentication and authorization
+- [**🔧 System API**](docs/api/SYSTEM-API.md) - Health checks and system information
+
+### 🛠️ Advanced Topics
+- [**🔒 Security Configuration**](docs/security/SECURITY.md) - Security best practices and hardening
+- [**📊 Monitoring Setup**](docs/monitoring/MONITORING.md) - Grafana, Prometheus, and logging
+- [**🐳 Docker Configuration**](docs/docker/DOCKER.md) - Container orchestration and customization
+- [**🚀 CI/CD Pipeline**](docs/cicd/PIPELINE.md) - Automated testing and deployment
+
+---
+
+## 🎯 Live Demo
+
+### 🌐 Production Instance
+- **Main App**: [http://116.118.48.143:3000](http://116.118.48.143:3000)
+- **API Endpoint**: [http://116.118.48.143:3001](http://116.118.48.143:3001)
+- **Database Admin**: [http://116.118.48.143:5050](http://116.118.48.143:5050)
+- **File Storage**: [http://116.118.48.143:9000](http://116.118.48.143:9000)
+
+### 🔑 Demo Credentials
+```
+Admin User:
+- Email: admin@katacore.com
+- Password: Admin123!
+
+Manager User:
+- Email: manager@katacore.com
+- Password: Manager123!
+
+Employee User:
+- Email: employee@katacore.com
+- Password: Employee123!
+```
+
+### 📱 Test Features
+- **Employee Management** - Create, update, and manage employee records
+- **Department Structure** - Organize employees into departments with hierarchies
+- **Role-Based Access** - Test different permission levels
+- **Authentication Flow** - Login/logout and session management
+- **API Integration** - Explore REST API endpoints
+
+---
+
+## 🏗️ Architecture
+
+### 🔧 Technology Stack
+```
+Frontend (site/)
+├── Next.js 15 (App Router)
+├── React 19 (Server Components)
+├── TypeScript 5.7
+├── Tailwind CSS 4.0
+├── Material-UI 7.0
+└── Bun.js Runtime
+
+Backend (api/)
+├── NestJS 11 (Modular Architecture)
+├── Prisma ORM (Database)
+├── JWT Authentication
+├── TypeScript 5.7
+├── Swagger/OpenAPI
+└── Bun.js Runtime
+
+Infrastructure
+├── PostgreSQL 15 (Database)
+├── Redis 7 (Caching)
+├── MinIO (Object Storage)
+├── Docker Compose
+├── Nginx (Reverse Proxy)
+└── Let's Encrypt (SSL)
+```
+
+### 🏛️ Project Structure
+```
+KataCore/
+├── 📁 site/                  # Next.js Frontend
+│   ├── src/app/               # App Router pages
+│   ├── src/components/        # React components
+│   ├── src/lib/              # Utilities & configs
+│   └── prisma/               # Database client
+├── 📁 api/                   # NestJS Backend
+│   ├── src/                  # Source code
+│   ├── prisma/               # Database schema
+│   └── dist/                 # Build output
+├── 📁 deployment/            # Deployment scripts
+│   ├── scripts/              # Automation scripts
+│   ├── configs/              # Server configurations
+│   └── templates/            # Config templates
+├── 📁 docs/                  # Documentation
+│   ├── guides/               # User guides
+│   ├── api/                  # API documentation
+│   └── examples/             # Code examples
+└── 📁 scripts/               # Development scripts
+    ├── setup/                # Initial setup
+    ├── deployment/           # Deployment helpers
+    └── maintenance/          # Maintenance tasks
+```
+
+### Prerequisites
+- **Bun.js** v1.0+ ([Install Bun](https://bun.sh))
+- **Docker** & **Docker Compose** (for deployment)
+- **Git** for version control
+- **Linux/macOS** (Windows with WSL2)
+
+### 1. 📥 Clone & Setup
 ```bash
 # Clone the repository
 git clone https://github.com/chikiet/KataCore.git
 cd KataCore
 
-# Make deployment script executable
-chmod +x deploy-remote.sh
-
 # Install all dependencies (frontend + backend)
 bun run install:all
+
+# Generate environment files
+cp .env.example .env
 ```
 
-### 2. Local Development
+### 2. 🏃 Local Development
 ```bash
-# Start both frontend and backend in development mode
+# Start both frontend and backend
 bun run dev
 
 # Or start individually
-bun run dev:site    # Frontend (Next.js) on http://localhost:3000
-bun run dev:api     # Backend (NestJS) on http://localhost:3001
+bun run dev:site    # Frontend: http://localhost:3000
+bun run dev:api     # Backend: http://localhost:3001
 ```
 
 **Development URLs:**
@@ -106,710 +281,424 @@ bun run dev:api     # Backend (NestJS) on http://localhost:3001
 - ❤️ **Health Check**: http://localhost:3001/health
 - 🏢 **HRM System**: http://localhost:3000/hr
 
-**HRM System Setup:**
+### 3. 🎯 HRM System Setup
 ```bash
-# Seed the HRM database with test data
+# Seed database with test data
 curl -X POST http://localhost:3001/api/seed/hrm
 
-# Login with test credentials (HR Manager)
-# Email: hr.manager@company.com
-# Password: hr123456
+# Login with test credentials
+# HR Manager: hr.manager@company.com / hr123456
+# IT Manager: it.manager@company.com / it123456
+# Sales Manager: sales.manager@company.com / sales123456
 ```
 
-### 3. Build for Production
+### 4. 🚀 Production Deployment
+
+#### Option 1: Quick Deploy (Recommended)
 ```bash
-# Build both applications
-bun run build
+# Deploy to any server with one command
+./quick-deploy-enhanced.sh
 
-# Or build individually
-bun run build:site  # Build Next.js application
-bun run build:api   # Build NestJS application
+# Follow interactive prompts for:
+# - Server IP configuration
+# - Domain and SSL setup
+# - Service selection
+# - Environment configuration
 ```
 
-### 4. Remote Deployment 🚀
+## 📖 Documentation
 
-**For deployment to remote servers:**
+### 🏢 HRM System Features
 
-#### SSH Key Setup 🔑
-```bash
-# Generate SSH key for deployment
-./ssh-keygen-setup.sh
+#### 👥 Employee Management
+- **Complete CRUD Operations** - Create, read, update, and delete employee records
+- **Status Tracking** - Active, Inactive, Terminated, On Leave, Probation
+- **Contract Types** - Full-time, Part-time, Contract, Internship, Freelance
+- **Personal & Professional Info** - Contact details, emergency contacts, job history
+- **Salary & Compensation** - Salary tracking with history and adjustments
 
-# Generate key with custom name and server configuration
-./ssh-keygen-setup.sh --name myproject-key --server 116.118.85.41 --user ubuntu
+#### 🏛️ Organizational Structure
+- **Department Hierarchies** - Multi-level departments with parent-child relationships
+- **Position Management** - Job roles with levels, responsibilities, and requirements
+- **Manager Assignments** - Clear reporting structure and team management
+- **Budget Tracking** - Department budgets and resource allocation
 
-# Generate RSA key with custom bits
-./ssh-keygen-setup.sh --type rsa --bits 4096 --copy-key
+#### 🔑 Security & Permissions
+- **Role-Based Access Control** - Granular permissions for different user types
+- **JWT Authentication** - Secure token-based authentication with refresh tokens
+- **Password Security** - bcrypt hashing with configurable salt rounds
+- **Session Management** - Automatic token expiration and renewal
 
-# Force overwrite existing key
-./ssh-keygen-setup.sh --force --name existing-key
-```
+### 🚀 Deployment Options
 
-#### Simple Deployment (IP-based)
-```bash
-# Deploy to server with IP only (no SSL)
-./deploy-remote.sh --simple SERVER_IP mydomain.com
-```
+#### 🎯 Development Mode
+- **Local Environment** - SQLite database with hot reloading
+- **Test Data** - Automated seeding with realistic employee data
+- **Development Tools** - Prisma Studio, API testing, and debugging
 
-#### Full Deployment (Domain + SSL)
-```bash
-# Deploy to server with domain and SSL
-./deploy-remote.sh SERVER_IP mydomain.com
-```
+#### 🌐 Production Deployment
+- **Automated Setup** - One-command deployment with environment generation
+- **SSL Certificates** - Automatic Let's Encrypt certificates with renewal
+- **Docker Orchestration** - Multi-container setup with health monitoring
+- **Security Hardening** - Production-ready configurations and secrets
 
-#### Advanced Options
-```bash
-# Custom SSH user and key
-./deploy-remote.sh --user ubuntu --key ~/.ssh/my-key.pem SERVER_IP mydomain.com
+#### 🔧 Infrastructure Services
+- **PostgreSQL** - Primary database with backup and replication
+- **Redis** - Caching and session storage
+- **MinIO** - S3-compatible object storage for file uploads
+- **pgAdmin** - Web-based database administration
+- **Nginx** - Reverse proxy with SSL termination
 
-# Force regenerate environment variables
-./deploy-remote.sh --force-regen SERVER_IP mydomain.com
-
-# Custom project name
-./deploy-remote.sh --project myproject SERVER_IP mydomain.com
-```
-
-#### Cleanup Deployment
-```bash
-# Remove deployment from remote server
-./deploy-remote.sh --cleanup SERVER_IP
-```
-
-**Requirements for remote deployment:**
-- SSH access to remote server
-- Docker & Docker Compose on remote server (auto-installed)
-- Domain name (for full deployment with SSL)
-
-## 🎯 Deployment Options
-
-### Development Mode (Local)
-```bash
-# Start development servers
-bun run dev  # Both frontend + backend
-```
-**Access:**
-- 🌐 Frontend: http://localhost:3000
-- 🔌 API: http://localhost:3001/health
-
-### Simple Deployment (IP-based)
-```bash
-./deploy-remote.sh --simple SERVER_IP DOMAIN
-```
-**Features:**
-- ✅ Docker containers only
-- ✅ IP address access
-- ✅ No SSL configuration
-- ✅ Perfect for staging/testing
-
-**Access:**
-- Site: `http://SERVER_IP:3000`
-- API: `http://SERVER_IP:3001`
-- MinIO: `http://SERVER_IP:9000`
-- pgAdmin: `http://SERVER_IP:5050`
-
-### Full Deployment (Production)
-```bash
-./deploy-remote.sh SERVER_IP DOMAIN
-```
-**Features:**
-- ✅ Docker containers + Nginx
-- ✅ Domain with SSL certificates
-- ✅ Production-ready configuration
-- ✅ Security headers and optimizations
-
-**Access:**
-- Site: `https://yourdomain.com`
-- API: `https://yourdomain.com/api`
-- MinIO: `https://yourdomain.com/minio`
-- pgAdmin: `https://yourdomain.com/pgadmin`
-
-## 🏛️ Application Architecture
-
-### Project Structure
-```
-KataCore/
-├── 📁 api/                     # NestJS Backend API
-│   ├── 📄 Dockerfile          # API container configuration
-│   ├── 📄 package.json        # API dependencies
-│   ├── 📄 tsconfig.json       # TypeScript configuration
-│   ├── 📄 nest-cli.json       # NestJS CLI configuration
-│   ├── 📄 index.ts            # Additional entry point
-│   ├── 📄 .gitignore          # Git ignore for API
-│   ├── 📄 bun.lock            # Bun lockfile for API
-│   ├── 📁 prisma/             # Database schema & migrations
-│   │   └── 📄 schema.prisma   # Prisma database schema
-│   └── 📁 src/                # API source code
-│       ├── 📄 main.ts         # Application entry point
-│       ├── 📄 app.module.ts   # Root module
-│       ├── 📄 app.controller.ts # Main controller
-│       └── 📄 app.service.ts  # Main service
-├── 📁 site/                   # Next.js Frontend
-│   ├── 📄 Dockerfile          # Frontend container configuration
-│   ├── 📄 package.json        # Frontend dependencies
-│   ├── 📄 next.config.ts      # Next.js configuration
-│   ├── 📄 tailwind.config.ts  # Tailwind CSS configuration
-│   ├── 📄 eslint.config.mjs   # ESLint configuration
-│   ├── 📄 postcss.config.mjs  # PostCSS configuration
-│   ├── 📄 next-env.d.ts       # Next.js TypeScript definitions
-│   ├── 📄 tsconfig.json       # TypeScript configuration
-│   ├── 📄 .gitignore          # Git ignore for frontend
-│   ├── 📄 bun.lock            # Bun lockfile for frontend
-│   ├── 📁 public/             # Static assets
-│   │   ├── 📄 next.svg        # Next.js logo
-│   │   ├── 📄 vercel.svg      # Vercel logo
-│   │   ├── 📄 file.svg        # File icon
-│   │   ├── 📄 globe.svg       # Globe icon
-│   │   └── 📄 window.svg      # Window icon
-│   └── 📁 src/                # Frontend source code
-│       ├── 📁 app/            # App Router pages
-│       │   ├── 📄 page.tsx    # Home page
-│       │   ├── 📄 layout.tsx  # Root layout
-│       │   ├── 📄 globals.css # Global styles
-│       │   └── 📄 favicon.ico # Site favicon
-│       └── 📁 components/     # React components
-│           └── 📄 ApiTest.tsx # API integration test
-├── 📄 package.json            # Root package.json (workspace)
-├── 📄 bun.lock               # Bun lockfile
-├── 📄 .env.example           # Environment variables template
-├── 📄 .env                   # Environment variables (local)
-├── 📄 .gitignore             # Git ignore rules
-├── 📄 docker-compose.startkitv1.yml # Full deployment stack
-├── 📄 deploy-remote.sh        # Deployment automation script
-├── 📄 ssh-keygen-setup.sh     # SSH key generation and setup
-├── 📄 generate-security.sh    # Security configuration generator
-├── 📄 test-deployment.sh      # Deployment testing script
-├── 📄 CHANGELOG.md           # Version history
-├── 📄 LICENSE                # MIT License
-└── 📄 README.md              # This file
-```
-
-### API Endpoints
-- `GET /` - Welcome message from KataCore API
-- `GET /health` - Health check endpoint with service status
-- Authentication endpoints (JWT-based) - *Ready for implementation*
-- RESTful CRUD operations with Prisma ORM - *Ready for implementation*
-
-### HRM System API Endpoints
-The Human Resource Management system provides comprehensive API endpoints:
-
-#### Authentication
-- `POST /api/auth/login` - User authentication with JWT tokens
-- `POST /api/auth/logout` - User logout and token invalidation
-- `POST /api/auth/refresh` - Token refresh for extended sessions
-
-#### Employee Management
-- `GET /api/hrm/employees` - List all employees with pagination and filters
-- `POST /api/hrm/employees` - Create new employee record
-- `PUT /api/hrm/employees/{id}` - Update employee information
-- `DELETE /api/hrm/employees/{id}` - Remove employee record
-
-#### Department Management
-- `GET /api/hrm/departments` - List all departments with employee counts
-- `POST /api/hrm/departments` - Create new department
-- `PUT /api/hrm/departments/{id}` - Update department information
-- `DELETE /api/hrm/departments/{id}` - Remove department
-
-#### Role & Permission Management
-- `GET /api/hrm/roles` - List all roles with permissions
-- `POST /api/hrm/roles` - Create new role with permissions
-- `PUT /api/hrm/roles/{id}` - Update role permissions
-- `DELETE /api/hrm/roles/{id}` - Remove role
-
-#### Data Seeding
-- `POST /api/seed/hrm` - Seed database with test data (7 employees, 3 departments, 6 positions)
-
-### HRM System Features
-The HRM system includes:
-
-#### Core Functionality
-- **Employee Lifecycle Management**: From hiring to termination with complete record keeping
-- **Organizational Structure**: Department and position hierarchies
-- **Role-Based Access Control**: Granular permissions for different user types
-- **Authentication & Security**: JWT-based authentication with bcrypt password hashing
-
-#### User Roles & Permissions
-- **HR Manager**: Full access to all HRM functions (READ, WRITE, DELETE, MANAGE_*)
-- **Department Manager**: Team management and employee oversight
-- **Employee**: Basic read access to organizational information
-
-#### Test Data & Credentials
-The system comes with realistic test data:
-- **7 Employees** across 3 departments (HR, IT, Sales)
-- **6 Positions** with different levels and responsibilities
-- **3 Departments** with hierarchical structure
-- **Role-based permissions** for realistic access control testing
-
-**Available Test Accounts:**
-```
-HR Manager: hr.manager@company.com / hr123456
-IT Manager: it.manager@company.com / it123456
-Sales Manager: sales.manager@company.com / sales123456
-John Doe (Developer): john.doe@company.com / john123456
-Jane Smith (Developer): jane.smith@company.com / jane123456
-Mike Wilson (Sales): mike.wilson@company.com / mike123456
-Sarah Jones (Sales): sarah.jones@company.com / sarah123456
-```
-
-### Database Schema (Prisma)
-#### HRM System Schema
-- **Users** - User accounts with authentication and role assignment
-- **Roles** - Role definitions with JSON-based permissions
-- **Employees** - Complete employee records with personal and professional information
-- **Departments** - Organizational departments with hierarchical structure
-- **Positions** - Job positions with levels and department associations
-- **Attendance** - Employee attendance tracking
-- **LeaveRequests** - Leave request management with approval workflows
-- **Payroll** - Salary and compensation records
-- **PerformanceReviews** - Employee performance evaluation system
-
-#### Core Features
-- **Authentication**: JWT-based with bcrypt password hashing
-- **Authorization**: Role-based access control with granular permissions
-- **Data Integrity**: Foreign key relationships and validation constraints
-- **Audit Trail**: Created/updated timestamps for all records
-- **Scalability**: Optimized for both SQLite (development) and PostgreSQL (production)
+---
 
 ## 📋 Available Scripts
 
-### Development Scripts
+### 🛠️ Development
 ```bash
-# Install dependencies for all packages
-bun run install:all
-
-# Development mode (both frontend + backend)
-bun run dev
-bun run dev:site    # Frontend only (Next.js)
-bun run dev:api     # Backend only (NestJS)
-
-# Build applications
-bun run build       # Build both applications
-bun run build:site  # Build Next.js frontend
-bun run build:api   # Build NestJS backend
-
-# Production mode
-bun run start       # Start both in production mode
-bun run start:site  # Start Next.js in production
-bun run start:api   # Start NestJS in production
-
-# Code quality
-bun run lint        # Lint both applications
-bun run lint:site   # Lint Next.js code
-bun run lint:api    # Lint NestJS code
-
-# Testing
-bun run test        # Run API tests
-./test-deployment.sh # Test deployment script and project structure
-
-# Cleanup
-bun run clean       # Remove node_modules and build artifacts
+bun run dev          # Start both frontend and backend
+bun run dev:site     # Frontend only (Next.js)
+bun run dev:api      # Backend only (NestJS)
+bun run build        # Build for production
+bun run test         # Run test suite
+bun run lint         # Code quality checks
 ```
 
-### Deployment Scripts
+### 🚀 Deployment
 ```bash
-# Remote deployment using npm scripts
-bun run deploy:remote  # Full remote deployment
-bun run deploy:simple  # Simple IP-based deployment
-bun run deploy:cleanup # Cleanup remote deployment
+# Interactive deployment
+./quick-deploy-enhanced.sh          # Enhanced quick deploy
+./deploy-wizard.sh                  # Step-by-step wizard
+./deploy-production.sh              # Enterprise deployment
 
-# Direct script usage
-./deploy-remote.sh SERVER_IP mydomain.com          # Full deployment
-./deploy-remote.sh --simple SERVER_IP mydomain.com # Simple deployment
-./deploy-remote.sh --cleanup SERVER_IP               # Cleanup
-
-# Test deployment functionality
-./test-deployment.sh   # Run deployment tests
+# Direct deployment
+./deploy-remote-fixed.sh --simple SERVER_IP          # Simple mode
+./deploy-remote-fixed.sh SERVER_IP DOMAIN            # Full mode with SSL
 ```
 
-### Docker Scripts
+### 🗄️ Database Management
 ```bash
-# Local Docker development
-bun run docker:up   # Start all services with Docker Compose
-bun run docker:down # Stop all Docker services
-bun run docker:logs # View Docker logs
-
-# Individual Docker builds
-cd api && bun run docker:build   # Build API Docker image
-cd api && bun run docker:run     # Run API in Docker
+cd api && bun run prisma:generate   # Generate Prisma client
+cd api && bun run prisma:migrate    # Run migrations
+cd api && bun run prisma:studio     # Open database admin
+cd api && bun run prisma:seed       # Seed with test data
 ```
 
-### Database Scripts (API directory)
+### 🐳 Docker Operations
 ```bash
-cd api
-
-# Prisma commands
-bun run prisma:generate  # Generate Prisma client
-bun run prisma:migrate   # Run database migrations
-bun run prisma:deploy    # Deploy migrations (production)
-bun run prisma:reset     # Reset database (development)
-bun run prisma:studio    # Open Prisma Studio
-bun run prisma:seed      # Seed database with sample data
+bun run docker:up      # Start local Docker stack
+bun run docker:down    # Stop Docker services
+bun run docker:logs    # View service logs
 ```
 
-### Testing Scripts
-```bash
-# Run deployment tests
-./test-deployment.sh    # Test deployment script functionality
+---
 
-# Run API tests
-bun run test           # Run NestJS API tests
-cd api && bun run test:watch  # Run tests in watch mode
-cd api && bun run test:cov    # Run tests with coverage
+## 🎯 API Reference
+
+### 🔐 Authentication
+```bash
+POST /api/auth/login     # User login with JWT tokens
+POST /api/auth/logout    # Logout and token invalidation
+POST /api/auth/refresh   # Token refresh for extended sessions
 ```
 
-## 🔧 Environment Variables
-
-Environment variables are automatically generated during deployment. You can customize them by copying `.env.example` to `.env`:
-
+### 👥 Employee Management
 ```bash
-cp .env.example .env
+GET    /api/hrm/employees        # List employees (paginated)
+POST   /api/hrm/employees        # Create new employee
+GET    /api/hrm/employees/:id    # Get employee details
+PUT    /api/hrm/employees/:id    # Update employee
+DELETE /api/hrm/employees/:id    # Delete employee
 ```
 
-### Core Application Variables
+### 🏛️ Department Management
+```bash
+GET    /api/hrm/departments      # List all departments
+POST   /api/hrm/departments      # Create department
+PUT    /api/hrm/departments/:id  # Update department
+DELETE /api/hrm/departments/:id  # Delete department
+```
+
+### 🔑 Role & Permissions
+```bash
+GET    /api/hrm/roles           # List roles with permissions
+POST   /api/hrm/roles           # Create new role
+PUT    /api/hrm/roles/:id       # Update role permissions
+DELETE /api/hrm/roles/:id       # Delete role
+```
+
+### 📊 Data Seeding
+```bash
+POST /api/seed/hrm              # Seed database with test data
+```
+
+---
+
+## 🔧 Configuration
+
+### 🌍 Environment Variables
+KataCore automatically generates secure environment variables during deployment:
+
 ```bash
 # Application Configuration
 NODE_ENV=production
 API_VERSION=latest
 SITE_VERSION=latest
-RESTART_POLICY=unless-stopped
 
-# Port Configuration
-PORT=3000
-SITE_PORT=3000
-API_PORT=3001
-
-# Database Configuration
+# Database Configuration  
+DATABASE_URL=postgresql://user:pass@postgres:5432/katacore
 POSTGRES_DB=katacore
 POSTGRES_USER=katacore
-POSTGRES_PASSWORD=<auto-generated-secure-password>
-DATABASE_URL=postgresql://katacore:${POSTGRES_PASSWORD}@postgres:5432/katacore
-
-# Redis Configuration
-REDIS_PASSWORD=<auto-generated-secure-password>
-REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+POSTGRES_PASSWORD=<auto-generated>
 
 # Authentication & Security
-JWT_SECRET=<auto-generated-64-char-secret>
-ENCRYPTION_KEY=<auto-generated-32-char-key>
-LOG_LEVEL=info
+JWT_SECRET=<auto-generated-64-char>
+ENCRYPTION_KEY=<auto-generated-32-char>
+
+# Redis Cache
+REDIS_URL=redis://:password@redis:6379
+REDIS_PASSWORD=<auto-generated>
 
 # MinIO Object Storage
 MINIO_ROOT_USER=admin
-MINIO_ROOT_PASSWORD=<auto-generated-secure-password>
-MINIO_PORT=9000
-MINIO_CONSOLE_PORT=9001
+MINIO_ROOT_PASSWORD=<auto-generated>
 MINIO_ENDPOINT=minio
-MINIO_ACCESS_KEY=admin
-MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
-MINIO_USE_SSL=false
+MINIO_PORT=9000
 
-# pgAdmin Configuration
-PGLADMIN_PORT=5050
-PGADMIN_DEFAULT_EMAIL=admin@localhost
-PGADMIN_DEFAULT_PASSWORD=<auto-generated-secure-password>
-```
-
-### Deployment Configuration
-```bash
-# API Configuration
-CORS_ORIGIN=https://yourdomain.com
-INTERNAL_API_URL=http://api:3001
-
-# Next.js Configuration
+# Application URLs
 NEXT_PUBLIC_API_URL=https://yourdomain.com/api
-
-# Domain & SSL Configuration
-DOMAIN=yourdomain.com
-LETSENCRYPT_EMAIL=admin@yourdomain.com
-SERVER_IP=SERVER_IP
-
-# Deployment Type
-DEPLOY_TYPE=production
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+CORS_ORIGIN=https://yourdomain.com
 ```
 
-### Development Configuration
-```bash
-# Development Configuration (automatically set)
-NODE_ENV=development
-API_PORT=3001
-SITE_PORT=3000
+### 🔐 Security Configuration
+- **Automated Password Generation** - Cryptographically secure random passwords
+- **SSL Certificate Management** - Automatic Let's Encrypt integration
+- **CORS Configuration** - Proper cross-origin resource sharing setup
+- **Security Headers** - Production-ready security headers and configurations
 
-# Local database (when using Docker for development)
-DATABASE_URL=postgresql://katacore:password@localhost:5432/katacore
-REDIS_URL=redis://localhost:6379
-
-# Development API URLs
-NEXT_PUBLIC_API_URL=http://localhost:3001
-INTERNAL_API_URL=http://localhost:3001
-```
-
-### Production Environment Variables
-All production environment variables are automatically generated during deployment with secure random values.
-
-## 🛠️ Development Workflow
-
-### Local Development
-```bash
-# 1. Start development environment
-bun run dev
-
-# 2. Make your changes to:
-#    - Frontend: site/src/
-#    - Backend: api/src/
-#    - Database: api/prisma/schema.prisma
-
-# 3. Test changes
-./test-deployment.sh   # Test deployment configuration
-bun run test          # Run API unit tests
-bun run lint          # Check code quality
-
-# 4. Build for production
-bun run build
-```
-
-### Database Management
-```bash
-# Generate Prisma client
-cd api && bun run prisma:generate
-
-# Create migration
-cd api && bun run prisma:migrate --name your-migration
-
-# Deploy to production (automatic during deployment)
-cd api && bun run prisma:deploy
-
-# Open Prisma Studio for database management
-cd api && bun run prisma:studio
-```
-
-### Testing & Quality Assurance
-```bash
-# Run deployment tests
-./test-deployment.sh
-
-# Run API tests
-cd api && bun run test
-
-# Run tests with coverage
-cd api && bun run test:cov
-
-# Lint code
-bun run lint
-
-# Format code
-cd api && bun run format
-```
+---
 
 ## 📊 Monitoring & Maintenance
 
-### Health Monitoring
+### 🔍 Health Monitoring
 ```bash
-# View service status
-docker-compose -f docker-compose.startkitv1.yml ps
+# Check service status
+docker compose ps
 
-# Real-time logs
-docker-compose -f docker-compose.startkitv1.yml logs -f
+# View real-time logs
+docker compose logs -f
 
-# Check individual service logs
-docker-compose -f docker-compose.startkitv1.yml logs service_name
+# Monitor resource usage
+docker stats
+
+# Check API health
+curl https://yourdomain.com/api/health
 ```
 
-### Updates & Maintenance
+### 🔄 Updates & Maintenance
 ```bash
-# Update application code
+# Update application
 git pull
-./deploy-remote.sh SERVER_IP mydomain.com
+./deploy-remote-fixed.sh SERVER_IP DOMAIN
+
+# Force environment regeneration
+./deploy-remote-fixed.sh --force-regen SERVER_IP DOMAIN
 
 # Clean deployment (removes old data)
-./deploy-remote.sh --cleanup SERVER_IP
-./deploy-remote.sh --force-regen SERVER_IP mydomain.com
+./deploy-remote-fixed.sh --cleanup SERVER_IP
 ```
 
-### Backup & Recovery
+### 💾 Backup & Recovery
 ```bash
-# Manual backup
-docker-compose -f docker-compose.startkitv1.yml exec postgres pg_dump -U katacore katacore > backup.sql
+# Database backup
+docker compose exec postgres pg_dump -U katacore katacore > backup.sql
 
-# Restore backup
-docker-compose -f docker-compose.startkitv1.yml exec -T postgres psql -U katacore -d katacore < backup.sql
+# Restore from backup
+docker compose exec -T postgres psql -U katacore -d katacore < backup.sql
+
+# Full system backup
+tar -czf katacore-backup-$(date +%Y%m%d).tar.gz /opt/katacore/
 ```
+
+---
 
 ## 🚨 Troubleshooting
 
-### Common Development Issues
+### 🔧 Common Development Issues
 
-1. **Dependencies installation fails**
-   ```bash
-   # Clear all node modules and reinstall
-   bun run clean
-   bun run install:all
-   ```
-
-2. **Port already in use**
-   ```bash
-   # Check what's using the ports
-   lsof -i :3000  # Frontend port
-   lsof -i :3001  # API port
-   
-   # Kill the process if needed
-   sudo kill -9 <PID>
-   ```
-
-3. **Database connection issues**
-   ```bash
-   # Reset Prisma client
-   cd api && bun run prisma:generate
-   
-   # Reset database (development only)
-   cd api && bun run prisma:reset
-   ```
-
-### Common Deployment Issues
-
-1. **Port conflicts on remote server**
-   ```bash
-   # Check if ports are in use
-   sudo netstat -tulpn | grep :3000
-   
-   # Stop conflicting services
-   ./deploy-remote.sh --cleanup SERVER_IP
-   ```
-
-2. **SSL certificate issues**
-   ```bash
-   # Check certificate status
-   sudo certbot certificates
-   
-   # Renew certificates
-   sudo certbot renew
-   ```
-
-3. **Service not starting**
-   ```bash
-   # Check service logs
-   docker-compose -f docker-compose.startkitv1.yml logs service_name
-   
-   # Restart services
-   docker-compose -f docker-compose.startkitv1.yml restart
-   ```
-
-4. **Test deployment issues**
-   ```bash
-   # Run deployment tests to check configuration
-   ./test-deployment.sh
-   
-   # Validate Docker Compose file
-   docker-compose -f docker-compose.startkitv1.yml config
-   ```
-
-### Reset deployment
+#### Dependencies Installation
 ```bash
-# Clean everything and start fresh
-./deploy-remote.sh --cleanup SERVER_IP
-./deploy-remote.sh --force-regen SERVER_IP mydomain.com
+# Clear and reinstall dependencies
+bun run clean
+bun run install:all
 ```
 
-## 📚 Quick Reference
-
-### Essential Commands
+#### Port Conflicts
 ```bash
-# Setup
-git clone https://github.com/chikiet/KataCore.git
-cd KataCore && bun run install:all
+# Check port usage
+lsof -i :3000  # Frontend
+lsof -i :3001  # Backend
 
-# Development
-bun run dev                    # Start development servers
-./test-deployment.sh           # Test deployment configuration
-
-# Deployment
-./deploy-remote.sh --simple IP DOMAIN    # Simple deployment
-./deploy-remote.sh IP DOMAIN             # Full deployment with SSL
-./deploy-remote.sh --cleanup IP          # Cleanup deployment
-
-# Database
-cd api && bun run prisma:studio          # Open database admin
-cd api && bun run prisma:migrate         # Run migrations
-
-# Monitoring
-docker-compose -f docker-compose.startkitv1.yml logs -f  # View logs
+# Kill processes if needed
+sudo kill -9 <PID>
 ```
 
-### Important URLs (After Deployment)
-- **Frontend**: `https://yourdomain.com` (or `http://IP:3000` for simple)
-- **API**: `https://yourdomain.com/api` (or `http://IP:3001` for simple)
-- **Health Check**: `https://yourdomain.com/api/health`
-- **pgAdmin**: `https://yourdomain.com/pgadmin` (or `http://IP:5050`)
-- **MinIO**: `https://yourdomain.com/minio` (or `http://IP:9000`)
+#### Database Issues
+```bash
+# Reset Prisma client
+cd api && bun run prisma:generate
+
+# Reset database (development only)
+cd api && bun run prisma:reset
+```
+
+### 🚀 Common Deployment Issues
+
+#### SSH Connection Problems
+```bash
+# Test SSH connection
+ssh -i ~/.ssh/default root@SERVER_IP
+
+# Fix SSH permissions
+chmod 600 ~/.ssh/default
+chmod 644 ~/.ssh/default.pub
+```
+
+#### Service Startup Issues
+```bash
+# Check container logs
+docker compose logs service_name
+
+# Restart specific service
+docker compose restart service_name
+
+# Full restart
+docker compose down && docker compose up -d
+```
+
+#### SSL Certificate Issues
+```bash
+# Check certificate status
+openssl s_client -connect yourdomain.com:443
+
+# Force certificate renewal
+certbot renew --force-renewal
+```
+
+---
 
 ## 🌍 Cloud Provider Support
 
-KataCore StartKit v1 works with **any** cloud provider:
+KataCore is tested and supported on:
 
-### Tested Platforms
-- ✅ **AWS EC2** - All instance types
-- ✅ **Google Cloud Compute** - All machine types  
-- ✅ **DigitalOcean Droplets** - All sizes
-- ✅ **Vultr Cloud Compute** - All plans
-- ✅ **Linode** - All instances
-- ✅ **Hetzner Cloud** - All server types
+- **✅ DigitalOcean** - Droplets and Kubernetes
+- **✅ AWS** - EC2, ECS, and Lambda
+- **✅ Google Cloud** - Compute Engine and Cloud Run
+- **✅ Azure** - Virtual Machines and Container Instances
+- **✅ Linode** - Compute Instances
+- **✅ Vultr** - Cloud Compute
+- **✅ Hetzner** - Cloud Servers
 
-### Linux Distributions
-- ✅ **Ubuntu** 20.04, 22.04, 24.04
-- ✅ **Debian** 11, 12
-- ✅ **CentOS** 8, 9
-- ✅ **RHEL** 8, 9
+### 📋 Minimum Requirements
+- **CPU**: 2 cores
+- **RAM**: 4GB
+- **Storage**: 20GB SSD
+- **Network**: 1Gbps
+- **OS**: Ubuntu 20.04+ / CentOS 8+ / Debian 11+
+
+---
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Test locally: `bun run dev` and `./test-deployment.sh`
-4. Run tests: `bun run test` and `bun run lint`
-5. Commit changes: `git commit -m 'Add amazing feature'`
-6. Push to branch: `git push origin feature/amazing-feature`
-7. Submit pull request
+We welcome contributions! Here's how to get started:
 
-### Development Guidelines
-- Follow TypeScript best practices
-- Write tests for new API endpoints
-- Update documentation for new features
-- Test deployment changes with `./test-deployment.sh`
-- Ensure all linting passes before committing
+### 🔧 Development Setup
+```bash
+# Fork and clone
+git clone https://github.com/yourusername/KataCore.git
+cd KataCore
+
+# Install dependencies
+bun run install:all
+
+# Create feature branch
+git checkout -b feature/amazing-feature
+
+# Start development
+bun run dev
+```
+
+### 📝 Contribution Guidelines
+- **Code Style**: Follow TypeScript best practices and ESLint rules
+- **Testing**: Add tests for new features and API endpoints
+- **Documentation**: Update documentation for new features
+- **Commits**: Use conventional commit messages
+- **Reviews**: All PRs require review and passing tests
+
+### 🧪 Testing
+```bash
+# Run all tests
+bun run test
+
+# Run with coverage
+cd api && bun run test:cov
+
+# Test deployment
+./test-deployment.sh
+
+# Lint code
+bun run lint
+```
+
+---
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📞 Support
+---
 
-- 📖 **Documentation**: This README.md
-- 🐛 **Issues**: [GitHub Issues](https://github.com/chikiet/KataCore/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/chikiet/KataCore/discussions)
-- 📧 **Email**: support@katacore.com
-- 🔧 **Help**: `./deploy-remote.sh --help` for deployment help
-- 🧪 **Testing**: `./test-deployment.sh` for configuration validation
+## 📞 Support & Community
 
-### Project Status
-- ✅ **Version**: 1.0.0
-- ✅ **Status**: Production Ready
-- ✅ **Last Updated**: July 3, 2025
-- ✅ **Node Version**: 18+
-- ✅ **Bun Version**: 1.0+
+<div align="center">
+
+### 🆘 Getting Help
+
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red.svg)](https://github.com/chikiet/KataCore/issues)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue.svg)](https://github.com/chikiet/KataCore/discussions)
+[![Documentation](https://img.shields.io/badge/Docs-Available-green.svg)](https://docs.katacore.com)
+
+**📧 Email**: support@katacore.com  
+**💬 Community**: [Join our Discord](https://discord.gg/katacore)  
+**📚 Documentation**: [docs.katacore.com](https://docs.katacore.com)
+
+</div>
+
+### 🎯 Quick Help Commands
+```bash
+./deploy-remote-fixed.sh --help     # Deployment help
+./test-deployment.sh                # Validate configuration
+bun run dev                         # Start development
+curl http://localhost:3001/health   # Test API
+```
 
 ---
 
 <div align="center">
 
-**🚀 Ready to deploy?**
+### 🚀 Ready to Deploy?
 
-**Quick Start:** `./deploy-remote.sh --simple SERVER_IP mydomain.com`
+**Quick Start**: `./quick-deploy-enhanced.sh`
 
-**Full Deploy:** `./deploy-remote.sh SERVER_IP mydomain.com`
+**Full Deploy**: `./deploy-production.sh SERVER_IP DOMAIN.COM`
 
 ---
 
+**⭐ Star us on GitHub** • **🐛 Report Issues** • **💡 Request Features**
+
 **Made with ❤️ by the KataCore Team**
 
-*Deploy once, run anywhere!*
+*Deploy once, scale everywhere!*
 
 </div>
 
