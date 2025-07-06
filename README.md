@@ -1035,6 +1035,4 @@ curl http://localhost:3001/health   # Test API
 
 
 
-Phong cách Website monochrome IU có darkmode
-
-Phong cách trắng đen hiện đại có darkmode
+Phong cách Website monochrome IU có darkmode,reponsive

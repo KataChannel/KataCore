@@ -458,3 +458,55 @@ body {
     min-height: 40px;
   }
 }
+
+/* Additional monochrome utility classes */
+.mono-50 {
+  background-color: var(--color-gray-50);
+}
+
+.text-text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.bg-hover {
+  background-color: var(--color-hover);
+}
+
+.border-border {
+  border-color: var(--color-border);
+}
+
+.shadow-mono-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Responsive spacing for monochrome components */
+@media (max-width: 640px) {
+  .mono-card {
+    padding: 16px;
+  }
+}
+
+/* Improve accessibility for monochrome design */
+@media (prefers-reduced-motion: reduce) {
+  .mono-transition,
+  .mono-transition-fast,
+  .mono-transition-slow {
+    transition: none;
+  }
+  
+  .mono-card:hover {
+    transform: none;
+  }
+  
+  .mono-button:hover {
+    transform: none;
+  }
+}
+
+/* Focus visible for better accessibility */
+.mono-button:focus-visible,
+.mono-input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
