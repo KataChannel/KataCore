@@ -78,6 +78,7 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
+    "@prisma/client": "^6.11.1",
     "@types/minimatch": "^6.0.0"
   }
 }
