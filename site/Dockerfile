@@ -31,9 +31,9 @@ ENV NEXT_PUBLIC_MINIO_ENDPOINT=http://localhost:9000
 ENV DATABASE_URL="file:./dev.db"
 
 # Generate Prisma client before building
-RUN if [ -f "src/prisma/schema.prisma" ]; then \
+RUN if [ -f "prisma/schema.prisma" ]; then \
     echo "Generating Prisma client..."; \
-    bunx prisma generate --schema=src/prisma/schema.prisma || \
+    bunx prisma generate --schema=prisma/schema.prisma || \
     { echo "Prisma client generation failed"; exit 1; }; \
     fi
 

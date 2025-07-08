@@ -1,10 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
 import Swipe from '../components/common/swipe';
-import FeaturedCategories from '../components/common/FeaturedCategories';
-import Promo from '../components/common/Promo';
-import PopularProducts from '../components/common/PopularProducts';
-
 export const metadata: Metadata = {
     title: 'Home Page - Your E-commerce',
     description: 'This is the Home page for Your E-commerce.',
@@ -22,7 +18,7 @@ export default function HomePage() {
                     </p>
                 </div>
             ),
-            backgroundImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop&sat=-100",
+            backgroundImage: "https://placehold.co/1200x600/f0f0f0/333333",
             info: "Ưu đãi đặc biệt - Giảm giá lên đến 50%",
             shopUrl: "/products"
         },
@@ -36,7 +32,7 @@ export default function HomePage() {
                     </p>
                 </div>
             ),
-            backgroundImage: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&h=600&fit=crop&sat=-100",
+            backgroundImage: "https://placehold.co/1200x600/f0f0f0/333333",
             info: "Bộ sưu tập Monochrome 2025",
             shopUrl: "/fashion"
         },
@@ -50,7 +46,7 @@ export default function HomePage() {
                     </p>
                 </div>
             ),
-            backgroundImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop&sat=-100",
+            backgroundImage: "https://placehold.co/1200x600/f0f0f0/333333",
             info: "Miễn phí vận chuyển toàn quốc",
             shopUrl: "/tech"
         },
@@ -64,7 +60,7 @@ export default function HomePage() {
                     </p>
                 </div>
             ),
-            backgroundImage: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=600&fit=crop&sat=-100",
+            backgroundImage: "https://placehold.co/1200x600/f0f0f0/333333",
             info: "Tư vấn miễn phí từ chuyên gia",
             shopUrl: "/beauty"
         }
