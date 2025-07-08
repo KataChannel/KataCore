@@ -35,7 +35,8 @@ rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude=
 
 # Transfer files to remote server
 rsync -avz "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
-
+# Update .env.prod to .env on remote server
+ssh "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME/ && if [ -f .env.prod ]; then mv .env.prod .env; fi" || error "Failed to rename .env.prod to .env"
 # Cleanup temp directory
 rm -rf "$TEMP_DIR"
 success "Project files transferred successfully"
