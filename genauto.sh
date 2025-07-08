@@ -294,20 +294,19 @@ create_env_file() {
     log "Tạo file .env.local..."
     
     # Generate all passwords
-    local DB_PASSWORD=$(generate_password 32)
-    local REDIS_PASSWORD=$(generate_password 32)
+    local DB_PASSWORD=$(generate_password 8)
+    local REDIS_PASSWORD=$(generate_password 8)
     local JWT_SECRET=$(generate_jwt_secret)
-    local ENCRYPTION_KEY=$(generate_password 32)
-    local MINIO_ROOT_PASSWORD=$(generate_password 32)
-    local MINIO_ACCESS_KEY=$(generate_password 20)
-    local PGADMIN_PASSWORD=$(generate_password 32)
-    local GRAFANA_PASSWORD=$(generate_password 32)
+    local ENCRYPTION_KEY=$(generate_password 8)
+    local MINIO_ROOT_PASSWORD=$(generate_password 8)
+    local MINIO_ACCESS_KEY=$(generate_password 8)
+    local PGADMIN_PASSWORD=$(generate_password 8)
+    local GRAFANA_PASSWORD=$(generate_password 8)
     
     # Create .env.local file
     cat > .env.local << EOF
 # 🔐 KataCore Auto-Generated Security Configuration
 # Generated on: $(date '+%Y-%m-%d %H:%M:%S %Z')
-
 # ===== DATABASE =====
 POSTGRES_PASSWORD=$DB_PASSWORD
 POSTGRES_DB=katacore
