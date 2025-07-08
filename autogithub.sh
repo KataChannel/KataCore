@@ -16,7 +16,7 @@ function show_header() {
     clear
     echo -e "${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
     echo -e "${CYAN}║                    ${YELLOW}GIT AUTOMATION TOOL${CYAN}                    ║${NC}"
-    echo -e "${CYAN}║                     ${GREEN}Version 2.0${CYAN}                         ║${NC}"
+    echo -e "${CYAN}║                     ${GREEN}Version 2.1${CYAN}                         ║${NC}"
     echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
@@ -50,10 +50,11 @@ function show_menu() {
     echo -e "${PURPLE}│${NC} ${CYAN}4.${NC} 🗑️  Remove files from tracking                  ${PURPLE}│${NC}"
     echo -e "${PURPLE}│${NC} ${CYAN}5.${NC} 🌿 Create and switch to new branch             ${PURPLE}│${NC}"
     echo -e "${PURPLE}│${NC} ${CYAN}6.${NC} 🔀 Merge branch into current                   ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${CYAN}7.${NC} 📋 List all branches                           ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${CYAN}8.${NC} 🗑️  Remove branch (local/remote)               ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${CYAN}9.${NC} 📊 Show repository status                      ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${CYAN}10.${NC} 🚪 Exit application                           ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}7.${NC} 🔄 Merge current into branch                   ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}8.${NC} 📋 List all branches                           ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}9.${NC} 🗑️  Remove branch (local/remote)               ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}10.${NC} 📊 Show repository status                     ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}11.${NC} 🚪 Exit application                           ${PURPLE}│${NC}"
     echo -e "${PURPLE}└─────────────────────────────────────────────────────────┘${NC}"
 }
 
@@ -260,6 +261,83 @@ function merge_branch() {
     fi
 }
 
+function merge_current_into_branch() {
+    echo -e "${BLUE}🔄 MERGE CURRENT INTO BRANCH${NC}"
+    echo -e "${YELLOW}───────────────────────────${NC}"
+    
+    current_branch=$(git branch --show-current)
+    echo -e "${BLUE}📍 Current branch: $current_branch${NC}"
+    echo ""
+    
+    echo -e "${CYAN}📋 Available branches:${NC}"
+    git branch | grep -v "^*" | sed 's/^/   /'
+    echo ""
+    
+    echo -e "${CYAN}🔄 Enter target branch to merge current branch into:${NC}"
+    echo -n "➤ "
+    read -r target_branch
+    
+    if [ -z "$target_branch" ]; then
+        echo -e "${RED}❌ Target branch name cannot be empty!${NC}"
+        return 1
+    fi
+    
+    if [ "$target_branch" = "$current_branch" ]; then
+        echo -e "${RED}❌ Cannot merge branch into itself!${NC}"
+        return 1
+    fi
+    
+    # Check if target branch exists
+    if ! git show-ref --verify --quiet refs/heads/"$target_branch"; then
+        echo -e "${RED}❌ Target branch '$target_branch' does not exist!${NC}"
+        return 1
+    fi
+    
+    echo -e "${YELLOW}⚠️  This will switch to '$target_branch' and merge '$current_branch' into it.${NC}"
+    echo -e "${CYAN}Do you want to continue? (y/N):${NC}"
+    echo -n "➤ "
+    read -r confirm
+    
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}💡 Operation cancelled.${NC}"
+        return 0
+    fi
+    
+    # Check for uncommitted changes
+    if ! git diff-index --quiet HEAD --; then
+        echo -e "${RED}❌ You have uncommitted changes! Please commit or stash them first.${NC}"
+        return 1
+    fi
+    
+    echo -e "${YELLOW}🔄 Switching to branch '$target_branch'...${NC}"
+    if git checkout "$target_branch"; then
+        echo -e "${GREEN}✅ Switched to branch '$target_branch'${NC}"
+        
+        echo -e "${YELLOW}🔄 Merging '$current_branch' into '$target_branch'...${NC}"
+        if git merge "$current_branch"; then
+            echo -e "${GREEN}✅ Successfully merged '$current_branch' into '$target_branch'!${NC}"
+            echo -e "${BLUE}🌿 You are now on branch: $target_branch${NC}"
+            
+            echo -e "${CYAN}🔄 Do you want to switch back to '$current_branch'? (y/N):${NC}"
+            echo -n "➤ "
+            read -r switch_back
+            
+            if [[ $switch_back =~ ^[Yy]$ ]]; then
+                if git checkout "$current_branch"; then
+                    echo -e "${GREEN}✅ Switched back to branch '$current_branch'${NC}"
+                else
+                    echo -e "${RED}❌ Failed to switch back to '$current_branch'${NC}"
+                fi
+            fi
+        else
+            echo -e "${RED}❌ Merge failed. Please resolve conflicts manually.${NC}"
+            echo -e "${BLUE}💡 You are currently on branch '$target_branch'${NC}"
+        fi
+    else
+        echo -e "${RED}❌ Failed to switch to branch '$target_branch'${NC}"
+    fi
+}
+
 function list_branches() {
     echo -e "${BLUE}📋 BRANCH INFORMATION${NC}"
     echo -e "${YELLOW}─────────────────────${NC}"
@@ -403,7 +481,7 @@ while true; do
     show_header
     show_menu
     echo ""
-    echo -e "${CYAN}Choose an option (1-10):${NC}"
+    echo -e "${CYAN}Choose an option (1-11):${NC}"
     echo -n "➤ "
     read -r choice
     
@@ -428,20 +506,23 @@ while true; do
             merge_branch
             ;;
         7)
-            list_branches
+            merge_current_into_branch
             ;;
         8)
-            remove_branch
+            list_branches
             ;;
         9)
-            show_status
+            remove_branch
             ;;
         10)
+            show_status
+            ;;
+        11)
             echo -e "${GREEN}👋 Goodbye! Thank you for using Git Automation Tool!${NC}"
             exit 0
             ;;
         *)
-            echo -e "${RED}❌ Invalid option! Please choose 1-10.${NC}"
+            echo -e "${RED}❌ Invalid option! Please choose 1-11.${NC}"
             ;;
     esac
     
