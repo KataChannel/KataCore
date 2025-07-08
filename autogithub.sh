@@ -51,8 +51,9 @@ function show_menu() {
     echo -e "${PURPLE}│${NC} ${CYAN}5.${NC} 🌿 Create and switch to new branch             ${PURPLE}│${NC}"
     echo -e "${PURPLE}│${NC} ${CYAN}6.${NC} 🔀 Merge branch into current                   ${PURPLE}│${NC}"
     echo -e "${PURPLE}│${NC} ${CYAN}7.${NC} 📋 List all branches                           ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${CYAN}8.${NC} 📊 Show repository status                      ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${CYAN}9.${NC} 🚪 Exit application                            ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}8.${NC} 🗑️  Remove branch (local/remote)               ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}9.${NC} 📊 Show repository status                      ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${CYAN}10.${NC} 🚪 Exit application                           ${PURPLE}│${NC}"
     echo -e "${PURPLE}└─────────────────────────────────────────────────────────┘${NC}"
 }
 
@@ -271,6 +272,114 @@ function list_branches() {
     git branch -r | sed 's/^/   /'
 }
 
+function remove_branch() {
+    echo -e "${BLUE}🗑️  REMOVE BRANCH (LOCAL/REMOTE)${NC}"
+    echo -e "${YELLOW}─────────────────────────────────${NC}"
+    
+    current_branch=$(git branch --show-current)
+    echo -e "${BLUE}📍 Current branch: $current_branch${NC}"
+    echo ""
+    
+    echo -e "${CYAN}📋 Available local branches:${NC}"
+    git branch | grep -v "^*" | sed 's/^/   /'
+    echo ""
+    
+    echo -e "${CYAN}🌐 Available remote branches:${NC}"
+    git branch -r | sed 's/^/   /'
+    echo ""
+    
+    echo -e "${CYAN}🔧 Choose removal type:${NC}"
+    echo -e "${YELLOW}   1) Remove local branch only${NC}"
+    echo -e "${YELLOW}   2) Remove remote branch only${NC}"
+    echo -e "${YELLOW}   3) Remove both local and remote branch${NC}"
+    echo -n "➤ "
+    read -r choice
+    
+    echo -e "${CYAN}🏷️  Enter branch name to remove:${NC}"
+    echo -n "➤ "
+    read -r branch_name
+    
+    if [ -z "$branch_name" ]; then
+        echo -e "${RED}❌ Branch name cannot be empty!${NC}"
+        return 1
+    fi
+    
+    if [ "$branch_name" = "$current_branch" ]; then
+        echo -e "${RED}❌ Cannot remove current branch! Switch to another branch first.${NC}"
+        return 1
+    fi
+    
+    case $choice in
+        1)
+            echo -e "${RED}⚠️  This will permanently delete the local branch '$branch_name'!${NC}"
+            echo -e "${CYAN}Are you sure? (y/N):${NC}"
+            echo -n "➤ "
+            read -r confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                echo -e "${YELLOW}🔄 Removing local branch '$branch_name'...${NC}"
+                if git branch -D "$branch_name"; then
+                    echo -e "${GREEN}✅ Local branch '$branch_name' removed successfully!${NC}"
+                else
+                    echo -e "${RED}❌ Failed to remove local branch. Branch may not exist.${NC}"
+                fi
+            else
+                echo -e "${BLUE}💡 Operation cancelled.${NC}"
+            fi
+            ;;
+        2)
+            echo -e "${RED}⚠️  This will permanently delete the remote branch '$branch_name'!${NC}"
+            echo -e "${CYAN}Are you sure? (y/N):${NC}"
+            echo -n "➤ "
+            read -r confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                echo -e "${YELLOW}🔄 Removing remote branch '$branch_name'...${NC}"
+                if git push origin --delete "$branch_name"; then
+                    echo -e "${GREEN}✅ Remote branch '$branch_name' removed successfully!${NC}"
+                else
+                    echo -e "${RED}❌ Failed to remove remote branch. Branch may not exist or check permissions.${NC}"
+                fi
+            else
+                echo -e "${BLUE}💡 Operation cancelled.${NC}"
+            fi
+            ;;
+        3)
+            echo -e "${RED}⚠️  This will permanently delete both local and remote branch '$branch_name'!${NC}"
+            echo -e "${CYAN}Are you sure? (y/N):${NC}"
+            echo -n "➤ "
+            read -r confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                echo -e "${YELLOW}🔄 Removing local branch '$branch_name'...${NC}"
+                local_success=false
+                remote_success=false
+                
+                if git branch -D "$branch_name"; then
+                    echo -e "${GREEN}✅ Local branch '$branch_name' removed successfully!${NC}"
+                    local_success=true
+                else
+                    echo -e "${RED}❌ Failed to remove local branch.${NC}"
+                fi
+                
+                echo -e "${YELLOW}🔄 Removing remote branch '$branch_name'...${NC}"
+                if git push origin --delete "$branch_name"; then
+                    echo -e "${GREEN}✅ Remote branch '$branch_name' removed successfully!${NC}"
+                    remote_success=true
+                else
+                    echo -e "${RED}❌ Failed to remove remote branch.${NC}"
+                fi
+                
+                if [ "$local_success" = true ] && [ "$remote_success" = true ]; then
+                    echo -e "${GREEN}✅ Both local and remote branches removed successfully!${NC}"
+                fi
+            else
+                echo -e "${BLUE}💡 Operation cancelled.${NC}"
+            fi
+            ;;
+        *)
+            echo -e "${RED}❌ Invalid choice!${NC}"
+            ;;
+    esac
+}
+
 function show_status() {
     echo -e "${BLUE}📊 REPOSITORY STATUS${NC}"
     echo -e "${YELLOW}───────────────────${NC}"
@@ -294,7 +403,7 @@ while true; do
     show_header
     show_menu
     echo ""
-    echo -e "${CYAN}Choose an option (1-9):${NC}"
+    echo -e "${CYAN}Choose an option (1-10):${NC}"
     echo -n "➤ "
     read -r choice
     
@@ -322,14 +431,17 @@ while true; do
             list_branches
             ;;
         8)
-            show_status
+            remove_branch
             ;;
         9)
+            show_status
+            ;;
+        10)
             echo -e "${GREEN}👋 Goodbye! Thank you for using Git Automation Tool!${NC}"
             exit 0
             ;;
         *)
-            echo -e "${RED}❌ Invalid option! Please choose 1-9.${NC}"
+            echo -e "${RED}❌ Invalid option! Please choose 1-10.${NC}"
             ;;
     esac
     
