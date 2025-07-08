@@ -95,13 +95,18 @@ function git_push() {
         return 1
     fi
     
-    echo -e "${CYAN}💬 Enter commit message:${NC}"
+    # Generate default commit message with timestamp
+    default_message="Update: $(date '+%Y-%m-%d %H:%M:%S')"
+    
+    echo -e "${CYAN}💬 Enter commit message (press Enter for default):${NC}"
+    echo -e "${YELLOW}   Default: $default_message${NC}"
     echo -n "➤ "
     read -r message
     
+    # Use default message if user input is empty
     if [ -z "$message" ]; then
-        echo -e "${RED}❌ Commit message cannot be empty!${NC}"
-        return 1
+        message="$default_message"
+        echo -e "${BLUE}💡 Using default commit message: $message${NC}"
     fi
     
     echo -e "${YELLOW}🔄 Creating commit...${NC}"
@@ -130,6 +135,8 @@ function git_push() {
         echo -e "${RED}❌ Commit failed. Please check your changes.${NC}"
     fi
 }
+
+
 
 function git_pull() {
     echo -e "${BLUE}⬇️  PULL FROM REMOTE REPOSITORY${NC}"
