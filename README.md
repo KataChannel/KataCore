@@ -1,29 +1,145 @@
-# 🚀 KataCore Enterprise Platform
+# 🚀 KataCore - Advanced Full-Stack Development Platform
 
 <div align="center">
 
-**Production-ready full-stack platform with automated deployment & Human Resource Management**
+![KataCore Logo](https://via.placeholder.com/200x80/4A90E2/FFFFFF?text=KataCore)
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/chikiet/KataCore)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/your-org/KataCore)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Bun](https://img.shields.io/badge/bun-1.0+-yellow.svg)](https://bun.sh)
-[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://docker.com)
-[![Next.js](https://img.shields.io/badge/next.js-15.3.5-black.svg)](https://nextjs.org)
-[![NestJS](https://img.shields.io/badge/nestjs-11.1.3-red.svg)](https://nestjs.com)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://docker.com)
+[![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-[🚀 Quick Start](#-quick-start) • 
-[📖 Documentation](#-documentation) • 
-[🌟 Features](#-features) • 
-[🎯 Live Demo](#-live-demo) • 
-[🤝 Contributing](#-contributing)
+**Nền tảng phát triển full-stack hiện đại với Next.js, NestJS, và Docker**
+
+[🚀 Quick Start](#quick-start) •
+[📖 Documentation](#documentation) •
+[🛠️ Development](#development) •
+[🚢 Deployment](#deployment) •
+[🤝 Contributing](#contributing)
 
 </div>
 
----
+## ✨ Tính năng nổi bật
+
+- 🎯 **Full-Stack TypeScript**: Next.js + NestJS + Prisma
+- 🐳 **Docker Ready**: Production-ready containerization
+- 🚀 **Auto Deployment**: Automated deployment scripts với SSL
+- 📱 **Responsive Design**: Mobile-first responsive UI
+- 🔐 **Authentication**: JWT-based auth với role management
+- 🗄️ **Database**: PostgreSQL với Prisma ORM
+- 📊 **Monitoring**: Built-in health checks và logging
+- 🔄 **CI/CD**: Automated Git workflow
+- 🌐 **Multi-Environment**: Dev, Staging, Production configs
+
+## 🏗️ Kiến trúc hệ thống
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend       │    │   Database      │
+│   (Next.js)     │◄──►│   (NestJS)      │◄──►│   (PostgreSQL)  │
+│   Port: 3000    │    │   Port: 3001    │    │   Port: 5432    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+         ┌─────────────────┐    ┌─────────────────┐
+         │   Redis Cache   │    │   MinIO S3      │
+         │   Port: 6379    │    │   Port: 9000    │
+         └─────────────────┘    └─────────────────┘
+```
+
+## 🚀 Quick Start Scripts
+
+KataCore includes powerful automation scripts to streamline your development and deployment workflow.
+
+### 🔧 Main Deployment Script (`deploy-remote.sh`)
+
+Deploy your application to any server with a single command:
+
+```bash
+# Interactive deployment (recommended for beginners)
+chmod +x deploy-remote.sh
+./deploy-remote.sh --interactive
+
+# Quick full deployment with SSL
+./deploy-remote.sh 116.118.48.143 yourdomain.com
+
+# Simple deployment (no SSL, IP only)
+./deploy-remote.sh --simple 192.168.1.100
+
+# Production deployment with all services
+./deploy-production.sh 116.118.48.143 yourdomain.com
+```
+
+**Features:**
+- ✅ **One-click deployment** to any Linux server
+- ✅ **Automatic SSL** with Let's Encrypt certificates
+- ✅ **Dynamic service configuration** (API, Database, Redis, MinIO, etc.)
+- ✅ **Health checks** and monitoring
+- ✅ **Interactive mode** for beginners
+- ✅ **Cleanup and rollback** capabilities
+
+### 🔄 Git Automation Script (`autopush.sh`)
+
+Automate your Git workflow with smart commit messages and branch management:
+
+```bash
+# Auto-commit and push with smart messages
+chmod +x autopush.sh
+./autopush.sh
+
+# Merge current branch to main with auto-detection
+./autopush.sh --merge
+
+# Custom commit message
+./autopush.sh "feat: add user authentication system"
+
+# Merge to specific branch
+./autopush.sh --main-branch develop --merge "release: v2.1.0"
+```
+
+**Features:**
+- ✅ **Smart commit messages** based on file changes
+- ✅ **Dynamic main branch detection** (main/master/develop/dev)
+- ✅ **Automatic merging** with conflict handling
+- ✅ **Branch cleanup** after merge
+- ✅ **Change analysis** and file type detection
+
+### 📖 Complete Documentation
+
+| Document | Description |
+|----------|-------------|
+| **[🚀 Deployment Guide](DEPLOYMENT-README.md)** | Complete deployment instructions, configurations, and troubleshooting |
+| **[🔄 AutoPush Guide](AUTOPUSH-README.md)** | Git automation documentation with examples |
+| **[📚 Full Documentation](docs/)** | Comprehensive project documentation and API references |
+| **[🏗️ Architecture Guide](docs/guides/ARCHITECTURE.md)** | System architecture and design patterns |
+| **[⚙️ Development Guide](docs/guides/DEVELOPMENT.md)** | Local development setup and guidelines |
+
+## 🛠️ Prerequisites
+
+Before using the deployment scripts, ensure you have:
+
+- **Server Access**: SSH access to a Linux server (Ubuntu 20.04+ recommended)
+- **Domain Name**: For SSL deployment (optional for simple deployment)
+- **SSH Keys**: Properly configured SSH key authentication
+- **Git Repository**: Your code should be in a Git repository
+
+## 🌟 Key Features at a Glance
+
+| Feature | Description | Script |
+|---------|-------------|--------|
+| **One-Click Deploy** | Deploy entire stack to any server | `deploy-remote.sh` |
+| **Auto SSL** | Automatic Let's Encrypt certificates | `deploy-remote.sh --full` |
+| **Smart Commits** | AI-powered commit message generation | `autopush.sh` |
+| **Branch Management** | Automatic merge and cleanup | `autopush.sh --merge` |
+| **Health Monitoring** | Built-in service health checks | All deployment scripts |
+| **Multi-Environment** | Support for dev/staging/production | `deploy-production.sh` |
+| **Interactive Mode** | Guided setup for beginners | `--interactive` flag |
+| **Cleanup Tools** | Safe removal and rollback | `--cleanup` flag |
 
 ## 📋 Overview
 
-**KataCore** is a modern enterprise platform that combines cutting-edge technology with practical business solutions. Built with Next.js 15, React 19, NestJS 11, and powered by Bun.js, it delivers a complete full-stack experience with automated deployment capabilities.
+**KataCore** là nền tảng phát triển full-stack hiện đại được thiết kế để đơn giản hóa quy trình phát triển và triển khai ứng dụng web. Với hai script tự động hóa chính `deploy-remote.sh` và `autopush.sh`, KataCore giúp developers tập trung vào việc phát triển tính năng thay vì lo lắng về infrastructure.
 
 ### 🎯 What Makes KataCore Special
 
@@ -33,41 +149,101 @@
 - **🔒 Enterprise Security** - JWT authentication, role-based permissions, and automated security configurations
 - **🐳 Cloud-Ready Architecture** - Containerized services with PostgreSQL, Redis, MinIO, and monitoring
 
+### ⚡ Quick Deploy Example
+
+Deploy your full-stack application in under 5 minutes:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/KataChannel/KataCore.git
+cd KataCore
+
+# 2. Deploy to your server (replace with your details)
+chmod +x deploy-remote.sh
+./deploy-remote.sh 116.118.48.143 myapp.com
+
+# 3. Your application is now live! 🎉
+```
+
+**What you get instantly:**
+- 🌐 **Frontend**: `https://myapp.com` - Next.js application
+- 🚀 **API**: `https://api.myapp.com` - NestJS backend  
+- 📊 **Database Admin**: `https://pgadmin.myapp.com` - pgAdmin interface
+- 📦 **Storage**: `https://minio.myapp.com` - Object storage
+- 🔒 **SSL Certificates** - Automatic Let's Encrypt setup
+- 🛡️ **Security** - Firewall, authentication, and secure configurations
+
+All services are automatically configured, secured, and monitored!
+
 ---
 
-## 🌟 Features
+## 🚀 Quick Start
 
-### 🏢 Human Resource Management System
-- **👥 Employee Lifecycle Management** - Complete CRUD operations with status tracking (Active, Probation, Leave, Terminated)
-- **🏛️ Organizational Structure** - Multi-level departments with hierarchical management and budget tracking
-- **🔑 Role-Based Access Control** - Granular permissions system with manager overrides and department-specific access
-- **📊 Comprehensive Data Management** - Automated seeding with 7 employees, 3 departments, and realistic test data
-- **🔐 Secure Authentication** - JWT-based login with bcrypt password hashing and session management
-- **📱 Modern Interface** - React-based UI with Material-UI components and responsive design
+### 1. Clone & Setup
 
-### 🚀 Platform Infrastructure
-- **⚛️ Next.js 15 Frontend** - Latest React 19 with Turbopack, App Router, and TypeScript
-- **🏗️ NestJS 11 Backend** - Scalable API with Prisma ORM, dependency injection, and modular architecture
-- **⚡ Bun.js Runtime** - Ultra-fast JavaScript runtime for both frontend and backend development
-- **🗄️ Production Database** - PostgreSQL with Redis caching and MinIO object storage
-- **🔧 Development Tools** - Hot reloading, TypeScript support, ESLint, and automated testing
+```bash
+# Clone repository
+git clone https://github.com/your-org/KataCore.git
+cd KataCore
 
-### 🚀 Automated Deployment System
-- **🎯 One-Command Deploy** - Deploy to any server with single command
-- **🔒 Automated SSL** - Let's Encrypt certificates with auto-renewal
-- **🐳 Docker Orchestration** - Multi-container setup with health checks
-- **🌐 Nginx Proxy** - Reverse proxy with subdomain routing
-- **📊 Monitoring Stack** - Optional Grafana and Prometheus integration
-- **🔐 Security Hardening** - Automated firewall, SSH key management, and system updates
-- **🗄️ PostgreSQL Database** - Production-ready with Redis caching and MinIO object storage
-- **🐳 Docker Orchestration** - Complete containerized stack with health monitoring and auto-restart
+# Cấp quyền thực thi cho scripts
+chmod +x deploy-remote.sh autopush.sh
 
-### 🎯 Deployment & DevOps
-- **🔄 Automated Deployment** - One-command deployment with SSH key generation and environment setup
-- **🔒 SSL Certificate Management** - Automatic Let's Encrypt certificates with domain configuration
-- **📊 Health Monitoring** - Built-in health checks, logging, and service status monitoring
-- **🛡️ Security-First Design** - Auto-generated passwords, secure configurations, and production hardening
-- **🌐 Multi-Environment Support** - Development, staging, and production configurations with environment-specific settings
+# Copy environment file
+cp .env.example .env
+```
+
+### 2. Local Development
+
+```bash
+# Start với Docker Compose
+docker compose up -d
+
+# Hoặc development mode
+cd site && npm run dev    # Frontend: http://localhost:3000
+cd api && npm run dev     # Backend: http://localhost:3001
+```
+
+### 3. Production Deployment
+
+```bash
+# Interactive deployment (khuyến nghị cho lần đầu)
+./deploy-remote.sh --interactive
+
+# Quick deployment
+./deploy-remote.sh YOUR_SERVER_IP YOUR_DOMAIN.COM
+
+# Simple deployment (no SSL)
+./deploy-remote.sh --simple YOUR_SERVER_IP
+```
+
+## 🛠️ Development
+
+### Tech Stack
+
+#### Frontend (site/)
+- **Framework**: Next.js 14+ (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: Custom component library
+- **State Management**: React Context + Hooks
+- **Auth**: NextAuth.js
+
+#### Backend (api/)
+- **Framework**: NestJS
+- **Language**: TypeScript  
+- **ORM**: Prisma
+- **Database**: PostgreSQL
+- **Cache**: Redis
+- **Auth**: JWT + Passport
+- **Validation**: Class Validator
+
+#### Infrastructure
+- **Containerization**: Docker + Docker Compose
+- **Web Server**: Nginx (production)
+- **SSL**: Let's Encrypt (automatic)
+- **Storage**: MinIO (S3-compatible)
+- **Monitoring**: Built-in health checks
 
 ---
 
@@ -87,54 +263,159 @@
 - **Docker** & **Docker Compose** ([Install Docker](https://docs.docker.com/get-docker/))
 - **Node.js** >= 18.0.0 (for compatibility)
 
-### 1. Clone & Install
-```bash
-git clone https://github.com/chikiet/KataCore.git
-cd KataCore
-bun install:all
+### Project Structure
+
+```
+KataCore/
+├── 📁 api/                 # NestJS backend
+│   ├── src/
+│   ├── prisma/
+│   ├── Dockerfile
+│   └── package.json
+├── 📁 site/                # Next.js frontend  
+│   ├── src/
+│   ├── public/
+│   ├── Dockerfile
+│   └── package.json
+├── 📁 configs/             # Configuration files
+├── 📁 docs/                # Documentation
+├── 📁 scripts/             # Utility scripts
+├── 🚀 deploy-remote.sh     # Production deployment
+├── 📝 autopush.sh          # Git automation
+└── 🐳 docker-compose.yml   # Docker orchestration
 ```
 
-### 2. Environment Setup
-```bash
-# Copy environment templates
-cp site/.env.example site/.env.local
-cp api/.env.example api/.env
+### Development Workflow
 
-# Generate security keys
-bun run security:generate
+#### 1. Feature Development
+```bash
+# Tạo feature branch
+git checkout -b feature/new-feature
+
+# Development...
+# Code, test, commit
+
+# Auto push với autopush.sh
+./autopush.sh "feat: implement new feature"
 ```
 
-### 3. Database Setup
+#### 2. Merge to Main
 ```bash
-# Start database services
-bun run docker:up
+# Auto merge với dynamic main branch detection
+./autopush.sh --merge "feat: add new feature"
 
-# Setup database schema
-cd api && bun run prisma:migrate
-cd api && bun run prisma:seed
+# Hoặc merge vào branch cụ thể
+./autopush.sh --main-branch develop --merge
 ```
 
-### 4. Start Development
+#### 3. Deployment
 ```bash
-# Start both frontend and backend
-bun run dev
+# Deploy to staging
+./deploy-remote.sh STAGING_IP staging.domain.com
 
-# Or start individually
-bun run dev:site  # Frontend on http://localhost:3000
-bun run dev:api   # Backend on http://localhost:3001
+# Deploy to production  
+./deploy-remote.sh PROD_IP domain.com
 ```
 
-### 5. Production Deployment
+## 🚢 Deployment
+
+### Deployment Options
+
+#### 1. Interactive Mode (Khuyến nghị)
 ```bash
-# Quick deployment to server
-./quick-deploy-enhanced.sh
-
-# Or interactive deployment wizard
-./deploy-wizard.sh
-
-# Or professional deployment with options
-./deploy-production.sh --help
+./deploy-remote.sh --interactive
 ```
+Hướng dẫn từng bước qua CLI wizard.
+
+#### 2. Simple Deployment (IP only)
+```bash
+./deploy-remote.sh --simple 116.118.48.143
+```
+- Không cần domain
+- Truy cập qua IP:PORT
+- HTTP only (no SSL)
+
+#### 3. Full Deployment (Domain + SSL)
+```bash
+./deploy-remote.sh 116.118.48.143 kataoffical.online
+```
+- Auto SSL với Let's Encrypt
+- Nginx reverse proxy
+- Subdomains support
+
+#### 4. Custom Services
+```bash
+./deploy-remote.sh \
+  --install-api \
+  --install-postgres \
+  --install-redis \
+  --install-minio \
+  --nginxapi \
+  116.118.48.143 domain.com
+```
+
+### Scripts & Automation
+
+#### autopush.sh - Git Automation
+Automated Git workflow với smart features:
+
+```bash
+# Basic usage
+./autopush.sh                           # Auto commit + push
+./autopush.sh "feat: new feature"       # Custom message
+
+# Merge workflow  
+./autopush.sh --merge                   # Merge to main
+./autopush.sh --merge "release v2.0"    # Custom merge message
+./autopush.sh --main-branch dev --merge # Target specific branch
+```
+
+**Features:**
+- ✅ Dynamic main branch detection (main/master/develop/dev)
+- ✅ Smart commit message generation
+- ✅ Safe merge with conflict detection
+- ✅ Branch cleanup options
+- ✅ Git repository validation
+
+#### deploy-remote.sh - Production Deployment
+One-command production deployment:
+
+```bash
+# Interactive mode
+./deploy-remote.sh -i
+
+# Quick modes
+./deploy-remote.sh --simple IP           # HTTP only
+./deploy-remote.sh IP DOMAIN             # HTTPS + SSL
+
+# Advanced options
+./deploy-remote.sh \
+  --user ubuntu \
+  --key ~/.ssh/custom.pem \
+  --install-api \
+  --install-postgres \
+  --nginxapi \
+  IP DOMAIN
+```
+
+**Features:**
+- ✅ Automated server preparation
+- ✅ Docker & Docker Compose installation
+- ✅ SSL certificates với Let's Encrypt
+- ✅ Nginx reverse proxy setup
+- ✅ Firewall configuration
+- ✅ Health checks
+- ✅ Service monitoring
+
+## 📖 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [🚀 DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Hướng dẫn deploy chi tiết |
+| [⚡ QUICK-START.md](QUICK-START.md) | Hướng dẫn bắt đầu nhanh |
+| [🏗️ DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) | Hướng dẫn development |
+| [🔧 API Documentation](docs/api/) | API reference và examples |
+| [🐛 TROUBLESHOOTING.md](docs/troubleshooting/TROUBLESHOOTING.md) | Xử lý sự cố |
 
 ---
 
@@ -182,57 +463,106 @@ Employee User:
 - Password: Employee123!
 ```
 
-### 📱 Test Features
-- **Employee Management** - Create, update, and manage employee records
-- **Department Structure** - Organize employees into departments with hierarchies
-- **Role-Based Access** - Test different permission levels
-- **Authentication Flow** - Login/logout and session management
-- **API Integration** - Explore REST API endpoints
+## 🔧 Management Commands
+
+### Kiểm tra trạng thái deployment
+
+```bash
+# Kiểm tra containers đang chạy
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose ps'
+
+# Xem logs
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose logs'
+
+# Kiểm tra resource usage
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'docker stats --no-stream'
+```
+
+### Restart services
+
+```bash
+# Restart tất cả services
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose restart'
+
+# Restart service cụ thể
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose restart api'
+```
+
+### Update deployment
+
+```bash
+# Re-deploy với code mới
+./deploy-remote.sh --force-regen SERVER_IP DOMAIN
+
+# Update chỉ API
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose build api && docker compose up -d api'
+```
+
+## 🔐 Security
+
+### Security Features
+- 🔒 JWT authentication
+- 🛡️ Rate limiting
+- 🔐 Input validation
+- 🌐 CORS protection
+- 🔑 Environment variable encryption
+- 🚫 SQL injection prevention
+
+### Production Security
+- ✅ SSL/TLS encryption
+- ✅ Firewall configuration
+- ✅ Secure password generation
+- ✅ Container isolation
+- ✅ Regular security updates
+
+## 🤝 Contributing
+
+### Development Setup
+1. Fork repository
+2. Create feature branch
+3. Implement changes
+4. Write tests
+5. Submit pull request
+
+### Commit Convention
+```bash
+feat: add new feature
+fix: resolve bug
+docs: update documentation  
+style: formatting changes
+refactor: code restructuring
+test: add tests
+chore: maintenance tasks
+```
+
+## 📞 Support & Community
+
+### Getting Help
+- 📖 [Documentation](docs/)
+- 🐛 [Issue Tracker](https://github.com/your-org/KataCore/issues)
+- 💬 [Discussions](https://github.com/your-org/KataCore/discussions)
+- 📧 Email: support@katacore.com
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Next.js team for the amazing framework
+- NestJS team for the powerful backend framework  
+- Docker team for containerization technology
+- Open source community
 
 ---
 
-## 🏗️ Architecture
+<div align="center">
 
-### 🔧 Technology Stack
-```
-Frontend (site/)
-├── Next.js 15 (App Router)
-├── React 19 (Server Components)
-├── TypeScript 5.7
-├── Tailwind CSS 4.0
-├── Material-UI 7.0
-└── Bun.js Runtime
+**Made with ❤️ by the KataCore Team**
 
-Backend (api/)
-├── NestJS 11 (Modular Architecture)
-├── Prisma ORM (Database)
-├── JWT Authentication
-├── TypeScript 5.7
-├── Swagger/OpenAPI
-└── Bun.js Runtime
+[⬆ Back to top](#-katacore---advanced-full-stack-development-platform)
 
-Infrastructure
-├── PostgreSQL 15 (Database)
-├── Redis 7 (Caching)
-├── MinIO (Object Storage)
-├── Docker Compose
-├── Nginx (Reverse Proxy)
-└── Let's Encrypt (SSL)
-```
-
-### 🏛️ Project Structure
-```
-KataCore/
-├── 📁 site/                  # Next.js Frontend
-│   ├── src/app/               # App Router pages
-│   ├── src/components/        # React components
-│   ├── src/lib/              # Utilities & configs
-│   └── prisma/               # Database client
-├── 📁 api/                   # NestJS Backend
-│   ├── src/                  # Source code
-│   ├── prisma/               # Database schema
-│   └── dist/                 # Build output
-├── 📁 deployment/            # Deployment scripts
+</div>
 │   ├── scripts/              # Automation scripts
 │   ├── configs/              # Server configurations
 │   └── templates/            # Config templates
@@ -703,3 +1033,6 @@ curl http://localhost:3001/health   # Test API
 </div>
 
 
+
+
+Phong cách Website monochrome IU có darkmode,reponsive

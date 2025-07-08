@@ -1,375 +1,291 @@
 #!/bin/bash
 
-# 🚀 KataCore Auto Git Push - Enhanced Version
-# Improved autopush with better commit messages and validation
-# Version: 2.1.0 - Dynamic main branch support
+# Set variables
+SSH_USER="root"
+SERVER_IP="116.118.48.143"
+PROJECT_NAME="katacore"
+TEMP_DIR="/tmp/deploy_$(date +%s)"
 
-set -euo pipefail
+# Colors for better display
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-# Colors for output
-readonly GREEN='\033[0;32m'
-readonly BLUE='\033[0;34m'
-readonly YELLOW='\033[1;33m'
-readonly RED='\033[0;31m'
-readonly PURPLE='\033[0;35m'
-readonly NC='\033[0m'
-
-# Functions
-log() { echo -e "${GREEN}[$(date +'%H:%M:%S')]${NC} $1"; }
-info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
-success() { echo -e "${GREEN}✅ $1${NC}"; }
-warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
-error() { echo -e "${RED}❌ $1${NC}"; }
-
-# Banner
-show_banner() {
-    echo -e "${PURPLE}"
-    cat << 'EOF'
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                    🚀 KataCore Auto Git Push v2.1                           ║
-║                                                                              ║
-║    Enhanced version with dynamic main branch and merge support              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-EOF
-    echo -e "${NC}"
+# Function for logging with colors
+log() {
+    echo -e "${CYAN}📋 $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
 }
 
-# Show help
-show_help() {
-    echo "Usage: $0 [OPTIONS] [COMMIT_MESSAGE]"
-    echo
-    echo "Options:"
-    echo "  --merge         Merge current branch to main/master branch"
-    echo "  --main-branch   Specify main branch name (default: auto-detect)"
-    echo "  --help, -h      Show this help message"
-    echo
-    echo "Examples:"
-    echo "  $0                                    # Auto-commit and push to current branch"
-    echo "  $0 \"feat: add new feature\"           # Commit with custom message"
-    echo "  $0 --merge                            # Merge to main branch"
-    echo "  $0 --merge \"release v2.0\"            # Merge to main with custom message"
-    echo "  $0 --main-branch develop --merge      # Merge to specific branch"
+success() {
+    echo -e "${GREEN}✅ $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
 }
 
-# Check if we're in a git repository
-check_git_repo() {
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        error "Not in a git repository!"
-        exit 1
-    fi
+error() {
+    echo -e "${RED}❌ $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
+    exit 1
 }
 
-# Generate smart commit message based on changes
-generate_commit_message() {
-    local modified_files=$(git diff --name-only | wc -l)
-    local staged_files=$(git diff --name-only --cached | wc -l)
-    local new_files=$(git status --porcelain | grep "^??" | wc -l)
-    local deleted_files=$(git status --porcelain | grep "^.D" | wc -l)
-    
-    # Get most changed file types
-    local changed_extensions=$(git diff --name-only | sed 's/.*\.//' | sort | uniq -c | sort -nr | head -3 | awk '{print $2}' | tr '\n' ' ')
-    
-    # Determine primary change type
-    if [ "$new_files" -gt 0 ] && [ "$modified_files" -gt 0 ]; then
-        echo "feat: Add $new_files new files and update $modified_files files"
-    elif [ "$new_files" -gt 0 ]; then
-        echo "feat: Add $new_files new files ($changed_extensions)"
-    elif [ "$deleted_files" -gt 0 ]; then
-        echo "refactor: Remove $deleted_files files and update $modified_files files"
-    elif [ "$modified_files" -gt 5 ]; then
-        echo "refactor: Major updates to $modified_files files ($changed_extensions)"
-    elif [ "$modified_files" -gt 0 ]; then
-        echo "update: Improve $modified_files files ($changed_extensions)"
-    else
-        echo "chore: Project maintenance and cleanup"
-    fi
+warning() {
+    echo -e "${YELLOW}⚠️  $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
 }
 
-# Show git status with colors
-show_status() {
-    echo -e "${BLUE}📊 Repository Status:${NC}"
-    echo
-    git status --short --branch
-    echo
-    
-    # Show file count summary
-    local modified=$(git diff --name-only | wc -l)
-    local staged=$(git diff --name-only --cached | wc -l)
-    local untracked=$(git status --porcelain | grep "^??" | wc -l)
-    
-    echo -e "${YELLOW}📋 Summary:${NC}"
-    echo "  Modified: $modified files"
-    echo "  Staged: $staged files"
-    echo "  Untracked: $untracked files"
-    
-    # Show detected main branch
-    local main_branch=$(detect_main_branch)
-    echo "  Main branch: $main_branch"
-    echo
+info() {
+    echo -e "${BLUE}ℹ️  $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
 }
 
-# Detect main branch dynamically
-detect_main_branch() {
-    local main_branch=""
-    
-    # Check for common main branch names in order of preference
-    local branch_candidates=("main" "master" "develop" "dev")
-    
-    for branch in "${branch_candidates[@]}"; do
-        if git show-ref --verify --quiet "refs/heads/$branch"; then
-            main_branch="$branch"
-            break
-        fi
-    done
-    
-    # If no local branch found, check remote branches
-    if [ -z "$main_branch" ]; then
-        for branch in "${branch_candidates[@]}"; do
-            if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-                main_branch="$branch"
-                info "Found remote branch: origin/$branch"
-                break
-            fi
-        done
-    fi
-    
-    # If still no branch found, check default branch from remote
-    if [ -z "$main_branch" ] && git remote | grep -q origin; then
-        main_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "")
-    fi
-    
-    # Fallback to 'main' if nothing found
-    if [ -z "$main_branch" ]; then
-        main_branch="main"
-        warning "No main branch detected. Using 'main' as default."
-    fi
-    
-    echo "$main_branch"
+progress() {
+    echo -e "${PURPLE}🔄 $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
 }
 
-# Merge to main branch
-merge_to_main() {
-    local commit_msg="$1"
-    local target_branch="$2"
-    local current_branch=$(git branch --show-current)
+# Function to show enhanced menu
+show_menu() {
+    clear
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}                    🚀 KataCore Deployment Tool${NC}"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${YELLOW}Project:${NC} $PROJECT_NAME"
+    echo -e "${YELLOW}Server:${NC} $SSH_USER@$SERVER_IP"
+    echo -e "${YELLOW}Time:${NC} $(date '+%Y-%m-%d %H:%M:%S')"
+    echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
+    echo -e "${BLUE}Deployment Options:${NC}"
+    echo -e "  ${GREEN}1)${NC} 📝 Git commit only"
+    echo -e "  ${GREEN}2)${NC} 🚀 Git commit + Full deployment to server"
+    echo -e "  ${GREEN}3)${NC} 🔄 Deploy only (skip git operations)"
+    echo -e "  ${GREEN}4)${NC} 🧹 Server cleanup only"
+    echo -e "  ${GREEN}5)${NC} 📊 Check server status"
+    echo -e "  ${RED}q)${NC} 👋 Quit"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+}
+
+# Function for enhanced git operations
+git_commit() {
+    progress "Starting git operations..."
     
-    info "Target branch: $target_branch"
-    info "Current branch: $current_branch"
-    
-    # Check if we're already on the target branch
-    if [ "$current_branch" = "$target_branch" ]; then
-        info "Already on target branch '$target_branch'. Proceeding with regular push."
-        return 0
-    fi
-    
-    # Check if target branch exists locally
-    if ! git show-ref --verify --quiet "refs/heads/$target_branch"; then
-        # Check if it exists remotely
-        if git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
-            info "Target branch '$target_branch' exists remotely. Checking it out..."
-            git checkout -b "$target_branch" "origin/$target_branch"
-        else
-            warning "Target branch '$target_branch' doesn't exist. Creating it..."
-            git checkout -b "$target_branch"
-            git push -u origin "$target_branch"
-        fi
-        return 0
-    fi
-    
-    # Commit changes first if there are any
-    if ! git diff-index --quiet HEAD -- || [ $(git status --porcelain | wc -l) -ne 0 ]; then
-        log "Committing changes on $current_branch..."
-        git add .
-        git commit -m "$commit_msg"
+    # Check if there are changes to commit
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        log "📝 Staging all changes..."
+        git add . || error "Failed to stage changes"
         
-        # Push current branch if remote exists
-        if git remote | grep -q origin; then
-            git push origin "$current_branch" 2>/dev/null || git push -u origin "$current_branch"
-        fi
-    fi
-    
-    # Switch to target branch and merge
-    log "Switching to $target_branch branch..."
-    git checkout "$target_branch"
-    
-    # Pull latest changes if remote exists
-    if git remote | grep -q origin; then
-        log "Pulling latest changes from origin/$target_branch..."
-        git pull origin "$target_branch" 2>/dev/null || {
-            warning "Could not pull from origin/$target_branch. Continuing without pull."
-        }
-    fi
-    
-    # Merge current branch
-    log "Merging $current_branch into $target_branch..."
-    if git merge "$current_branch" --no-ff -m "Merge branch '$current_branch' into $target_branch"; then
-        success "Successfully merged $current_branch into $target_branch"
-    else
-        error "Merge failed. Please resolve conflicts manually."
-        exit 1
-    fi
-    
-    # Push to target branch
-    if git remote | grep -q origin; then
-        log "Pushing to origin/$target_branch..."
-        git push origin "$target_branch"
-        success "Successfully pushed to origin/$target_branch"
-    fi
-    
-    # Ask if user wants to delete the feature branch
-    if [ "$current_branch" != "$target_branch" ]; then
-        echo -e "${YELLOW}🗑️  Delete branch '$current_branch'? [y/N]: ${NC}"
-        read -r delete_branch
+        echo -e "${YELLOW}Enter commit message (or press Enter for auto-generated):${NC}"
+        read -p "💬 " commit_message
         
-        if [[ $delete_branch =~ ^[Yy]$ ]]; then
-            git branch -d "$current_branch" 2>/dev/null || git branch -D "$current_branch"
-            if git remote | grep -q origin; then
-                git push origin --delete "$current_branch" 2>/dev/null || {
-                    warning "Could not delete remote branch $current_branch"
-                }
-            fi
-            success "Deleted branch $current_branch"
+        if [ -z "$commit_message" ]; then
+            commit_message="Auto-update $(date '+%Y-%m-%d %H:%M:%S')"
         fi
+        
+        progress "Committing with message: '$commit_message'"
+        git commit -m "$commit_message" || error "Failed to commit changes"
+        
+        progress "Pushing to remote repository..."
+        git push || error "Failed to push to git repository"
+        
+        success "Git operations completed successfully"
+    else
+        warning "No changes detected in git repository"
+        info "Repository is up to date"
     fi
-    
-    return 1  # Indicate that we merged to target branch
 }
 
-# Main execution
-main() {
-    show_banner
+# Function to check server status
+check_server_status() {
+    progress "Checking server connection..."
     
-    # Check if we're in a git repository
-    check_git_repo
-    
-    # Parse arguments
-    local merge_mode=false
-    local commit_msg=""
-    local main_branch=""
-    
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --merge)
-                merge_mode=true
-                shift
-                ;;
-            --main-branch)
-                main_branch="$2"
-                shift 2
-                ;;
-            --help|-h)
-                show_help
-                exit 0
-                ;;
-            *)
-                commit_msg="$*"
-                break
-                ;;
-        esac
-    done
-    
-    # Detect main branch if not specified
-    if [ -z "$main_branch" ]; then
-        main_branch=$(detect_main_branch)
+    if ssh -o ConnectTimeout=10 "$SSH_USER@$SERVER_IP" "echo 'Connection successful'" >/dev/null 2>&1; then
+        success "Server connection established"
+        
+        progress "Checking Docker status on server..."
+        ssh "$SSH_USER@$SERVER_IP" "
+            echo '=== Docker Info ==='
+            docker --version
+            echo ''
+            echo '=== Running Containers ==='
+            docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            echo ''
+            echo '=== System Resources ==='
+            df -h / | tail -1 | awk '{print \"Disk Usage: \" \$5 \" of \" \$2}'
+            free -h | grep '^Mem:' | awk '{print \"Memory Usage: \" \$3 \"/\" \$2}'
+            echo ''
+            echo '=== Project Status ==='
+            if [ -d '/opt/$PROJECT_NAME' ]; then
+                echo 'Project directory exists: ✅'
+                cd /opt/$PROJECT_NAME
+                if [ -f 'docker-compose.yml' ]; then
+                    echo 'Docker compose file exists: ✅'
+                    docker compose ps
+                else
+                    echo 'Docker compose file missing: ❌'
+                fi
+            else
+                echo 'Project directory missing: ❌'
+            fi
+        "
+    else
+        error "Cannot connect to server. Please check connection."
     fi
+}
+
+# Function for enhanced deployment
+deploy_to_server() {
+    progress "Initializing deployment process..."
     
-    log "Checking repository status..."
+    # Create temp directory
+    mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
+    success "Temporary directory created: $TEMP_DIR"
+
+    progress "📤 Preparing project files for transfer..."
+    # Show what will be excluded
+    info "Excluding: .git, node_modules, *.log, .env, *.md, *.sh"
     
-    # Show current status
-    show_status
+    # Copy all project files to temp directory
+    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
     
-    # Check for changes
-    if git diff-index --quiet HEAD -- && [ $(git status --porcelain | wc -l) -eq 0 ]; then
-        if [ "$merge_mode" = true ]; then
-            info "No changes to commit, but proceeding with merge to $main_branch..."
+    # Show transfer size
+    size=$(du -sh "$TEMP_DIR" | cut -f1)
+    info "Transfer size: $size"
+
+    progress "🌐 Transferring files to remote server..."
+    rsync -avz --progress "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    
+    progress "🔧 Configuring environment on remote server..."
+    ssh "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME/ && if [ -f .env.prod ]; then mv .env.prod .env && echo 'Environment file configured'; else echo 'No .env.prod found'; fi" || error "Failed to configure environment"
+    
+    # Cleanup temp directory
+    rm -rf "$TEMP_DIR"
+    success "Local cleanup completed"
+
+    server_cleanup
+    deploy_application
+}
+
+# Enhanced server cleanup function
+server_cleanup() {
+    progress "🧹 Starting comprehensive server cleanup..."
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        echo '🛑 Stopping existing containers...'
+        cd /opt/$PROJECT_NAME/ && docker compose down --remove-orphans
+        
+        echo '🗑️  Cleaning Docker system...'
+        echo 'Before cleanup:'
+        docker system df
+        
+        docker system prune -af --volumes
+        docker builder prune -af
+        docker image prune -af
+        docker container prune -f
+        docker volume prune -f
+        docker network prune -f
+        
+        echo 'After cleanup:'
+        docker system df
+        
+        echo '💾 Clearing system caches...'
+        sync && echo 3 > /proc/sys/vm/drop_caches
+        
+        echo '🗂️  Cleaning temporary files...'
+        rm -rf /tmp/* 2>/dev/null || true
+        
+        echo '📋 Cleaning old logs...'
+        find /var/log -name '*.log' -type f -mtime +7 -delete 2>/dev/null || true
+        
+        echo '📦 Cleaning package cache...'
+        apt-get clean 2>/dev/null || yum clean all 2>/dev/null || true
+        
+        echo '✅ Server cleanup completed'
+    " || error "Failed to cleanup server"
+
+    success "Server cleanup completed successfully"
+}
+
+# Enhanced deployment function
+deploy_application() {
+    progress "🚀 Deploying application..."
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        echo '📋 Current directory: \$(pwd)'
+        echo '📄 Available files:'
+        ls -la
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo '🐳 Starting Docker Compose deployment...'
+            docker compose -f 'docker-compose.yml' up -d --build
+            
+            echo '⏳ Waiting for containers to start...'
+            sleep 10
+            
+            echo '📊 Container status:'
+            docker compose ps
+            
+            echo '📋 Container logs (last 20 lines):'
+            docker compose logs --tail=20
         else
-            info "No changes to commit. Repository is clean."
+            echo '❌ docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to deploy application"
+
+    success "🎉 Deployment completed successfully!"
+    info "Your application should now be running on the server"
+}
+
+# Main script with enhanced menu handling
+while true; do
+    show_menu
+    echo -ne "${YELLOW}Enter your choice: ${NC}"
+    read choice
+    echo ""
+    
+    case $choice in
+        1)
+            log "Option 1 selected: Git commit only"
+            git_commit
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        2)
+            log "Option 2 selected: Full deployment"
+            git_commit
+            deploy_to_server
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        3)
+            log "Option 3 selected: Deploy only"
+            warning "Skipping git operations..."
+            deploy_to_server
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        4)
+            log "Option 4 selected: Server cleanup only"
+            server_cleanup
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        5)
+            log "Option 5 selected: Check server status"
+            check_server_status
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        q|Q)
+            echo -e "${GREEN}👋 Thank you for using KataCore Deployment Tool!${NC}"
+            echo -e "${CYAN}Goodbye!${NC}"
             exit 0
-        fi
-    fi
-    
-    # Get commit message if not provided
-    if [ -z "$commit_msg" ]; then
-        if [ "$merge_mode" = true ]; then
-            echo -e "${YELLOW}💬 Enter commit message for merge (or press Enter for auto-generated): ${NC}"
-        else
-            echo -e "${YELLOW}💬 Enter commit message (or press Enter for auto-generated): ${NC}"
-        fi
-        read -r commit_msg
-        
-        if [ -z "$commit_msg" ]; then
-            commit_msg=$(generate_commit_message)
-            info "Auto-generated commit message: $commit_msg"
-        fi
-    fi
-    
-    # Show what will be committed
-    if ! git diff-index --quiet HEAD -- || [ $(git status --porcelain | wc -l) -ne 0 ]; then
-        echo -e "${BLUE}📝 Files to be committed:${NC}"
-        git add . --dry-run
-        echo
-    fi
-    
-    # Confirm action
-    if [ "$merge_mode" = true ]; then
-        echo -e "${YELLOW}🤔 Commit and merge to '$main_branch' with message: '$commit_msg'? [Y/n]: ${NC}"
-    else
-        echo -e "${YELLOW}🤔 Commit with message: '$commit_msg'? [Y/n]: ${NC}"
-    fi
-    read -r confirm
-    
-    if [[ ! $confirm =~ ^[Yy]?$ ]] && [ -n "$confirm" ]; then
-        warning "Operation cancelled by user"
-        exit 0
-    fi
-    
-    # Check if remote exists
-    if git remote | grep -q origin; then
-        info "Remote 'origin' detected"
-    else
-        warning "No 'origin' remote found. Working in local mode."
-    fi
-    
-    # Merge to main or regular push
-    if [ "$merge_mode" = true ]; then
-        merge_to_main "$commit_msg" "$main_branch"
-        merged_to_main=$?
-    else
-        # Regular push to current branch
-        log "Adding all changes..."
-        git add .
-        
-        log "Committing changes..."
-        git commit -m "$commit_msg"
-        
-        local current_branch=$(git branch --show-current)
-        
-        # Push to remote if it exists
-        if git remote | grep -q origin; then
-            log "Pushing to remote repository (branch: $current_branch)..."
-            git push origin "$current_branch" 2>/dev/null || git push -u origin "$current_branch"
-            success "Successfully pushed to origin/$current_branch"
-        else
-            success "Changes committed locally to $current_branch"
-        fi
-        merged_to_main=0
-    fi
-    
-    # Show final status
-    echo
-    success "🎉 Auto-push completed successfully!"
-    info "Commit: $commit_msg"
-    
-    if [ "$merged_to_main" -eq 1 ]; then
-        info "Branch: $main_branch (merged)"
-    else
-        info "Branch: $(git branch --show-current)"
-    fi
-    
-    # Show last commit info
-    echo -e "${BLUE}📝 Last commit:${NC}"
-    git log --oneline -1
-}
-
-# Run main function with all arguments
-main "$@"
+            ;;
+        *)
+            error "Invalid option. Please try again."
+            sleep 2
+            ;;
+    esac
+done

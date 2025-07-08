@@ -1,144 +1,84 @@
 {
   "name": "KataCore HR Management System",
   "short_name": "KataCore HR",
-  "description": "Comprehensive HR management system with employee management, departments, attendance, payroll, and more",
-  "start_url": "/hr",
-  "display": "standalone",
+  "description": "Professional HR management system for employee, department, and attendance management",
+  "theme_color": "#4F46E5",
   "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/hr",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
+      "src": "icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-96x96.png",
+      "src": "icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-128x128.png",
+      "src": "icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-144x144.png",
+      "src": "icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-152x152.png",
+      "src": "icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-384x384.png",
+      "src": "icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
     }
   ],
   "categories": ["business", "productivity", "utilities"],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-1.png",
-      "type": "image/png",
-      "sizes": "1280x720",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshots/mobile-1.png",
-      "type": "image/png",
-      "sizes": "360x640",
-      "form_factor": "narrow"
-    }
-  ],
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "Open HR Dashboard",
-      "url": "/hr",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Employees",
-      "short_name": "Employees",
-      "description": "Manage Employees",
+      "name": "Employee Management",
       "url": "/hr/employees",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Departments",
-      "short_name": "Departments",
-      "description": "Manage Departments",
-      "url": "/hr/departments",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
+      "description": "Manage employees and their information"
     },
     {
       "name": "Attendance",
-      "short_name": "Attendance",
-      "description": "Track Attendance",
       "url": "/hr/attendance",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "share_target": {
-    "action": "/hr/share-target",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "files": [
-        {
-          "name": "media",
-          "accept": ["image/*", "application/pdf", "text/csv"]
-        }
-      ]
-    }
-  },
-  "protocol_handlers": [
+      "description": "Track employee attendance and hours"
+    },
     {
-      "protocol": "mailto",
-      "url": "/hr/compose?to=%s"
+      "name": "Departments",
+      "url": "/hr/departments",
+      "description": "Manage organizational departments"
+    },
+    {
+      "name": "Leave Requests",
+      "url": "/hr/leave-requests",
+      "description": "Review and manage leave requests"
     }
   ]
 }
