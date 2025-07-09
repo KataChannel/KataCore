@@ -8,7 +8,17 @@
     "start": "next start",
     "start:standalone": "node .next/standalone/server.js",
     "start:prod": "NODE_ENV=production next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "format": "prettier --write .",
+    "clean": "rm -rf .next"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
