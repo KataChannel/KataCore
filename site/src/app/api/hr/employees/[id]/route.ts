@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../prisma/prisma';
+import { prisma } from '../../../../../../prisma/prisma';
 
 // GET /api/hr/employees/[id] - Lấy thông tin nhân viên
 export async function GET(

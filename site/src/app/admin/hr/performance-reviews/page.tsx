@@ -19,7 +19,7 @@ import {
   ClockIcon,
   CalendarIcon,
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PerformanceReview {
   id: string;

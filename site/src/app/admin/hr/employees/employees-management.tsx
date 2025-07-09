@@ -19,7 +19,7 @@ import {
   ExclamationTriangleIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 
 interface Employee {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../prisma/prisma';
-import authService from '../../../../lib/auth/authService';
+import { prisma } from '../../../../../prisma/prisma';
+import authService from '../../../../../lib/auth/authService';
 
 // Middleware to check authentication
 async function authenticate(request: NextRequest) {

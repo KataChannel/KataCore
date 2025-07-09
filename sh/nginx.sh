@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Default values
-DEFAULT_SERVER_NAME="hrm.tazagroup.vn"
-DEFAULT_PROXY_IP="116.118.49.243"
+DEFAULT_SERVER_NAME="localhost"
+DEFAULT_PROXY_IP="192.168.1.1"
 DEFAULT_PROXY_PORT="3000"
 DEFAULT_ENABLE_SSL="y"
-DEFAULT_CLOUD_IP="116.118.49.243"
+DEFAULT_CLOUD_IP="192.168.1.1"
 DEFAULT_CLOUD_USER="root"
 
 # Get user input with default values

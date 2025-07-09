@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Set variables
+# Set default variables
 SSH_USER="root"
-SERVER_IP="116.118.49.243"
-PROJECT_NAME="taza"
+DEFAULT_SERVER_IP="192.168.1.1"
+DEFAULT_PROJECT_NAME="taza"
 TEMP_DIR="/tmp/deploy_$(date +%s)"
 
 # Colors for better display
@@ -39,6 +39,76 @@ info() {
 
 progress() {
     echo -e "${PURPLE}🔄 $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
+}
+
+# Function to get server configuration from user
+get_server_config() {
+    clear
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}                   🛠️  Server Configuration${NC}"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    
+    # Get server IP
+    echo -e "${YELLOW}Enter server IP address:${NC}"
+    echo -e "${BLUE}Default: ${DEFAULT_SERVER_IP}${NC}"
+    echo -ne "${YELLOW}Server IP (press Enter for default): ${NC}"
+    read input_server_ip
+    
+    if [ -z "$input_server_ip" ]; then
+        SERVER_IP="$DEFAULT_SERVER_IP"
+    else
+        SERVER_IP="$input_server_ip"
+    fi
+    
+    # Validate IP format (basic validation)
+    if [[ ! $SERVER_IP =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        warning "Invalid IP format. Please use format: xxx.xxx.xxx.xxx"
+        echo -ne "${YELLOW}Re-enter server IP: ${NC}"
+        read SERVER_IP
+        if [[ ! $SERVER_IP =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            error "Invalid IP format provided twice. Exiting."
+        fi
+    fi
+    
+    echo ""
+    
+    # Get project name
+    echo -e "${YELLOW}Enter project name:${NC}"
+    echo -e "${BLUE}Default: ${DEFAULT_PROJECT_NAME}${NC}"
+    echo -ne "${YELLOW}Project name (press Enter for default): ${NC}"
+    read input_project_name
+    
+    if [ -z "$input_project_name" ]; then
+        PROJECT_NAME="$DEFAULT_PROJECT_NAME"
+    else
+        PROJECT_NAME="$input_project_name"
+    fi
+    
+    # Validate project name (only alphanumeric and underscores)
+    if [[ ! $PROJECT_NAME =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        warning "Project name should only contain letters, numbers, underscores, and hyphens"
+        echo -ne "${YELLOW}Re-enter project name: ${NC}"
+        read PROJECT_NAME
+        if [[ ! $PROJECT_NAME =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            error "Invalid project name provided twice. Exiting."
+        fi
+    fi
+    
+    echo ""
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}✅ Configuration Summary:${NC}"
+    echo -e "${YELLOW}Server IP:${NC} $SERVER_IP"
+    echo -e "${YELLOW}Project Name:${NC} $PROJECT_NAME"
+    echo -e "${YELLOW}SSH User:${NC} $SSH_USER"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    
+    echo -e "${YELLOW}Is this configuration correct? (Y/n):${NC}"
+    read -p "❓ " confirm
+    if [[ $confirm =~ ^[Nn]$ ]]; then
+        get_server_config  # Recursive call to re-enter configuration
+    fi
+    
+    success "Server configuration completed"
 }
 
 # Function to select services
@@ -105,6 +175,7 @@ show_menu() {
     echo -e "${YELLOW}Time:${NC} $(date '+%Y-%m-%d %H:%M:%S')"
     echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
     echo -e "${BLUE}Deployment Options:${NC}"
+    echo -e "  ${GREEN}0)${NC} ⚙️  Configure server settings"
     echo -e "  ${GREEN}1)${NC} 📝 Git commit only"
     echo -e "  ${GREEN}2)${NC} 🚀 Git commit + Full deployment to server"
     echo -e "  ${GREEN}3)${NC} 🔄 Deploy only (skip git operations)"
@@ -388,6 +459,10 @@ deploy_selected_services() {
     info "Selected services ($SELECTED_SERVICES) are now running on the server"
 }
 
+
+# Initialize configuration
+get_server_config
+
 # Main script with enhanced menu handling
 while true; do
     show_menu
@@ -396,6 +471,10 @@ while true; do
     echo ""
     
     case $choice in
+        0)
+            log "Option 0 selected: Configure server settings"
+            get_server_config
+            ;;
         1)
             log "Option 1 selected: Git commit only"
             git_commit
