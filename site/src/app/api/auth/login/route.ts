@@ -44,11 +44,20 @@ export async function POST(request: NextRequest) {
       accessToken: result.tokens.accessToken,
     });
 
+    // Set both refresh and access token cookies
     response.cookies.set('refreshToken', result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    // Set access token as cookie for middleware
+    response.cookies.set('token', result.tokens.accessToken, {
+      httpOnly: false, // Allow client-side access
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15 minutes (same as JWT expiry)
     });
 
     return response;

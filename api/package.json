@@ -20,7 +20,6 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:reset": "prisma migrate reset",
-    "prisma:studio": "prisma studio",
     "prisma:seed": "bun run src/prisma/seed.ts",
     "docker:build": "docker build -t katacore-api .",
     "docker:run": "docker run -p 3001:3001 katacore-api"

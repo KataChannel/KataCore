@@ -17,7 +17,7 @@ async function main() {
     data: {
       name: 'ADMIN',
       description: 'Quản trị viên hệ thống',
-      permissions: ['READ', 'WRITE', 'DELETE', 'MANAGE_USERS']
+      permissions: JSON.stringify(['READ', 'WRITE', 'DELETE', 'MANAGE_USERS'])
     }
   })
 
@@ -25,7 +25,7 @@ async function main() {
     data: {
       name: 'MODERATOR',
       description: 'Điều hành viên',
-      permissions: ['READ', 'WRITE', 'MODERATE']
+      permissions: JSON.stringify(['READ', 'WRITE', 'MODERATE'])
     }
   })
 
@@ -33,15 +33,15 @@ async function main() {
     data: {
       name: 'USER',
       description: 'Người dùng thông thường',
-      permissions: ['READ', 'WRITE']
+      permissions: JSON.stringify(['READ', 'WRITE'])
     }
   })
 
-  const guestRole = await prisma.role.create({
+  await prisma.role.create({
     data: {
       name: 'GUEST',
       description: 'Khách',
-      permissions: ['READ']
+      permissions: JSON.stringify(['READ'])
     }
   })
 

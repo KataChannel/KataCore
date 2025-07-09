@@ -273,15 +273,15 @@ create_env_file() {
     log "Tạo file .env.prod..."
     
     # Generate all passwords
-    local DB_PASSWORD=$(generate_password 8)
-    local REDIS_PASSWORD=$(generate_password 8)
+    local DB_PASSWORD=$(generate_password 12)
+    local REDIS_PASSWORD=$(generate_password 12)
     local JWT_SECRET=$(generate_jwt_secret)
-    local ENCRYPTION_KEY=$(generate_password 8)
-    local MINIO_ROOT_PASSWORD=$(generate_password 8)
-    local MINIO_ACCESS_KEY=$(generate_password 8)
-    local PGADMIN_PASSWORD=$(generate_password 8)
-    local GRAFANA_PASSWORD=$(generate_password 8)
-    
+    local ENCRYPTION_KEY=$(generate_password 12)
+    local MINIO_ROOT_PASSWORD=$(generate_password 12)
+    local MINIO_ACCESS_KEY=$(generate_password 12)
+    local PGADMIN_PASSWORD=$(generate_password 12)
+    local GRAFANA_PASSWORD=$(generate_password 12)
+
     # Create .env.prod file
     cat > .env.prod << EOF
 # 🔐 ${PROJECT_NAME^^} Auto-Generated Security Configuration

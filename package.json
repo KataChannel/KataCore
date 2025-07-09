@@ -35,7 +35,13 @@
     "docker:down": "docker-compose -f configs/docker/docker-compose.yml down",
     "docker:logs": "docker-compose -f configs/docker/docker-compose.yml logs -f",
     "docker:build": "docker-compose -f configs/docker/docker-compose.yml build",
-    "docker:restart": "docker-compose -f configs/docker/docker-compose.yml restart"
+    "docker:restart": "docker-compose -f configs/docker/docker-compose.yml restart",
+    "prisma:studio": "cd site && bun prisma studio",
+    "prisma:generate": "cd site && bun prisma generate",
+    "prisma:migrate": "cd site && bun prisma migrate dev",
+    "prisma:deploy": "cd site && bun prisma migrate deploy",
+    "prisma:reset": "cd site && bun prisma migrate reset",
+    "prisma:seed": "cd site && bun run prisma/seed.ts"
   },
   "keywords": [
     "katacore",
@@ -78,7 +84,7 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "6",
     "@types/minimatch": "^6.0.0"
   }
 }

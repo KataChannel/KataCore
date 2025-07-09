@@ -183,6 +183,7 @@ show_menu() {
     echo -e "  ${GREEN}5)${NC} 📊 Check server status"
     echo -e "  ${GREEN}6)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
     echo -e "  ${GREEN}7)${NC} 🛠️  Deploy specific services"
+    echo -e "  ${RED}8)${NC} 🚨 Quick container cleanup (fix conflicts)"
     echo -e "  ${RED}q)${NC} 👋 Quit"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
 }
@@ -351,18 +352,36 @@ server_cleanup() {
     
     ssh "$SSH_USER@$SERVER_IP" "
         echo '🛑 Stopping existing containers...'
-        cd /opt/$PROJECT_NAME/ && docker compose down --remove-orphans
+        cd /opt/$PROJECT_NAME/ 2>/dev/null || true
+        
+        # Force stop and remove all containers with project prefix
+        echo 'Force stopping containers with $PROJECT_NAME prefix...'
+        docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker stop 2>/dev/null || true
+        docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker rm -f 2>/dev/null || true
+        
+        # Also try generic cleanup for common container names
+        for container in postgres redis minio pgadmin api site; do
+            docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+        done
+        
+        # Use docker compose down if docker-compose.yml exists
+        if [ -f docker-compose.yml ]; then
+            echo 'Running docker compose down...'
+            docker compose down --remove-orphans --volumes 2>/dev/null || true
+        fi
         
         echo '🗑️  Cleaning Docker system...'
         echo 'Before cleanup:'
         docker system df
         
-        docker system prune -af --volumes
-        docker builder prune -af
-        docker image prune -af
+        # Clean up dangling resources
         docker container prune -f
+        docker image prune -f
         docker volume prune -f
         docker network prune -f
+        docker system prune -af --volumes
+        docker builder prune -af
         
         echo 'After cleanup:'
         docker system df
@@ -396,14 +415,33 @@ deploy_application() {
         ls -la
         
         if [ -f 'docker-compose.yml' ]; then
-            echo '🐳 Starting Docker Compose deployment...'
-            docker compose -f 'docker-compose.yml' up -d --build
+            echo '� Ensuring clean state before deployment...'
+            # Force stop and remove any existing containers
+            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker stop 2>/dev/null || true
+            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker rm -f 2>/dev/null || true
+            
+            # Also cleanup by service names
+            for container in postgres redis minio pgadmin api site; do
+                docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+                docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            done
+            
+            echo '�🐳 Starting Docker Compose deployment...'
+            docker compose -f 'docker-compose.yml' down --remove-orphans --volumes 2>/dev/null || true
+            docker compose -f 'docker-compose.yml' up -d --build --force-recreate
             
             echo '⏳ Waiting for containers to start...'
-            sleep 10
+            sleep 15
             
             echo '📊 Container status:'
             docker compose ps
+            
+            echo '🔍 Checking container health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                docker compose ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}'
+                sleep 3
+            done
             
             echo '📋 Container logs (last 20 lines):'
             docker compose logs --tail=20
@@ -432,17 +470,38 @@ deploy_selected_services() {
         echo '📋 Current directory: \$(pwd)'
         
         if [ -f 'docker-compose.yml' ]; then
-            echo '🛑 Stopping existing containers...'
-            docker compose down --remove-orphans
+            echo '🛑 Cleaning up existing containers...'
+            # Force stop and remove any existing containers
+            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker stop 2>/dev/null || true
+            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker rm -f 2>/dev/null || true
+            
+            # Also cleanup by service names
+            for container in postgres redis minio pgadmin api site; do
+                docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+                docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            done
+            
+            echo '🛑 Stopping existing containers with compose...'
+            docker compose down --remove-orphans --volumes 2>/dev/null || true
             
             echo '🐳 Starting selected services: $SELECTED_SERVICES'
-            docker compose up -d --build $SELECTED_SERVICES
+            docker compose up -d --build --force-recreate $SELECTED_SERVICES
             
             echo '⏳ Waiting for containers to start...'
-            sleep 10
+            sleep 15
             
             echo '📊 Container status:'
             docker compose ps
+            
+            echo '🔍 Checking selected services health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                for service in $SELECTED_SERVICES; do
+                    status=\$(docker compose ps \$service --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                    echo \"\$service: \$status\"
+                done
+                sleep 3
+            done
             
             echo '📋 Container logs for selected services:'
             for service in $SELECTED_SERVICES; do
@@ -459,6 +518,36 @@ deploy_selected_services() {
     info "Selected services ($SELECTED_SERVICES) are now running on the server"
 }
 
+# Function for quick container cleanup (emergency fix)
+quick_container_cleanup() {
+    progress "🚨 Emergency container cleanup..."
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        echo '🛑 Force stopping and removing conflicting containers...'
+        
+        # Stop all containers with project prefix
+        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker stop 2>/dev/null || true
+        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker rm -f 2>/dev/null || true
+        
+        # Also handle common container names
+        for container in postgres redis minio pgadmin api site; do
+            docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            # Also try without project prefix in case they exist
+            docker stop \"\$container\" 2>/dev/null || true
+            docker rm -f \"\$container\" 2>/dev/null || true
+        done
+        
+        # Clean up any remaining conflicting containers
+        docker container prune -f
+        
+        echo '✅ Container cleanup completed'
+        echo 'Current running containers:'
+        docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+    " || error "Failed to cleanup containers"
+
+    success "Emergency cleanup completed"
+}
 
 # Initialize configuration
 get_server_config
@@ -529,6 +618,20 @@ while true; do
         7)
             log "Option 7 selected: Deploy specific services"
             deploy_selected_services
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        8)
+            log "Option 8 selected: Quick container cleanup"
+            warning "This will forcefully stop and remove conflicting containers"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                quick_container_cleanup
+            else
+                warning "Cleanup cancelled"
+            fi
             echo ""
             info "Press any key to return to menu..."
             read -n 1
