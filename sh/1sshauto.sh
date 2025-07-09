@@ -11,8 +11,8 @@ SSH_KEY_PATH="$HOME/.ssh"
 SSH_KEY_TYPE="ed25519"
 SSH_KEY_BITS="4096"
 DEFAULT_USER="root"
-DEFAULT_SERVER="116.118.49.243"
-DOMAIN="hrm.tazagroup.vn"
+DEFAULT_SERVER="192.168.1.1"
+DOMAIN="localhost"
 CONFIG_FILE="$HOME/.ssh/config"
 
 # Color codes
@@ -493,7 +493,7 @@ main() {
     show_banner
     
     # Set defaults
-    FORCE_OVERWRITE=${FORCE_OVERWRITE:-false}
+    FORCE_OVERWRITE=${FORCE_OVERWRITE:-true}
     NO_CONFIG=${NO_CONFIG:-false}
     COPY_KEY=${COPY_KEY:-false}
     AUTO_DEPLOY=${AUTO_DEPLOY:-false}
