@@ -130,11 +130,6 @@ export default function HomePage() {
   }
 
   return (
-    <ThemeManager
-      enablePersistence={true}
-      enableSystemListener={true}
-      enableDebugMode={true}
-    >
       <div
         className={`font-mono min-h-screen transition-all duration-500 ease-in-out ${
           isDarkMode ? "bg-black text-white" : "bg-white text-black"
@@ -318,6 +313,5 @@ export default function HomePage() {
           </div>
         </footer>
       </div>
-    </ThemeManager>
   );
 }

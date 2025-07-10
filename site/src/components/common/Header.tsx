@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
-import { Menu, X, ChevronDown, Search, User, Sun, Moon } from "lucide-react";
+import React, { useState } from "react";
+import { Menu, X, ChevronDown, Search, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "../../lib/config/site";
+import { ThemeModeToggle } from "../ThemeManager"; // Import component có sẵn
 import SearchDialog, { 
   SearchDialogTrigger, 
   SearchDialogContent, 
@@ -103,36 +104,9 @@ const Header: React.FC<HeaderProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
 
-  // Initialize dark mode from localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
+  // Xóa tất cả logic theme local
 
   // Sample search results data
   const searchResults: SearchResult[] = [
@@ -248,18 +222,10 @@ const Header: React.FC<HeaderProps> = ({
             </SearchDialogContent>
           </SearchDialog>
           
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
+          {/* Thay thế button cũ bằng ThemeModeToggle */}
+          <ThemeModeToggle 
             className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 transition-all duration-200"
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </button>
+          />
 
           {showAuthButton && (
             <button
@@ -272,7 +238,7 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Responsive Drawer for Mobile Navigation */}
+        {/* Mobile Drawer */}
         {isMobileMenuOpen && (
           <>
             {/* Overlay */}
@@ -295,20 +261,12 @@ const Header: React.FC<HeaderProps> = ({
                   </button>
                   
                   {/* Dark Mode Toggle in Mobile Menu */}
-                  <button
-                    onClick={toggleDarkMode}
+                  <ThemeModeToggle 
                     className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 transition-all duration-200"
-                    aria-label="Toggle dark mode"
-                  >
-                    {isDarkMode ? (
-                      <Sun className="h-5 w-5" />
-                    ) : (
-                      <Moon className="h-5 w-5" />
-                    )}
-                  </button>
+                  />
                 </div>
                 
-                {/* Mobile Navigation */}
+                {/* Mobile Navigation - giữ nguyên */}
                 <nav className="space-y-2">
                   {visibleMenuItems.map((item) =>
                     item.hasDropdown ? (
