@@ -2,8 +2,8 @@
 
 # Set default variables
 SSH_USER="root"
-DEFAULT_SERVER_IP="192.168.1.1"
-DEFAULT_PROJECT_NAME="taza"
+DEFAULT_SERVER_IP="116.118.48.143"
+DEFAULT_PROJECT_NAME="katacore"
 TEMP_DIR="/tmp/deploy_$(date +%s)"
 
 # Colors for better display
@@ -176,14 +176,12 @@ show_menu() {
     echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
     echo -e "${BLUE}Deployment Options:${NC}"
     echo -e "  ${GREEN}0)${NC} ⚙️  Configure server settings"
-    echo -e "  ${GREEN}1)${NC} 📝 Git commit only"
-    echo -e "  ${GREEN}2)${NC} 🚀 Git commit + Full deployment to server"
-    echo -e "  ${GREEN}3)${NC} 🔄 Deploy only (skip git operations)"
-    echo -e "  ${GREEN}4)${NC} 🧹 Server cleanup only"
-    echo -e "  ${GREEN}5)${NC} 📊 Check server status"
-    echo -e "  ${GREEN}6)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
-    echo -e "  ${GREEN}7)${NC} 🛠️  Deploy specific services"
-    echo -e "  ${RED}8)${NC} 🚨 Quick container cleanup (fix conflicts)"
+    echo -e "  ${GREEN}1)${NC} 🔄 Deploy with Git & preserve data (Site & API update)"
+    echo -e "  ${GREEN}2)${NC} 🚀 Deploy only (skip git operations)"
+    echo -e "  ${GREEN}3)${NC} 🧹 Server cleanup & container fix"
+    echo -e "  ${GREEN}4)${NC} 📊 Check server status"
+    echo -e "  ${GREEN}5)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
+    echo -e "  ${GREEN}6)${NC} 🛠️  Deploy specific services"
     echo -e "  ${RED}q)${NC} 👋 Quit"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
 }
@@ -346,23 +344,124 @@ fresh_deploy_to_server() {
     # deploy_application
 }
 
-# Enhanced server cleanup function
-server_cleanup() {
-    progress "🧹 Starting comprehensive server cleanup..."
+# Combined function: Git commit + Update Site & API only (preserves data services)
+git_commit_and_update_preserve_data() {
+    # First, handle git operations
+    git_commit
+    
+    progress "🔄 Initializing Site & API update process with data preservation..."
+    
+    # Create temp directory
+    mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
+    success "Temporary directory created: $TEMP_DIR"
+
+    progress "📤 Preparing project files for Site & API update..."
+    # Show what will be excluded
+    info "Excluding: .git, node_modules, *.log, .env, *.md, *.sh"
+    
+    # Copy all project files to temp directory
+    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+    
+    # Show transfer size
+    size=$(du -sh "$TEMP_DIR" | cut -f1)
+    info "Transfer size: $size"
+
+    progress "🌐 Transferring updated files to remote server..."
+    rsync -avz --progress "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    
+    progress "🔧 Preserving existing environment configuration..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        if [ -f .env.prod ]; then
+            cp .env.prod .env && echo 'Environment file configured from .env.prod'
+        elif [ -f .env ]; then
+            echo 'Keeping existing .env file'
+        else
+            echo 'Warning: No environment file found'
+        fi
+    " || warning "Could not configure environment file"
+    
+    # Cleanup temp directory
+    rm -rf "$TEMP_DIR"
+    success "Local cleanup completed"
+
+    progress "🔄 Updating Site & API services without affecting data services..."
     
     ssh "$SSH_USER@$SERVER_IP" "
-        echo '🛑 Stopping existing containers...'
+        cd /opt/$PROJECT_NAME/
+        echo '📋 Current directory: \$(pwd)'
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo '🛑 Stopping only Site & API containers...'
+            # Stop only site and api services
+            docker compose stop site api 2>/dev/null || true
+            docker compose rm -f site api 2>/dev/null || true
+            
+            # Also handle containers with project prefix
+            docker stop \"$PROJECT_NAME-site\" \"$PROJECT_NAME-api\" 2>/dev/null || true
+            docker rm -f \"$PROJECT_NAME-site\" \"$PROJECT_NAME-api\" 2>/dev/null || true
+            
+            echo '📊 Data services status (should remain running):'
+            docker compose ps postgres redis minio pgadmin 2>/dev/null || docker ps --filter name=\"$PROJECT_NAME\"
+            
+            echo '🚀 Rebuilding and starting Site & API services...'
+            docker compose up -d --build --force-recreate site api
+            
+            echo '⏳ Waiting for Site & API services to start...'
+            sleep 10
+            
+            echo '📊 Updated services status:'
+            docker compose ps site api
+            
+            echo '🔍 Checking Site & API health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                site_status=\$(docker compose ps site --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                api_status=\$(docker compose ps api --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                echo \"Site: \$site_status\"
+                echo \"API: \$api_status\"
+                sleep 3
+            done
+            
+            echo '📋 Recent logs for updated services:'
+            echo '--- Site Service Logs ---'
+            docker compose logs --tail=15 site 2>/dev/null || echo 'No logs available for site'
+            echo '--- API Service Logs ---'
+            docker compose logs --tail=15 api 2>/dev/null || echo 'No logs available for api'
+            
+            echo '✅ All services overview:'
+            docker compose ps
+        else
+            echo '❌ docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to update Site & API services"
+
+    success "🎉 Git commit and Site & API update completed successfully!"
+    info "Site and API services have been updated while preserving all data services (PostgreSQL, Redis, MinIO, pgAdmin)"
+    warning "Database, cache, and file storage data remain unchanged"
+}
+
+# Combined server cleanup and container fix function
+server_cleanup_and_container_fix() {
+    progress "🧹🚨 Starting comprehensive server cleanup and container fix..."
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        echo '🛑 Emergency container cleanup and fix...'
         cd /opt/$PROJECT_NAME/ 2>/dev/null || true
         
         # Force stop and remove all containers with project prefix
         echo 'Force stopping containers with $PROJECT_NAME prefix...'
-        docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker stop 2>/dev/null || true
-        docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker rm -f 2>/dev/null || true
+        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker stop 2>/dev/null || true
+        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker rm -f 2>/dev/null || true
         
         # Also try generic cleanup for common container names
         for container in postgres redis minio pgadmin api site; do
             docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
             docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            # Also try without project prefix in case they exist
+            docker stop \"\$container\" 2>/dev/null || true
+            docker rm -f \"\$container\" 2>/dev/null || true
         done
         
         # Use docker compose down if docker-compose.yml exists
@@ -398,10 +497,12 @@ server_cleanup() {
         echo '📦 Cleaning package cache...'
         apt-get clean 2>/dev/null || yum clean all 2>/dev/null || true
         
-        echo '✅ Server cleanup completed'
-    " || error "Failed to cleanup server"
+        echo '✅ Server cleanup and container fix completed'
+        echo 'Current running containers:'
+        docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+    " || error "Failed to cleanup server and fix containers"
 
-    success "Server cleanup completed successfully"
+    success "Comprehensive server cleanup and container fix completed successfully"
 }
 
 # Enhanced deployment function with service selection
@@ -415,7 +516,7 @@ deploy_application() {
         ls -la
         
         if [ -f 'docker-compose.yml' ]; then
-            echo '� Ensuring clean state before deployment...'
+            echo '🛑 Ensuring clean state before deployment...'
             # Force stop and remove any existing containers
             docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker stop 2>/dev/null || true
             docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker rm -f 2>/dev/null || true
@@ -426,7 +527,7 @@ deploy_application() {
                 docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
             done
             
-            echo '�🐳 Starting Docker Compose deployment...'
+            echo '🐳 Starting Docker Compose deployment...'
             docker compose -f 'docker-compose.yml' down --remove-orphans --volumes 2>/dev/null || true
             docker compose -f 'docker-compose.yml' up -d --build --force-recreate
             
@@ -518,37 +619,6 @@ deploy_selected_services() {
     info "Selected services ($SELECTED_SERVICES) are now running on the server"
 }
 
-# Function for quick container cleanup (emergency fix)
-quick_container_cleanup() {
-    progress "🚨 Emergency container cleanup..."
-    
-    ssh "$SSH_USER@$SERVER_IP" "
-        echo '🛑 Force stopping and removing conflicting containers...'
-        
-        # Stop all containers with project prefix
-        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker stop 2>/dev/null || true
-        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker rm -f 2>/dev/null || true
-        
-        # Also handle common container names
-        for container in postgres redis minio pgadmin api site; do
-            docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
-            docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
-            # Also try without project prefix in case they exist
-            docker stop \"\$container\" 2>/dev/null || true
-            docker rm -f \"\$container\" 2>/dev/null || true
-        done
-        
-        # Clean up any remaining conflicting containers
-        docker container prune -f
-        
-        echo '✅ Container cleanup completed'
-        echo 'Current running containers:'
-        docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-    " || error "Failed to cleanup containers"
-
-    success "Emergency cleanup completed"
-}
-
 # Initialize configuration
 get_server_config
 
@@ -565,44 +635,50 @@ while true; do
             get_server_config
             ;;
         1)
-            log "Option 1 selected: Git commit only"
-            git_commit
+            log "Option 1 selected: Deploy with Git & preserve data"
+            warning "This will commit git changes and update only Site & API services, preserving all data services"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                git_commit_and_update_preserve_data
+            else
+                warning "Deployment cancelled"
+            fi
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
         2)
-            log "Option 2 selected: Full deployment"
-            git_commit
-            deploy_to_server
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        3)
-            log "Option 3 selected: Deploy only"
+            log "Option 2 selected: Deploy only"
             warning "Skipping git operations..."
             deploy_to_server
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        4)
-            log "Option 4 selected: Server cleanup only"
-            server_cleanup
+        3)
+            log "Option 3 selected: Server cleanup & container fix"
+            warning "This will perform comprehensive cleanup and fix container conflicts"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                server_cleanup_and_container_fix
+            else
+                warning "Cleanup cancelled"
+            fi
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        5)
-            log "Option 5 selected: Check server status"
+        4)
+            log "Option 4 selected: Check server status"
             check_server_status
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        6)
-            log "Option 6 selected: Fresh deploy with new environment"
+        5)
+            log "Option 5 selected: Fresh deploy with new environment"
             warning "This will remove all old .env files and use .env.prod as new environment"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
@@ -615,23 +691,9 @@ while true; do
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        7)
-            log "Option 7 selected: Deploy specific services"
+        6)
+            log "Option 6 selected: Deploy specific services"
             deploy_selected_services
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        8)
-            log "Option 8 selected: Quick container cleanup"
-            warning "This will forcefully stop and remove conflicting containers"
-            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
-            read -p "❓ " confirm
-            if [[ $confirm =~ ^[Yy]$ ]]; then
-                quick_container_cleanup
-            else
-                warning "Cleanup cancelled"
-            fi
             echo ""
             info "Press any key to return to menu..."
             read -n 1
