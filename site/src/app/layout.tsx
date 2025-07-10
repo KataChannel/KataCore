@@ -1,4 +1,4 @@
-import './globals.css';
+import '@/styles/globals.css';
 import { inter } from '../components/ui/fonts';
 import { Metadata, Viewport } from 'next';
 import { siteConfig } from '../lib/config/site';
@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="application-name" content="KataCore HR" />

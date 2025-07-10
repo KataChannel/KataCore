@@ -1035,4 +1035,5 @@ curl http://localhost:3001/health   # Test API
 
 
 
-Phong cách Website monochrome IU có darkmode,reponsive
+Phong cách Website monochrome IU darkmode,reponsive
+dark mode, light mode, reponsive,minimalist black and white design, modern Next-Gen, monochrome UI

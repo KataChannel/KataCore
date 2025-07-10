@@ -1,0 +1,583 @@
+/* ============================================================================
+   UNIFIED THEME SYSTEM - CSS VARIABLES & STYLES
+   Centralized styling system for KataCore with dark mode support
+============================================================================ */
+
+@import "tailwindcss";
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES (CSS Variables)
+   These are managed by the unified theme system
+============================================================================ */
+
+:root {
+  /* Color Variables - Light Mode (Default) */
+  --color-primary: #000000;
+  --color-secondary: #6c757d;
+  --color-accent: #2563eb;
+  
+  --color-background: #ffffff;
+  --color-surface: #fafafa;
+  --color-surface-elevated: #f8f9fa;
+  
+  --color-text: #000000;
+  --color-text-secondary: #495057;
+  --color-text-muted: #6c757d;
+  
+  --color-border: #dee2e6;
+  --color-border-light: #e9ecef;
+  
+  --color-hover: #f8f9fa;
+  --color-active: #e9ecef;
+  --color-disabled: #f8f9fa;
+  
+  --color-success: #198754;
+  --color-warning: #fd7e14;
+  --color-error: #dc3545;
+  --color-info: #0dcaf0;
+  
+  /* Gray Scale */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f8f9fa;
+  --color-gray-200: #e9ecef;
+  --color-gray-300: #dee2e6;
+  --color-gray-400: #ced4da;
+  --color-gray-500: #adb5bd;
+  --color-gray-600: #6c757d;
+  --color-gray-700: #495057;
+  --color-gray-800: #343a40;
+  --color-gray-900: #212529;
+  
+  /* Shadows */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  
+  /* Animation Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 750ms;
+  
+  /* Easing Functions */
+  --easing-linear: linear;
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Typography */
+  --font-size-xs: 0.75rem;
+  --line-height-xs: 1rem;
+  --font-size-sm: 0.875rem;
+  --line-height-sm: 1.25rem;
+  --font-size-base: 1rem;
+  --line-height-base: 1.5rem;
+  --font-size-lg: 1.125rem;
+  --line-height-lg: 1.75rem;
+  --font-size-xl: 1.25rem;
+  --line-height-xl: 1.75rem;
+  --font-size-2xl: 1.5rem;
+  --line-height-2xl: 2rem;
+  --font-size-3xl: 1.875rem;
+  --line-height-3xl: 2.25rem;
+  --font-size-4xl: 2.25rem;
+  --line-height-4xl: 2.5rem;
+}
+
+/* ============================================================================
+   DARK MODE VARIABLES
+============================================================================ */
+
+.dark {
+  --color-primary: #ffffff;
+  --color-secondary: #8b949e;
+  --color-accent: #3b82f6;
+  
+  --color-background: #0d1117;
+  --color-surface: #161b22;
+  --color-surface-elevated: #21262d;
+  
+  --color-text: #f0f6fc;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #6e7681;
+  
+  --color-border: #30363d;
+  --color-border-light: #21262d;
+  
+  --color-hover: #21262d;
+  --color-active: #30363d;
+  --color-disabled: #21262d;
+  
+  --color-success: #3fb950;
+  --color-warning: #d29922;
+  --color-error: #f85149;
+  --color-info: #79c0ff;
+  
+  /* Dark Gray Scale */
+  --color-gray-50: #0d1117;
+  --color-gray-100: #161b22;
+  --color-gray-200: #21262d;
+  --color-gray-300: #30363d;
+  --color-gray-400: #484f58;
+  --color-gray-500: #6e7681;
+  --color-gray-600: #8b949e;
+  --color-gray-700: #b1bac4;
+  --color-gray-800: #c9d1d9;
+  --color-gray-900: #f0f6fc;
+  
+  /* Dark Shadows - More pronounced */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================================
+   HIGH CONTRAST MODE
+============================================================================ */
+
+.high-contrast {
+  --color-border: currentColor;
+  --color-text-secondary: currentColor;
+  --shadow-base: 0 0 0 1px currentColor;
+  --shadow-md: 0 0 0 2px currentColor;
+  --shadow-lg: 0 0 0 3px currentColor;
+}
+
+.dark.high-contrast {
+  --color-background: #000000;
+  --color-surface: #111111;
+  --color-text: #ffffff;
+  --color-border: #ffffff;
+}
+
+/* ============================================================================
+   REDUCED MOTION
+============================================================================ */
+
+.reduced-motion,
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+   BASE STYLES
+============================================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: background-color var(--duration-normal) var(--easing-in-out),
+              color var(--duration-normal) var(--easing-in-out);
+}
+
+/* ============================================================================
+   UNIFIED COMPONENT CLASSES
+============================================================================ */
+
+/* Cards */
+.unified-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-normal) var(--easing-in-out);
+}
+
+.unified-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.unified-card.elevated {
+  background-color: var(--color-surface-elevated);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Buttons */
+.unified-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  min-height: 2.75rem;
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border: 2px solid var(--color-primary);
+  border-radius: 0.5rem;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--duration-fast) var(--easing-in-out);
+}
+
+.unified-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.unified-button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.unified-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.unified-button.secondary {
+  background-color: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.unified-button.secondary:hover {
+  background-color: var(--color-hover);
+  border-color: var(--color-primary);
+}
+
+.unified-button.ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: none;
+}
+
+.unified-button.ghost:hover {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.unified-button.accent {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.unified-button.accent:hover {
+  filter: brightness(1.1);
+}
+
+.unified-button.success {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+}
+
+.unified-button.warning {
+  background-color: var(--color-warning);
+  border-color: var(--color-warning);
+  color: white;
+}
+
+.unified-button.error {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+  color: white;
+}
+
+/* Inputs */
+.unified-input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  min-height: 3rem;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
+  border-radius: 0.75rem;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  transition: all var(--duration-fast) var(--easing-in-out);
+}
+
+.unified-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.unified-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.unified-input:disabled {
+  background-color: var(--color-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Badges */
+.unified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.unified-badge.accent {
+  background-color: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+.unified-badge.success {
+  background-color: var(--color-success);
+  color: white;
+  border-color: var(--color-success);
+}
+
+.unified-badge.warning {
+  background-color: var(--color-warning);
+  color: white;
+  border-color: var(--color-warning);
+}
+
+.unified-badge.error {
+  background-color: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+}
+
+/* Dividers */
+.unified-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  border: none;
+  margin: 1.5rem 0;
+}
+
+.unified-divider.vertical {
+  width: 1px;
+  height: auto;
+  margin: 0 1.5rem;
+}
+
+/* Loading States */
+.unified-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.unified-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: unified-loading-shimmer 1.5s infinite;
+}
+
+.dark .unified-loading::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+}
+
+@keyframes unified-loading-shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+============================================================================ */
+
+@media (max-width: 768px) {
+  .unified-card {
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  .unified-button {
+    padding: 0.625rem 1.25rem;
+    min-height: 2.5rem;
+    font-size: var(--font-size-sm);
+  }
+  
+  .unified-input {
+    min-height: 2.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+============================================================================ */
+
+/* Theme Mode Classes */
+.theme-light { /* Styles for light mode */ }
+.theme-dark { /* Styles for dark mode */ }
+.theme-auto { /* Styles for auto mode */ }
+
+/* Color Scheme Classes */
+.color-scheme-monochrome { /* Monochrome specific styles */ }
+.color-scheme-colorful { /* Colorful specific styles */ }
+
+/* Animation Level Classes */
+.animation-none * { animation: none !important; transition: none !important; }
+.animation-reduced * { animation-duration: 0.1s !important; transition-duration: 0.1s !important; }
+.animation-normal { /* Default animations */ }
+.animation-enhanced { /* Enhanced animations */ }
+
+/* Font Size Classes */
+.font-size-xs { font-size: var(--font-size-xs); line-height: var(--line-height-xs); }
+.font-size-sm { font-size: var(--font-size-sm); line-height: var(--line-height-sm); }
+.font-size-base { font-size: var(--font-size-base); line-height: var(--line-height-base); }
+.font-size-lg { font-size: var(--font-size-lg); line-height: var(--line-height-lg); }
+.font-size-xl { font-size: var(--font-size-xl); line-height: var(--line-height-xl); }
+
+/* Border Radius Classes */
+.border-radius-none * { border-radius: 0 !important; }
+.border-radius-sm * { border-radius: 0.25rem !important; }
+.border-radius-base * { border-radius: 0.5rem !important; }
+.border-radius-lg * { border-radius: 0.75rem !important; }
+.border-radius-xl * { border-radius: 1rem !important; }
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+============================================================================ */
+
+/* Focus Indicators */
+.unified-focus-ring:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* High Contrast Focus */
+.high-contrast .unified-focus-ring:focus {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Skip Links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-background);
+  color: var(--color-text);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 0.25rem;
+  border: 2px solid var(--color-border);
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* ============================================================================
+   PRINT STYLES
+============================================================================ */
+
+@media print {
+  * {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+  
+  .unified-button,
+  .unified-badge {
+    border: 1px solid black !important;
+  }
+}
+
+/* ============================================================================
+   LEGACY COMPATIBILITY
+   These classes maintain compatibility with existing components
+============================================================================ */
+
+/* Map old mono- classes to new unified- classes */
+.mono-card { @apply unified-card; }
+.mono-button { @apply unified-button; }
+.mono-input { @apply unified-input; }
+.mono-badge { @apply unified-badge; }
+.mono-divider { @apply unified-divider; }
+.mono-loading { @apply unified-loading; }
+
+/* Maintain existing CSS variable names for gradual migration */
+:root {
+  /* Legacy variable mappings */
+  --mono-color-primary: var(--color-primary);
+  --mono-color-secondary: var(--color-secondary);
+  --mono-color-accent: var(--color-accent);
+  --mono-color-background: var(--color-background);
+  --mono-color-surface: var(--color-surface);
+  --mono-color-text: var(--color-text);
+  --mono-color-text-secondary: var(--color-text-secondary);
+  --mono-color-border: var(--color-border);
+  --mono-shadow-md: var(--shadow-md);
+  --mono-duration-normal: var(--duration-normal);
+}
