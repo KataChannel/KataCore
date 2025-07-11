@@ -1,6 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { ThemeManager } from '../../components/ThemeManager';
+import { useUnifiedTheme } from '../../hooks/useUnifiedTheme';
 import {
   SunIcon,
   MoonIcon,
@@ -29,8 +31,8 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+// Component nội bộ sử dụng theme context
+const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userData, setUserData] = useState<any>(null);
@@ -39,39 +41,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Load theme and user data from localStorage
+  // Sử dụng unified theme hook
+  const { actualMode, toggleMode, isLoading } = useUnifiedTheme();
+
+  // Load user data from localStorage
   useEffect(() => {
     setMounted(true);
 
-    const savedTheme = localStorage.getItem('admin-theme');
     const savedUserData = localStorage.getItem('admin-user-data');
-
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === 'dark');
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches;
-      setIsDarkMode(prefersDark);
-    }
-
     if (savedUserData) {
       setUserData(JSON.parse(savedUserData));
     }
   }, []);
-
-  // Save theme to localStorage and update DOM
-  useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('admin-theme', isDarkMode ? 'dark' : 'light');
-      if (isDarkMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-  }, [isDarkMode, mounted]);
 
   const hrSubMenus = [
     {
@@ -136,6 +117,33 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     },
   ];
 
+  const crmSubMenus = [
+    {
+      name: 'Dashboard',
+      nameVi: 'Tổng quan',
+      href: '/admin/crm',
+      icon: ChartBarIcon,
+    },
+    {
+      name: 'Customers',
+      nameVi: 'Khách hàng',
+      href: '/admin/crm/customers',
+      icon: UsersIcon,
+    },
+    {
+      name: 'Call Center',
+      nameVi: 'Trung tâm cuộc gọi',
+      href: '/admin/crm/callcenter',
+      icon: BellIcon,
+    },
+    {
+      name: 'Facebook',
+      nameVi: 'Facebook',
+      href: '/admin/crm/facebook',
+      icon: ComputerDesktopIcon,
+    },
+  ];
+
   const menuItems = [
     {
       title: 'Dashboard',
@@ -155,6 +163,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       icon: UserIcon,
       path: '/admin/crm',
       active: pathname.startsWith('/admin/crm'),
+      children: crmSubMenus,
     },
     {
       title: 'Website Management',
@@ -199,8 +208,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     });
   }, [pathname]);
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+ const toggleTheme = () => {
+    toggleMode();
   };
 
   const toggleSidebar = () => {
@@ -214,7 +223,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const handleLogout = () => {
     localStorage.removeItem('admin-user-data');
     localStorage.removeItem('admin-token');
-    localStorage.removeItem('admin-theme');
     router.push('/login');
   };
 
@@ -230,14 +238,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   // Prevent hydration mismatch
-  if (!mounted) {
+  if (!mounted || isLoading) {
     return null;
   }
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`}
-    >
+    <div className="min-h-screen transition-colors duration-300">
       <div className="flex h-screen bg-background">
         {/* Desktop Sidebar */}
         <aside
@@ -346,7 +352,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           className={`
           fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          ${isDarkMode ? 'bg-gray-900' : 'bg-white'}
+          bg-surface
         `}
         >
           {/* Mobile Sidebar Header */}
@@ -466,20 +472,39 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-hover transition-colors"
-                title="Toggle theme"
+                className={`p-2 ${actualMode === 'dark'
+                  ? 'text-white hover:bg-white/20'
+                  : 'text-black hover:bg-black/20'
+                }`}
+                aria-label="Toggle theme"
               >
-                {isDarkMode ? (
-                  <SunIcon className="h-5 w-5 text-text-secondary" />
-                ) : (
-                  <MoonIcon className="h-5 w-5 text-text-secondary" />
-                )}
+                <div className="relative w-5 h-5 sm:w-6 sm:h-6">
+                  <SunIcon
+                    className={`w-full h-full transition-all duration-500 absolute inset-0 ${
+                      actualMode === 'dark'
+                        ? 'opacity-0 rotate-180 scale-0'
+                        : 'opacity-100 rotate-0 scale-100'
+                    }`}
+                  />
+                  <MoonIcon
+                    className={`w-full h-full transition-all duration-500 absolute inset-0 ${
+                      actualMode === 'dark'
+                        ? 'opacity-100 rotate-0 scale-100'
+                        : 'opacity-0 -rotate-180 scale-0'
+                    }`}
+                  />
+                </div>
               </button>
 
               {/* Notifications */}
               <button className="p-2 rounded-lg hover:bg-hover transition-colors relative">
                 <BellIcon className="h-5 w-5 text-text-secondary" />
                 <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+              </button>
+
+              {/* Settings/Config */}
+              <button className="p-2 rounded-lg hover:bg-hover transition-colors">
+                <Cog6ToothIcon className="h-5 w-5 text-text-secondary" />
               </button>
 
               {/* User Profile */}
@@ -513,6 +538,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Component chính với ThemeManager wrapper
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+  return (
+    <ThemeManager 
+      enablePersistence={true}
+      enableSystemListener={true}
+      enableDebugMode={false}
+    >
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </ThemeManager>
   );
 };
 

@@ -1,0 +1,560 @@
+/* ============================================================================
+   COLORFUL THEME SYSTEM FOR TAZACORE
+   Modern, vibrant color palette with accessibility in mind
+============================================================================ */
+
+/* ============================================================================
+   COLORFUL THEME VARIABLES - LIGHT MODE
+============================================================================ */
+
+:root {
+  /* Primary Brand Colors */
+  --colorful-primary: #3b82f6;         /* Bright Blue */
+  --colorful-primary-light: #60a5fa;   /* Light Blue */
+  --colorful-primary-dark: #1d4ed8;    /* Dark Blue */
+  
+  /* Secondary Colors */
+  --colorful-secondary: #8b5cf6;       /* Purple */
+  --colorful-secondary-light: #a78bfa; /* Light Purple */
+  --colorful-secondary-dark: #7c3aed;  /* Dark Purple */
+  
+  /* Accent Colors */
+  --colorful-accent: #06b6d4;          /* Cyan */
+  --colorful-accent-light: #22d3ee;    /* Light Cyan */
+  --colorful-accent-dark: #0891b2;     /* Dark Cyan */
+  
+  /* Success Colors */
+  --colorful-success: #10b981;         /* Emerald */
+  --colorful-success-light: #34d399;   /* Light Emerald */
+  --colorful-success-dark: #059669;    /* Dark Emerald */
+  
+  /* Warning Colors */
+  --colorful-warning: #f59e0b;         /* Amber */
+  --colorful-warning-light: #fbbf24;   /* Light Amber */
+  --colorful-warning-dark: #d97706;    /* Dark Amber */
+  
+  /* Error Colors */
+  --colorful-error: #ef4444;           /* Red */
+  --colorful-error-light: #f87171;     /* Light Red */
+  --colorful-error-dark: #dc2626;      /* Dark Red */
+  
+  /* Info Colors */
+  --colorful-info: #06b6d4;            /* Cyan */
+  --colorful-info-light: #22d3ee;      /* Light Cyan */
+  --colorful-info-dark: #0891b2;       /* Dark Cyan */
+  
+  /* Background Colors */
+  --colorful-background: #fefefe;      /* Off-white */
+  --colorful-surface: #f8fafc;         /* Very light gray */
+  --colorful-surface-elevated: #f1f5f9; /* Light gray */
+  --colorful-surface-hover: #e2e8f0;   /* Hover gray */
+  
+  /* Text Colors */
+  --colorful-text: #1e293b;            /* Dark slate */
+  --colorful-text-secondary: #475569;  /* Medium slate */
+  --colorful-text-muted: #64748b;      /* Light slate */
+  --colorful-text-inverse: #ffffff;    /* White */
+  
+  /* Border Colors */
+  --colorful-border: #cbd5e1;          /* Light border */
+  --colorful-border-light: #e2e8f0;    /* Very light border */
+  --colorful-border-strong: #94a3b8;   /* Strong border */
+  
+  /* Interactive Colors */
+  --colorful-hover: #f1f5f9;           /* Light hover */
+  --colorful-active: #e2e8f0;          /* Active state */
+  --colorful-disabled: #f8fafc;        /* Disabled background */
+  --colorful-disabled-text: #cbd5e1;   /* Disabled text */
+  
+  /* Gradient Colors */
+  --colorful-gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --colorful-gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #10b981 100%);
+  --colorful-gradient-accent: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --colorful-gradient-surface: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* ============================================================================
+   COLORFUL THEME VARIABLES - DARK MODE
+============================================================================ */
+
+.dark {
+  /* Primary Brand Colors */
+  --colorful-primary: #60a5fa;         /* Light Blue */
+  --colorful-primary-light: #93c5fd;   /* Very Light Blue */
+  --colorful-primary-dark: #3b82f6;    /* Medium Blue */
+  
+  /* Secondary Colors */
+  --colorful-secondary: #a78bfa;       /* Light Purple */
+  --colorful-secondary-light: #c4b5fd; /* Very Light Purple */
+  --colorful-secondary-dark: #8b5cf6;  /* Medium Purple */
+  
+  /* Accent Colors */
+  --colorful-accent: #22d3ee;          /* Light Cyan */
+  --colorful-accent-light: #67e8f9;    /* Very Light Cyan */
+  --colorful-accent-dark: #06b6d4;     /* Medium Cyan */
+  
+  /* Success Colors */
+  --colorful-success: #34d399;         /* Light Emerald */
+  --colorful-success-light: #6ee7b7;   /* Very Light Emerald */
+  --colorful-success-dark: #10b981;    /* Medium Emerald */
+  
+  /* Warning Colors */
+  --colorful-warning: #fbbf24;         /* Light Amber */
+  --colorful-warning-light: #fcd34d;   /* Very Light Amber */
+  --colorful-warning-dark: #f59e0b;    /* Medium Amber */
+  
+  /* Error Colors */
+  --colorful-error: #f87171;           /* Light Red */
+  --colorful-error-light: #fca5a5;     /* Very Light Red */
+  --colorful-error-dark: #ef4444;      /* Medium Red */
+  
+  /* Info Colors */
+  --colorful-info: #22d3ee;            /* Light Cyan */
+  --colorful-info-light: #67e8f9;      /* Very Light Cyan */
+  --colorful-info-dark: #06b6d4;       /* Medium Cyan */
+  
+  /* Background Colors */
+  --colorful-background: #0f172a;      /* Very dark slate */
+  --colorful-surface: #1e293b;         /* Dark slate */
+  --colorful-surface-elevated: #334155; /* Medium slate */
+  --colorful-surface-hover: #475569;   /* Light slate */
+  
+  /* Text Colors */
+  --colorful-text: #f8fafc;            /* Light gray */
+  --colorful-text-secondary: #cbd5e1;  /* Medium gray */
+  --colorful-text-muted: #94a3b8;      /* Dark gray */
+  --colorful-text-inverse: #1e293b;    /* Dark slate */
+  
+  /* Border Colors */
+  --colorful-border: #475569;          /* Medium border */
+  --colorful-border-light: #334155;    /* Light border */
+  --colorful-border-strong: #64748b;   /* Strong border */
+  
+  /* Interactive Colors */
+  --colorful-hover: #334155;           /* Dark hover */
+  --colorful-active: #475569;          /* Active state */
+  --colorful-disabled: #1e293b;        /* Disabled background */
+  --colorful-disabled-text: #475569;   /* Disabled text */
+  
+  /* Gradient Colors */
+  --colorful-gradient-primary: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  --colorful-gradient-secondary: linear-gradient(135deg, #22d3ee 0%, #34d399 100%);
+  --colorful-gradient-accent: linear-gradient(135deg, #fbbf24 0%, #f87171 100%);
+  --colorful-gradient-surface: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+/* ============================================================================
+   COLORFUL THEME APPLICATION
+============================================================================ */
+
+.color-scheme-colorful {
+  /* Override unified theme variables with colorful variants */
+  --color-primary: var(--colorful-primary);
+  --color-secondary: var(--colorful-secondary);
+  --color-accent: var(--colorful-accent);
+  
+  --color-background: var(--colorful-background);
+  --color-surface: var(--colorful-surface);
+  --color-surface-elevated: var(--colorful-surface-elevated);
+  
+  --color-text: var(--colorful-text);
+  --color-text-secondary: var(--colorful-text-secondary);
+  --color-text-muted: var(--colorful-text-muted);
+  
+  --color-border: var(--colorful-border);
+  --color-border-light: var(--colorful-border-light);
+  
+  --color-hover: var(--colorful-hover);
+  --color-active: var(--colorful-active);
+  --color-disabled: var(--colorful-disabled);
+  
+  --color-success: var(--colorful-success);
+  --color-warning: var(--colorful-warning);
+  --color-error: var(--colorful-error);
+  --color-info: var(--colorful-info);
+}
+
+/* ============================================================================
+   COLORFUL SPECIFIC UTILITIES
+============================================================================ */
+
+/* Gradient Backgrounds */
+.bg-gradient-colorful-primary {
+  background: var(--colorful-gradient-primary);
+}
+
+.bg-gradient-colorful-secondary {
+  background: var(--colorful-gradient-secondary);
+}
+
+.bg-gradient-colorful-accent {
+  background: var(--colorful-gradient-accent);
+}
+
+.bg-gradient-colorful-surface {
+  background: var(--colorful-gradient-surface);
+}
+
+/* Colorful Button Variants */
+.btn-colorful-primary {
+  background: var(--colorful-primary);
+  color: var(--colorful-text-inverse);
+  border: 1px solid var(--colorful-primary);
+  transition: all 0.2s ease;
+}
+
+.btn-colorful-primary:hover {
+  background: var(--colorful-primary-dark);
+  border-color: var(--colorful-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-colorful-secondary {
+  background: var(--colorful-secondary);
+  color: var(--colorful-text-inverse);
+  border: 1px solid var(--colorful-secondary);
+  transition: all 0.2s ease;
+}
+
+.btn-colorful-secondary:hover {
+  background: var(--colorful-secondary-dark);
+  border-color: var(--colorful-secondary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-colorful-outline {
+  background: transparent;
+  color: var(--colorful-primary);
+  border: 1px solid var(--colorful-primary);
+  transition: all 0.2s ease;
+}
+
+.btn-colorful-outline:hover {
+  background: var(--colorful-primary);
+  color: var(--colorful-text-inverse);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Colorful Card Variants */
+.card-colorful {
+  background: var(--colorful-surface);
+  border: 1px solid var(--colorful-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-colorful:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  border-color: var(--colorful-primary-light);
+}
+
+.card-colorful-gradient {
+  background: var(--colorful-gradient-surface);
+  border: 1px solid var(--colorful-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+/* Colorful Badge Variants */
+.badge-colorful-primary {
+  background: var(--colorful-primary);
+  color: var(--colorful-text-inverse);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-colorful-secondary {
+  background: var(--colorful-secondary);
+  color: var(--colorful-text-inverse);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-colorful-success {
+  background: var(--colorful-success);
+  color: var(--colorful-text-inverse);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-colorful-warning {
+  background: var(--colorful-warning);
+  color: var(--colorful-text-inverse);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-colorful-error {
+  background: var(--colorful-error);
+  color: var(--colorful-text-inverse);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Colorful Input Variants */
+.input-colorful {
+  background: var(--colorful-surface);
+  border: 1px solid var(--colorful-border);
+  color: var(--colorful-text);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.input-colorful:focus {
+  outline: none;
+  border-color: var(--colorful-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-colorful::placeholder {
+  color: var(--colorful-text-muted);
+}
+
+/* Colorful Link Variants */
+.link-colorful {
+  color: var(--colorful-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.link-colorful:hover {
+  color: var(--colorful-primary-dark);
+}
+
+.link-colorful::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--colorful-primary);
+  transition: width 0.3s ease;
+}
+
+.link-colorful:hover::after {
+  width: 100%;
+}
+
+/* Colorful Alert Variants */
+.alert-colorful-info {
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid var(--colorful-info-light);
+  border-left: 4px solid var(--colorful-info);
+  color: var(--colorful-text);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.alert-colorful-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--colorful-success-light);
+  border-left: 4px solid var(--colorful-success);
+  color: var(--colorful-text);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.alert-colorful-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--colorful-warning-light);
+  border-left: 4px solid var(--colorful-warning);
+  color: var(--colorful-text);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.alert-colorful-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--colorful-error-light);
+  border-left: 4px solid var(--colorful-error);
+  color: var(--colorful-text);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+/* ============================================================================
+   COLORFUL ANIMATIONS & EFFECTS
+============================================================================ */
+
+/* Pulse Animation for Colorful Elements */
+@keyframes colorful-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.pulse-colorful {
+  animation: colorful-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Gradient Animation */
+@keyframes colorful-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: colorful-gradient 4s ease infinite;
+}
+
+/* Hover Glow Effects */
+.glow-colorful-primary:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.glow-colorful-secondary:hover {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+.glow-colorful-accent:hover {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+}
+
+/* ============================================================================
+   RESPONSIVE COLORFUL UTILITIES
+============================================================================ */
+
+/* Mobile-first colorful adjustments */
+@media (max-width: 640px) {
+  .card-colorful {
+    border-radius: 8px;
+  }
+  
+  .btn-colorful-primary,
+  .btn-colorful-secondary,
+  .btn-colorful-outline {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .card-colorful {
+    border-radius: 10px;
+  }
+}
+
+/* Desktop enhancements */
+@media (min-width: 1025px) {
+  .card-colorful:hover {
+    transform: translateY(-4px);
+  }
+  
+  .btn-colorful-primary:hover,
+  .btn-colorful-secondary:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY & HIGH CONTRAST SUPPORT
+============================================================================ */
+
+/* High contrast mode adjustments */
+.high-contrast .color-scheme-colorful {
+  --colorful-border: currentColor;
+  --colorful-border-light: currentColor;
+  --colorful-border-strong: currentColor;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .color-scheme-colorful *,
+  .color-scheme-colorful *::before,
+  .color-scheme-colorful *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================================
+   COLORFUL THEME INTEGRATIONS
+============================================================================ */
+
+/* Integration with existing components */
+.color-scheme-colorful .unified-component {
+  border-color: var(--colorful-border);
+  background: var(--colorful-surface);
+}
+
+.color-scheme-colorful .unified-component:hover {
+  border-color: var(--colorful-primary-light);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+/* Override monochrome with colorful variants */
+.color-scheme-colorful .mono-btn {
+  background: var(--colorful-primary);
+  color: var(--colorful-text-inverse);
+}
+
+.color-scheme-colorful .mono-card {
+  background: var(--colorful-surface);
+  border-color: var(--colorful-border);
+}
+
+/* ============================================================================
+   UTILITY CLASSES FOR COLORFUL THEME
+============================================================================ */
+
+/* Background utilities */
+.bg-colorful-primary { background-color: var(--colorful-primary); }
+.bg-colorful-secondary { background-color: var(--colorful-secondary); }
+.bg-colorful-accent { background-color: var(--colorful-accent); }
+.bg-colorful-surface { background-color: var(--colorful-surface); }
+.bg-colorful-success { background-color: var(--colorful-success); }
+.bg-colorful-warning { background-color: var(--colorful-warning); }
+.bg-colorful-error { background-color: var(--colorful-error); }
+.bg-colorful-info { background-color: var(--colorful-info); }
+
+/* Text utilities */
+.text-colorful-primary { color: var(--colorful-primary); }
+.text-colorful-secondary { color: var(--colorful-secondary); }
+.text-colorful-accent { color: var(--colorful-accent); }
+.text-colorful-success { color: var(--colorful-success); }
+.text-colorful-warning { color: var(--colorful-warning); }
+.text-colorful-error { color: var(--colorful-error); }
+.text-colorful-info { color: var(--colorful-info); }
+
+/* Border utilities */
+.border-colorful-primary { border-color: var(--colorful-primary); }
+.border-colorful-secondary { border-color: var(--colorful-secondary); }
+.border-colorful-accent { border-color: var(--colorful-accent); }
+.border-colorful { border-color: var(--colorful-border); }
+.border-colorful-strong { border-color: var(--colorful-border-strong); }
+
+/* Ring utilities for focus states */
+.ring-colorful-primary { --tw-ring-color: rgba(59, 130, 246, 0.5); }
+.ring-colorful-secondary { --tw-ring-color: rgba(139, 92, 246, 0.5); }
+.ring-colorful-accent { --tw-ring-color: rgba(6, 182, 212, 0.5); }

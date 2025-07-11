@@ -84,7 +84,9 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
-    "@prisma/client": "6",
-    "@types/minimatch": "^6.0.0"
+    "@prisma/client": "^6.11.1",
+    "@types/jssip": "^3.5.4",
+    "@types/minimatch": "^6.0.0",
+    "jssip": "^3.10.1"
   }
 }

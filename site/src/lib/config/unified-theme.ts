@@ -210,6 +210,100 @@ export const UNIFIED_THEME_CONFIG = {
         900: '#f0f6fc',
       },
     } as ColorPalette,
+
+    // Colorful theme - Light mode
+    colorfulLight: {
+      // Primary colors
+      primary: '#3b82f6',
+      secondary: '#8b5cf6',
+      accent: '#06b6d4',
+
+      // Background colors
+      background: '#fefefe',
+      surface: '#f8fafc',
+      surfaceElevated: '#f1f5f9',
+
+      // Text colors
+      text: '#1e293b',
+      textSecondary: '#475569',
+      textMuted: '#64748b',
+
+      // Border colors
+      border: '#cbd5e1',
+      borderLight: '#e2e8f0',
+
+      // State colors
+      hover: '#f1f5f9',
+      active: '#e2e8f0',
+      disabled: '#f8fafc',
+
+      // Status colors
+      success: '#10b981',
+      warning: '#f59e0b',
+      error: '#ef4444',
+      info: '#06b6d4',
+
+      // Gray scale
+      gray: {
+        50: '#f8fafc',
+        100: '#f1f5f9',
+        200: '#e2e8f0',
+        300: '#cbd5e1',
+        400: '#94a3b8',
+        500: '#64748b',
+        600: '#475569',
+        700: '#334155',
+        800: '#1e293b',
+        900: '#0f172a',
+      },
+    } as ColorPalette,
+
+    // Colorful theme - Dark mode
+    colorfulDark: {
+      // Primary colors
+      primary: '#60a5fa',
+      secondary: '#a78bfa',
+      accent: '#22d3ee',
+
+      // Background colors
+      background: '#0f172a',
+      surface: '#1e293b',
+      surfaceElevated: '#334155',
+
+      // Text colors
+      text: '#f8fafc',
+      textSecondary: '#cbd5e1',
+      textMuted: '#94a3b8',
+
+      // Border colors
+      border: '#475569',
+      borderLight: '#334155',
+
+      // State colors
+      hover: '#334155',
+      active: '#475569',
+      disabled: '#1e293b',
+
+      // Status colors
+      success: '#34d399',
+      warning: '#fbbf24',
+      error: '#f87171',
+      info: '#22d3ee',
+
+      // Gray scale
+      gray: {
+        50: '#0f172a',
+        100: '#1e293b',
+        200: '#334155',
+        300: '#475569',
+        400: '#64748b',
+        500: '#94a3b8',
+        600: '#cbd5e1',
+        700: '#e2e8f0',
+        800: '#f1f5f9',
+        900: '#f8fafc',
+      },
+    } as ColorPalette,
   },
 
   // Typography configuration
@@ -338,17 +432,23 @@ export const UNIFIED_THEME_CONFIG = {
 // ============================================================================
 
 /**
- * Get theme colors based on mode
+ * Get theme colors based on mode and color scheme
  */
-export function getThemeColors(mode: ThemeMode): ColorPalette {
-  if (mode === 'auto') {
-    const prefersDark =
-      typeof window !== 'undefined'
-        ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        : false;
-    return UNIFIED_THEME_CONFIG.colors[prefersDark ? 'dark' : 'light'];
+export function getThemeColors(
+  mode: ThemeMode, 
+  colorScheme: ColorScheme = 'monochrome'
+): ColorPalette {
+  const actualMode = mode === 'auto' 
+    ? (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : mode === 'dark' ? 'dark' : 'light';
+
+  // Return colorful theme colors if colorScheme is colorful
+  if (colorScheme === 'colorful') {
+    return UNIFIED_THEME_CONFIG.colors[actualMode === 'dark' ? 'colorfulDark' : 'colorfulLight'];
   }
-  return UNIFIED_THEME_CONFIG.colors[mode === 'dark' ? 'dark' : 'light'];
+
+  // Return monochrome theme colors (default)
+  return UNIFIED_THEME_CONFIG.colors[actualMode];
 }
 
 /**

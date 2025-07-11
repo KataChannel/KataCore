@@ -315,6 +315,59 @@ export function ThemeModeToggle({
 }
 
 /**
+ * Color scheme toggle button
+ */
+export function ColorSchemeToggle({
+  className = '',
+  showLabel = false,
+}: {
+  className?: string;
+  showLabel?: boolean;
+}) {
+  const { config, setColorScheme } = useUnifiedTheme();
+
+  const getSchemeIcon = () => {
+    switch (config.colorScheme) {
+      case 'monochrome':
+        return '⚫';
+      case 'colorful':
+        return '🎨';
+      default:
+        return '⚫';
+    }
+  };
+
+  const getSchemeLabel = () => {
+    switch (config.colorScheme) {
+      case 'monochrome':
+        return config.language === 'vi' ? 'Đơn sắc' : 'Monochrome';
+      case 'colorful':
+        return config.language === 'vi' ? 'Nhiều màu' : 'Colorful';
+      default:
+        return 'Monochrome';
+    }
+  };
+
+  const toggleColorScheme = () => {
+    setColorScheme(config.colorScheme === 'monochrome' ? 'colorful' : 'monochrome');
+  };
+
+  return (
+    <button
+      onClick={toggleColorScheme}
+      className={`px-4 py-2 rounded border border-border hover:bg-hover transition-colors ${className}`}
+      aria-label={
+        config.language === 'vi' ? 'Chuyển phong cách màu' : 'Toggle color scheme'
+      }
+      title={`${config.language === 'vi' ? 'Phong cách hiện tại' : 'Current scheme'}: ${getSchemeLabel()}`}
+    >
+      <span className="text-lg">{getSchemeIcon()}</span>
+      {showLabel && <span className="ml-2">{getSchemeLabel()}</span>}
+    </button>
+  );
+}
+
+/**
  * Language toggle button
  */
 export function LanguageToggle({

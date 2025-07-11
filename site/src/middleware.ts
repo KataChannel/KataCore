@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
+import { siteConfig } from './lib/config/site';
 
 export async function middleware(request: NextRequest) {
   console.log('Middleware called for:', request.nextUrl.pathname);
@@ -42,7 +43,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // If on protected route and not authenticated, redirect to login
-  if (isProtectedRoute) {
+  if (isProtectedRoute && siteConfig.auth.loginRequired) {
     if (!isValidToken) {
       console.log(
         'Redirecting unauthenticated user from protected route to login'

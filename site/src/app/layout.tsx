@@ -116,7 +116,7 @@ export default function RootLayout({
             defaultConfig={{
               mode: 'light',
               language: 'vi',
-              colorScheme: 'monochrome',
+              colorScheme: 'monochrome', // Can be 'monochrome' or 'colorful'
             }}
             enablePersistence={true}
             enableSystemListener={true}
