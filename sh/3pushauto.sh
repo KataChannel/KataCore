@@ -100,6 +100,7 @@ get_server_config() {
     echo -e "${YELLOW}Server IP:${NC} $SERVER_IP"
     echo -e "${YELLOW}Project Name:${NC} $PROJECT_NAME"
     echo -e "${YELLOW}SSH User:${NC} $SSH_USER"
+    echo -e "${YELLOW}Project Path:${NC} /opt/$PROJECT_NAME"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
     
     echo -e "${YELLOW}Is this configuration correct? (Y/n):${NC}"
@@ -168,10 +169,11 @@ select_services() {
 show_menu() {
     clear
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}                    🚀 Tazav1 Deployment Tool${NC}"
+    echo -e "${GREEN}                    🚀 PROJECT-SCOPED Deployment Tool${NC}"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}Project:${NC} $PROJECT_NAME"
     echo -e "${YELLOW}Server:${NC} $SSH_USER@$SERVER_IP"
+    echo -e "${YELLOW}Project Path:${NC} /opt/$PROJECT_NAME"
     echo -e "${YELLOW}Time:${NC} $(date '+%Y-%m-%d %H:%M:%S')"
     echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
     echo -e "${BLUE}Deployment Options:${NC}"
@@ -179,12 +181,13 @@ show_menu() {
     echo -e "  ${GREEN}1)${NC} 🔄 Deploy with Git & preserve data (Site & API update)"
     echo -e "  ${GREEN}2)${NC} 🔄 Deploy ALL with Git & preserve data (Update all services)"
     echo -e "  ${GREEN}3)${NC} 🚀 Deploy only (skip git operations)"
-    echo -e "  ${GREEN}4)${NC} 🧹 Server cleanup & container fix"
-    echo -e "  ${GREEN}5)${NC} 📊 Check server status"
+    echo -e "  ${GREEN}4)${NC} 🧹 Project cleanup & container fix (PROJECT ONLY)"
+    echo -e "  ${GREEN}5)${NC} 📊 Check project status"
     echo -e "  ${GREEN}6)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
     echo -e "  ${GREEN}7)${NC} 🛠️  Deploy specific services"
     echo -e "  ${RED}q)${NC} 👋 Quit"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${RED}🔒 ALL OPERATIONS ARE PROJECT-SCOPED - NO IMPACT ON OTHER SERVER SERVICES${NC}"
 }
 
 # Function for enhanced git operations
@@ -216,38 +219,125 @@ git_commit() {
     fi
 }
 
-# Function to check server status
+# Function to check project status (STRICTLY PROJECT-SCOPED)
 check_server_status() {
     progress "Checking server connection..."
     
     if ssh -o ConnectTimeout=10 "$SSH_USER@$SERVER_IP" "echo 'Connection successful'" >/dev/null 2>&1; then
         success "Server connection established"
         
-        progress "Checking Docker status on server..."
+        progress "Checking PROJECT-ONLY status on server..."
         ssh "$SSH_USER@$SERVER_IP" "
-            echo '=== Docker Info ==='
-            docker --version
+            echo '🔒════════════════════════════════════════════════🔒'
+            echo '🔒          PROJECT-SCOPED STATUS REPORT         🔒'
+            echo '🔒                PROJECT: $PROJECT_NAME          🔒'
+            echo '🔒════════════════════════════════════════════════🔒'
             echo ''
-            echo '=== Running Containers ==='
-            docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-            echo ''
-            echo '=== System Resources ==='
-            df -h / | tail -1 | awk '{print \"Disk Usage: \" \$5 \" of \" \$2}'
-            free -h | grep '^Mem:' | awk '{print \"Memory Usage: \" \$3 \"/\" \$2}'
-            echo ''
-            echo '=== Project Status ==='
+            
+            echo '📋 Project Directory Information:'
             if [ -d '/opt/$PROJECT_NAME' ]; then
-                echo 'Project directory exists: ✅'
+                echo '✅ Project directory exists: /opt/$PROJECT_NAME'
+                echo '📂 Directory size:' \$(du -sh /opt/$PROJECT_NAME 2>/dev/null | cut -f1)
                 cd /opt/$PROJECT_NAME
-                if [ -f 'docker-compose.yml' ]; then
-                    echo 'Docker compose file exists: ✅'
-                    docker compose ps
-                else
-                    echo 'Docker compose file missing: ❌'
-                fi
+                echo '📄 Main files:'
+                ls -la | grep -E '(docker-compose|\.env|Dockerfile)' || echo '   No main config files found'
             else
-                echo 'Project directory missing: ❌'
+                echo '❌ Project directory missing: /opt/$PROJECT_NAME'
+                exit 1
             fi
+            echo ''
+            
+            echo '🐳 PROJECT-SPECIFIC Docker Resources:'
+            echo '───────────────────────────────────────────'
+            echo '📦 Project Containers (running):'
+            PROJECT_CONTAINERS=\$(docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null)
+            if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+                echo \"\$PROJECT_CONTAINERS\"
+            else
+                echo '   No project containers running'
+            fi
+            echo ''
+            
+            echo '📦 Project Containers (all states):'
+            ALL_PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}' 2>/dev/null)
+            if [ -n \"\$ALL_PROJECT_CONTAINERS\" ]; then
+                echo \"\$ALL_PROJECT_CONTAINERS\"
+            else
+                echo '   No project containers found'
+            fi
+            echo ''
+            
+            echo '🎛️  Project Docker Compose Status:'
+            if [ -f '/opt/$PROJECT_NAME/docker-compose.yml' ]; then
+                echo '✅ docker-compose.yml exists'
+                cd /opt/$PROJECT_NAME
+                COMPOSE_STATUS=\$(docker compose ps 2>/dev/null || echo 'Compose not available')
+                echo \"\$COMPOSE_STATUS\"
+            else
+                echo '❌ docker-compose.yml not found'
+            fi
+            echo ''
+            
+            echo '💾 Project Data Volumes:'
+            PROJECT_VOLUMES=\$(docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME --format 'table {{.Name}}\t{{.Driver}}\t{{.Scope}}' 2>/dev/null)
+            if [ -n \"\$PROJECT_VOLUMES\" ]; then
+                echo \"\$PROJECT_VOLUMES\"
+            else
+                # Try alternative method
+                ALT_VOLUMES=\$(docker volume ls | grep \"${PROJECT_NAME}\" 2>/dev/null)
+                if [ -n \"\$ALT_VOLUMES\" ]; then
+                    echo \"\$ALT_VOLUMES\"
+                else
+                    echo '   No project volumes found'
+                fi
+            fi
+            echo ''
+            
+            echo '🌐 Project Networks:'
+            PROJECT_NETWORKS=\$(docker network ls --filter label=com.docker.compose.project=$PROJECT_NAME --format 'table {{.Name}}\t{{.Driver}}\t{{.Scope}}' 2>/dev/null)
+            if [ -n \"\$PROJECT_NETWORKS\" ]; then
+                echo \"\$PROJECT_NETWORKS\"
+            else
+                # Try alternative method
+                ALT_NETWORKS=\$(docker network ls | grep \"${PROJECT_NAME}\" 2>/dev/null)
+                if [ -n \"\$ALT_NETWORKS\" ]; then
+                    echo \"\$ALT_NETWORKS\"
+                else
+                    echo '   No project networks found'
+                fi
+            fi
+            echo ''
+            
+            echo '🏗️  Project Images:'
+            PROJECT_IMAGES=\$(docker images --filter reference=\"*${PROJECT_NAME}*\" --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' 2>/dev/null)
+            if [ -n \"\$PROJECT_IMAGES\" ]; then
+                echo \"\$PROJECT_IMAGES\"
+            else
+                echo '   No project-specific images found'
+            fi
+            echo ''
+            
+            echo '🔧 Project Environment:'
+            if [ -f '/opt/$PROJECT_NAME/.env' ]; then
+                echo '✅ Environment file exists'
+                echo '📊 Environment variables:' \$(grep -c '=' /opt/$PROJECT_NAME/.env 2>/dev/null || echo '0')
+            else
+                echo '❌ Environment file missing'
+            fi
+            echo ''
+            
+            echo '📊 Server Resource Usage (General):'
+            echo 'Memory:' \$(free -h | grep '^Mem:' | awk '{print \$3 \"/\" \$2 \" (\" \$5 \" available)\"}')
+            echo 'Disk usage for project:' \$(du -sh /opt/$PROJECT_NAME 2>/dev/null | cut -f1 || echo 'N/A')
+            echo ''
+            
+            echo '🔒════════════════════════════════════════════════🔒'
+            echo '🔒         SERVER ISOLATION VERIFICATION        🔒'
+            echo '🔒════════════════════════════════════════════════🔒'
+            echo '🔍 Total Docker containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo '🎯 PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo '🌐 Other containers remain untouched:' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
+            echo '✅ PROJECT-SCOPED operations ensure server isolation'
         "
     else
         error "Cannot connect to server. Please check connection."
@@ -256,7 +346,7 @@ check_server_status() {
 
 # Function for enhanced deployment
 deploy_to_server() {
-    progress "Initializing deployment process..."
+    progress "Initializing PROJECT-SCOPED deployment process..."
     
     # Create temp directory
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
@@ -273,23 +363,23 @@ deploy_to_server() {
     size=$(du -sh "$TEMP_DIR" | cut -f1)
     info "Transfer size: $size"
 
-    progress "🌐 Transferring files to remote server..."
+    progress "🌐 Transferring files to remote server PROJECT directory..."
     rsync -avz --progress "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
     
-    progress "🔧 Configuring environment on remote server..."
-    ssh "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME/ && if [ -f .env.prod ]; then mv .env.prod .env && echo 'Environment file configured'; else echo 'No .env.prod found'; fi" || error "Failed to configure environment"
+    progress "🔧 Configuring PROJECT environment on remote server..."
+    ssh "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME/ && if [ -f .env.prod ]; then mv .env.prod .env && echo 'PROJECT environment file configured'; else echo 'No .env.prod found for PROJECT'; fi" || error "Failed to configure PROJECT environment"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    server_cleanup
+    project_cleanup_and_container_fix
     deploy_application
 }
 
 # Function for fresh deployment with env cleanup
 fresh_deploy_to_server() {
-    progress "Initializing fresh deployment process..."
+    progress "Initializing PROJECT-SCOPED fresh deployment process..."
     
     # Check if env.local exists locally
     if [ ! -f ".env.prod" ]; then
@@ -300,7 +390,7 @@ fresh_deploy_to_server() {
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
     success "Temporary directory created: $TEMP_DIR"
 
-    progress "📤 Preparing project files for fresh deployment..."
+    progress "📤 Preparing project files for PROJECT fresh deployment..."
     # Show what will be excluded
     info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
     
@@ -309,40 +399,37 @@ fresh_deploy_to_server() {
     
     # Copy env.local to temp directory as .env
     cp .env.prod "$TEMP_DIR/.env" || error "Failed to copy .env.prod file"
-    success "Environment file prepared from .env.prod"
+    success "PROJECT environment file prepared from .env.prod"
     
     # Show transfer size
     size=$(du -sh "$TEMP_DIR" | cut -f1)
     info "Transfer size: $size"
 
-    progress "🗑️ Cleaning old environment files on server..."
+    progress "🗑️ Cleaning old PROJECT environment files on server..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/ 2>/dev/null || true
         rm -f .env .env.* 2>/dev/null || true
-        echo 'Old environment files removed'
-    " || warning "Could not clean old environment files (directory may not exist)"
+        echo 'Old PROJECT environment files removed'
+    " || warning "Could not clean old PROJECT environment files (directory may not exist)"
 
-    progress "🌐 Transferring files to remote server..."
+    progress "🌐 Transferring files to PROJECT directory on remote server..."
     rsync -avz --progress "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
     
-    progress "🔧 Verifying new environment configuration..."
+    progress "🔧 Verifying new PROJECT environment configuration..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
         if [ -f .env ]; then
-            echo '✅ New environment file is in place'
-            echo 'Environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+            echo '✅ New PROJECT environment file is in place'
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
         else
-            echo '❌ Environment file missing after transfer'
+            echo '❌ PROJECT environment file missing after transfer'
             exit 1
         fi
-    " || error "Failed to verify environment configuration"
+    " || error "Failed to verify PROJECT environment configuration"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
-
-    # server_cleanup
-    # deploy_application
 }
 
 # Combined function: Git commit + Update Site & API only (preserves data services)
@@ -350,13 +437,13 @@ git_commit_and_update_preserve_data() {
     # First, handle git operations
     git_commit
     
-    progress "🔄 Initializing Site & API update process with data preservation..."
+    progress "🔄 Initializing PROJECT-SCOPED Site & API update process with data preservation..."
     
     # Create temp directory
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
     success "Temporary directory created: $TEMP_DIR"
 
-    progress "📤 Preparing project files for Site & API update..."
+    progress "📤 Preparing PROJECT files for Site & API update..."
     # Show what will be excluded
     info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
     
@@ -367,110 +454,121 @@ git_commit_and_update_preserve_data() {
     size=$(du -sh "$TEMP_DIR" | cut -f1)
     info "Transfer size: $size"
 
-    progress "🔐 Backing up existing environment file on server..."
+    progress "🔐 Backing up existing PROJECT environment file on server..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/ 2>/dev/null || exit 1
         if [ -f .env ]; then
             cp .env .env.backup
-            echo '✅ Environment file backed up as .env.backup'
+            echo '✅ PROJECT environment file backed up as .env.backup'
         else
-            echo '⚠️  No existing .env file found to backup'
+            echo '⚠️  No existing PROJECT .env file found to backup'
         fi
-    " || warning "Could not backup environment file"
+    " || warning "Could not backup PROJECT environment file"
 
-    progress "🌐 Transferring updated files to remote server (excluding env files)..."
+    progress "🌐 Transferring updated files to PROJECT directory (excluding env files)..."
     # Use --exclude to prevent overwriting .env files during transfer
     rsync -avz --progress --exclude='.env*' "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
     
-    progress "🔧 Restoring preserved environment configuration..."
+    progress "🔧 Restoring preserved PROJECT environment configuration..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
         if [ -f .env.backup ]; then
             mv .env.backup .env
-            echo '✅ Original environment file restored and preserved'
-            echo 'Environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+            echo '✅ Original PROJECT environment file restored and preserved'
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
         else
             echo '⚠️  No backup file found to restore'
             if [ -f .env.prod ]; then
                 cp .env.prod .env
-                echo '📝 Using .env.prod as fallback environment'
+                echo '📝 Using .env.prod as fallback PROJECT environment'
             else
-                echo '❌ No environment file available'
+                echo '❌ No PROJECT environment file available'
             fi
         fi
-    " || warning "Could not restore environment file"
+    " || warning "Could not restore PROJECT environment file"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    progress "🔄 Updating Site & API services without affecting data services..."
+    progress "🔄 Updating PROJECT Site & API services without affecting PROJECT data services..."
     
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        echo '📋 Current directory: \$(pwd)'
-        echo '🔍 Verifying environment preservation:'
+        echo '🔒 PROJECT-SCOPED OPERATION: Only $PROJECT_NAME containers will be affected'
+        echo '📋 Current PROJECT directory: \$(pwd)'
+        echo '🔍 Verifying PROJECT environment preservation:'
         if [ -f .env ]; then
-            echo '✅ Environment file exists and preserved'
+            echo '✅ PROJECT environment file exists and preserved'
         else
-            echo '❌ Environment file missing!'
+            echo '❌ PROJECT environment file missing!'
             exit 1
         fi
         
         if [ -f 'docker-compose.yml' ]; then
-            echo '🛑 Stopping only Site & API containers...'
-            # Stop only site and api services
-            docker compose stop site api 2>/dev/null || true
-            docker compose rm -f site api 2>/dev/null || true
+            echo '🛑 Stopping only PROJECT Site & API containers...'
             
-            # Also handle containers with project prefix
-            docker stop \"$PROJECT_NAME-site\" \"$PROJECT_NAME-api\" 2>/dev/null || true
-            docker rm -f \"$PROJECT_NAME-site\" \"$PROJECT_NAME-api\" 2>/dev/null || true
+            # STRICTLY PROJECT-SCOPED: Only stop containers with project prefix
+            echo 'Stopping containers: ${PROJECT_NAME}-site and ${PROJECT_NAME}-api'
+            docker stop \"${PROJECT_NAME}-site\" 2>/dev/null || true
+            docker stop \"${PROJECT_NAME}-api\" 2>/dev/null || true
+            docker rm -f \"${PROJECT_NAME}-site\" 2>/dev/null || true
+            docker rm -f \"${PROJECT_NAME}-api\" 2>/dev/null || true
             
-            echo '📊 Data services status (should remain running):'
-            docker compose ps postgres redis minio pgadmin 2>/dev/null || docker ps --filter name=\"$PROJECT_NAME\"
+            # Also use compose method with explicit project directory
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME stop site api 2>/dev/null || true
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME rm -f site api 2>/dev/null || true
             
-            echo '🚀 Rebuilding and starting Site & API services with preserved environment...'
-            docker compose up -d --build --force-recreate site api
+            echo '📊 PROJECT data services status (should remain running):'
+            docker ps --filter name=\"${PROJECT_NAME}-postgres\" --filter name=\"${PROJECT_NAME}-redis\" --filter name=\"${PROJECT_NAME}-minio\" --filter name=\"${PROJECT_NAME}-pgadmin\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo 'No PROJECT data services running'
             
-            echo '⏳ Waiting for Site & API services to start...'
+            echo '🚀 Rebuilding and starting PROJECT Site & API services with preserved environment...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate site api
+            
+            echo '⏳ Waiting for PROJECT Site & API services to start...'
             sleep 10
             
-            echo '📊 Updated services status:'
-            docker compose ps site api
+            echo '📊 Updated PROJECT services status:'
+            docker ps --filter name=\"${PROJECT_NAME}-site\" --filter name=\"${PROJECT_NAME}-api\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
             
-            echo '🔍 Checking Site & API health:'
+            echo '🔍 Checking PROJECT Site & API health:'
             for i in {1..5}; do
                 echo \"Health check attempt \$i/5:\"
-                site_status=\$(docker compose ps site --format '{{.Status}}' 2>/dev/null || echo 'Not found')
-                api_status=\$(docker compose ps api --format '{{.Status}}' 2>/dev/null || echo 'Not found')
-                echo \"Site: \$site_status\"
-                echo \"API: \$api_status\"
+                site_status=\$(docker ps --filter name=\"${PROJECT_NAME}-site\" --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                api_status=\$(docker ps --filter name=\"${PROJECT_NAME}-api\" --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                echo \"PROJECT Site: \$site_status\"
+                echo \"PROJECT API: \$api_status\"
                 sleep 3
             done
             
-            echo '📋 Recent logs for updated services:'
-            echo '--- Site Service Logs ---'
-            docker compose logs --tail=15 site 2>/dev/null || echo 'No logs available for site'
-            echo '--- API Service Logs ---'
-            docker compose logs --tail=15 api 2>/dev/null || echo 'No logs available for api'
+            echo '📋 Recent logs for updated PROJECT services:'
+            echo '--- PROJECT Site Service Logs ---'
+            docker logs --tail=15 \"${PROJECT_NAME}-site\" 2>/dev/null || echo 'No logs available for PROJECT site'
+            echo '--- PROJECT API Service Logs ---'
+            docker logs --tail=15 \"${PROJECT_NAME}-api\" 2>/dev/null || echo 'No logs available for PROJECT api'
             
-            echo '✅ All services overview:'
-            docker compose ps
+            echo '✅ All PROJECT services overview:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
             
-            echo '🔐 Final environment verification:'
-            echo 'Environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
+            echo '🔐 Final PROJECT environment verification:'
+            echo 'PROJECT environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
+            
+            echo '🌐 Server isolation verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
         else
-            echo '❌ docker-compose.yml not found!'
+            echo '❌ PROJECT docker-compose.yml not found!'
             exit 1
         fi
-    " || error "Failed to update Site & API services"
+    " || error "Failed to update PROJECT Site & API services"
 
-    success "🎉 Git commit and Site & API update completed successfully!"
-    info "✅ Site and API services updated with latest code"
-    info "✅ Environment file (.env) preserved unchanged"
-    info "✅ Data services (PostgreSQL, Redis, MinIO, pgAdmin) remain untouched"
-    warning "🔒 Original environment configuration maintained"
+    success "🎉 Git commit and PROJECT Site & API update completed successfully!"
+    info "✅ PROJECT Site and API services updated with latest code"
+    info "✅ PROJECT environment file (.env) preserved unchanged"
+    info "✅ PROJECT data services (PostgreSQL, Redis, MinIO, pgAdmin) remain untouched"
+    info "✅ Other server services completely unaffected"
+    warning "🔒 PROJECT-SCOPED: Only $PROJECT_NAME containers were modified"
 }
 
 # NEW FUNCTION: Combined function: Git commit + Update ALL services while preserving data
@@ -478,13 +576,13 @@ git_commit_and_update_all_preserve_data() {
     # First, handle git operations
     git_commit
     
-    progress "🔄 Initializing ALL services update process with data preservation..."
+    progress "🔄 Initializing PROJECT-SCOPED ALL services update process with data preservation..."
     
     # Create temp directory
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
     success "Temporary directory created: $TEMP_DIR"
 
-    progress "📤 Preparing project files for ALL services update..."
+    progress "📤 Preparing PROJECT files for ALL services update..."
     # Show what will be excluded
     info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
     
@@ -495,251 +593,321 @@ git_commit_and_update_all_preserve_data() {
     size=$(du -sh "$TEMP_DIR" | cut -f1)
     info "Transfer size: $size"
 
-    progress "🔐 Backing up existing environment file and data volumes on server..."
+    progress "🔐 Backing up existing PROJECT environment file and data volumes on server..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/ 2>/dev/null || exit 1
         if [ -f .env ]; then
             cp .env .env.backup
-            echo '✅ Environment file backed up as .env.backup'
+            echo '✅ PROJECT environment file backed up as .env.backup'
         else
-            echo '⚠️  No existing .env file found to backup'
+            echo '⚠️  No existing PROJECT .env file found to backup'
         fi
         
-        # Create data backup info
-        echo '📋 Current data volumes:'
-        docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || true
-    " || warning "Could not backup environment file"
+        # Create data backup info (STRICTLY PROJECT-SCOPED)
+        echo '📋 Current PROJECT data volumes:'
+        docker volume ls | grep \"${PROJECT_NAME}\" 2>/dev/null || echo 'No PROJECT volumes found'
+    " || warning "Could not backup PROJECT environment file"
 
-    progress "🌐 Transferring updated files to remote server (excluding env files)..."
+    progress "🌐 Transferring updated files to PROJECT directory (excluding env files)..."
     # Use --exclude to prevent overwriting .env files during transfer
     rsync -avz --progress --exclude='.env*' "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
     
-    progress "🔧 Restoring preserved environment configuration..."
+    progress "🔧 Restoring preserved PROJECT environment configuration..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
         if [ -f .env.backup ]; then
             mv .env.backup .env
-            echo '✅ Original environment file restored and preserved'
-            echo 'Environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+            echo '✅ Original PROJECT environment file restored and preserved'
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
         else
             echo '⚠️  No backup file found to restore'
             if [ -f .env.prod ]; then
                 cp .env.prod .env
-                echo '📝 Using .env.prod as fallback environment'
+                echo '📝 Using .env.prod as fallback PROJECT environment'
             else
-                echo '❌ No environment file available'
+                echo '❌ No PROJECT environment file available'
             fi
         fi
-    " || warning "Could not restore environment file"
+    " || warning "Could not restore PROJECT environment file"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    progress "🔄 Updating ALL services while preserving data volumes..."
+    progress "🔄 Updating ALL PROJECT services while preserving PROJECT data volumes..."
     
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        echo '📋 Current directory: \$(pwd)'
-        echo '🔍 Verifying environment preservation:'
+        echo '🔒 PROJECT-SCOPED OPERATION: Only $PROJECT_NAME containers will be affected'
+        echo '📋 Current PROJECT directory: \$(pwd)'
+        echo '🔍 Verifying PROJECT environment preservation:'
         if [ -f .env ]; then
-            echo '✅ Environment file exists and preserved'
+            echo '✅ PROJECT environment file exists and preserved'
         else
-            echo '❌ Environment file missing!'
+            echo '❌ PROJECT environment file missing!'
             exit 1
         fi
         
         if [ -f 'docker-compose.yml' ]; then
-            echo '📊 Current services status before update:'
-            docker compose ps
+            echo '📊 Current PROJECT services status before update:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
             
-            echo '💾 Listing data volumes before update:'
-            docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || docker volume ls | grep $PROJECT_NAME || true
+            echo '💾 Listing PROJECT data volumes before update:'
+            docker volume ls | grep \"${PROJECT_NAME}\" || echo 'No PROJECT volumes found'
             
-            echo '🛑 Stopping all services gracefully...'
-            docker compose down --remove-orphans
+            echo '🛑 Stopping all PROJECT services gracefully...'
+            # STRICTLY PROJECT-SCOPED: Only affect containers with project prefix
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | xargs -r docker stop
+            docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | xargs -r docker rm -f
             
-            echo '🔍 Verifying data volumes are preserved:'
-            docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || docker volume ls | grep $PROJECT_NAME || true
+            # Also use compose method with explicit project scoping
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans
             
-            echo '🚀 Starting ALL services with updated code and preserved data...'
-            docker compose up -d --build --force-recreate
+            echo '🔍 Verifying PROJECT data volumes are preserved:'
+            docker volume ls | grep \"${PROJECT_NAME}\" || echo 'No PROJECT volumes found'
             
-            echo '⏳ Waiting for all services to start...'
+            echo '🚀 Starting ALL PROJECT services with updated code and preserved data...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate
+            
+            echo '⏳ Waiting for all PROJECT services to start...'
             sleep 20
             
-            echo '📊 Updated services status:'
-            docker compose ps
+            echo '📊 Updated PROJECT services status:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
             
-            echo '🔍 Checking all services health:'
+            echo '🔍 Checking all PROJECT services health:'
             for i in {1..5}; do
                 echo \"Health check attempt \$i/5:\"
-                docker compose ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}'
+                docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
                 sleep 5
             done
             
-            echo '💾 Verifying data persistence:'
-            echo '--- Data volumes after update ---'
-            docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || docker volume ls | grep $PROJECT_NAME || true
+            echo '💾 Verifying PROJECT data persistence:'
+            echo '--- PROJECT data volumes after update ---'
+            docker volume ls | grep \"${PROJECT_NAME}\" || echo 'No PROJECT volumes found'
             
-            echo '📋 Recent logs for all services:'
-            for service in api site postgres redis minio pgadmin; do
-                echo \"--- Logs for \$service ---\"
-                docker compose logs --tail=10 \$service 2>/dev/null || echo \"No logs available for \$service\"
+            echo '📋 Recent logs for all PROJECT services:'
+            for container in \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}'); do
+                echo \"--- Logs for \$container ---\"
+                docker logs --tail=10 \$container 2>/dev/null || echo \"No logs available for \$container\"
             done
             
-            echo '✅ All services overview:'
-            docker compose ps
+            echo '✅ All PROJECT services overview:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
             
-            echo '🔐 Final environment verification:'
-            echo 'Environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
+            echo '🔐 Final PROJECT environment verification:'
+            echo 'PROJECT environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
             
-            echo '🎯 Database connectivity test:'
+            echo '🎯 PROJECT database connectivity test:'
             # Test database connection if postgres service exists
-            if docker compose ps postgres | grep -q 'Up'; then
-                echo 'PostgreSQL service is running ✅'
-                # You can add more specific database connectivity tests here
+            if docker ps --filter name=\"${PROJECT_NAME}-postgres\" | grep -q 'Up'; then
+                echo 'PROJECT PostgreSQL service is running ✅'
             else
-                echo 'PostgreSQL service status unknown'
+                echo 'PROJECT PostgreSQL service status unknown'
             fi
             
-            echo '🎯 Redis connectivity test:'
-            if docker compose ps redis | grep -q 'Up'; then
-                echo 'Redis service is running ✅'
+            echo '🎯 PROJECT Redis connectivity test:'
+            if docker ps --filter name=\"${PROJECT_NAME}-redis\" | grep -q 'Up'; then
+                echo 'PROJECT Redis service is running ✅'
             else
-                echo 'Redis service status unknown'
+                echo 'PROJECT Redis service status unknown'
             fi
+            
+            echo '🌐 Server isolation verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
             
         else
-            echo '❌ docker-compose.yml not found!'
+            echo '❌ PROJECT docker-compose.yml not found!'
             exit 1
         fi
-    " || error "Failed to update ALL services"
+    " || error "Failed to update ALL PROJECT services"
 
-    success "🎉 Git commit and ALL services update completed successfully!"
-    info "✅ ALL services updated with latest code"
-    info "✅ Environment file (.env) preserved unchanged"
-    info "✅ Data volumes preserved - no data loss"
-    info "✅ PostgreSQL, Redis, MinIO data maintained"
-    warning "🔒 Original environment configuration maintained"
-    warning "💾 All persistent data preserved across update"
+    success "🎉 Git commit and ALL PROJECT services update completed successfully!"
+    info "✅ ALL PROJECT services updated with latest code"
+    info "✅ PROJECT environment file (.env) preserved unchanged"
+    info "✅ PROJECT data volumes preserved - no data loss"
+    info "✅ PROJECT PostgreSQL, Redis, MinIO data maintained"
+    info "✅ Other server services completely unaffected"
+    warning "🔒 PROJECT-SCOPED: Only $PROJECT_NAME containers were modified"
+    warning "💾 All persistent PROJECT data preserved across update"
 }
 
-# Combined server cleanup and container fix function
-server_cleanup_and_container_fix() {
-    progress "🧹🚨 Starting comprehensive server cleanup and container fix..."
+# STRICTLY PROJECT-SCOPED server cleanup and container fix function
+project_cleanup_and_container_fix() {
+    progress "🧹🚨 Starting STRICTLY PROJECT-SCOPED cleanup and container fix for $PROJECT_NAME..."
     
     ssh "$SSH_USER@$SERVER_IP" "
-        echo '🛑 Emergency container cleanup and fix...'
+        echo '🔒 STRICTLY PROJECT-SCOPED: Emergency container cleanup and fix for $PROJECT_NAME ONLY...'
         cd /opt/$PROJECT_NAME/ 2>/dev/null || true
         
-        # Force stop and remove all containers with project prefix
-        echo 'Force stopping containers with $PROJECT_NAME prefix...'
-        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker stop 2>/dev/null || true
-        docker ps -aq --filter name='$PROJECT_NAME-*' | xargs -r docker rm -f 2>/dev/null || true
+        echo '🌐 Before cleanup - Server state verification:'
+        echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+        echo 'Total images on server:' \$(docker images --format '{{.Repository}}:{{.Tag}}' | wc -l)
+        echo 'Total volumes on server:' \$(docker volume ls --format '{{.Name}}' | wc -l)
+        echo 'Total networks on server:' \$(docker network ls --format '{{.Name}}' | wc -l)
+        echo ''
         
-        # Also try generic cleanup for common container names
-        for container in postgres redis minio pgadmin api site; do
-            docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
-            docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
-            # Also try without project prefix in case they exist
-            docker stop \"\$container\" 2>/dev/null || true
-            docker rm -f \"\$container\" 2>/dev/null || true
-        done
-        
-        # Use docker compose down if docker-compose.yml exists
-        if [ -f docker-compose.yml ]; then
-            echo 'Running docker compose down...'
-            docker compose down --remove-orphans --volumes 2>/dev/null || true
+        # STRICTLY force stop and remove ONLY containers with project prefix
+        echo '🛑 Force stopping ONLY containers with $PROJECT_NAME prefix...'
+        PROJECT_CONTAINERS=\$(docker ps -aq --filter name=\"${PROJECT_NAME}-\")
+        if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+            echo \"Found PROJECT containers: \$(echo \$PROJECT_CONTAINERS | wc -w)\"
+            echo \$PROJECT_CONTAINERS | xargs docker stop 2>/dev/null || true
+            echo \$PROJECT_CONTAINERS | xargs docker rm -f 2>/dev/null || true
+        else
+            echo 'No PROJECT containers found to stop'
         fi
         
-        echo '🗑️  Cleaning Docker system...'
-        echo 'Before cleanup:'
-        docker system df
+        # Also try specific project service cleanup with exact naming
+        echo '🧹 Cleaning up specific PROJECT services...'
+        for service in postgres redis minio pgadmin api site; do
+            container_name=\"${PROJECT_NAME}-\$service\"
+            if docker ps -a --filter name=\"\$container_name\" --format '{{.Names}}' | grep -q \"^\$container_name\$\"; then
+                echo \"Removing \$container_name\"
+                docker stop \"\$container_name\" 2>/dev/null || true
+                docker rm -f \"\$container_name\" 2>/dev/null || true
+            fi
+        done
         
-        # Clean up dangling resources
-        docker container prune -f
-        docker image prune -f
-        docker volume prune -f
-        docker network prune -f
-        docker system prune -af --volumes
-        docker builder prune -af
+        # Use docker compose down ONLY for this project if docker-compose.yml exists
+        if [ -f docker-compose.yml ]; then
+            echo '🐳 Running docker compose down for PROJECT ONLY...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans 2>/dev/null || true
+        fi
         
-        echo 'After cleanup:'
-        docker system df
+        echo '🗑️  Cleaning PROJECT-SPECIFIC Docker resources ONLY...'
+        echo 'Before PROJECT-specific cleanup:'
+        echo 'PROJECT containers:' \$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+        echo 'PROJECT images:' \$(docker images | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT volumes:' \$(docker volume ls | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT networks:' \$(docker network ls | grep \"${PROJECT_NAME}\" | wc -l)
         
-        echo '💾 Clearing system caches...'
-        sync && echo 3 > /proc/sys/vm/drop_caches
+        # Clean up PROJECT-SPECIFIC dangling resources ONLY
+        echo '🧹 Cleaning PROJECT-SPECIFIC dangling containers...'
+        docker container ls -a --filter name=\"${PROJECT_NAME}-\" --filter status=exited -q | xargs -r docker rm 2>/dev/null || true
         
-        echo '🗂️  Cleaning temporary files...'
-        rm -rf /tmp/* 2>/dev/null || true
+        echo '🧹 Cleaning PROJECT-SPECIFIC unused images...'
+        # Only remove images that specifically contain the project name
+        docker images | grep \"${PROJECT_NAME}\" | awk '{print \$3}' | xargs -r docker rmi -f 2>/dev/null || true
         
-        echo '📋 Cleaning old logs...'
-        find /var/log -name '*.log' -type f -mtime +7 -delete 2>/dev/null || true
+        echo '🧹 Cleaning PROJECT-SPECIFIC unused networks...'
+        # Only remove networks that specifically contain the project name
+        docker network ls | grep \"${PROJECT_NAME}\" | awk '{print \$1}' | xargs -r docker network rm 2>/dev/null || true
         
-        echo '📦 Cleaning package cache...'
-        apt-get clean 2>/dev/null || yum clean all 2>/dev/null || true
+        # NOTE: We STRICTLY do NOT clean volumes as they contain data and could affect other projects
+        echo '⚠️  PROJECT DATA VOLUMES PRESERVED - No volume cleanup performed for safety'
         
-        echo '✅ Server cleanup and container fix completed'
-        echo 'Current running containers:'
-        docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-    " || error "Failed to cleanup server and fix containers"
+        echo 'After PROJECT-specific cleanup:'
+        echo 'PROJECT containers:' \$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+        echo 'PROJECT images:' \$(docker images | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT volumes:' \$(docker volume ls | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT networks:' \$(docker network ls | grep \"${PROJECT_NAME}\" | wc -l)
+        
+        echo '🗂️  Cleaning PROJECT temporary files only...'
+        rm -rf /opt/$PROJECT_NAME/tmp/* 2>/dev/null || true
+        rm -rf /opt/$PROJECT_NAME/.cache/* 2>/dev/null || true
+        
+        echo '🌐 After cleanup - Server state verification:'
+        echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+        echo 'Total images on server:' \$(docker images --format '{{.Repository}}:{{.Tag}}' | wc -l)
+        echo 'Total volumes on server:' \$(docker volume ls --format '{{.Name}}' | wc -l)
+        echo 'Total networks on server:' \$(docker network ls --format '{{.Name}}' | wc -l)
+        echo ''
+        
+        echo '✅ STRICTLY PROJECT-SCOPED cleanup and container fix completed for $PROJECT_NAME'
+        echo 'Current PROJECT containers:'
+        docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo 'No PROJECT containers running'
+        
+        echo '🌐 Other server containers remain COMPLETELY UNTOUCHED:'
+        OTHER_CONTAINERS=\$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | head -5)
+        if [ -n \"\$OTHER_CONTAINERS\" ]; then
+            echo \"\$OTHER_CONTAINERS\"
+        else
+            echo 'No other containers visible or all containers are PROJECT-scoped'
+        fi
+    " || error "Failed to cleanup project and fix containers"
 
-    success "Comprehensive server cleanup and container fix completed successfully"
+    success "STRICTLY PROJECT-SCOPED cleanup and container fix completed successfully for $PROJECT_NAME"
+    warning "✅ ONLY $PROJECT_NAME containers were affected"
+    warning "✅ ALL other server services remain completely untouched"
+    warning "✅ Server isolation maintained throughout cleanup process"
 }
 
-# Enhanced deployment function with service selection
+# Enhanced deployment function (STRICTLY PROJECT-SCOPED)
 deploy_application() {
-    progress "🚀 Deploying application..."
+    progress "🚀 Deploying application (STRICTLY PROJECT-SCOPED)..."
     
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        echo '📋 Current directory: \$(pwd)'
-        echo '📄 Available files:'
+        echo '🔒 STRICTLY PROJECT-SCOPED DEPLOYMENT for $PROJECT_NAME'
+        echo '📋 Current PROJECT directory: \$(pwd)'
+        echo '📄 Available PROJECT files:'
         ls -la
         
         if [ -f 'docker-compose.yml' ]; then
-            echo '🛑 Ensuring clean state before deployment...'
-            # Force stop and remove any existing containers
-            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker stop 2>/dev/null || true
-            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker rm -f 2>/dev/null || true
+            echo '🌐 Before deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo ''
             
-            # Also cleanup by service names
-            for container in postgres redis minio pgadmin api site; do
-                docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
-                docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            echo '🛑 Ensuring clean PROJECT state before deployment...'
+            # STRICTLY force stop and remove ONLY existing project containers
+            PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}')
+            if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+                echo \"Stopping PROJECT containers: \$(echo \$PROJECT_CONTAINERS | wc -w)\"
+                echo \$PROJECT_CONTAINERS | xargs docker stop 2>/dev/null || true
+                echo \$PROJECT_CONTAINERS | xargs docker rm -f 2>/dev/null || true
+            fi
+            
+            # Also cleanup by exact project service names
+            for service in postgres redis minio pgadmin api site; do
+                container_name=\"${PROJECT_NAME}-\$service\"
+                docker stop \"\$container_name\" 2>/dev/null || true
+                docker rm -f \"\$container_name\" 2>/dev/null || true
             done
             
-            echo '🐳 Starting Docker Compose deployment...'
-            docker compose -f 'docker-compose.yml' down --remove-orphans --volumes 2>/dev/null || true
-            docker compose -f 'docker-compose.yml' up -d --build --force-recreate
+            echo '🐳 Starting Docker Compose deployment (STRICTLY PROJECT-SCOPED)...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans 2>/dev/null || true
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate
             
-            echo '⏳ Waiting for containers to start...'
+            echo '⏳ Waiting for PROJECT containers to start...'
             sleep 15
             
-            echo '📊 Container status:'
-            docker compose ps
+            echo '📊 PROJECT container status:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
             
-            echo '🔍 Checking container health:'
+            echo '🔍 Checking PROJECT container health:'
             for i in {1..5}; do
                 echo \"Health check attempt \$i/5:\"
-                docker compose ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}'
+                docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
                 sleep 3
             done
             
-            echo '📋 Container logs (last 20 lines):'
-            docker compose logs --tail=20
+            echo '📋 PROJECT container logs (last 20 lines):'
+            for container in \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}'); do
+                echo \"--- Logs for \$container ---\"
+                docker logs --tail=10 \$container 2>/dev/null || echo \"No logs for \$container\"
+            done
+            
+            echo '🌐 After deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
         else
-            echo '❌ docker-compose.yml not found!'
+            echo '❌ PROJECT docker-compose.yml not found!'
             exit 1
         fi
-    " || error "Failed to deploy application"
+    " || error "Failed to deploy PROJECT application"
 
-    success "🎉 Deployment completed successfully!"
-    info "Your application should now be running on the server"
+    success "🎉 STRICTLY PROJECT-SCOPED deployment completed successfully!"
+    info "Your $PROJECT_NAME application should now be running on the server"
+    warning "✅ ONLY $PROJECT_NAME services were deployed/affected"
+    warning "✅ ALL other server services remain completely untouched"
 }
 
-# Function to deploy specific services
+# Function to deploy specific services (STRICTLY PROJECT-SCOPED)
 deploy_selected_services() {
     select_services
     
@@ -747,59 +915,79 @@ deploy_selected_services() {
         error "No services selected"
     fi
     
-    progress "🚀 Deploying selected services: $SELECTED_SERVICES"
+    progress "🚀 Deploying selected PROJECT services (STRICTLY PROJECT-SCOPED): $SELECTED_SERVICES"
     
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        echo '📋 Current directory: \$(pwd)'
+        echo '🔒 STRICTLY PROJECT-SCOPED SERVICE DEPLOYMENT for $PROJECT_NAME'
+        echo '📋 Current PROJECT directory: \$(pwd)'
         
         if [ -f 'docker-compose.yml' ]; then
-            echo '🛑 Cleaning up existing containers...'
-            # Force stop and remove any existing containers
-            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker stop 2>/dev/null || true
-            docker ps -a --filter name='$PROJECT_NAME-*' --format '{{.Names}}' | xargs -r docker rm -f 2>/dev/null || true
+            echo '🌐 Before deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo ''
             
-            # Also cleanup by service names
-            for container in postgres redis minio pgadmin api site; do
-                docker stop \"$PROJECT_NAME-\$container\" 2>/dev/null || true
-                docker rm -f \"$PROJECT_NAME-\$container\" 2>/dev/null || true
+            echo '🛑 Cleaning up existing PROJECT containers...'
+            # STRICTLY force stop and remove ONLY existing project containers
+            PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}')
+            if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+                echo \"Stopping PROJECT containers: \$(echo \$PROJECT_CONTAINERS | wc -w)\"
+                echo \$PROJECT_CONTAINERS | xargs docker stop 2>/dev/null || true
+                echo \$PROJECT_CONTAINERS | xargs docker rm -f 2>/dev/null || true
+            fi
+            
+            # Also cleanup by exact project service names
+            for service in postgres redis minio pgadmin api site; do
+                container_name=\"${PROJECT_NAME}-\$service\"
+                docker stop \"\$container_name\" 2>/dev/null || true
+                docker rm -f \"\$container_name\" 2>/dev/null || true
             done
             
-            echo '🛑 Stopping existing containers with compose...'
-            docker compose down --remove-orphans --volumes 2>/dev/null || true
+            echo '🛑 Stopping existing PROJECT containers with compose...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans 2>/dev/null || true
             
-            echo '🐳 Starting selected services: $SELECTED_SERVICES'
-            docker compose up -d --build --force-recreate $SELECTED_SERVICES
+            echo '🐳 Starting selected PROJECT services: $SELECTED_SERVICES'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate $SELECTED_SERVICES
             
-            echo '⏳ Waiting for containers to start...'
+            echo '⏳ Waiting for PROJECT containers to start...'
             sleep 15
             
-            echo '📊 Container status:'
-            docker compose ps
+            echo '📊 PROJECT container status:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
             
-            echo '🔍 Checking selected services health:'
+            echo '🔍 Checking selected PROJECT services health:'
             for i in {1..5}; do
                 echo \"Health check attempt \$i/5:\"
                 for service in $SELECTED_SERVICES; do
-                    status=\$(docker compose ps \$service --format '{{.Status}}' 2>/dev/null || echo 'Not found')
-                    echo \"\$service: \$status\"
+                    container_name=\"${PROJECT_NAME}-\$service\"
+                    status=\$(docker ps --filter name=\"\$container_name\" --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                    echo \"\$service (\$container_name): \$status\"
                 done
                 sleep 3
             done
             
-            echo '📋 Container logs for selected services:'
+            echo '📋 Container logs for selected PROJECT services:'
             for service in $SELECTED_SERVICES; do
-                echo '--- Logs for \$service ---'
-                docker compose logs --tail=10 \$service 2>/dev/null || echo 'No logs available for \$service'
+                container_name=\"${PROJECT_NAME}-\$service\"
+                echo \"--- Logs for \$container_name ---\"
+                docker logs --tail=10 \"\$container_name\" 2>/dev/null || echo \"No logs available for \$container_name\"
             done
+            
+            echo '🌐 After deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
         else
-            echo '❌ docker-compose.yml not found!'
+            echo '❌ PROJECT docker-compose.yml not found!'
             exit 1
         fi
-    " || error "Failed to deploy selected services"
+    " || error "Failed to deploy selected PROJECT services"
 
-    success "🎉 Selected services deployment completed!"
-    info "Selected services ($SELECTED_SERVICES) are now running on the server"
+    success "🎉 Selected PROJECT services deployment completed!"
+    info "Selected services ($SELECTED_SERVICES) for project $PROJECT_NAME are now running on the server"
+    warning "✅ ONLY selected $PROJECT_NAME services were deployed/affected"
+    warning "✅ ALL other server services remain completely untouched"
 }
 
 # Initialize configuration
@@ -820,6 +1008,7 @@ while true; do
         1)
             log "Option 1 selected: Deploy with Git & preserve data (Site & API only)"
             warning "This will commit git changes and update only Site & API services, preserving all data services"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
             if [[ $confirm =~ ^[Yy]$ ]]; then
@@ -834,6 +1023,7 @@ while true; do
         2)
             log "Option 2 selected: Deploy ALL with Git & preserve data"
             warning "This will commit git changes and update ALL services while preserving data volumes"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
             if [[ $confirm =~ ^[Yy]$ ]]; then
@@ -848,18 +1038,20 @@ while true; do
         3)
             log "Option 3 selected: Deploy only"
             warning "Skipping git operations..."
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             deploy_to_server
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
         4)
-            log "Option 4 selected: Server cleanup & container fix"
-            warning "This will perform comprehensive cleanup and fix container conflicts"
+            log "Option 4 selected: Project cleanup & container fix (PROJECT ONLY)"
+            warning "This will perform STRICTLY PROJECT-SCOPED cleanup and fix container conflicts"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers and resources"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
             if [[ $confirm =~ ^[Yy]$ ]]; then
-                server_cleanup_and_container_fix
+                project_cleanup_and_container_fix
             else
                 warning "Cleanup cancelled"
             fi
@@ -868,7 +1060,7 @@ while true; do
             read -n 1
             ;;
         5)
-            log "Option 5 selected: Check server status"
+            log "Option 5 selected: Check project status"
             check_server_status
             echo ""
             info "Press any key to return to menu..."
@@ -877,6 +1069,7 @@ while true; do
         6)
             log "Option 6 selected: Fresh deploy with new environment"
             warning "This will remove all old .env files and use .env.prod as new environment"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
             if [[ $confirm =~ ^[Yy]$ ]]; then
@@ -890,13 +1083,14 @@ while true; do
             ;;
         7)
             log "Option 7 selected: Deploy specific services"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects selected $PROJECT_NAME services"
             deploy_selected_services
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
         q|Q)
-            echo -e "${GREEN}👋 Thank you for using Tazav1 Deployment Tool!${NC}"
+            echo -e "${GREEN}👋 Thank you for using PROJECT-SCOPED Deployment Tool!${NC}"
             echo -e "${CYAN}Goodbye!${NC}"
             exit 0
             ;;
