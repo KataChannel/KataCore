@@ -1,5 +1,4 @@
 import SideNav from "../../../ui/dashboard/sidenav";
-import { Dashboard } from "@tazaoffical/nextjs";
 
 export default async function Page() {
   return (
