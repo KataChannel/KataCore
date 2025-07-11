@@ -122,7 +122,7 @@ stop_failed_services() {
         ssh "$SSH_USER@$SERVER_IP" "
             cd /opt/$PROJECT_NAME/
             for service in $failed_services; do
-                container_name=\"${PROJECT_NAME}-\$service\"
+                container_name=\"\${PROJECT_NAME}-\$service\"
                 echo \"Stopping failed service: \$service\"
                 docker stop \"\$container_name\" 2>/dev/null || true
                 docker rm -f \"\$container_name\" 2>/dev/null || true
@@ -158,34 +158,34 @@ smart_deploy_services() {
         progress "🚀 Starting deployment for services: $failed_services"
         ssh "$SSH_USER@$SERVER_IP" "
             cd /opt/$PROJECT_NAME/
-            echo '🔒 SMART PROJECT-SCOPED DEPLOYMENT for $PROJECT_NAME'
-            echo '📋 Services to deploy: $failed_services'
+            echo 'SMART PROJECT-SCOPED DEPLOYMENT for $PROJECT_NAME'
+            echo 'Services to deploy: $failed_services'
             
             if [ -f 'docker-compose.yml' ]; then
-                echo '🐳 Starting selective Docker Compose deployment...'
+                echo 'Starting selective Docker Compose deployment...'
                 
                 # Start only the failed/missing services
                 for service in $failed_services; do
-                    echo \"🚀 Starting service: \$service\"
+                    echo \"Starting service: \$service\"
                     docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate \$service
                     
                     # Wait a bit for the service to start
                     sleep 5
                     
                     # Check immediate status
-                    container_name=\"${PROJECT_NAME}-\$service\"
+                    container_name=\"\${PROJECT_NAME}-\$service\"
                     status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
                     echo \"Service \$service status: \$status\"
                 done
                 
-                echo '⏳ Waiting for all deployed services to stabilize...'
+                echo 'Waiting for all deployed services to stabilize...'
                 sleep 15
                 
-                echo '📊 Final deployment status:'
-                docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+                echo 'Final deployment status:'
+                docker ps --filter name=\"\${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
                 
             else
-                echo '❌ PROJECT docker-compose.yml not found!'
+                echo 'PROJECT docker-compose.yml not found!'
                 exit 1
             fi
         " || error "Failed to deploy services"
