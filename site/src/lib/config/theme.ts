@@ -30,8 +30,8 @@ export interface ThemeContextType {
 }
 
 // Re-export helper functions
-export { 
-  getThemeColors, 
+export {
+  getThemeColors,
   generateCSSVariables,
   applyCSSVariables,
   applyThemeMode,

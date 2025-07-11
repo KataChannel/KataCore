@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
 
     const where: any = {};
-    
+
     if (status && status !== 'all') {
       where.status = status;
     }
-    
+
     if (employeeId && employeeId !== 'all') {
       where.employeeId = employeeId;
     }
@@ -26,12 +26,12 @@ export async function GET(request: NextRequest) {
     if (date) {
       where.date = {
         gte: new Date(date + 'T00:00:00.000Z'),
-        lte: new Date(date + 'T23:59:59.999Z')
+        lte: new Date(date + 'T23:59:59.999Z'),
       };
     } else if (startDate && endDate) {
       where.date = {
         gte: new Date(startDate + 'T00:00:00.000Z'),
-        lte: new Date(endDate + 'T23:59:59.999Z')
+        lte: new Date(endDate + 'T23:59:59.999Z'),
       };
     }
 
@@ -44,28 +44,28 @@ export async function GET(request: NextRequest) {
               user: {
                 select: {
                   displayName: true,
-                  avatar: true
-                }
+                  avatar: true,
+                },
               },
               position: {
                 include: {
                   department: {
                     select: {
-                      name: true
-                    }
-                  }
-                }
-              }
-            }
-          }
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
         orderBy: {
-          date: 'desc'
+          date: 'desc',
         },
         skip: (page - 1) * limit,
-        take: limit
+        take: limit,
       }),
-      prisma.attendance.count({ where })
+      prisma.attendance.count({ where }),
     ]);
 
     // Transform data for frontend
@@ -87,11 +87,11 @@ export async function GET(request: NextRequest) {
         position: {
           title: attendance.employee.position.title,
           department: {
-            name: attendance.employee.position.department.name
-          }
+            name: attendance.employee.position.department.name,
+          },
         },
-        user: attendance.employee.user
-      }
+        user: attendance.employee.user,
+      },
     }));
 
     return NextResponse.json({
@@ -101,10 +101,9 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
-
   } catch (error) {
     console.error('Error fetching attendances:', error);
     return NextResponse.json(
@@ -118,7 +117,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { employeeId, date, timeIn, timeOut, breakStart, breakEnd, status, notes } = body;
+    const {
+      employeeId,
+      date,
+      timeIn,
+      timeOut,
+      breakStart,
+      breakEnd,
+      status,
+      notes,
+    } = body;
 
     if (!employeeId || !date) {
       return NextResponse.json(
@@ -129,7 +137,7 @@ export async function POST(request: NextRequest) {
 
     // Kiểm tra employee có tồn tại không
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+      where: { id: employeeId },
     });
 
     if (!employee) {
@@ -144,9 +152,9 @@ export async function POST(request: NextRequest) {
       where: {
         employeeId_date: {
           employeeId,
-          date: new Date(date)
-        }
-      }
+          date: new Date(date),
+        },
+      },
     });
 
     if (existingAttendance) {
@@ -163,17 +171,20 @@ export async function POST(request: NextRequest) {
     if (timeIn && timeOut) {
       const timeInDate = new Date(`${date}T${timeIn}`);
       const timeOutDate = new Date(`${date}T${timeOut}`);
-      
-      let workingHours = (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
-      
+
+      let workingHours =
+        (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
+
       // Trừ thời gian nghỉ trưa
       if (breakStart && breakEnd) {
         const breakStartDate = new Date(`${date}T${breakStart}`);
         const breakEndDate = new Date(`${date}T${breakEnd}`);
-        const breakHours = (breakEndDate.getTime() - breakStartDate.getTime()) / (1000 * 60 * 60);
+        const breakHours =
+          (breakEndDate.getTime() - breakStartDate.getTime()) /
+          (1000 * 60 * 60);
         workingHours -= breakHours;
       }
-      
+
       totalHours = Math.max(0, workingHours);
       overtime = Math.max(0, totalHours - 8); // Giờ tăng ca = tổng giờ làm - 8h
     }
@@ -190,7 +201,7 @@ export async function POST(request: NextRequest) {
         totalHours,
         overtime,
         status: status || 'PRESENT',
-        notes
+        notes,
       },
       include: {
         employee: {
@@ -198,29 +209,28 @@ export async function POST(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
       data: attendance,
-      message: 'Tạo bản ghi chấm công thành công'
+      message: 'Tạo bản ghi chấm công thành công',
     });
-
   } catch (error) {
     console.error('Error creating attendance:', error);
     return NextResponse.json(
@@ -244,7 +254,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const existingAttendance = await prisma.attendance.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingAttendance) {
@@ -262,17 +272,20 @@ export async function PUT(request: NextRequest) {
       const date = existingAttendance.date.toISOString().split('T')[0];
       const timeInDate = new Date(`${date}T${timeIn}`);
       const timeOutDate = new Date(`${date}T${timeOut}`);
-      
-      let workingHours = (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
-      
+
+      let workingHours =
+        (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
+
       // Trừ thời gian nghỉ trưa
       if (breakStart && breakEnd) {
         const breakStartDate = new Date(`${date}T${breakStart}`);
         const breakEndDate = new Date(`${date}T${breakEnd}`);
-        const breakHours = (breakEndDate.getTime() - breakStartDate.getTime()) / (1000 * 60 * 60);
+        const breakHours =
+          (breakEndDate.getTime() - breakStartDate.getTime()) /
+          (1000 * 60 * 60);
         workingHours -= breakHours;
       }
-      
+
       totalHours = Math.max(0, workingHours);
       overtime = Math.max(0, totalHours - 8);
     }
@@ -288,7 +301,7 @@ export async function PUT(request: NextRequest) {
         totalHours,
         overtime,
         status: status || existingAttendance.status,
-        notes
+        notes,
       },
       include: {
         employee: {
@@ -296,29 +309,28 @@ export async function PUT(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
       data: attendance,
-      message: 'Cập nhật bản ghi chấm công thành công'
+      message: 'Cập nhật bản ghi chấm công thành công',
     });
-
   } catch (error) {
     console.error('Error updating attendance:', error);
     return NextResponse.json(
@@ -342,7 +354,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const existingAttendance = await prisma.attendance.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingAttendance) {
@@ -353,14 +365,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     await prisma.attendance.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Xóa bản ghi chấm công thành công'
+      message: 'Xóa bản ghi chấm công thành công',
     });
-
   } catch (error) {
     console.error('Error deleting attendance:', error);
     return NextResponse.json(

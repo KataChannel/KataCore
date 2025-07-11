@@ -77,29 +77,29 @@ const mockActivities: Activity[] = [
     type: 'hire',
     message: 'John Doe joined as Software Engineer',
     timestamp: '2 hours ago',
-    user: 'HR Team'
+    user: 'HR Team',
   },
   {
     id: '2',
     type: 'leave',
-    message: 'Jane Smith\'s leave request approved',
+    message: "Jane Smith's leave request approved",
     timestamp: '4 hours ago',
-    user: 'Manager'
+    user: 'Manager',
   },
   {
     id: '3',
     type: 'payroll',
     message: 'Monthly payroll processed',
     timestamp: '1 day ago',
-    user: 'Finance'
+    user: 'Finance',
   },
   {
     id: '4',
     type: 'attendance',
     message: 'Daily attendance report generated',
     timestamp: '1 day ago',
-    user: 'System'
-  }
+    user: 'System',
+  },
 ];
 
 export default function HRDashboard() {
@@ -111,7 +111,7 @@ export default function HRDashboard() {
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Get dark mode preference from localStorage
     const getDarkModeFromStorage = () => {
       try {
@@ -137,7 +137,7 @@ export default function HRDashboard() {
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
-    
+
     try {
       localStorage.setItem('admin-theme', newDarkMode ? 'dark' : 'light');
       if (newDarkMode) {
@@ -279,7 +279,9 @@ export default function HRDashboard() {
       <div className="mono-card p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-primary mb-2">HR Dashboard</h1>
+            <h1 className="text-2xl font-bold text-primary mb-2">
+              HR Dashboard
+            </h1>
             <p className="text-text-secondary">
               Welcome back! Here's what's happening with your organization.
             </p>
@@ -303,11 +305,16 @@ export default function HRDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card) => (
-          <div key={card.name} className="mono-card p-6 hover:shadow-lg transition-all duration-300">
+        {statCards.map(card => (
+          <div
+            key={card.name}
+            className="mono-card p-6 hover:shadow-lg transition-all duration-300"
+          >
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-sm font-medium text-text-secondary mb-1">{card.name}</p>
+                <p className="text-sm font-medium text-text-secondary mb-1">
+                  {card.name}
+                </p>
                 <p className="text-2xl font-bold text-primary">{card.value}</p>
               </div>
               <div className="p-3 bg-mono-100 rounded-lg">
@@ -320,12 +327,16 @@ export default function HRDashboard() {
               ) : (
                 <ArrowDownIcon className="h-4 w-4 text-error mr-1" />
               )}
-              <span className={`text-sm font-medium ${
-                card.changeType === 'increase' ? 'text-success' : 'text-error'
-              }`}>
+              <span
+                className={`text-sm font-medium ${
+                  card.changeType === 'increase' ? 'text-success' : 'text-error'
+                }`}
+              >
                 {card.change}
               </span>
-              <span className="text-sm text-text-secondary ml-2">from last month</span>
+              <span className="text-sm text-text-secondary ml-2">
+                from last month
+              </span>
             </div>
           </div>
         ))}
@@ -335,20 +346,26 @@ export default function HRDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick Actions */}
         <div className="mono-card p-6">
-          <h3 className="text-lg font-semibold text-primary mb-4">Quick Actions</h3>
+          <h3 className="text-lg font-semibold text-primary mb-4">
+            Quick Actions
+          </h3>
           <div className="space-y-3">
-            {quickActions.map((action) => (
+            {quickActions.map(action => (
               <button
                 key={action.name}
                 className="w-full flex items-center p-3 rounded-lg hover:bg-hover transition-colors text-left"
-                onClick={() => action.href && window.open(action.href, '_blank')}
+                onClick={() =>
+                  action.href && window.open(action.href, '_blank')
+                }
               >
                 <div className="p-2 bg-mono-100 rounded-lg mr-3">
                   <action.icon className="h-5 w-5 text-text-secondary" />
                 </div>
                 <div>
                   <p className="font-medium text-primary">{action.name}</p>
-                  <p className="text-sm text-text-secondary">{action.description}</p>
+                  <p className="text-sm text-text-secondary">
+                    {action.description}
+                  </p>
                 </div>
               </button>
             ))}
@@ -357,20 +374,35 @@ export default function HRDashboard() {
 
         {/* Recent Activities */}
         <div className="mono-card p-6">
-          <h3 className="text-lg font-semibold text-primary mb-4">Recent Activities</h3>
+          <h3 className="text-lg font-semibold text-primary mb-4">
+            Recent Activities
+          </h3>
           <div className="space-y-3">
-            {activities.map((activity) => (
-              <div key={activity.id} className="flex items-start p-3 rounded-lg bg-mono-50">
+            {activities.map(activity => (
+              <div
+                key={activity.id}
+                className="flex items-start p-3 rounded-lg bg-mono-50"
+              >
                 <div className="flex-shrink-0 mr-3">
                   <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
-                    {activity.type === 'hire' && <UsersIcon className="h-4 w-4 text-accent" />}
-                    {activity.type === 'leave' && <CalendarIcon className="h-4 w-4 text-accent" />}
-                    {activity.type === 'payroll' && <CurrencyDollarIcon className="h-4 w-4 text-accent" />}
-                    {activity.type === 'attendance' && <ClockIcon className="h-4 w-4 text-accent" />}
+                    {activity.type === 'hire' && (
+                      <UsersIcon className="h-4 w-4 text-accent" />
+                    )}
+                    {activity.type === 'leave' && (
+                      <CalendarIcon className="h-4 w-4 text-accent" />
+                    )}
+                    {activity.type === 'payroll' && (
+                      <CurrencyDollarIcon className="h-4 w-4 text-accent" />
+                    )}
+                    {activity.type === 'attendance' && (
+                      <ClockIcon className="h-4 w-4 text-accent" />
+                    )}
                   </div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-primary">{activity.message}</p>
+                  <p className="text-sm font-medium text-primary">
+                    {activity.message}
+                  </p>
                   <p className="text-xs text-text-secondary mt-1">
                     {activity.timestamp} • by {activity.user}
                   </p>
@@ -385,22 +417,30 @@ export default function HRDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Employee Growth Chart */}
         <div className="mono-card p-6">
-          <h3 className="text-lg font-semibold text-primary mb-4">Employee Growth</h3>
+          <h3 className="text-lg font-semibold text-primary mb-4">
+            Employee Growth
+          </h3>
           <div className="h-64 rounded-lg bg-mono-50 flex items-center justify-center">
             <div className="text-center">
               <ChartPieIcon className="h-12 w-12 text-text-secondary mx-auto mb-2" />
-              <p className="text-text-secondary">Chart placeholder - Employee growth over time</p>
+              <p className="text-text-secondary">
+                Chart placeholder - Employee growth over time
+              </p>
             </div>
           </div>
         </div>
 
         {/* Department Distribution */}
         <div className="mono-card p-6">
-          <h3 className="text-lg font-semibold text-primary mb-4">Department Distribution</h3>
+          <h3 className="text-lg font-semibold text-primary mb-4">
+            Department Distribution
+          </h3>
           <div className="h-64 rounded-lg bg-mono-50 flex items-center justify-center">
             <div className="text-center">
               <BuildingOfficeIcon className="h-12 w-12 text-text-secondary mx-auto mb-2" />
-              <p className="text-text-secondary">Chart placeholder - Employees by department</p>
+              <p className="text-text-secondary">
+                Chart placeholder - Employees by department
+              </p>
             </div>
           </div>
         </div>

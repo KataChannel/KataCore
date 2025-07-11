@@ -1,7 +1,18 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { ThemeMode, ThemeColors, getThemeColors, generateCSSVariables } from '../lib/config/theme';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from 'react';
+import {
+  ThemeMode,
+  ThemeColors,
+  getThemeColors,
+  generateCSSVariables,
+} from '../lib/config/theme';
 
 interface ThemeContextType {
   mode: ThemeMode;
@@ -17,9 +28,14 @@ interface ThemeProviderProps {
   defaultMode?: ThemeMode;
 }
 
-export function ThemeProvider({ children, defaultMode = 'light' }: ThemeProviderProps) {
+export function ThemeProvider({
+  children,
+  defaultMode = 'light',
+}: ThemeProviderProps) {
   const [mode, setModeState] = useState<ThemeMode>(defaultMode);
-  const [colors, setColors] = useState<ThemeColors>(getThemeColors(defaultMode));
+  const [colors, setColors] = useState<ThemeColors>(
+    getThemeColors(defaultMode)
+  );
 
   useEffect(() => {
     // Load theme from localStorage on mount
@@ -28,7 +44,9 @@ export function ThemeProvider({ children, defaultMode = 'light' }: ThemeProvider
       setModeState(savedMode);
     } else {
       // Check system preference
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const systemPrefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
       const systemMode = systemPrefersDark ? 'dark' : 'light';
       setModeState(systemMode);
     }
@@ -38,22 +56,22 @@ export function ThemeProvider({ children, defaultMode = 'light' }: ThemeProvider
     // Update colors when mode changes
     const newColors = getThemeColors(mode);
     setColors(newColors);
-    
+
     // Update CSS variables
     const cssVariables = generateCSSVariables(mode);
     Object.entries(cssVariables).forEach(([key, value]) => {
       document.documentElement.style.setProperty(key, value);
     });
-    
+
     // Update HTML class for Tailwind dark mode
     document.documentElement.classList.toggle('dark', mode === 'dark');
-    
+
     // Save to localStorage
     localStorage.setItem('theme-mode', mode);
   }, [mode]);
 
   const toggleMode = () => {
-    setModeState(prevMode => prevMode === 'light' ? 'dark' : 'light');
+    setModeState(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
   };
 
   const setMode = (newMode: ThemeMode) => {
@@ -82,14 +100,19 @@ interface LanguageContextType {
   toggleLanguage: () => void;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
 interface LanguageProviderProps {
   children: ReactNode;
   defaultLanguage?: 'vi' | 'en';
 }
 
-export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageProviderProps) {
+export function LanguageProvider({
+  children,
+  defaultLanguage = 'vi',
+}: LanguageProviderProps) {
   const [language, setLanguageState] = useState<'vi' | 'en'>(defaultLanguage);
 
   useEffect(() => {
@@ -115,7 +138,7 @@ export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageP
   };
 
   const toggleLanguage = () => {
-    setLanguageState(prev => prev === 'vi' ? 'en' : 'vi');
+    setLanguageState(prev => (prev === 'vi' ? 'en' : 'vi'));
   };
 
   return (
@@ -137,9 +160,9 @@ export function useLanguage() {
 export function useAppSettings() {
   const theme = useTheme();
   const language = useLanguage();
-  
+
   return {
     ...theme,
-    ...language
+    ...language,
   };
 }

@@ -1,12 +1,16 @@
-import { 
-  RESOURCE_ICONS, 
-  SPIRIT_BEAST_ICONS, 
-  SOURCE_ICONS, 
+import {
+  RESOURCE_ICONS,
+  SPIRIT_BEAST_ICONS,
+  SOURCE_ICONS,
   NGU_HANH_RELATIONS,
   UPGRADE_COSTS,
-  GAME_CONFIG
+  GAME_CONFIG,
 } from '../constants/game.constants';
-import type { GameSource, SpiritBeast, GameResources } from '../types/game.types';
+import type {
+  GameSource,
+  SpiritBeast,
+  GameResources,
+} from '../types/game.types';
 
 export const getRandomInt = (min: number, max: number): number => {
   min = Math.ceil(min);
@@ -19,7 +23,7 @@ export const getIconForType = (type: string): string => {
     RESOURCE_ICONS[type as keyof typeof RESOURCE_ICONS] ||
     SPIRIT_BEAST_ICONS[type as keyof typeof SPIRIT_BEAST_ICONS] ||
     SOURCE_ICONS[type as keyof typeof SOURCE_ICONS] ||
-    ""
+    ''
   );
 };
 
@@ -34,26 +38,34 @@ export const calculateUpgradeCosts = (
   itemType: 'source' | 'spiritBeast',
   unlockedTier2: boolean
 ) => {
-  const config:any = UPGRADE_COSTS[itemType];
+  const config: any = UPGRADE_COSTS[itemType];
   const isSource = itemType === 'source';
-  
-  const primaryResourceType = NGU_HANH_RELATIONS.elementMap[item.type as keyof typeof NGU_HANH_RELATIONS.elementMap];
-  const secondaryResourceType = isSource 
-    ? NGU_HANH_RELATIONS.overcomes[primaryResourceType as keyof typeof NGU_HANH_RELATIONS.overcomes]
-    : NGU_HANH_RELATIONS.generates[primaryResourceType as keyof typeof NGU_HANH_RELATIONS.generates];
 
-  const currentMultiplier = item.level < GAME_CONFIG.MAX_LEVEL_INITIAL_TIER
-    ? config.multiplier
-    : config.tier2Multiplier;
+  const primaryResourceType =
+    NGU_HANH_RELATIONS.elementMap[
+      item.type as keyof typeof NGU_HANH_RELATIONS.elementMap
+    ];
+  const secondaryResourceType = isSource
+    ? NGU_HANH_RELATIONS.overcomes[
+        primaryResourceType as keyof typeof NGU_HANH_RELATIONS.overcomes
+      ]
+    : NGU_HANH_RELATIONS.generates[
+        primaryResourceType as keyof typeof NGU_HANH_RELATIONS.generates
+      ];
+
+  const currentMultiplier =
+    item.level < GAME_CONFIG.MAX_LEVEL_INITIAL_TIER
+      ? config.multiplier
+      : config.tier2Multiplier;
 
   const primaryCost = Math.floor(
-    (isSource ? config.basePrimary : config.basePrimary) * 
-    Math.pow(currentMultiplier, item.level - 1)
+    (isSource ? config.basePrimary : config.basePrimary) *
+      Math.pow(currentMultiplier, item.level - 1)
   );
-  
+
   const secondaryCost = Math.floor(
-    (isSource ? config.baseOpposite : config.baseGenerates) * 
-    Math.pow(currentMultiplier, item.level - 1)
+    (isSource ? config.baseOpposite : config.baseGenerates) *
+      Math.pow(currentMultiplier, item.level - 1)
   );
 
   return {
@@ -68,16 +80,20 @@ export const canAffordUpgrade = (
   resources: GameResources,
   costs: ReturnType<typeof calculateUpgradeCosts>
 ): boolean => {
-  return resources[costs.primaryResourceType as keyof GameResources] >= costs.primaryCost &&
-         resources[costs.secondaryResourceType as keyof GameResources] >= costs.secondaryCost;
+  return (
+    resources[costs.primaryResourceType as keyof GameResources] >=
+      costs.primaryCost &&
+    resources[costs.secondaryResourceType as keyof GameResources] >=
+      costs.secondaryCost
+  );
 };
 
 export const formatSourceName = (type: string): string => {
   return type
-    .replace("_", " ")
-    .replace("mine", "Mine")
-    .replace("forest", "Forest")
-    .replace("spring", "Spring")
-    .replace("forge", "Forge")
-    .replace("field", "Field");
+    .replace('_', ' ')
+    .replace('mine', 'Mine')
+    .replace('forest', 'Forest')
+    .replace('spring', 'Spring')
+    .replace('forge', 'Forge')
+    .replace('field', 'Field');
 };

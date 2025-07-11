@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
   FunnelIcon,
   PencilIcon,
   TrashIcon,
@@ -13,7 +13,7 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   CalendarIcon,
-  IdentificationIcon
+  IdentificationIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../../hooks/useAuth';
 
@@ -64,7 +64,9 @@ const EmployeeManagement: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -80,7 +82,7 @@ const EmployeeManagement: React.FC = () => {
     status: 'ACTIVE',
     contractType: 'FULL_TIME',
     hireDate: new Date().toISOString().split('T')[0],
-    salary: 0
+    salary: 0,
   });
 
   useEffect(() => {
@@ -144,7 +146,7 @@ const EmployeeManagement: React.FC = () => {
         status: employee.status,
         contractType: employee.contractType,
         hireDate: employee.hireDate.split('T')[0],
-        salary: employee.salary || 0
+        salary: employee.salary || 0,
       });
     } else {
       setSelectedEmployee(null);
@@ -159,7 +161,7 @@ const EmployeeManagement: React.FC = () => {
         status: 'ACTIVE',
         contractType: 'FULL_TIME',
         hireDate: new Date().toISOString().split('T')[0],
-        salary: 0
+        salary: 0,
       });
     }
     setShowModal(true);
@@ -179,7 +181,7 @@ const EmployeeManagement: React.FC = () => {
       }
 
       const method = selectedEmployee ? 'PUT' : 'POST';
-      const url = selectedEmployee 
+      const url = selectedEmployee
         ? `/api/hr/employees/${selectedEmployee.id}`
         : '/api/hr/employees';
 
@@ -225,45 +227,68 @@ const EmployeeManagement: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'bg-green-100 text-green-800';
-      case 'INACTIVE': return 'bg-gray-100 text-gray-800';
-      case 'TERMINATED': return 'bg-red-100 text-red-800';
-      case 'ON_LEAVE': return 'bg-yellow-100 text-yellow-800';
-      case 'PROBATION': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'ACTIVE':
+        return 'bg-green-100 text-green-800';
+      case 'INACTIVE':
+        return 'bg-gray-100 text-gray-800';
+      case 'TERMINATED':
+        return 'bg-red-100 text-red-800';
+      case 'ON_LEAVE':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'PROBATION':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'Đang làm việc';
-      case 'INACTIVE': return 'Không hoạt động';
-      case 'TERMINATED': return 'Đã nghỉ việc';
-      case 'ON_LEAVE': return 'Nghỉ phép';
-      case 'PROBATION': return 'Thử việc';
-      default: return status;
+      case 'ACTIVE':
+        return 'Đang làm việc';
+      case 'INACTIVE':
+        return 'Không hoạt động';
+      case 'TERMINATED':
+        return 'Đã nghỉ việc';
+      case 'ON_LEAVE':
+        return 'Nghỉ phép';
+      case 'PROBATION':
+        return 'Thử việc';
+      default:
+        return status;
     }
   };
 
   const getContractTypeLabel = (type: string) => {
     switch (type) {
-      case 'FULL_TIME': return 'Toàn thời gian';
-      case 'PART_TIME': return 'Bán thời gian';
-      case 'CONTRACT': return 'Hợp đồng';
-      case 'INTERNSHIP': return 'Thực tập';
-      case 'FREELANCE': return 'Tự do';
-      default: return type;
+      case 'FULL_TIME':
+        return 'Toàn thời gian';
+      case 'PART_TIME':
+        return 'Bán thời gian';
+      case 'CONTRACT':
+        return 'Hợp đồng';
+      case 'INTERNSHIP':
+        return 'Thực tập';
+      case 'FREELANCE':
+        return 'Tự do';
+      default:
+        return type;
     }
   };
 
   const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (employee.email && employee.email.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || employee.status === statusFilter;
-    const matchesDepartment = departmentFilter === 'all' || employee.position.department.id === departmentFilter;
-    
+    const matchesSearch =
+      employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (employee.email &&
+        employee.email.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesStatus =
+      statusFilter === 'all' || employee.status === statusFilter;
+    const matchesDepartment =
+      departmentFilter === 'all' ||
+      employee.position.department.id === departmentFilter;
+
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
@@ -272,8 +297,12 @@ const EmployeeManagement: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý nhân viên</h1>
-          <p className="text-gray-600">Quản lý thông tin nhân viên trong tổ chức</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Quản lý nhân viên
+          </h1>
+          <p className="text-gray-600">
+            Quản lý thông tin nhân viên trong tổ chức
+          </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -299,12 +328,16 @@ const EmployeeManagement: React.FC = () => {
               <UserIcon className="h-8 w-8 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Tổng nhân viên</p>
-              <p className="text-2xl font-bold text-gray-900">{employees.length}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Tổng nhân viên
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {employees.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -318,7 +351,7 @@ const EmployeeManagement: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -326,11 +359,13 @@ const EmployeeManagement: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Phòng ban</p>
-              <p className="text-2xl font-bold text-gray-900">{departments.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {departments.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -338,7 +373,9 @@ const EmployeeManagement: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Chức vụ</p>
-              <p className="text-2xl font-bold text-gray-900">{positions.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {positions.length}
+              </p>
             </div>
           </div>
         </div>
@@ -353,14 +390,14 @@ const EmployeeManagement: React.FC = () => {
               type="text"
               placeholder="Tìm kiếm nhân viên..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={e => setStatusFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">Tất cả trạng thái</option>
@@ -370,14 +407,14 @@ const EmployeeManagement: React.FC = () => {
             <option value="ON_LEAVE">Nghỉ phép</option>
             <option value="PROBATION">Thử việc</option>
           </select>
-          
+
           <select
             value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
+            onChange={e => setDepartmentFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">Tất cả phòng ban</option>
-            {departments.map((dept) => (
+            {departments.map(dept => (
               <option key={dept.id} value={dept.id}>
                 {dept.name}
               </option>
@@ -458,19 +495,24 @@ const EmployeeManagement: React.FC = () => {
                 <tr>
                   <td colSpan={9} className="px-6 py-12 text-center">
                     <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg">Chưa có nhân viên nào</p>
+                    <p className="text-gray-500 text-lg">
+                      Chưa có nhân viên nào
+                    </p>
                     <p className="text-gray-400">Hãy thêm nhân viên đầu tiên</p>
                   </td>
                 </tr>
               ) : (
-                filteredEmployees.map((employee) => (
+                filteredEmployees.map(employee => (
                   <tr key={employee.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <img
                             className="h-10 w-10 rounded-full"
-                            src={employee.user?.avatar || `https://ui-avatars.com/api/?name=${employee.firstName}+${employee.lastName}&background=3b82f6&color=fff`}
+                            src={
+                              employee.user?.avatar ||
+                              `https://ui-avatars.com/api/?name=${employee.firstName}+${employee.lastName}&background=3b82f6&color=fff`
+                            }
                             alt={employee.fullName}
                           />
                         </div>
@@ -512,7 +554,9 @@ const EmployeeManagement: React.FC = () => {
                       {employee.position.title}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(employee.status)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(employee.status)}`}
+                      >
                         {getStatusLabel(employee.status)}
                       </span>
                     </td>
@@ -522,7 +566,9 @@ const EmployeeManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-600">
                         <CalendarIcon className="h-4 w-4 mr-1" />
-                        {new Date(employee.hireDate).toLocaleDateString('vi-VN')}
+                        {new Date(employee.hireDate).toLocaleDateString(
+                          'vi-VN'
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -557,7 +603,7 @@ const EmployeeManagement: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {selectedEmployee ? 'Cập nhật nhân viên' : 'Thêm nhân viên mới'}
               </h3>
-              
+
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                   {error}
@@ -572,12 +618,14 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.employeeId}
-                    onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, employeeId: e.target.value })
+                    }
                     disabled={!!selectedEmployee}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Họ *
@@ -585,11 +633,13 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tên *
@@ -597,11 +647,13 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email
@@ -609,11 +661,13 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Số điện thoại
@@ -621,56 +675,66 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phòng ban *
                   </label>
                   <select
                     value={formData.departmentId}
-                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, departmentId: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Chọn phòng ban</option>
-                    {departments.map((dept) => (
+                    {departments.map(dept => (
                       <option key={dept.id} value={dept.id}>
                         {dept.name}
                       </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Chức vụ *
                   </label>
                   <select
                     value={formData.positionId}
-                    onChange={(e) => setFormData({ ...formData, positionId: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, positionId: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Chọn chức vụ</option>
                     {positions
-                      .filter(pos => pos.department.id === formData.departmentId)
-                      .map((pos) => (
+                      .filter(
+                        pos => pos.department.id === formData.departmentId
+                      )
+                      .map(pos => (
                         <option key={pos.id} value={pos.id}>
                           {pos.title}
                         </option>
                       ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trạng thái
                   </label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="ACTIVE">Đang làm việc</option>
@@ -680,14 +744,16 @@ const EmployeeManagement: React.FC = () => {
                     <option value="PROBATION">Thử việc</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Loại hợp đồng
                   </label>
                   <select
                     value={formData.contractType}
-                    onChange={(e) => setFormData({ ...formData, contractType: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, contractType: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="FULL_TIME">Toàn thời gian</option>
@@ -697,7 +763,7 @@ const EmployeeManagement: React.FC = () => {
                     <option value="FREELANCE">Tự do</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Ngày vào làm
@@ -705,11 +771,13 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="date"
                     value={formData.hireDate}
-                    onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, hireDate: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Lương cơ bản
@@ -717,7 +785,12 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="number"
                     value={formData.salary}
-                    onChange={(e) => setFormData({ ...formData, salary: Number(e.target.value) })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        salary: Number(e.target.value),
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>

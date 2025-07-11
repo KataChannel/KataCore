@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
+import {
+  PlusIcon,
   MagnifyingGlassIcon,
   CheckIcon,
   XMarkIcon,
@@ -11,7 +11,7 @@ import {
   UserIcon,
   DocumentTextIcon,
   ExclamationTriangleIcon,
-  PencilIcon
+  PencilIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../../hooks/useAuth';
 
@@ -57,7 +57,9 @@ const LeaveRequestManagement: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -68,7 +70,7 @@ const LeaveRequestManagement: React.FC = () => {
     endDate: '',
     type: 'ANNUAL',
     reason: '',
-    notes: ''
+    notes: '',
   });
 
   useEffect(() => {
@@ -114,7 +116,7 @@ const LeaveRequestManagement: React.FC = () => {
         endDate: request.endDate.split('T')[0],
         type: request.type,
         reason: request.reason,
-        notes: request.notes || ''
+        notes: request.notes || '',
       });
     } else {
       setSelectedRequest(null);
@@ -124,7 +126,7 @@ const LeaveRequestManagement: React.FC = () => {
         endDate: '',
         type: 'ANNUAL',
         reason: '',
-        notes: ''
+        notes: '',
       });
     }
     setShowModal(true);
@@ -138,7 +140,12 @@ const LeaveRequestManagement: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      if (!formData.employeeId || !formData.startDate || !formData.endDate || !formData.reason) {
+      if (
+        !formData.employeeId ||
+        !formData.startDate ||
+        !formData.endDate ||
+        !formData.reason
+      ) {
         setError('Vui lòng điền đầy đủ thông tin bắt buộc');
         return;
       }
@@ -150,7 +157,7 @@ const LeaveRequestManagement: React.FC = () => {
       const days = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
       const method = selectedRequest ? 'PUT' : 'POST';
-      const url = selectedRequest 
+      const url = selectedRequest
         ? `/api/hr/leave-requests/${selectedRequest.id}`
         : '/api/hr/leave-requests';
 
@@ -161,7 +168,7 @@ const LeaveRequestManagement: React.FC = () => {
         },
         body: JSON.stringify({
           ...formData,
-          days
+          days,
         }),
       });
 
@@ -228,12 +235,18 @@ const LeaveRequestManagement: React.FC = () => {
   };
 
   const filteredRequests = leaveRequests.filter(request => {
-    const matchesSearch = request.employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         request.employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         request.reason.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+    const matchesSearch =
+      request.employee.fullName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      request.employee.employeeId
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      request.reason.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' || request.status === statusFilter;
     const matchesType = typeFilter === 'all' || request.type === typeFilter;
-    
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -241,8 +254,12 @@ const LeaveRequestManagement: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Vui lòng đăng nhập</h2>
-          <p className="text-gray-600">Bạn cần đăng nhập để truy cập trang này.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Vui lòng đăng nhập
+          </h2>
+          <p className="text-gray-600">
+            Bạn cần đăng nhập để truy cập trang này.
+          </p>
         </div>
       </div>
     );
@@ -253,8 +270,12 @@ const LeaveRequestManagement: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý đơn nghỉ phép</h1>
-          <p className="text-gray-600">Quản lý và phê duyệt đơn nghỉ phép của nhân viên</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Quản lý đơn nghỉ phép
+          </h1>
+          <p className="text-gray-600">
+            Quản lý và phê duyệt đơn nghỉ phép của nhân viên
+          </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -274,14 +295,14 @@ const LeaveRequestManagement: React.FC = () => {
               type="text"
               placeholder="Tìm kiếm đơn nghỉ phép..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={e => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tất cả trạng thái</option>
@@ -290,10 +311,10 @@ const LeaveRequestManagement: React.FC = () => {
             <option value="REJECTED">Đã từ chối</option>
             <option value="CANCELLED">Đã hủy</option>
           </select>
-          
+
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={e => setTypeFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tất cả loại nghỉ phép</option>
@@ -304,7 +325,7 @@ const LeaveRequestManagement: React.FC = () => {
             <option value="PATERNITY">Nghỉ chăm con</option>
             <option value="EMERGENCY">Nghỉ khẩn cấp</option>
           </select>
-          
+
           <div className="text-sm text-gray-500 flex items-center">
             Tổng: {filteredRequests.length} đơn
           </div>
@@ -327,11 +348,13 @@ const LeaveRequestManagement: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Tổng đơn</p>
-              <p className="text-2xl font-bold text-gray-900">{leaveRequests.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {leaveRequests.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -345,7 +368,7 @@ const LeaveRequestManagement: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -359,7 +382,7 @@ const LeaveRequestManagement: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -379,7 +402,10 @@ const LeaveRequestManagement: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow p-6 animate-pulse">
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow p-6 animate-pulse"
+            >
               <div className="flex items-center mb-4">
                 <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                 <div className="ml-4">
@@ -398,21 +424,33 @@ const LeaveRequestManagement: React.FC = () => {
             <p className="text-gray-500 text-lg">Chưa có đơn nghỉ phép nào</p>
           </div>
         ) : (
-          filteredRequests.map((request) => (
-            <div key={request.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
+          filteredRequests.map(request => (
+            <div
+              key={request.id}
+              className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6"
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <img
                     className="h-10 w-10 rounded-full object-cover"
-                    src={request.employee.user?.avatar || `https://ui-avatars.com/api/?name=${request.employee.fullName}&background=3b82f6&color=fff`}
+                    src={
+                      request.employee.user?.avatar ||
+                      `https://ui-avatars.com/api/?name=${request.employee.fullName}&background=3b82f6&color=fff`
+                    }
                     alt={request.employee.fullName}
                   />
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-900">{request.employee.fullName}</h3>
-                    <p className="text-xs text-gray-500">#{request.employee.employeeId}</p>
+                    <h3 className="text-sm font-medium text-gray-900">
+                      {request.employee.fullName}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      #{request.employee.employeeId}
+                    </p>
                   </div>
                 </div>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(request.status)}`}>
+                <span
+                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(request.status)}`}
+                >
                   {getStatusText(request.status)}
                 </span>
               </div>
@@ -420,19 +458,23 @@ const LeaveRequestManagement: React.FC = () => {
               <div className="mb-4">
                 <div className="flex items-center text-sm text-gray-600 mb-2">
                   <CalendarIcon className="h-4 w-4 mr-2" />
-                  <span className="font-medium">{getLeaveTypeText(request.type)}</span>
+                  <span className="font-medium">
+                    {getLeaveTypeText(request.type)}
+                  </span>
                 </div>
-                
+
                 <div className="text-sm text-gray-600 mb-2">
                   <span className="font-medium">Thời gian: </span>
-                  {new Date(request.startDate).toLocaleDateString('vi-VN')} - {new Date(request.endDate).toLocaleDateString('vi-VN')}
+                  {new Date(request.startDate).toLocaleDateString(
+                    'vi-VN'
+                  )} - {new Date(request.endDate).toLocaleDateString('vi-VN')}
                 </div>
-                
+
                 <div className="text-sm text-gray-600 mb-3">
                   <span className="font-medium">Số ngày: </span>
                   {request.days} ngày
                 </div>
-                
+
                 <div className="text-sm text-gray-600">
                   <span className="font-medium">Lý do: </span>
                   <p className="mt-1 line-clamp-2">{request.reason}</p>
@@ -459,9 +501,11 @@ const LeaveRequestManagement: React.FC = () => {
           <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {selectedRequest ? 'Cập nhật đơn nghỉ phép' : 'Tạo đơn nghỉ phép mới'}
+                {selectedRequest
+                  ? 'Cập nhật đơn nghỉ phép'
+                  : 'Tạo đơn nghỉ phép mới'}
               </h3>
-              
+
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                   {error}
@@ -475,26 +519,30 @@ const LeaveRequestManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.employeeId}
-                    onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, employeeId: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={!!selectedRequest}
                   >
                     <option value="">Chọn nhân viên</option>
-                    {employees.map((employee) => (
+                    {employees.map(employee => (
                       <option key={employee.id} value={employee.id}>
                         {employee.fullName} (#{employee.employeeId})
                       </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Loại nghỉ phép *
                   </label>
                   <select
                     value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="ANNUAL">Nghỉ phép năm</option>
@@ -505,7 +553,7 @@ const LeaveRequestManagement: React.FC = () => {
                     <option value="EMERGENCY">Nghỉ khẩn cấp</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Ngày bắt đầu *
@@ -513,11 +561,13 @@ const LeaveRequestManagement: React.FC = () => {
                   <input
                     type="date"
                     value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, startDate: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Ngày kết thúc *
@@ -525,38 +575,44 @@ const LeaveRequestManagement: React.FC = () => {
                   <input
                     type="date"
                     value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, endDate: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Lý do nghỉ phép *
                   </label>
                   <textarea
                     value={formData.reason}
-                    onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, reason: e.target.value })
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nhập lý do nghỉ phép..."
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Ghi chú
                   </label>
                   <textarea
                     value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, notes: e.target.value })
+                    }
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Ghi chú thêm (không bắt buộc)..."
                   />
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={handleCloseModal}

@@ -23,14 +23,14 @@ export const ENHANCED_HR_PERMISSIONS = {
   EMPLOYEE_DELETE: { action: 'delete', resource: 'employee' },
   EMPLOYEE_IMPORT: { action: 'import', resource: 'employee' },
   EMPLOYEE_EXPORT: { action: 'export', resource: 'employee' },
-  
+
   // Department Management
   DEPARTMENT_READ: { action: 'read', resource: 'department' },
   DEPARTMENT_CREATE: { action: 'create', resource: 'department' },
   DEPARTMENT_UPDATE: { action: 'update', resource: 'department' },
   DEPARTMENT_DELETE: { action: 'delete', resource: 'department' },
   DEPARTMENT_MANAGE_BUDGET: { action: 'manage_budget', resource: 'department' },
-  
+
   // Attendance Management
   ATTENDANCE_READ: { action: 'read', resource: 'attendance' },
   ATTENDANCE_CREATE: { action: 'create', resource: 'attendance' },
@@ -38,7 +38,7 @@ export const ENHANCED_HR_PERMISSIONS = {
   ATTENDANCE_DELETE: { action: 'delete', resource: 'attendance' },
   ATTENDANCE_APPROVE: { action: 'approve', resource: 'attendance' },
   ATTENDANCE_REJECT: { action: 'reject', resource: 'attendance' },
-  
+
   // Leave Management
   LEAVE_READ: { action: 'read', resource: 'leave' },
   LEAVE_CREATE: { action: 'create', resource: 'leave' },
@@ -47,7 +47,7 @@ export const ENHANCED_HR_PERMISSIONS = {
   LEAVE_APPROVE: { action: 'approve', resource: 'leave' },
   LEAVE_REJECT: { action: 'reject', resource: 'leave' },
   LEAVE_CANCEL: { action: 'cancel', resource: 'leave' },
-  
+
   // Payroll Management
   PAYROLL_READ: { action: 'read', resource: 'payroll' },
   PAYROLL_CREATE: { action: 'create', resource: 'payroll' },
@@ -55,19 +55,19 @@ export const ENHANCED_HR_PERMISSIONS = {
   PAYROLL_DELETE: { action: 'delete', resource: 'payroll' },
   PAYROLL_APPROVE: { action: 'approve', resource: 'payroll' },
   PAYROLL_PROCESS: { action: 'process', resource: 'payroll' },
-  
+
   // Performance Management
   PERFORMANCE_READ: { action: 'read', resource: 'performance' },
   PERFORMANCE_CREATE: { action: 'create', resource: 'performance' },
   PERFORMANCE_UPDATE: { action: 'update', resource: 'performance' },
   PERFORMANCE_DELETE: { action: 'delete', resource: 'performance' },
-  
+
   // Reports and Analytics
   REPORTS_READ: { action: 'read', resource: 'reports' },
   REPORTS_CREATE: { action: 'create', resource: 'reports' },
   REPORTS_EXPORT: { action: 'export', resource: 'reports' },
   REPORTS_SCHEDULE: { action: 'schedule', resource: 'reports' },
-  
+
   // System Administration
   SETTINGS_READ: { action: 'read', resource: 'settings' },
   SETTINGS_UPDATE: { action: 'update', resource: 'settings' },
@@ -80,16 +80,16 @@ export const ENHANCED_HR_PERMISSIONS = {
   ROLES_CREATE: { action: 'create', resource: 'roles' },
   ROLES_UPDATE: { action: 'update', resource: 'roles' },
   ROLES_DELETE: { action: 'delete', resource: 'roles' },
-  
+
   // Notifications
   NOTIFICATIONS_READ: { action: 'read', resource: 'notifications' },
   NOTIFICATIONS_CREATE: { action: 'create', resource: 'notifications' },
   NOTIFICATIONS_SEND: { action: 'send', resource: 'notifications' },
-  
+
   // Audit Logs
   AUDIT_READ: { action: 'read', resource: 'audit' },
   AUDIT_EXPORT: { action: 'export', resource: 'audit' },
-  
+
   // Integrations
   INTEGRATIONS_READ: { action: 'read', resource: 'integrations' },
   INTEGRATIONS_MANAGE: { action: 'manage', resource: 'integrations' },
@@ -102,7 +102,10 @@ export const ENHANCED_HR_ROLES: HRRole[] = [
     name: 'Super Administrator',
     description: 'Complete system access with all permissions',
     level: 5,
-    permissions: Object.values(ENHANCED_HR_PERMISSIONS).map(p => ({ ...p, scope: 'all' as const })),
+    permissions: Object.values(ENHANCED_HR_PERMISSIONS).map(p => ({
+      ...p,
+      scope: 'all' as const,
+    })),
   },
   {
     id: 'hr_admin',
@@ -272,7 +275,12 @@ export class EnhancedHRPermissionService {
   /**
    * Check if user has permission to perform an action on a resource
    */
-  hasPermission(action: string, resource: string, targetDepartment?: string, targetUserId?: string): boolean {
+  hasPermission(
+    action: string,
+    resource: string,
+    targetDepartment?: string,
+    targetUserId?: string
+  ): boolean {
     if (!this.userRole) return false;
 
     const permission = this.userRole.permissions.find(
@@ -298,7 +306,12 @@ export class EnhancedHRPermissionService {
    * Employee management permissions
    */
   canReadEmployee(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('read', 'employee', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'read',
+      'employee',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   canCreateEmployee(): boolean {
@@ -306,11 +319,21 @@ export class EnhancedHRPermissionService {
   }
 
   canUpdateEmployee(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('update', 'employee', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'update',
+      'employee',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   canDeleteEmployee(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('delete', 'employee', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'delete',
+      'employee',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   canImportEmployee(): boolean {
@@ -325,7 +348,10 @@ export class EnhancedHRPermissionService {
    * Department management permissions
    */
   canManageDepartments(): boolean {
-    return this.hasPermission('create', 'department') || this.hasPermission('update', 'department');
+    return (
+      this.hasPermission('create', 'department') ||
+      this.hasPermission('update', 'department')
+    );
   }
 
   canManageDepartmentBudget(): boolean {
@@ -344,14 +370,24 @@ export class EnhancedHRPermissionService {
   }
 
   canCancelLeave(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('cancel', 'leave', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'cancel',
+      'leave',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   /**
    * Payroll management permissions
    */
   canAccessPayroll(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('read', 'payroll', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'read',
+      'payroll',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   canProcessPayroll(): boolean {
@@ -397,7 +433,10 @@ export class EnhancedHRPermissionService {
   }
 
   canManageRoles(): boolean {
-    return this.hasPermission('create', 'roles') || this.hasPermission('update', 'roles');
+    return (
+      this.hasPermission('create', 'roles') ||
+      this.hasPermission('update', 'roles')
+    );
   }
 
   /**
@@ -484,57 +523,61 @@ export class EnhancedHRPermissionService {
     return permissionCheck ? permissionCheck() : false;
   }
 
-  getAuthorizedNavigation(): Array<{name: string, href: string, permission: () => boolean}> {
+  getAuthorizedNavigation(): Array<{
+    name: string;
+    href: string;
+    permission: () => boolean;
+  }> {
     return [
       {
         name: 'Dashboard',
         href: '/hr',
-        permission: () => true
+        permission: () => true,
       },
       {
         name: 'Employees',
         href: '/hr/employees',
-        permission: () => this.canReadEmployee()
+        permission: () => this.canReadEmployee(),
       },
       {
         name: 'Departments',
         href: '/hr/departments',
-        permission: () => this.hasPermission('read', 'department')
+        permission: () => this.hasPermission('read', 'department'),
       },
       {
         name: 'Attendance',
         href: '/hr/attendance',
-        permission: () => this.hasPermission('read', 'attendance')
+        permission: () => this.hasPermission('read', 'attendance'),
       },
       {
         name: 'Leave Requests',
         href: '/hr/leave-requests',
-        permission: () => this.hasPermission('read', 'leave')
+        permission: () => this.hasPermission('read', 'leave'),
       },
       {
         name: 'Payroll',
         href: '/hr/payroll',
-        permission: () => this.canAccessPayroll()
+        permission: () => this.canAccessPayroll(),
       },
       {
         name: 'Performance',
         href: '/hr/performance',
-        permission: () => this.hasPermission('read', 'performance')
+        permission: () => this.hasPermission('read', 'performance'),
       },
       {
         name: 'Reports',
         href: '/hr/reports',
-        permission: () => this.hasPermission('read', 'reports')
+        permission: () => this.hasPermission('read', 'reports'),
       },
       {
         name: 'Roles & Permissions',
         href: '/hr/roles',
-        permission: () => this.hasPermission('read', 'roles')
+        permission: () => this.hasPermission('read', 'roles'),
       },
       {
         name: 'Settings',
         href: '/hr/settings',
-        permission: () => this.canManageSettings()
+        permission: () => this.canManageSettings(),
       },
     ].filter(item => item.permission());
   }
@@ -543,14 +586,32 @@ export class EnhancedHRPermissionService {
 /**
  * React hook for enhanced HR permissions
  */
-export const useEnhancedHRPermissions = (roleId: string, departmentId?: string, userId?: string) => {
-  const permissionService = new EnhancedHRPermissionService(roleId, departmentId, userId);
-  
+export const useEnhancedHRPermissions = (
+  roleId: string,
+  departmentId?: string,
+  userId?: string
+) => {
+  const permissionService = new EnhancedHRPermissionService(
+    roleId,
+    departmentId,
+    userId
+  );
+
   return {
     // Core permission checking
-    hasPermission: (action: string, resource: string, targetDepartment?: string, targetUserId?: string) =>
-      permissionService.hasPermission(action, resource, targetDepartment, targetUserId),
-    
+    hasPermission: (
+      action: string,
+      resource: string,
+      targetDepartment?: string,
+      targetUserId?: string
+    ) =>
+      permissionService.hasPermission(
+        action,
+        resource,
+        targetDepartment,
+        targetUserId
+      ),
+
     // Employee permissions
     canReadEmployee: (targetDepartment?: string, targetUserId?: string) =>
       permissionService.canReadEmployee(targetDepartment, targetUserId),
@@ -561,27 +622,32 @@ export const useEnhancedHRPermissions = (roleId: string, departmentId?: string, 
       permissionService.canDeleteEmployee(targetDepartment, targetUserId),
     canImportEmployee: () => permissionService.canImportEmployee(),
     canExportEmployee: () => permissionService.canExportEmployee(),
-    
+
     // Department permissions
     canManageDepartments: () => permissionService.canManageDepartments(),
-    canManageDepartmentBudget: () => permissionService.canManageDepartmentBudget(),
-    
+    canManageDepartmentBudget: () =>
+      permissionService.canManageDepartmentBudget(),
+
     // Leave permissions
-    canApproveLeave: (targetDepartment?: string) => permissionService.canApproveLeave(targetDepartment),
-    canRejectLeave: (targetDepartment?: string) => permissionService.canRejectLeave(targetDepartment),
-    canCancelLeave: (targetDepartment?: string, targetUserId?: string) => 
+    canApproveLeave: (targetDepartment?: string) =>
+      permissionService.canApproveLeave(targetDepartment),
+    canRejectLeave: (targetDepartment?: string) =>
+      permissionService.canRejectLeave(targetDepartment),
+    canCancelLeave: (targetDepartment?: string, targetUserId?: string) =>
       permissionService.canCancelLeave(targetDepartment, targetUserId),
-    
+
     // Payroll permissions
     canAccessPayroll: (targetDepartment?: string, targetUserId?: string) =>
       permissionService.canAccessPayroll(targetDepartment, targetUserId),
     canProcessPayroll: () => permissionService.canProcessPayroll(),
     canApprovePayroll: () => permissionService.canApprovePayroll(),
-    
+
     // Attendance permissions
-    canApproveAttendance: (targetDepartment?: string) => permissionService.canApproveAttendance(targetDepartment),
-    canRejectAttendance: (targetDepartment?: string) => permissionService.canRejectAttendance(targetDepartment),
-    
+    canApproveAttendance: (targetDepartment?: string) =>
+      permissionService.canApproveAttendance(targetDepartment),
+    canRejectAttendance: (targetDepartment?: string) =>
+      permissionService.canRejectAttendance(targetDepartment),
+
     // Administrative permissions
     canManageSettings: () => permissionService.canManageSettings(),
     canManageUsers: () => permissionService.canManageUsers(),
@@ -589,27 +655,28 @@ export const useEnhancedHRPermissions = (roleId: string, departmentId?: string, 
     canUpdateUsers: () => permissionService.canUpdateUsers(),
     canDeleteUsers: () => permissionService.canDeleteUsers(),
     canManageRoles: () => permissionService.canManageRoles(),
-    
+
     // Notification permissions
     canCreateNotifications: () => permissionService.canCreateNotifications(),
     canSendNotifications: () => permissionService.canSendNotifications(),
-    
+
     // Report permissions
     canCreateReports: () => permissionService.canCreateReports(),
     canExportReports: () => permissionService.canExportReports(),
     canScheduleReports: () => permissionService.canScheduleReports(),
-    
+
     // Audit permissions
     canAccessAuditLogs: () => permissionService.canAccessAuditLogs(),
     canExportAuditLogs: () => permissionService.canExportAuditLogs(),
-    
+
     // Integration permissions
     canManageIntegrations: () => permissionService.canManageIntegrations(),
-    
+
     // Utility methods
     getUserRole: () => permissionService.getUserRole(),
     getPermissionLevel: () => permissionService.getPermissionLevel(),
-    hasPermissionLevel: (level: number) => permissionService.hasPermissionLevel(level),
+    hasPermissionLevel: (level: number) =>
+      permissionService.hasPermissionLevel(level),
     getAllPermissions: () => permissionService.getAllPermissions(),
     canAccessRoute: (route: string) => permissionService.canAccessRoute(route),
     getAuthorizedNavigation: () => permissionService.getAuthorizedNavigation(),
@@ -627,8 +694,14 @@ export const getRoleById = (roleId: string): HRRole | null => {
   return ENHANCED_HR_ROLES.find(role => role.id === roleId) || null;
 };
 
-export const getPermissionsByCategory = (): Record<string, typeof ENHANCED_HR_PERMISSIONS[keyof typeof ENHANCED_HR_PERMISSIONS][]> => {
-  const categories: Record<string, typeof ENHANCED_HR_PERMISSIONS[keyof typeof ENHANCED_HR_PERMISSIONS][]> = {
+export const getPermissionsByCategory = (): Record<
+  string,
+  (typeof ENHANCED_HR_PERMISSIONS)[keyof typeof ENHANCED_HR_PERMISSIONS][]
+> => {
+  const categories: Record<
+    string,
+    (typeof ENHANCED_HR_PERMISSIONS)[keyof typeof ENHANCED_HR_PERMISSIONS][]
+  > = {
     employee: [],
     department: [],
     attendance: [],

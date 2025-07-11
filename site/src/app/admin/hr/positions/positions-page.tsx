@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
+import {
+  PlusIcon,
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
   BuildingOfficeIcon,
   BriefcaseIcon,
   CurrencyDollarIcon,
-  ChartBarIcon
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -42,7 +42,9 @@ const PositionManagement: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -55,7 +57,7 @@ const PositionManagement: React.FC = () => {
     maxSalary: 0,
     requirements: '',
     isActive: true,
-    departmentId: ''
+    departmentId: '',
   });
 
   useEffect(() => {
@@ -103,7 +105,7 @@ const PositionManagement: React.FC = () => {
         maxSalary: position.maxSalary || 0,
         requirements: position.requirements || '',
         isActive: position.isActive,
-        departmentId: position.department.id
+        departmentId: position.department.id,
       });
     } else {
       setSelectedPosition(null);
@@ -115,7 +117,7 @@ const PositionManagement: React.FC = () => {
         maxSalary: 0,
         requirements: '',
         isActive: true,
-        departmentId: ''
+        departmentId: '',
       });
     }
     setShowModal(true);
@@ -135,7 +137,7 @@ const PositionManagement: React.FC = () => {
       }
 
       const method = selectedPosition ? 'PUT' : 'POST';
-      const url = selectedPosition 
+      const url = selectedPosition
         ? `/api/hr/positions/${selectedPosition.id}`
         : '/api/hr/positions';
 
@@ -181,13 +183,18 @@ const PositionManagement: React.FC = () => {
   };
 
   const filteredPositions = positions.filter(position => {
-    const matchesSearch = position.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         position.department.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'active' && position.isActive) ||
-                         (statusFilter === 'inactive' && !position.isActive);
-    const matchesDepartment = departmentFilter === 'all' || position.department.id === departmentFilter;
-    
+    const matchesSearch =
+      position.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      position.department.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && position.isActive) ||
+      (statusFilter === 'inactive' && !position.isActive);
+    const matchesDepartment =
+      departmentFilter === 'all' || position.department.id === departmentFilter;
+
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
@@ -195,8 +202,12 @@ const PositionManagement: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Vui lòng đăng nhập</h2>
-          <p className="text-gray-600">Bạn cần đăng nhập để truy cập trang này.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Vui lòng đăng nhập
+          </h2>
+          <p className="text-gray-600">
+            Bạn cần đăng nhập để truy cập trang này.
+          </p>
         </div>
       </div>
     );
@@ -228,34 +239,34 @@ const PositionManagement: React.FC = () => {
               type="text"
               placeholder="Tìm kiếm chức vụ..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <select
             value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
+            onChange={e => setDepartmentFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tất cả phòng ban</option>
-            {departments.map((dept) => (
+            {departments.map(dept => (
               <option key={dept.id} value={dept.id}>
                 {dept.name}
               </option>
             ))}
           </select>
-          
+
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={e => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="active">Hoạt động</option>
             <option value="inactive">Không hoạt động</option>
           </select>
-          
+
           <div className="text-sm text-gray-500 flex items-center">
             Tổng: {filteredPositions.length} chức vụ
           </div>
@@ -278,25 +289,29 @@ const PositionManagement: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Tổng chức vụ</p>
-              <p className="text-2xl font-bold text-gray-900">{positions.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {positions.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <ChartBarIcon className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Đang hoạt động</p>
+              <p className="text-sm font-medium text-gray-500">
+                Đang hoạt động
+              </p>
               <p className="text-2xl font-bold text-gray-900">
                 {positions.filter(p => p.isActive).length}
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -304,11 +319,13 @@ const PositionManagement: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Phòng ban</p>
-              <p className="text-2xl font-bold text-gray-900">{departments.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {departments.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -321,15 +338,17 @@ const PositionManagement: React.FC = () => {
                   ? new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
                       currency: 'VND',
-                      maximumFractionDigits: 0
+                      maximumFractionDigits: 0,
                     }).format(
                       positions
                         .filter(p => p.minSalary && p.maxSalary)
-                        .reduce((sum, p) => sum + ((p.minSalary! + p.maxSalary!) / 2), 0) /
-                      positions.filter(p => p.minSalary && p.maxSalary).length
+                        .reduce(
+                          (sum, p) => sum + (p.minSalary! + p.maxSalary!) / 2,
+                          0
+                        ) /
+                        positions.filter(p => p.minSalary && p.maxSalary).length
                     )
-                  : 'N/A'
-                }
+                  : 'N/A'}
               </p>
             </div>
           </div>
@@ -340,7 +359,10 @@ const PositionManagement: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow p-6 animate-pulse">
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow p-6 animate-pulse"
+            >
               <div className="h-4 bg-gray-200 rounded mb-4"></div>
               <div className="h-3 bg-gray-200 rounded mb-2"></div>
               <div className="h-3 bg-gray-200 rounded mb-4"></div>
@@ -353,12 +375,19 @@ const PositionManagement: React.FC = () => {
             <p className="text-gray-500 text-lg">Chưa có chức vụ nào</p>
           </div>
         ) : (
-          filteredPositions.map((position) => (
-            <div key={position.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
+          filteredPositions.map(position => (
+            <div
+              key={position.id}
+              className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6"
+            >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{position.title}</h3>
-                  <p className="text-sm text-gray-600">{position.department.name}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {position.title}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {position.department.name}
+                  </p>
                 </div>
                 <div className="flex space-x-2">
                   <button
@@ -400,22 +429,26 @@ const PositionManagement: React.FC = () => {
                   {new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND',
-                    maximumFractionDigits: 0
-                  }).format(position.minSalary)} - {new Intl.NumberFormat('vi-VN', {
+                    maximumFractionDigits: 0,
+                  }).format(position.minSalary)}{' '}
+                  -{' '}
+                  {new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND',
-                    maximumFractionDigits: 0
+                    maximumFractionDigits: 0,
                   }).format(position.maxSalary)}
                 </div>
               )}
 
               {/* Status */}
               <div className="flex justify-between items-center">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  position.isActive 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    position.isActive
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
                   {position.isActive ? 'Hoạt động' : 'Không hoạt động'}
                 </span>
               </div>
@@ -432,7 +465,7 @@ const PositionManagement: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {selectedPosition ? 'Cập nhật chức vụ' : 'Thêm chức vụ mới'}
               </h3>
-              
+
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                   {error}
@@ -447,29 +480,33 @@ const PositionManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phòng ban *
                   </label>
                   <select
                     value={formData.departmentId}
-                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, departmentId: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Chọn phòng ban</option>
-                    {departments.map((dept) => (
+                    {departments.map(dept => (
                       <option key={dept.id} value={dept.id}>
                         {dept.name}
                       </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Cấp độ
@@ -479,25 +516,35 @@ const PositionManagement: React.FC = () => {
                     min="1"
                     max="10"
                     value={formData.level}
-                    onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        level: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trạng thái
                   </label>
                   <select
                     value={formData.isActive ? 'active' : 'inactive'}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'active' })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        isActive: e.target.value === 'active',
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="active">Hoạt động</option>
                     <option value="inactive">Không hoạt động</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Lương tối thiểu
@@ -507,11 +554,16 @@ const PositionManagement: React.FC = () => {
                     min="0"
                     step="100000"
                     value={formData.minSalary}
-                    onChange={(e) => setFormData({ ...formData, minSalary: parseInt(e.target.value) })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        minSalary: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Lương tối đa
@@ -521,36 +573,45 @@ const PositionManagement: React.FC = () => {
                     min="0"
                     step="100000"
                     value={formData.maxSalary}
-                    onChange={(e) => setFormData({ ...formData, maxSalary: parseInt(e.target.value) })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        maxSalary: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Mô tả
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Yêu cầu
                   </label>
                   <textarea
                     value={formData.requirements}
-                    onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, requirements: e.target.value })
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={handleCloseModal}

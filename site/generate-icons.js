@@ -45,7 +45,7 @@ const hrIconSvg = `
 
 async function generateIcons() {
   const iconsDir = path.join(__dirname, 'public', 'icons');
-  
+
   // Ensure icons directory exists
   if (!fs.existsSync(iconsDir)) {
     fs.mkdirSync(iconsDir, { recursive: true });
@@ -61,7 +61,7 @@ async function generateIcons() {
         .resize(size, size)
         .png()
         .toFile(path.join(iconsDir, `icon-${size}x${size}.png`));
-      
+
       console.log(`✓ Generated icon-${size}x${size}.png`);
     } catch (error) {
       console.error(`✗ Failed to generate icon-${size}x${size}.png:`, error);
@@ -74,7 +74,7 @@ async function generateIcons() {
       .resize(32, 32)
       .ico()
       .toFile(path.join(__dirname, 'public', 'favicon.ico'));
-    
+
     console.log('✓ Generated favicon.ico');
   } catch (error) {
     console.error('✗ Failed to generate favicon.ico:', error);

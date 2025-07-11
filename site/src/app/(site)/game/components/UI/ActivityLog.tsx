@@ -18,9 +18,11 @@ export const ActivityLog = ({ logs }: ActivityLogProps) => {
             <div
               key={`${log.timestamp}-${index}`}
               className={`text-xs p-2 rounded ${
-                log.type === 'success' ? 'bg-green-900/30 text-green-300' :
-                log.type === 'error' ? 'bg-red-900/30 text-red-300' :
-                'bg-gray-700/50 text-gray-300'
+                log.type === 'success'
+                  ? 'bg-green-900/30 text-green-300'
+                  : log.type === 'error'
+                    ? 'bg-red-900/30 text-red-300'
+                    : 'bg-gray-700/50 text-gray-300'
               }`}
             >
               <div className="flex justify-between items-start">

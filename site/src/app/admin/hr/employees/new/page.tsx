@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   ArrowLeftIcon,
   UserIcon,
   BuildingOfficeIcon,
@@ -80,53 +80,60 @@ export default function NewEmployeePage() {
   const [errors, setErrors] = useState<Partial<EmployeeFormData>>({});
   const router = useRouter();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name as keyof EmployeeFormData]) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
 
   const validateForm = (): boolean => {
     const newErrors: Partial<EmployeeFormData> = {};
-    
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+
+    if (!formData.firstName.trim())
+      newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (!formData.employeeId.trim()) newErrors.employeeId = 'Employee ID is required';
+    if (!formData.employeeId.trim())
+      newErrors.employeeId = 'Employee ID is required';
     if (!formData.hireDate) newErrors.hireDate = 'Hire date is required';
-    if (!formData.departmentId) newErrors.departmentId = 'Department is required';
+    if (!formData.departmentId)
+      newErrors.departmentId = 'Department is required';
     if (!formData.positionId) newErrors.positionId = 'Position is required';
-    
+
     // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Show success message and redirect
       router.push('/hr/employees');
     } catch (error) {
@@ -136,8 +143,8 @@ export default function NewEmployeePage() {
     }
   };
 
-  const availablePositions = mockPositions.filter(pos => 
-    pos.departmentId === formData.departmentId
+  const availablePositions = mockPositions.filter(
+    pos => pos.departmentId === formData.departmentId
   );
 
   return (
@@ -153,7 +160,9 @@ export default function NewEmployeePage() {
             Back to Employees
           </Link>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mt-2">Add New Employee</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mt-2">
+          Add New Employee
+        </h1>
         <p className="text-gray-600">Fill in the employee information below</p>
       </div>
 
@@ -179,7 +188,9 @@ export default function NewEmployeePage() {
                 }`}
                 placeholder="EMP001"
               />
-              {errors.employeeId && <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>}
+              {errors.employeeId && (
+                <p className="mt-1 text-sm text-red-600">{errors.employeeId}</p>
+              )}
             </div>
             <div className="md:col-span-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -197,7 +208,11 @@ export default function NewEmployeePage() {
                     }`}
                     placeholder="John"
                   />
-                  {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
+                  {errors.firstName && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.firstName}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -213,7 +228,11 @@ export default function NewEmployeePage() {
                     }`}
                     placeholder="Doe"
                   />
-                  {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
+                  {errors.lastName && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.lastName}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -241,7 +260,9 @@ export default function NewEmployeePage() {
                 }`}
                 placeholder="john.doe@company.com"
               />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -369,7 +390,9 @@ export default function NewEmployeePage() {
                   errors.hireDate ? 'border-red-300' : 'border-gray-300'
                 }`}
               />
-              {errors.hireDate && <p className="mt-1 text-sm text-red-600">{errors.hireDate}</p>}
+              {errors.hireDate && (
+                <p className="mt-1 text-sm text-red-600">{errors.hireDate}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -385,10 +408,16 @@ export default function NewEmployeePage() {
               >
                 <option value="">Select Department</option>
                 {mockDepartments.map(dept => (
-                  <option key={dept.id} value={dept.id}>{dept.name}</option>
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
                 ))}
               </select>
-              {errors.departmentId && <p className="mt-1 text-sm text-red-600">{errors.departmentId}</p>}
+              {errors.departmentId && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.departmentId}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -405,10 +434,14 @@ export default function NewEmployeePage() {
               >
                 <option value="">Select Position</option>
                 {availablePositions.map(pos => (
-                  <option key={pos.id} value={pos.id}>{pos.title}</option>
+                  <option key={pos.id} value={pos.id}>
+                    {pos.title}
+                  </option>
                 ))}
               </select>
-              {errors.positionId && <p className="mt-1 text-sm text-red-600">{errors.positionId}</p>}
+              {errors.positionId && (
+                <p className="mt-1 text-sm text-red-600">{errors.positionId}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

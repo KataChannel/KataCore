@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  ClockIcon, 
-  CalendarIcon, 
+import {
+  ClockIcon,
+  CalendarIcon,
   UsersIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -155,9 +155,13 @@ const statusIcons = {
 };
 
 export default function AttendancePage() {
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<
+    AttendanceRecord[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
@@ -171,45 +175,60 @@ export default function AttendancePage() {
   }, [selectedDate]);
 
   const filteredRecords = attendanceRecords.filter(record => {
-    const matchesSearch = record.employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         record.employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
-    const matchesDepartment = departmentFilter === 'all' || record.employee.department === departmentFilter;
-    
+    const matchesSearch =
+      record.employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      record.employee.employeeId
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' || record.status === statusFilter;
+    const matchesDepartment =
+      departmentFilter === 'all' ||
+      record.employee.department === departmentFilter;
+
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
   const getSummary = (): AttendanceSummary => {
     const totalEmployees = attendanceRecords.length;
-    const present = attendanceRecords.filter(r => r.status === 'PRESENT').length;
+    const present = attendanceRecords.filter(
+      r => r.status === 'PRESENT'
+    ).length;
     const absent = attendanceRecords.filter(r => r.status === 'ABSENT').length;
     const late = attendanceRecords.filter(r => r.status === 'LATE').length;
-    const workFromHome = attendanceRecords.filter(r => r.status === 'WORK_FROM_HOME').length;
-    
+    const workFromHome = attendanceRecords.filter(
+      r => r.status === 'WORK_FROM_HOME'
+    ).length;
+
     return {
       totalEmployees,
       present,
       absent,
       late,
       workFromHome,
-      attendanceRate: totalEmployees > 0 ? ((present + late + workFromHome) / totalEmployees) * 100 : 0,
+      attendanceRate:
+        totalEmployees > 0
+          ? ((present + late + workFromHome) / totalEmployees) * 100
+          : 0,
     };
   };
 
   const summary = getSummary();
-  const departments = [...new Set(attendanceRecords.map(r => r.employee.department))];
+  const departments = [
+    ...new Set(attendanceRecords.map(r => r.employee.department)),
+  ];
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const currentDate = new Date(selectedDate);
     const newDate = new Date(currentDate);
-    
+
     if (direction === 'prev') {
       newDate.setDate(currentDate.getDate() - 1);
     } else {
       newDate.setDate(currentDate.getDate() + 1);
     }
-    
+
     setSelectedDate(newDate.toISOString().split('T')[0]);
   };
 
@@ -245,8 +264,12 @@ export default function AttendancePage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Attendance Management</h1>
-            <p className="text-gray-600">Track employee attendance and work hours</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Attendance Management
+            </h1>
+            <p className="text-gray-600">
+              Track employee attendance and work hours
+            </p>
           </div>
           <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <PlusIcon className="h-4 w-4 mr-2" />
@@ -271,7 +294,7 @@ export default function AttendancePage() {
                 <input
                   type="date"
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={e => setSelectedDate(e.target.value)}
                   className="text-lg font-medium text-gray-900 border-none focus:outline-none focus:ring-0"
                 />
               </div>
@@ -287,7 +310,7 @@ export default function AttendancePage() {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
               })}
             </div>
           </div>
@@ -303,7 +326,9 @@ export default function AttendancePage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.totalEmployees}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.totalEmployees}
+              </p>
             </div>
           </div>
         </div>
@@ -314,7 +339,9 @@ export default function AttendancePage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Present</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.present}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.present}
+              </p>
             </div>
           </div>
         </div>
@@ -325,7 +352,9 @@ export default function AttendancePage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Absent</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.absent}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.absent}
+              </p>
             </div>
           </div>
         </div>
@@ -347,7 +376,9 @@ export default function AttendancePage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">WFH</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.workFromHome}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.workFromHome}
+              </p>
             </div>
           </div>
         </div>
@@ -358,13 +389,20 @@ export default function AttendancePage() {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">Attendance Rate</h3>
-              <p className="text-sm text-gray-600">Overall attendance for {new Date(selectedDate).toLocaleDateString()}</p>
+              <h3 className="text-lg font-medium text-gray-900">
+                Attendance Rate
+              </h3>
+              <p className="text-sm text-gray-600">
+                Overall attendance for{' '}
+                {new Date(selectedDate).toLocaleDateString()}
+              </p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-gray-900">{summary.attendanceRate.toFixed(1)}%</div>
+              <div className="text-3xl font-bold text-gray-900">
+                {summary.attendanceRate.toFixed(1)}%
+              </div>
               <div className="w-32 bg-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className="bg-green-500 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${summary.attendanceRate}%` }}
                 ></div>
@@ -388,7 +426,7 @@ export default function AttendancePage() {
                   placeholder="Search employees..."
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -398,7 +436,7 @@ export default function AttendancePage() {
                 <select
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={e => setStatusFilter(e.target.value)}
                 >
                   <option value="all">All Status</option>
                   <option value="PRESENT">Present</option>
@@ -412,11 +450,13 @@ export default function AttendancePage() {
                 <select
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   value={departmentFilter}
-                  onChange={(e) => setDepartmentFilter(e.target.value)}
+                  onChange={e => setDepartmentFilter(e.target.value)}
                 >
                   <option value="all">All Departments</option>
                   {departments.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -460,7 +500,7 @@ export default function AttendancePage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredRecords.map((record) => {
+              {filteredRecords.map(record => {
                 const StatusIcon = statusIcons[record.status];
                 return (
                   <tr key={record.id} className="hover:bg-gray-50">
@@ -469,7 +509,10 @@ export default function AttendancePage() {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                             <span className="text-sm font-medium text-gray-600">
-                              {record.employee.name.split(' ').map(n => n[0]).join('')}
+                              {record.employee.name
+                                .split(' ')
+                                .map(n => n[0])
+                                .join('')}
                             </span>
                           </div>
                         </div>
@@ -478,7 +521,8 @@ export default function AttendancePage() {
                             {record.employee.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {record.employee.employeeId} • {record.employee.department}
+                            {record.employee.employeeId} •{' '}
+                            {record.employee.department}
                           </div>
                         </div>
                       </div>
@@ -486,7 +530,9 @@ export default function AttendancePage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <StatusIcon className="h-4 w-4 mr-2 text-gray-400" />
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[record.status]}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[record.status]}`}
+                        >
                           {record.status.replace('_', ' ')}
                         </span>
                       </div>
@@ -498,10 +544,9 @@ export default function AttendancePage() {
                       {record.timeOut || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {record.breakStart && record.breakEnd 
+                      {record.breakStart && record.breakEnd
                         ? `${record.breakStart} - ${record.breakEnd}`
-                        : '-'
-                      }
+                        : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div>

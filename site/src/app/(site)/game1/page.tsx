@@ -1,67 +1,67 @@
 // pages/Game1.js
-"use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+'use client';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 // --- Constants ---
 const MAP_SIZE = 10;
 const TILE_SIZE_PX = 32;
-const RESOURCE_TYPES: any = ["metal", "wood", "water", "fire", "earth"];
+const RESOURCE_TYPES: any = ['metal', 'wood', 'water', 'fire', 'earth'];
 const RESOURCE_ICONS: any = {
-  metal: "💰",
-  wood: "🌳",
-  water: "💧",
-  fire: "🔥",
-  earth: "⛰️",
+  metal: '💰',
+  wood: '🌳',
+  water: '💧',
+  fire: '🔥',
+  earth: '⛰️',
 };
 const SPIRIT_BEAST_ICONS: any = {
-  spirit_metal: "🐉",
-  spirit_wood: "🦌",
-  spirit_water: "🐢",
-  spirit_fire: "🦅",
-  spirit_earth: "🐻",
+  spirit_metal: '🐉',
+  spirit_wood: '🦌',
+  spirit_water: '🐢',
+  spirit_fire: '🦅',
+  spirit_earth: '🐻',
 };
 const SOURCE_ICONS: any = {
-  metal_mine: "⛏️",
-  wood_forest: "🌲",
-  water_spring: "🌊",
-  fire_forge: "🌋",
-  earth_field: "🌾",
+  metal_mine: '⛏️',
+  wood_forest: '🌲',
+  water_spring: '🌊',
+  fire_forge: '🌋',
+  earth_field: '🌾',
 };
 const NGU_HANH_RELATIONS: any = {
   generates: {
-    wood: "fire",
-    fire: "earth",
-    earth: "metal",
-    metal: "water",
-    water: "wood",
+    wood: 'fire',
+    fire: 'earth',
+    earth: 'metal',
+    metal: 'water',
+    water: 'wood',
   },
   overcomes: {
-    metal: "wood",
-    wood: "earth",
-    earth: "water",
-    water: "fire",
-    fire: "metal",
+    metal: 'wood',
+    wood: 'earth',
+    earth: 'water',
+    water: 'fire',
+    fire: 'metal',
   },
   elementMap: {
-    metal_mine: "metal",
-    wood_forest: "wood",
-    water_spring: "water",
-    fire_forge: "fire",
-    earth_field: "earth",
-    spirit_metal: "metal",
-    spirit_wood: "wood",
-    spirit_water: "water",
-    spirit_fire: "fire",
-    spirit_earth: "earth",
+    metal_mine: 'metal',
+    wood_forest: 'wood',
+    water_spring: 'water',
+    fire_forge: 'fire',
+    earth_field: 'earth',
+    spirit_metal: 'metal',
+    spirit_wood: 'wood',
+    spirit_water: 'water',
+    spirit_fire: 'fire',
+    spirit_earth: 'earth',
   },
 };
 const ELEMENT_TILE_BG_COLORS: any = {
-  metal: "bg-gray-500",
-  wood: "bg-lime-700",
-  water: "bg-blue-700",
-  fire: "bg-red-700",
-  earth: "bg-amber-700",
-  empty: "bg-gray-800",
+  metal: 'bg-gray-500',
+  wood: 'bg-lime-700',
+  water: 'bg-blue-700',
+  fire: 'bg-red-700',
+  earth: 'bg-amber-700',
+  empty: 'bg-gray-800',
 };
 const BASE_RESOURCE_YIELD = 10;
 const BASE_HARVEST_COOLDOWN_MS = 10 * 1000;
@@ -84,8 +84,8 @@ const DISCOVERY_COST_AMOUNT = 5;
 const ACTIVATION_COST_AMOUNT = 5;
 const MAX_LEVEL_INITIAL_TIER = 10;
 const MAX_LEVEL_FINAL = 20;
-const GAME_PHASE_INITIAL = "initial";
-const GAME_PHASE_ADVANCED = "advanced";
+const GAME_PHASE_INITIAL = 'initial';
+const GAME_PHASE_ADVANCED = 'advanced';
 
 // --- Game Logic ---
 const getRandomInt = (min: number, max: number) => {
@@ -99,7 +99,7 @@ const getIconForType = (type: string | number) => {
     RESOURCE_ICONS[type as keyof typeof RESOURCE_ICONS] ||
     SPIRIT_BEAST_ICONS[type as keyof typeof SPIRIT_BEAST_ICONS] ||
     SOURCE_ICONS[type as keyof typeof SOURCE_ICONS] ||
-    ""
+    ''
   );
 };
 
@@ -109,10 +109,10 @@ const generateMapContent = (size: number) => {
       id: `${r}-${c}`,
       row: r,
       col: c,
-      type: "undiscovered",
+      type: 'undiscovered',
       isDiscovered: false,
       isActive: false,
-      hiddenType: "empty",
+      hiddenType: 'empty',
     }))
   );
 
@@ -124,22 +124,22 @@ const generateMapContent = (size: number) => {
   }
 
   const typesToPlace = [
-    "metal_mine",
-    "wood_forest",
-    "water_spring",
-    "fire_forge",
-    "earth_field",
-    "spirit_metal",
-    "spirit_wood",
-    "spirit_water",
-    "spirit_fire",
-    "spirit_earth",
+    'metal_mine',
+    'wood_forest',
+    'water_spring',
+    'fire_forge',
+    'earth_field',
+    'spirit_metal',
+    'spirit_wood',
+    'spirit_water',
+    'spirit_fire',
+    'spirit_earth',
   ];
 
   const sources: any = {};
   const spiritBeasts: any = {};
 
-  typesToPlace.forEach((type) => {
+  typesToPlace.forEach(type => {
     if (availablePositions.length === 0) return;
     const randomIndex = getRandomInt(0, availablePositions.length - 1);
     const { r, c } = availablePositions.splice(randomIndex, 1)[0];
@@ -147,11 +147,11 @@ const generateMapContent = (size: number) => {
     newMap[r][c].hiddenType = type;
 
     if (
-      type.includes("_mine") ||
-      type.includes("_forest") ||
-      type.includes("_spring") ||
-      type.includes("_forge") ||
-      type.includes("_field")
+      type.includes('_mine') ||
+      type.includes('_forest') ||
+      type.includes('_spring') ||
+      type.includes('_forge') ||
+      type.includes('_field')
     ) {
       sources[type] = {
         type,
@@ -163,7 +163,7 @@ const generateMapContent = (size: number) => {
         row: r,
         col: c,
       };
-    } else if (type.includes("spirit_")) {
+    } else if (type.includes('spirit_')) {
       spiritBeasts[type] = {
         type,
         level: 1,
@@ -185,7 +185,7 @@ const initializeGame = () => {
   let woodForestTile = null;
   for (let r = 0; r < MAP_SIZE; r++) {
     for (let c = 0; c < MAP_SIZE; c++) {
-      if (initialMapContent.map[r][c].hiddenType === "wood_forest") {
+      if (initialMapContent.map[r][c].hiddenType === 'wood_forest') {
         woodForestTile = initialMapContent.map[r][c];
         break;
       }
@@ -197,7 +197,7 @@ const initializeGame = () => {
     woodForestTile.isDiscovered = true;
     woodForestTile.isActive = true;
     woodForestTile.type = woodForestTile.hiddenType;
-    initialMapContent.sources["wood_forest"].isActive = true;
+    initialMapContent.sources['wood_forest'].isActive = true;
   }
 
   return {
@@ -222,35 +222,35 @@ const saveGame = (gameState: any, isAutoHarvesting: any) => {
       lastPlayedTime: Date.now(),
       isAutoHarvestingOnLoad: isAutoHarvesting,
     });
-    localStorage.setItem("nguHanhGame", serializedState);
+    localStorage.setItem('nguHanhGame', serializedState);
   } catch (error) {
-    console.error("Error saving game:", error);
+    console.error('Error saving game:', error);
   }
 };
 
 const resetGame = () => {
   try {
     // Remove saved game from localStorage
-    localStorage.removeItem("nguHanhGame");
+    localStorage.removeItem('nguHanhGame');
     // Return a fresh game state
     return initializeGame();
   } catch (error) {
-    console.error("Error resetting game:", error);
+    console.error('Error resetting game:', error);
     return initializeGame();
   }
 };
 
 const loadGame = () => {
   try {
-    if (typeof window === "undefined") return undefined;
-    const serializedState = localStorage.getItem("nguHanhGame");
+    if (typeof window === 'undefined') return undefined;
+    const serializedState = localStorage.getItem('nguHanhGame');
     if (!serializedState) return undefined;
     const loadedState = JSON.parse(serializedState);
 
     if (!loadedState.maps[GAME_PHASE_ADVANCED]) {
       loadedState.maps[GAME_PHASE_ADVANCED] = null;
     }
-    if (typeof loadedState.unlockedTier2Upgrades === "undefined") {
+    if (typeof loadedState.unlockedTier2Upgrades === 'undefined') {
       loadedState.unlockedTier2Upgrades = false;
     }
 
@@ -272,7 +272,7 @@ const loadGame = () => {
 
     return loadedState;
   } catch (error) {
-    console.error("Error loading game:", error);
+    console.error('Error loading game:', error);
     return undefined;
   }
 };
@@ -288,12 +288,12 @@ const discoverTile = (gameState: any, row: any, col: any) => {
   const tile = newMap[row][col];
 
   if (tile.isDiscovered) {
-    return { success: false, message: "This tile is already discovered." };
+    return { success: false, message: 'This tile is already discovered.' };
   }
 
   let costType =
-    tile.hiddenType === "empty"
-      ? "wood"
+    tile.hiddenType === 'empty'
+      ? 'wood'
       : (NGU_HANH_RELATIONS.elementMap[
           tile.hiddenType as keyof typeof NGU_HANH_RELATIONS.elementMap
         ] &&
@@ -302,7 +302,7 @@ const discoverTile = (gameState: any, row: any, col: any) => {
               tile.hiddenType as keyof typeof NGU_HANH_RELATIONS.elementMap
             ] as keyof typeof NGU_HANH_RELATIONS.generates
           ]) ||
-        "wood";
+        'wood';
   const costAmount = DISCOVERY_COST_AMOUNT;
 
   if (newResources[costType] < costAmount) {
@@ -340,11 +340,11 @@ const activateTile = (gameState: any, row: any, col: any) => {
   const newResources = { ...resources };
   const tile = currentMapData.map[row][col];
 
-  if (!tile.isDiscovered || tile.isActive || tile.type === "empty") {
-    return { success: false, message: "Cannot activate this tile." };
+  if (!tile.isDiscovered || tile.isActive || tile.type === 'empty') {
+    return { success: false, message: 'Cannot activate this tile.' };
   }
 
-  let message = "";
+  let message = '';
   let newUnlockedTier2Upgrades = gameState.unlockedTier2Upgrades;
 
   if (currentMapData.sources[tile.type]) {
@@ -368,21 +368,21 @@ const activateTile = (gameState: any, row: any, col: any) => {
     currentMapData.sources[tile.type].isActive = true;
     tile.isActive = true;
     message = `Activated source ${tile.type
-      .replace("_", " ")
-      .replace("mine", "Mine")
-      .replace("forest", "Forest")
-      .replace("spring", "Spring")
-      .replace("forge", "Forge")
+      .replace('_', ' ')
+      .replace('mine', 'Mine')
+      .replace('forest', 'Forest')
+      .replace('spring', 'Spring')
+      .replace('forge', 'Forge')
       .replace(
-        "field",
-        "Field"
+        'field',
+        'Field'
       )}! Cost ${ACTIVATION_COST_AMOUNT} ${generatingResource}.`;
   } else if (currentMapData.spiritBeasts[tile.type]) {
     currentMapData.spiritBeasts[tile.type].isActive = true;
     tile.isActive = true;
     message = `Activated spirit beast ${tile.type.replace(
-      "spirit_",
-      "Spirit Beast "
+      'spirit_',
+      'Spirit Beast '
     )}!`;
 
     if (
@@ -391,7 +391,7 @@ const activateTile = (gameState: any, row: any, col: any) => {
       Object.values(currentMapData.spiritBeasts).every((sb: any) => sb.isActive)
     ) {
       newUnlockedTier2Upgrades = true;
-      message += " Unlocked next tier upgrades (up to level 20)!";
+      message += ' Unlocked next tier upgrades (up to level 20)!';
     }
   }
 
@@ -420,7 +420,7 @@ const harvestSource = (gameState: any, sourceKey: any, isOffline = false) => {
   if (!source || !source.isActive) {
     return {
       success: false,
-      message: "This source is not activated or does not exist.",
+      message: 'This source is not activated or does not exist.',
     };
   }
 
@@ -438,12 +438,12 @@ const harvestSource = (gameState: any, sourceKey: any, isOffline = false) => {
   let canHarvestOthers = gameState.canHarvestOtherSources;
   if (
     currentMapId === GAME_PHASE_INITIAL &&
-    sourceKey !== "wood_forest" &&
+    sourceKey !== 'wood_forest' &&
     !canHarvestOthers
   ) {
     return { success: false, message: "Harvest 'Wood Forest' first." };
   }
-  if (sourceKey === "wood_forest" && !canHarvestOthers) {
+  if (sourceKey === 'wood_forest' && !canHarvestOthers) {
     canHarvestOthers = true;
   }
 
@@ -480,12 +480,12 @@ const harvestSource = (gameState: any, sourceKey: any, isOffline = false) => {
       canHarvestOtherSources: canHarvestOthers,
     },
     message: `Harvested ${actualYield} ${primaryResourceType} and ${generatedYield} ${generatedResourceType} from ${source.type
-      .replace("_", " ")
-      .replace("mine", "Mine")
-      .replace("forest", "Forest")
-      .replace("spring", "Spring")
-      .replace("forge", "Forge")
-      .replace("field", "Field")}!`,
+      .replace('_', ' ')
+      .replace('mine', 'Mine')
+      .replace('forest', 'Forest')
+      .replace('spring', 'Spring')
+      .replace('forge', 'Forge')
+      .replace('field', 'Field')}!`,
     yieldedAmounts: {
       [primaryResourceType]: actualYield,
       [generatedResourceType]: generatedYield,
@@ -506,7 +506,7 @@ const upgradeSource = (gameState: any, sourceKey: any) => {
   if (!source || !source.isActive) {
     return {
       success: false,
-      message: "This source is not activated or does not exist.",
+      message: 'This source is not activated or does not exist.',
     };
   }
 
@@ -518,8 +518,8 @@ const upgradeSource = (gameState: any, sourceKey: any) => {
       success: false,
       message: `Source at max level (${source.level}). ${
         source.level >= MAX_LEVEL_INITIAL_TIER && !unlockedTier2Upgrades
-          ? "Activate all spirit beasts on the advanced map to continue upgrading."
-          : ""
+          ? 'Activate all spirit beasts on the advanced map to continue upgrading.'
+          : ''
       }`,
     };
   }
@@ -569,12 +569,12 @@ const upgradeSource = (gameState: any, sourceKey: any) => {
       maps: { ...maps, [currentMapId]: currentMapData },
     },
     message: `Upgraded ${source.type
-      .replace("_", " ")
-      .replace("mine", "Mine")
-      .replace("forest", "Forest")
-      .replace("spring", "Spring")
-      .replace("forge", "Forge")
-      .replace("field", "Field")} to level ${source.level}!`,
+      .replace('_', ' ')
+      .replace('mine', 'Mine')
+      .replace('forest', 'Forest')
+      .replace('spring', 'Spring')
+      .replace('forge', 'Forge')
+      .replace('field', 'Field')} to level ${source.level}!`,
   };
 };
 
@@ -591,7 +591,7 @@ const upgradeSpiritBeast = (gameState: any, spiritBeastKey: any) => {
   if (!spiritBeast || !spiritBeast.isActive) {
     return {
       success: false,
-      message: "This spirit beast is not activated or does not exist.",
+      message: 'This spirit beast is not activated or does not exist.',
     };
   }
 
@@ -603,8 +603,8 @@ const upgradeSpiritBeast = (gameState: any, spiritBeastKey: any) => {
       success: false,
       message: `Spirit beast at max level (${spiritBeast.level}). ${
         spiritBeast.level >= MAX_LEVEL_INITIAL_TIER && !unlockedTier2Upgrades
-          ? "Activate all spirit beasts on the advanced map to continue upgrading."
-          : ""
+          ? 'Activate all spirit beasts on the advanced map to continue upgrading.'
+          : ''
       }`,
     };
   }
@@ -650,8 +650,8 @@ const upgradeSpiritBeast = (gameState: any, spiritBeastKey: any) => {
       maps: { ...maps, [currentMapId]: currentMapData },
     },
     message: `Upgraded ${spiritBeast.type.replace(
-      "spirit_",
-      "Spirit Beast "
+      'spirit_',
+      'Spirit Beast '
     )} to level ${spiritBeast.level}!`,
   };
 };
@@ -673,7 +673,7 @@ const NotificationSystem = ({ notifications, setNotifications }: any) => {
         <div
           key={index}
           className={`p-3 rounded-lg shadow-md text-sm ${
-            notif.type === "error" ? "bg-red-600" : "bg-green-600"
+            notif.type === 'error' ? 'bg-red-600' : 'bg-green-600'
           } text-white animate-fade-in-up`}
         >
           {notif.message}
@@ -702,7 +702,9 @@ const ResourceItem = ({ type, amount, icon, lastChange, hasBonus }: any) => {
   return (
     <div className="relative flex flex-col justify-center items-center gap-2 p-1 bg-gray-600 rounded-md overflow-hidden">
       <span className="text-base">{icon}</span>
-      <span className="font-bold text-green-300 text-xs">{amount.toLocaleString('vi-VN')}</span>
+      <span className="font-bold text-green-300 text-xs">
+        {amount.toLocaleString('vi-VN')}
+      </span>
       {hasBonus && (
         <span className="text-green-400 font-bold ml-1 text-sm">+</span>
       )}
@@ -735,24 +737,24 @@ const ResourcePanel = ({
             onClick={toggleAutoHarvest}
             className={`p-2 rounded-lg text-sm font-bold transition-colors duration-200 shadow-lg ${
               isAutoHarvesting
-                ? "bg-red-700 hover:bg-red-800"
-                : "bg-green-700 hover:bg-green-800"
+                ? 'bg-red-700 hover:bg-red-800'
+                : 'bg-green-700 hover:bg-green-800'
             } text-white`}
           >
-            {isAutoHarvesting ? "🤖 Stop Auto" : "🤖 Start Auto"}
+            {isAutoHarvesting ? '🤖 Stop Auto' : '🤖 Start Auto'}
           </button>
           <button
             onClick={() => {
               if (
                 confirm(
-                  "Are you sure you want to reset your game? All progress will be lost!"
+                  'Are you sure you want to reset your game? All progress will be lost!'
                 )
               ) {
                 const newGameState = resetGame();
                 setGameState(newGameState);
                 setLogs([]);
                 setIsAutoHarvesting(false);
-                addLog("Game has been reset!", "info");
+                addLog('Game has been reset!', 'info');
               }
             }}
             className="p-2 rounded-lg text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition-colors duration-200 shadow-lg"
@@ -780,17 +782,17 @@ const ResourcePanel = ({
 const Tile = ({ tile, onClick }: any) => {
   const { row, col, type, isDiscovered, isActive } = tile;
   const icon = getIconForType(type);
-  const isSpecialTile = type !== "empty" && type !== "undiscovered";
-  let tileBgClass = "bg-gray-700 hover:bg-gray-600";
+  const isSpecialTile = type !== 'empty' && type !== 'undiscovered';
+  let tileBgClass = 'bg-gray-700 hover:bg-gray-600';
 
   if (isDiscovered) {
     if (isActive && isSpecialTile) {
-      tileBgClass = "bg-green-700";
+      tileBgClass = 'bg-green-700';
     } else {
       const elementType =
         NGU_HANH_RELATIONS.elementMap[type] ||
-        (type === "empty" ? "empty" : null);
-      tileBgClass = ELEMENT_TILE_BG_COLORS[elementType] || "bg-gray-800";
+        (type === 'empty' ? 'empty' : null);
+      tileBgClass = ELEMENT_TILE_BG_COLORS[elementType] || 'bg-gray-800';
     }
   }
 
@@ -804,7 +806,7 @@ const Tile = ({ tile, onClick }: any) => {
         isSpecialTile && (
           <span
             className="text-xl"
-            style={{ filter: isActive ? "grayscale(0%)" : "grayscale(100%)" }}
+            style={{ filter: isActive ? 'grayscale(0%)' : 'grayscale(100%)' }}
           >
             {icon}
           </span>
@@ -901,7 +903,7 @@ const SourcePanel = ({
           const canHarvest =
             cooldownRemaining === 0 &&
             source.isActive &&
-            (source.type === "wood_forest" || canHarvestOtherSources);
+            (source.type === 'wood_forest' || canHarvestOtherSources);
 
           return (
             <div
@@ -909,9 +911,13 @@ const SourcePanel = ({
               className="bg-gray-600 p-2 rounded-md flex flex-col gap-1"
             >
               <div className="flex flex-row gap-1 text-xs">
-                <span className={`font-bold flex items-center gap-1 ${
-                    source.isActive ? "text-green-400 grayscale-0" : "text-red-400 grayscale"
-                  }`}>
+                <span
+                  className={`font-bold flex items-center gap-1 ${
+                    source.isActive
+                      ? 'text-green-400 grayscale-0'
+                      : 'text-red-400 grayscale'
+                  }`}
+                >
                   {SOURCE_ICONS[source.type]} ({source.level})
                 </span>
                 {/* <span
@@ -922,11 +928,11 @@ const SourcePanel = ({
                   {source.isActive ? "Active" : "Inactive"}
                 </span> */}
                 <span>
-                  + {Math.floor(source.yield)}{" "}
+                  + {Math.floor(source.yield)}{' '}
                   {RESOURCE_ICONS[primaryResourceType]}
                 </span>
                 <span>
-                  + {Math.floor(source.yield / 5)}{" "}
+                  + {Math.floor(source.yield / 5)}{' '}
                   {
                     RESOURCE_ICONS[
                       NGU_HANH_RELATIONS.generates[primaryResourceType]
@@ -953,31 +959,31 @@ const SourcePanel = ({
                   disabled={!canHarvest}
                   className={`px-2 py-0.5 rounded text-xs font-semibold transition-colors duration-200 ${
                     canHarvest
-                      ? "bg-blue-600 hover:bg-blue-700 text-white shadow"
-                      : "bg-gray-500 text-gray-300 cursor-not-allowed"
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow'
+                      : 'bg-gray-500 text-gray-300 cursor-not-allowed'
                   }`}
                   title="Harvest"
                 >
-               🕒 {cooldownRemaining > 0 ? `(${cooldownRemaining}s)` : "👐"}
+                  🕒 {cooldownRemaining > 0 ? `(${cooldownRemaining}s)` : '👐'}
                 </button>
                 <button
                   onClick={() => onUpgrade(source.type)}
                   disabled={!canUpgrade || !source.isActive}
                   className={`px-2 py-0.5 rounded text-xs font-semibold transition-colors duration-200 ${
                     canUpgrade && source.isActive
-                      ? "bg-purple-600 hover:bg-purple-700 text-white shadow"
-                      : "bg-gray-500 text-gray-300 cursor-not-allowed"
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white shadow'
+                      : 'bg-gray-500 text-gray-300 cursor-not-allowed'
                   }`}
                   title="Upgrade"
                 >
-                  ⬆️({source.level}) 
+                  ⬆️({source.level})
                 </button>
               </div>
               {!canUpgrade &&
                 source.isActive &&
                 source.level < maxLevelForThisUpgrade && (
                   <p className="text-xs text-red-300 mt-0.5">
-                    -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]},{" "}
+                    -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]},{' '}
                     {oppositeCost} {RESOURCE_ICONS[oppositeResourceType]}
                   </p>
                 )}
@@ -1058,9 +1064,9 @@ const SpiritBeastPanel = ({
                   {SPIRIT_BEAST_ICONS[beast.type]} ({beast.level})
                 </span>
                 <span
-                  className={beast.isActive ? "text-green-400" : "text-red-400"}
+                  className={beast.isActive ? 'text-green-400' : 'text-red-400'}
                 >
-                  {beast.isActive ? "Active" : "Inactive"}
+                  {beast.isActive ? 'Active' : 'Inactive'}
                 </span>
               </div>
               <button
@@ -1068,8 +1074,8 @@ const SpiritBeastPanel = ({
                 disabled={!canUpgrade || !beast.isActive}
                 className={`px-3 py-1 rounded-md text-sm font-semibold transition-colors duration-200 mt-2 ${
                   canUpgrade && beast.isActive
-                    ? "bg-green-600 hover:bg-green-700 text-white shadow-md"
-                    : "bg-gray-500 text-gray-300 cursor-not-allowed"
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
+                    : 'bg-gray-500 text-gray-300 cursor-not-allowed'
                 }`}
               >
                 ⬆️
@@ -1078,7 +1084,7 @@ const SpiritBeastPanel = ({
                 beast.isActive &&
                 beast.level < maxLevelForThisUpgrade && (
                   <p className="text-xs text-red-300 mt-1">
-                    -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]},{" "}
+                    -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]},{' '}
                     {generatesCost} {RESOURCE_ICONS[generatesResourceType]}
                   </p>
                 )}
@@ -1108,16 +1114,16 @@ const ActivityLog = ({ logs }: any) => {
           <p
             key={index}
             className={`text-xs mb-1 ${
-              log.type === "error"
-                ? "text-red-300"
-                : log.type === "success"
-                ? "text-green-300"
-                : "text-gray-300"
+              log.type === 'error'
+                ? 'text-red-300'
+                : log.type === 'success'
+                  ? 'text-green-300'
+                  : 'text-gray-300'
             }`}
           >
             <span className="text-gray-500">
               [{new Date(log.timestamp).toLocaleTimeString()}]
-            </span>{" "}
+            </span>{' '}
             {log.message}
           </p>
         ))}
@@ -1164,7 +1170,7 @@ export default function Game1() {
   const [animatedResourceChanges, setAnimatedResourceChanges] = useState({});
   const [activeSpiritBeastBonuses, setActiveSpiritBeastBonuses] = useState({});
 
-  const addLog = useCallback((message: any, type = "info") => {
+  const addLog = useCallback((message: any, type = 'info') => {
     const logEntry = { timestamp: Date.now(), message, type };
     setNotifications((prev: any[]) => [...prev, logEntry]);
     setLogs((prev: any[]) => [...prev, logEntry]);
@@ -1238,8 +1244,8 @@ export default function Game1() {
             addLog(
               `Offline harvest: ${Object.entries(totalOfflineYield)
                 .map(([type, amount]) => `${amount} ${type}`)
-                .join(", ")}`,
-              "success"
+                .join(', ')}`,
+              'success'
             );
             updatedGameState.maps[updatedGameState.currentMapId].sources =
               sourcesToProcess;
@@ -1255,8 +1261,8 @@ export default function Game1() {
       saveGame(gameState, isAutoHarvesting);
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [gameState, isAutoHarvesting, addLog]);
 
   useEffect(() => {
@@ -1292,8 +1298,8 @@ export default function Game1() {
         !maps[GAME_PHASE_ADVANCED]
       ) {
         addLog(
-          "All sources and spirit beasts at initial max level! Unlocking new map...",
-          "info"
+          'All sources and spirit beasts at initial max level! Unlocking new map...',
+          'info'
         );
         const advancedMapContent = generateMapContent(MAP_SIZE);
 
@@ -1307,8 +1313,8 @@ export default function Game1() {
           canHarvestOtherSources: true,
         }));
         addLog(
-          "New map unlocked! Explore and activate Spirit Beasts to unlock next tier upgrades (up to level 20)!",
-          "success"
+          'New map unlocked! Explore and activate Spirit Beasts to unlock next tier upgrades (up to level 20)!',
+          'success'
         );
       }
     }
@@ -1329,14 +1335,14 @@ export default function Game1() {
           source.isActive &&
           source.lastHarvestTime + source.cooldown <= now &&
           (currentGameState.currentMapId === GAME_PHASE_ADVANCED ||
-            sourceKey === "wood_forest" ||
+            sourceKey === 'wood_forest' ||
             currentGameState.canHarvestOtherSources);
 
         if (canHarvest) {
           const harvestResult: any = harvestSource(currentGameState, sourceKey);
           if (harvestResult.success) {
             currentGameState = harvestResult.newState;
-            addLog(harvestResult.message, "success");
+            addLog(harvestResult.message, 'success');
             harvestedCount++;
             for (const resType in harvestResult.yieldedAmounts) {
               totalYieldedAmounts[resType] =
@@ -1371,17 +1377,17 @@ export default function Game1() {
         const result = discoverTile(gameState, row, col);
         if (result.success) {
           setGameState(result.newState);
-          addLog(result.message, "info");
+          addLog(result.message, 'info');
         } else {
-          addLog(result.message, "error");
+          addLog(result.message, 'error');
         }
-      } else if (tile.isDiscovered && !tile.isActive && tile.type !== "empty") {
+      } else if (tile.isDiscovered && !tile.isActive && tile.type !== 'empty') {
         const result = activateTile(gameState, row, col);
         if (result.success) {
           setGameState(result.newState);
-          addLog(result.message, "success");
+          addLog(result.message, 'success');
         } else {
-          addLog(result.message, "error");
+          addLog(result.message, 'error');
         }
       }
     },
@@ -1393,11 +1399,11 @@ export default function Game1() {
       const result: any = harvestSource(gameState, sourceId);
       if (result.success) {
         setGameState(result.newState);
-        addLog(result.message, "success");
+        addLog(result.message, 'success');
         setAnimatedResourceChanges(result.yieldedAmounts);
         setTimeout(() => setAnimatedResourceChanges({}), 800);
       } else {
-        addLog(result.message, "error");
+        addLog(result.message, 'error');
       }
     },
     [gameState, addLog]
@@ -1408,9 +1414,9 @@ export default function Game1() {
       const result: any = upgradeSource(gameState, sourceId);
       if (result.success) {
         setGameState(result.newState);
-        addLog(result.message, "success");
+        addLog(result.message, 'success');
       } else {
-        addLog(result.message, "error");
+        addLog(result.message, 'error');
       }
     },
     [gameState, addLog]
@@ -1421,9 +1427,9 @@ export default function Game1() {
       const result: any = upgradeSpiritBeast(gameState, spiritBeastId);
       if (result.success) {
         setGameState(result.newState);
-        addLog(result.message, "success");
+        addLog(result.message, 'success');
       } else {
-        addLog(result.message, "error");
+        addLog(result.message, 'error');
       }
     },
     [gameState, addLog]
@@ -1432,17 +1438,17 @@ export default function Game1() {
   const toggleAutoHarvest = () => {
     setIsAutoHarvesting((prev: any) => !prev);
     addLog(
-      isAutoHarvesting ? "Auto-harvest disabled." : "Auto-harvest enabled.",
-      "info"
+      isAutoHarvesting ? 'Auto-harvest disabled.' : 'Auto-harvest enabled.',
+      'info'
     );
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4 font-inter">
       <style jsx global>{`
-        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body {
-          font-family: "Inter", sans-serif;
+          font-family: 'Inter', sans-serif;
         }
         .animate-fade-in-up {
           animation: fade-in-up 0.5s ease-out forwards;
@@ -1486,15 +1492,15 @@ export default function Game1() {
         <div className="lg:col-span-2 w-full bg-gray-800 p-2 rounded-xl shadow-2xl border border-gray-700 flex flex-col items-center">
           <h2 className="text-xl font-bold mb-4 text-gray-200">
             Exploration Map (
-            {currentMapId === GAME_PHASE_INITIAL ? "Initial" : "Advanced"})
+            {currentMapId === GAME_PHASE_INITIAL ? 'Initial' : 'Advanced'})
           </h2>
           <ResourcePanel
-              resources={resources}
-              animatedResourceChanges={animatedResourceChanges}
-              activeSpiritBeastBonuses={activeSpiritBeastBonuses}
-              toggleAutoHarvest={toggleAutoHarvest}
-              isAutoHarvesting={isAutoHarvesting}
-            />
+            resources={resources}
+            animatedResourceChanges={animatedResourceChanges}
+            activeSpiritBeastBonuses={activeSpiritBeastBonuses}
+            toggleAutoHarvest={toggleAutoHarvest}
+            isAutoHarvesting={isAutoHarvesting}
+          />
           {currentMapData && (
             <Map map={currentMapData.map} onTileClick={handleTileClick} />
           )}

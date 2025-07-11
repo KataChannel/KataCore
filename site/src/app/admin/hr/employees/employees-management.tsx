@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
   FunnelIcon,
   PencilIcon,
   TrashIcon,
@@ -17,10 +17,9 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ExclamationTriangleIcon,
-  XCircleIcon
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
-
 
 interface Employee {
   id: string;
@@ -66,14 +65,16 @@ const EmployeeManagement: React.FC = () => {
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [sortField, setSortField] = useState('fullName');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [error, setError] = useState('');
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -83,15 +84,35 @@ const EmployeeManagement: React.FC = () => {
     salary: '',
     hireDate: '',
     status: 'ACTIVE',
-    contractType: 'FULL_TIME'
+    contractType: 'FULL_TIME',
   });
 
   const statusOptions = [
-    { value: 'ACTIVE', label: 'Đang làm việc', color: 'bg-green-100 text-green-800' },
-    { value: 'INACTIVE', label: 'Nghỉ việc', color: 'bg-gray-100 text-gray-800' },
-    { value: 'TERMINATED', label: 'Bị sa thải', color: 'bg-red-100 text-red-800' },
-    { value: 'ON_LEAVE', label: 'Nghỉ phép', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'PROBATION', label: 'Thử việc', color: 'bg-blue-100 text-blue-800' }
+    {
+      value: 'ACTIVE',
+      label: 'Đang làm việc',
+      color: 'bg-green-100 text-green-800',
+    },
+    {
+      value: 'INACTIVE',
+      label: 'Nghỉ việc',
+      color: 'bg-gray-100 text-gray-800',
+    },
+    {
+      value: 'TERMINATED',
+      label: 'Bị sa thải',
+      color: 'bg-red-100 text-red-800',
+    },
+    {
+      value: 'ON_LEAVE',
+      label: 'Nghỉ phép',
+      color: 'bg-yellow-100 text-yellow-800',
+    },
+    {
+      value: 'PROBATION',
+      label: 'Thử việc',
+      color: 'bg-blue-100 text-blue-800',
+    },
   ];
 
   const contractTypes = [
@@ -99,7 +120,7 @@ const EmployeeManagement: React.FC = () => {
     { value: 'PART_TIME', label: 'Bán thời gian' },
     { value: 'CONTRACT', label: 'Hợp đồng' },
     { value: 'INTERNSHIP', label: 'Thực tập' },
-    { value: 'FREELANCE', label: 'Tự do' }
+    { value: 'FREELANCE', label: 'Tự do' },
   ];
 
   useEffect(() => {
@@ -112,7 +133,8 @@ const EmployeeManagement: React.FC = () => {
     try {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.append('status', statusFilter);
-      if (departmentFilter !== 'all') params.append('departmentId', departmentFilter);
+      if (departmentFilter !== 'all')
+        params.append('departmentId', departmentFilter);
 
       const response = await fetch(`/api/hr/employees?${params}`);
       if (response.ok) {
@@ -158,11 +180,11 @@ const EmployeeManagement: React.FC = () => {
     try {
       const method = selectedEmployee ? 'PUT' : 'POST';
       const url = '/api/hr/employees';
-      
+
       const payload: any = {
         ...formData,
         salary: parseFloat(formData.salary) || undefined,
-        fullName: `${formData.firstName} ${formData.lastName}`.trim()
+        fullName: `${formData.firstName} ${formData.lastName}`.trim(),
       };
 
       if (selectedEmployee) {
@@ -203,7 +225,7 @@ const EmployeeManagement: React.FC = () => {
       salary: employee.salary?.toString() || '',
       hireDate: employee.hireDate.split('T')[0],
       status: employee.status,
-      contractType: employee.contractType
+      contractType: employee.contractType,
     });
     setShowModal(true);
   };
@@ -239,7 +261,7 @@ const EmployeeManagement: React.FC = () => {
       salary: '',
       hireDate: '',
       status: 'ACTIVE',
-      contractType: 'FULL_TIME'
+      contractType: 'FULL_TIME',
     });
     setSelectedEmployee(null);
   };
@@ -255,15 +277,17 @@ const EmployeeManagement: React.FC = () => {
 
   const filteredAndSortedEmployees = employees
     .filter(employee => {
-      const matchesSearch = employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           (employee.email && employee.email.toLowerCase().includes(searchQuery.toLowerCase()));
-      
+      const matchesSearch =
+        employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (employee.email &&
+          employee.email.toLowerCase().includes(searchQuery.toLowerCase()));
+
       return matchesSearch;
     })
     .sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (sortField) {
         case 'fullName':
           aValue = a.fullName;
@@ -288,14 +312,16 @@ const EmployeeManagement: React.FC = () => {
         default:
           return 0;
       }
-      
+
       if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
       return 0;
     });
 
   const getStatusConfig = (status: string) => {
-    return statusOptions.find(option => option.value === status) || statusOptions[0];
+    return (
+      statusOptions.find(option => option.value === status) || statusOptions[0]
+    );
   };
 
   const getContractTypeLabel = (type: string) => {
@@ -305,7 +331,7 @@ const EmployeeManagement: React.FC = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'VND',
     }).format(amount);
   };
 
@@ -322,8 +348,12 @@ const EmployeeManagement: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Quản lý nhân viên</h1>
-          <p className="text-gray-600">Quản lý thông tin và dữ liệu nhân viên</p>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Quản lý nhân viên
+          </h1>
+          <p className="text-gray-600">
+            Quản lý thông tin và dữ liệu nhân viên
+          </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -347,8 +377,12 @@ const EmployeeManagement: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Tổng nhân viên</p>
-              <p className="text-2xl font-semibold text-gray-900">{employees.length}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Tổng nhân viên
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {employees.length}
+              </p>
             </div>
             <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <UserIcon className="h-6 w-6 text-blue-600" />
@@ -388,7 +422,9 @@ const EmployeeManagement: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Phòng ban</p>
-              <p className="text-2xl font-semibold text-gray-900">{departments.length}</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {departments.length}
+              </p>
             </div>
             <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <BuildingOfficeIcon className="h-6 w-6 text-purple-600" />
@@ -407,7 +443,7 @@ const EmployeeManagement: React.FC = () => {
                 type="text"
                 placeholder="Tìm kiếm theo tên, mã nhân viên hoặc email..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -415,7 +451,7 @@ const EmployeeManagement: React.FC = () => {
           <div className="flex gap-4">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tất cả trạng thái</option>
@@ -427,7 +463,7 @@ const EmployeeManagement: React.FC = () => {
             </select>
             <select
               value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
+              onChange={e => setDepartmentFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tất cả phòng ban</option>
@@ -447,62 +483,77 @@ const EmployeeManagement: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('fullName')}
                 >
                   <div className="flex items-center">
                     Nhân viên
-                    {sortField === 'fullName' && (
-                      sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                    )}
+                    {sortField === 'fullName' &&
+                      (sortOrder === 'asc' ? (
+                        <ChevronUpIcon className="h-4 w-4 ml-1" />
+                      ) : (
+                        <ChevronDownIcon className="h-4 w-4 ml-1" />
+                      ))}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('department')}
                 >
                   <div className="flex items-center">
                     Phòng ban
-                    {sortField === 'department' && (
-                      sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                    )}
+                    {sortField === 'department' &&
+                      (sortOrder === 'asc' ? (
+                        <ChevronUpIcon className="h-4 w-4 ml-1" />
+                      ) : (
+                        <ChevronDownIcon className="h-4 w-4 ml-1" />
+                      ))}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('position')}
                 >
                   <div className="flex items-center">
                     Chức vụ
-                    {sortField === 'position' && (
-                      sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                    )}
+                    {sortField === 'position' &&
+                      (sortOrder === 'asc' ? (
+                        <ChevronUpIcon className="h-4 w-4 ml-1" />
+                      ) : (
+                        <ChevronDownIcon className="h-4 w-4 ml-1" />
+                      ))}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('hireDate')}
                 >
                   <div className="flex items-center">
                     Ngày vào làm
-                    {sortField === 'hireDate' && (
-                      sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                    )}
+                    {sortField === 'hireDate' &&
+                      (sortOrder === 'asc' ? (
+                        <ChevronUpIcon className="h-4 w-4 ml-1" />
+                      ) : (
+                        <ChevronDownIcon className="h-4 w-4 ml-1" />
+                      ))}
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Lương
                 </th>
-                <th 
+                <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center">
                     Trạng thái
-                    {sortField === 'status' && (
-                      sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                    )}
+                    {sortField === 'status' &&
+                      (sortOrder === 'asc' ? (
+                        <ChevronUpIcon className="h-4 w-4 ml-1" />
+                      ) : (
+                        <ChevronDownIcon className="h-4 w-4 ml-1" />
+                      ))}
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -511,7 +562,7 @@ const EmployeeManagement: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAndSortedEmployees.map((employee) => {
+              {filteredAndSortedEmployees.map(employee => {
                 const statusConfig = getStatusConfig(employee.status);
                 return (
                   <tr key={employee.id} className="hover:bg-gray-50">
@@ -519,8 +570,8 @@ const EmployeeManagement: React.FC = () => {
                       <div className="flex items-center">
                         <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
                           {employee.user?.avatar ? (
-                            <img 
-                              src={employee.user.avatar} 
+                            <img
+                              src={employee.user.avatar}
                               alt={employee.fullName}
                               className="h-10 w-10 rounded-full object-cover"
                             />
@@ -553,26 +604,36 @@ const EmployeeManagement: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{employee.position.department.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{employee.position.title}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {new Date(employee.hireDate).toLocaleDateString('vi-VN')}
+                        {employee.position.department.name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {employee.salary ? formatCurrency(employee.salary) : 'Chưa cập nhật'}
+                        {employee.position.title}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {new Date(employee.hireDate).toLocaleDateString(
+                          'vi-VN'
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {employee.salary
+                          ? formatCurrency(employee.salary)
+                          : 'Chưa cập nhật'}
                       </div>
                       <div className="text-sm text-gray-500">
                         {getContractTypeLabel(employee.contractType)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusConfig.color}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusConfig.color}`}
+                      >
                         {statusConfig.label}
                       </span>
                     </td>
@@ -606,7 +667,9 @@ const EmployeeManagement: React.FC = () => {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
-                {selectedEmployee ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
+                {selectedEmployee
+                  ? 'Chỉnh sửa nhân viên'
+                  : 'Thêm nhân viên mới'}
               </h3>
               <button
                 onClick={() => {
@@ -628,7 +691,9 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -640,7 +705,9 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -655,7 +722,9 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -666,7 +735,9 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -678,14 +749,20 @@ const EmployeeManagement: React.FC = () => {
                 </label>
                 <select
                   value={formData.positionId}
-                  onChange={(e) => setFormData({...formData, positionId: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, positionId: e.target.value })
+                  }
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Chọn chức vụ</option>
                   {positions.map(position => (
                     <option key={position.id} value={position.id}>
-                      {position.title} - {departments.find(d => d.id === position.departmentId)?.name}
+                      {position.title} -{' '}
+                      {
+                        departments.find(d => d.id === position.departmentId)
+                          ?.name
+                      }
                     </option>
                   ))}
                 </select>
@@ -699,7 +776,9 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="number"
                     value={formData.salary}
-                    onChange={(e) => setFormData({...formData, salary: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, salary: e.target.value })
+                    }
                     min="0"
                     step="100000"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -712,7 +791,9 @@ const EmployeeManagement: React.FC = () => {
                   <input
                     type="date"
                     value={formData.hireDate}
-                    onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, hireDate: e.target.value })
+                    }
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -726,7 +807,9 @@ const EmployeeManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {statusOptions.map(status => (
@@ -742,7 +825,9 @@ const EmployeeManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.contractType}
-                    onChange={(e) => setFormData({...formData, contractType: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, contractType: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {contractTypes.map(type => (

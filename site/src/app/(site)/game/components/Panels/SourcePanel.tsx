@@ -7,8 +7,15 @@ interface SourcePanelProps {
   onHarvestSource: (sourceId: string) => void;
 }
 
-export const SourcePanel = ({ sources, resources, unlockedTier2Upgrades, onHarvestSource }: SourcePanelProps) => {
-  const activeSources = Object.entries(sources).filter(([_, source]) => source.isActive);
+export const SourcePanel = ({
+  sources,
+  resources,
+  unlockedTier2Upgrades,
+  onHarvestSource,
+}: SourcePanelProps) => {
+  const activeSources = Object.entries(sources).filter(
+    ([_, source]) => source.isActive
+  );
 
   return (
     <div className="space-y-3">

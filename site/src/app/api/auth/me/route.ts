@@ -7,20 +7,14 @@ export async function GET(request: NextRequest) {
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token not found' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token not found' }, { status: 401 });
     }
 
     const decoded = authService.verifyToken(token);
     const user = await authService.getUserById(decoded.userId);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json({

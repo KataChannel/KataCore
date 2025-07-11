@@ -18,32 +18,32 @@ export interface ColorPalette {
   primary: string;
   secondary: string;
   accent: string;
-  
+
   // Background colors
   background: string;
   surface: string;
   surfaceElevated: string;
-  
+
   // Text colors
   text: string;
   textSecondary: string;
   textMuted: string;
-  
+
   // Border colors
   border: string;
   borderLight: string;
-  
+
   // State colors
   hover: string;
   active: string;
   disabled: string;
-  
+
   // Status colors
   success: string;
   warning: string;
   error: string;
   info: string;
-  
+
   // Gray scale
   gray: {
     50: string;
@@ -124,32 +124,32 @@ export const UNIFIED_THEME_CONFIG = {
       primary: '#000000',
       secondary: '#6c757d',
       accent: '#2563eb',
-      
+
       // Background colors
       background: '#ffffff',
       surface: '#fafafa',
       surfaceElevated: '#f8f9fa',
-      
+
       // Text colors
       text: '#000000',
       textSecondary: '#495057',
       textMuted: '#6c757d',
-      
+
       // Border colors
       border: '#dee2e6',
       borderLight: '#e9ecef',
-      
+
       // State colors
       hover: '#f8f9fa',
       active: '#e9ecef',
       disabled: '#f8f9fa',
-      
+
       // Status colors
       success: '#198754',
       warning: '#fd7e14',
       error: '#dc3545',
       info: '#0dcaf0',
-      
+
       // Gray scale
       gray: {
         50: '#fafafa',
@@ -170,32 +170,32 @@ export const UNIFIED_THEME_CONFIG = {
       primary: '#ffffff',
       secondary: '#8b949e',
       accent: '#3b82f6',
-      
+
       // Background colors
       background: '#0d1117',
       surface: '#161b22',
       surfaceElevated: '#21262d',
-      
+
       // Text colors
       text: '#f0f6fc',
       textSecondary: '#8b949e',
       textMuted: '#6e7681',
-      
+
       // Border colors
       border: '#30363d',
       borderLight: '#21262d',
-      
+
       // State colors
       hover: '#21262d',
       active: '#30363d',
       disabled: '#21262d',
-      
+
       // Status colors
       success: '#3fb950',
       warning: '#d29922',
       error: '#f85149',
       info: '#79c0ff',
-      
+
       // Gray scale
       gray: {
         50: '#0d1117',
@@ -215,7 +215,13 @@ export const UNIFIED_THEME_CONFIG = {
   // Typography configuration
   typography: {
     fontFamily: {
-      sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+      sans: [
+        'Inter',
+        'system-ui',
+        '-apple-system',
+        'BlinkMacSystemFont',
+        'sans-serif',
+      ],
       mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'monospace'],
       display: ['Inter', 'system-ui', 'sans-serif'],
     },
@@ -336,9 +342,10 @@ export const UNIFIED_THEME_CONFIG = {
  */
 export function getThemeColors(mode: ThemeMode): ColorPalette {
   if (mode === 'auto') {
-    const prefersDark = typeof window !== 'undefined' 
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches 
-      : false;
+    const prefersDark =
+      typeof window !== 'undefined'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        : false;
     return UNIFIED_THEME_CONFIG.colors[prefersDark ? 'dark' : 'light'];
   }
   return UNIFIED_THEME_CONFIG.colors[mode === 'dark' ? 'dark' : 'light'];
@@ -347,18 +354,25 @@ export function getThemeColors(mode: ThemeMode): ColorPalette {
 /**
  * Generate CSS variables from theme colors
  */
-export function generateCSSVariables(config: Partial<ThemeConfig>): Record<string, string> {
-  const actualMode = config.mode === 'auto' 
-    ? (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : (config.mode || 'light');
-    
+export function generateCSSVariables(
+  config: Partial<ThemeConfig>
+): Record<string, string> {
+  const actualMode =
+    config.mode === 'auto'
+      ? typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : config.mode || 'light';
+
   const colors = getThemeColors(actualMode);
   const variables: Record<string, string> = {};
 
   // Color variables
   Object.entries(colors).forEach(([key, value]) => {
     if (typeof value === 'string') {
-      variables[`--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`] = value;
+      variables[`--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`] =
+        value;
     } else if (typeof value === 'object' && value !== null) {
       Object.entries(value).forEach(([subKey, subValue]) => {
         if (typeof subValue === 'string') {
@@ -369,24 +383,32 @@ export function generateCSSVariables(config: Partial<ThemeConfig>): Record<strin
   });
 
   // Layout variables
-  Object.entries(UNIFIED_THEME_CONFIG.layout.shadows).forEach(([key, value]) => {
-    variables[`--shadow-${key}`] = value;
-  });
+  Object.entries(UNIFIED_THEME_CONFIG.layout.shadows).forEach(
+    ([key, value]) => {
+      variables[`--shadow-${key}`] = value;
+    }
+  );
 
   // Animation variables
-  Object.entries(UNIFIED_THEME_CONFIG.animations.duration).forEach(([key, value]) => {
-    variables[`--duration-${key}`] = value;
-  });
+  Object.entries(UNIFIED_THEME_CONFIG.animations.duration).forEach(
+    ([key, value]) => {
+      variables[`--duration-${key}`] = value;
+    }
+  );
 
-  Object.entries(UNIFIED_THEME_CONFIG.animations.easing).forEach(([key, value]) => {
-    variables[`--easing-${key}`] = value;
-  });
+  Object.entries(UNIFIED_THEME_CONFIG.animations.easing).forEach(
+    ([key, value]) => {
+      variables[`--easing-${key}`] = value;
+    }
+  );
 
   // Typography variables
-  Object.entries(UNIFIED_THEME_CONFIG.typography.fontSize).forEach(([key, value]) => {
-    variables[`--font-size-${key}`] = value.size;
-    variables[`--line-height-${key}`] = value.lineHeight;
-  });
+  Object.entries(UNIFIED_THEME_CONFIG.typography.fontSize).forEach(
+    ([key, value]) => {
+      variables[`--font-size-${key}`] = value.size;
+      variables[`--line-height-${key}`] = value.lineHeight;
+    }
+  );
 
   return variables;
 }
@@ -412,7 +434,9 @@ export function applyThemeMode(mode: ThemeMode): 'light' | 'dark' {
   let actualMode: 'light' | 'dark' = 'light';
 
   if (mode === 'auto') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
     actualMode = prefersDark ? 'dark' : 'light';
   } else {
     actualMode = mode === 'dark' ? 'dark' : 'light';
@@ -420,7 +444,7 @@ export function applyThemeMode(mode: ThemeMode): 'light' | 'dark' {
 
   // Apply CSS class for Tailwind dark mode
   document.documentElement.classList.toggle('dark', actualMode === 'dark');
-  
+
   // Apply theme-color meta tag for mobile browsers
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta) {
@@ -436,11 +460,11 @@ export function applyThemeMode(mode: ThemeMode): 'light' | 'dark' {
  */
 export function saveThemeConfig(config: Partial<ThemeConfig>): void {
   if (typeof localStorage === 'undefined') return;
-  
+
   try {
     const validatedConfig = ThemeConfigSchema.partial().parse(config);
     localStorage.setItem(
-      UNIFIED_THEME_CONFIG.storageKeys.theme, 
+      UNIFIED_THEME_CONFIG.storageKeys.theme,
       JSON.stringify(validatedConfig)
     );
   } catch (error) {
@@ -473,14 +497,16 @@ export function loadThemeConfig(): ThemeConfig {
 /**
  * Listen for system theme changes
  */
-export function createSystemThemeListener(callback: (isDark: boolean) => void): () => void {
+export function createSystemThemeListener(
+  callback: (isDark: boolean) => void
+): () => void {
   if (typeof window === 'undefined') return () => {};
 
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   const handleChange = (e: MediaQueryListEvent) => callback(e.matches);
-  
+
   mediaQuery.addEventListener('change', handleChange);
-  
+
   // Return cleanup function
   return () => mediaQuery.removeEventListener('change', handleChange);
 }
@@ -495,9 +521,13 @@ export function getThemeClasses(config: Partial<ThemeConfig>): {
   fontSize: string;
   borderRadius: string;
 } {
-  const actualMode = config.mode === 'auto' 
-    ? (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : (config.mode || 'light');
+  const actualMode =
+    config.mode === 'auto'
+      ? typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : config.mode || 'light';
 
   return {
     mode: actualMode,

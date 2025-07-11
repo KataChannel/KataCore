@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { lusitana } from '../fonts';
 import { fetchLatestInvoices } from '@/lib/data';
 
-
 export default async function LatestInvoices() {
   const latestInvoices = await fetchLatestInvoices();
 
@@ -23,7 +22,7 @@ export default async function LatestInvoices() {
                   'flex flex-row items-center justify-between py-4',
                   {
                     'border-t': i !== 0,
-                  },
+                  }
                 )}
               >
                 <div className="flex items-center">

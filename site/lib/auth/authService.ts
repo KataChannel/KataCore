@@ -59,17 +59,18 @@ export interface RegisterData {
 
 class AuthService {
   private JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-  private JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
+  private JWT_REFRESH_SECRET =
+    process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
 
   // Generate JWT tokens
   generateTokens(user: AuthUser) {
     const accessToken = jwt.sign(
-      { 
-        userId: user.id, 
-        email: user.email, 
+      {
+        userId: user.id,
+        email: user.email,
         phone: user.phone,
         roleId: user.roleId,
-        permissions: user.role.permissions 
+        permissions: user.role.permissions,
       },
       this.JWT_SECRET,
       { expiresIn: '15m' }
@@ -110,7 +111,14 @@ class AuthService {
 
   // Register user
   async register(data: RegisterData): Promise<AuthUser> {
-    const { email, phone, username, password, displayName, provider = 'email' } = data;
+    const {
+      email,
+      phone,
+      username,
+      password,
+      displayName,
+      provider = 'email',
+    } = data;
 
     // Check if user exists
     const existingUser = await prisma.user.findFirst({
@@ -138,7 +146,7 @@ class AuthService {
 
     // Create user
     const hashedPassword = password ? await this.hashPassword(password) : null;
-    
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -161,8 +169,16 @@ class AuthService {
   }
 
   // Login with email/username/phone
-  async login(credentials: LoginCredentials): Promise<{ user: AuthUser; tokens: any }> {
-    const { email, phone, username, password, provider = 'email' } = credentials;
+  async login(
+    credentials: LoginCredentials
+  ): Promise<{ user: AuthUser; tokens: any }> {
+    const {
+      email,
+      phone,
+      username,
+      password,
+      provider = 'email',
+    } = credentials;
 
     // Find user
     const user = await prisma.user.findFirst({
@@ -191,8 +207,11 @@ class AuthService {
       if (!user.password) {
         throw new Error('Password not set for this account');
       }
-      
-      const isPasswordValid = await this.comparePassword(password, user.password);
+
+      const isPasswordValid = await this.comparePassword(
+        password,
+        user.password
+      );
       if (!isPasswordValid) {
         throw new Error('Invalid password');
       }
@@ -212,7 +231,10 @@ class AuthService {
   }
 
   // Login with OTP (for phone)
-  async loginWithOTP(phone: string, otpCode: string): Promise<{ user: AuthUser; tokens: any }> {
+  async loginWithOTP(
+    phone: string,
+    otpCode: string
+  ): Promise<{ user: AuthUser; tokens: any }> {
     const user = await prisma.user.findFirst({
       where: { phone },
       include: { role: true },
@@ -273,18 +295,19 @@ class AuthService {
 
     // TODO: Implement SMS service (Twilio, AWS SNS, etc.)
     console.log(`OTP for ${phone}: ${otpCode}`);
-    
+
     return true;
   }
 
   // Google OAuth login
-  async googleLogin(googleId: string, email: string, displayName: string): Promise<{ user: AuthUser; tokens: any }> {
+  async googleLogin(
+    googleId: string,
+    email: string,
+    displayName: string
+  ): Promise<{ user: AuthUser; tokens: any }> {
     let user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { googleId },
-          { email },
-        ],
+        OR: [{ googleId }, { email }],
       },
       include: { role: true },
     });
@@ -329,7 +352,7 @@ class AuthService {
       where: { id: userId },
       include: { role: true },
     });
-    
+
     return user ? this.transformUserData(user) : null;
   }
 
@@ -356,7 +379,7 @@ class AuthService {
       where: { id: userId },
       data: { lastSeen: new Date() },
     });
-    
+
     return true;
   }
 
@@ -366,8 +389,8 @@ class AuthService {
       ...user,
       role: {
         ...user.role,
-        permissions: JSON.parse(user.role.permissions || '[]')
-      }
+        permissions: JSON.parse(user.role.permissions || '[]'),
+      },
     };
   }
 }

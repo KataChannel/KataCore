@@ -1,73 +1,79 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 export default {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
         // Unified Theme System - CSS variables for dynamic theming
-        background: "var(--color-background)",
-        surface: "var(--color-surface)",
-        'surface-elevated': "var(--color-surface-elevated)",
-        primary: "var(--color-primary)",
-        secondary: "var(--color-secondary)",
-        accent: "var(--color-accent)",
-        text: "var(--color-text)",
-        'text-secondary': "var(--color-text-secondary)",
-        'text-muted': "var(--color-text-muted)",
-        border: "var(--color-border)",
-        'border-light': "var(--color-border-light)",
-        hover: "var(--color-hover)",
-        active: "var(--color-active)",
-        disabled: "var(--color-disabled)",
-        
+        background: 'var(--color-background)',
+        surface: 'var(--color-surface)',
+        'surface-elevated': 'var(--color-surface-elevated)',
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        accent: 'var(--color-accent)',
+        text: 'var(--color-text)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-muted': 'var(--color-text-muted)',
+        border: 'var(--color-border)',
+        'border-light': 'var(--color-border-light)',
+        hover: 'var(--color-hover)',
+        active: 'var(--color-active)',
+        disabled: 'var(--color-disabled)',
+
         // Unified gray scale
         gray: {
-          50: "var(--color-gray-50)",
-          100: "var(--color-gray-100)",
-          200: "var(--color-gray-200)",
-          300: "var(--color-gray-300)",
-          400: "var(--color-gray-400)",
-          500: "var(--color-gray-500)",
-          600: "var(--color-gray-600)",
-          700: "var(--color-gray-700)",
-          800: "var(--color-gray-800)",
-          900: "var(--color-gray-900)",
+          50: 'var(--color-gray-50)',
+          100: 'var(--color-gray-100)',
+          200: 'var(--color-gray-200)',
+          300: 'var(--color-gray-300)',
+          400: 'var(--color-gray-400)',
+          500: 'var(--color-gray-500)',
+          600: 'var(--color-gray-600)',
+          700: 'var(--color-gray-700)',
+          800: 'var(--color-gray-800)',
+          900: 'var(--color-gray-900)',
         },
-        
+
         // Legacy mono classes for backward compatibility
         mono: {
-          50: "var(--color-gray-50)",
-          100: "var(--color-gray-100)",
-          200: "var(--color-gray-200)",
-          300: "var(--color-gray-300)",
-          400: "var(--color-gray-400)",
-          500: "var(--color-gray-500)",
-          600: "var(--color-gray-600)",
-          700: "var(--color-gray-700)",
-          800: "var(--color-gray-800)",
-          900: "var(--color-gray-900)",
+          50: 'var(--color-gray-50)',
+          100: 'var(--color-gray-100)',
+          200: 'var(--color-gray-200)',
+          300: 'var(--color-gray-300)',
+          400: 'var(--color-gray-400)',
+          500: 'var(--color-gray-500)',
+          600: 'var(--color-gray-600)',
+          700: 'var(--color-gray-700)',
+          800: 'var(--color-gray-800)',
+          900: 'var(--color-gray-900)',
         },
-        
+
         // Semantic colors
-        success: "var(--color-success)",
-        warning: "var(--color-warning)",
-        error: "var(--color-error)",
-        info: "var(--color-info)",
+        success: 'var(--color-success)',
+        warning: 'var(--color-warning)',
+        error: 'var(--color-error)',
+        info: 'var(--color-info)',
       },
-      
+
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        sans: [
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'sans-serif',
+        ],
         mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'monospace'],
         display: ['Inter', 'system-ui', 'sans-serif'],
       },
-      
+
       fontSize: {
         xs: ['var(--font-size-xs)', 'var(--line-height-xs)'],
         sm: ['var(--font-size-sm)', 'var(--line-height-sm)'],
@@ -80,7 +86,7 @@ export default {
         '5xl': ['3rem', { lineHeight: '1' }],
         '6xl': ['3.75rem', { lineHeight: '1' }],
       },
-      
+
       fontWeight: {
         light: '300',
         normal: '400',
@@ -89,7 +95,7 @@ export default {
         bold: '700',
         extrabold: '800',
       },
-      
+
       borderRadius: {
         none: '0',
         sm: '0.25rem',
@@ -100,7 +106,7 @@ export default {
         '2xl': '1.5rem',
         full: '9999px',
       },
-      
+
       spacing: {
         xs: '0.25rem',
         sm: '0.5rem',
@@ -109,7 +115,7 @@ export default {
         xl: '2rem',
         '2xl': '3rem',
       },
-      
+
       boxShadow: {
         none: 'var(--shadow-none)',
         sm: 'var(--shadow-sm)',
@@ -119,16 +125,16 @@ export default {
         xl: 'var(--shadow-xl)',
         '2xl': 'var(--shadow-2xl)',
         inner: 'var(--shadow-inner)',
-        
+
         // Legacy mono shadows
         'mono-sm': 'var(--shadow-sm)',
-        'mono': 'var(--shadow-base)',
+        mono: 'var(--shadow-base)',
         'mono-md': 'var(--shadow-md)',
         'mono-lg': 'var(--shadow-lg)',
         'mono-xl': 'var(--shadow-xl)',
         'mono-base': 'var(--shadow-base)',
       },
-      
+
       transitionDuration: {
         instant: 'var(--duration-instant)',
         fast: 'var(--duration-fast)',
@@ -137,7 +143,7 @@ export default {
         slow: 'var(--duration-slow)',
         slower: 'var(--duration-slower)',
       },
-      
+
       transitionTimingFunction: {
         DEFAULT: 'var(--easing-in-out)',
         linear: 'var(--easing-linear)',
@@ -148,7 +154,7 @@ export default {
         'ease-in-expo': 'cubic-bezier(0.7, 0, 0.84, 0)',
         'ease-in-out-expo': 'cubic-bezier(0.87, 0, 0.13, 1)',
       },
-      
+
       // Animation keyframes
       keyframes: {
         'fade-in': {
@@ -180,7 +186,7 @@ export default {
           '100%': { left: '100%' },
         },
       },
-      
+
       animation: {
         'fade-in': 'fade-in 0.3s ease-out',
         'fade-in-up': 'fade-in-up 0.3s ease-out',
@@ -194,56 +200,56 @@ export default {
   },
   plugins: [
     // Custom plugin for unified theme utilities
-    function({ addUtilities, theme }: { addUtilities: any; theme: any }) {
+    function ({ addUtilities, theme }: { addUtilities: any; theme: any }) {
       addUtilities({
         '.unified-card': {
           'background-color': 'var(--color-surface)',
-          'border': '1px solid var(--color-border)',
+          border: '1px solid var(--color-border)',
           'border-radius': '16px',
-          'padding': '32px',
-          'transition': 'all var(--duration-normal) var(--easing-in-out)',
+          padding: '32px',
+          transition: 'all var(--duration-normal) var(--easing-in-out)',
           'box-shadow': 'var(--shadow-sm)',
-          'position': 'relative',
-          'overflow': 'hidden',
+          position: 'relative',
+          overflow: 'hidden',
           'backdrop-filter': 'blur(8px)',
         },
         '.unified-card:hover': {
           'box-shadow': 'var(--shadow-lg)',
-          'transform': 'translateY(-4px)',
+          transform: 'translateY(-4px)',
           'border-color': 'var(--color-border-light)',
         },
         // Unified transitions
         '.unified-transition': {
-          'transition': 'all var(--duration-normal) var(--easing-in-out)',
+          transition: 'all var(--duration-normal) var(--easing-in-out)',
         },
         '.unified-transition-fast': {
-          'transition': 'all var(--duration-fast) var(--easing-in-out)',
+          transition: 'all var(--duration-fast) var(--easing-in-out)',
         },
         '.unified-transition-slow': {
-          'transition': 'all var(--duration-slow) var(--easing-in-out)',
+          transition: 'all var(--duration-slow) var(--easing-in-out)',
         },
-        
+
         // Unified focus ring
         '.unified-focus-ring': {
           '&:focus': {
-            'outline': '2px solid var(--color-accent)',
+            outline: '2px solid var(--color-accent)',
             'outline-offset': '2px',
           },
         },
-        
+
         // Legacy mono utilities for backward compatibility
         '.mono-transition': {
-          'transition': 'all var(--duration-normal) var(--easing-in-out)',
+          transition: 'all var(--duration-normal) var(--easing-in-out)',
         },
         '.mono-transition-fast': {
-          'transition': 'all var(--duration-fast) var(--easing-in-out)',
+          transition: 'all var(--duration-fast) var(--easing-in-out)',
         },
         '.mono-transition-slow': {
-          'transition': 'all var(--duration-slow) var(--easing-in-out)',
+          transition: 'all var(--duration-slow) var(--easing-in-out)',
         },
         '.mono-focus-ring': {
           '&:focus': {
-            'outline': '2px solid var(--color-accent)',
+            outline: '2px solid var(--color-accent)',
             'outline-offset': '2px',
           },
         },

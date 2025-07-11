@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ============================================================================
    CSS CUSTOM PROPERTIES (CSS Variables)
@@ -10,27 +10,27 @@
   --color-primary: #000000;
   --color-secondary: #6c757d;
   --color-accent: #2563eb;
-  
+
   --color-background: #ffffff;
   --color-surface: #fafafa;
   --color-surface-elevated: #f8f9fa;
-  
+
   --color-text: #000000;
   --color-text-secondary: #495057;
   --color-text-muted: #6c757d;
-  
+
   --color-border: #dee2e6;
   --color-border-light: #e9ecef;
-  
+
   --color-hover: #f8f9fa;
   --color-active: #e9ecef;
   --color-disabled: #f8f9fa;
-  
+
   --color-success: #198754;
   --color-warning: #fd7e14;
   --color-error: #dc3545;
   --color-info: #0dcaf0;
-  
+
   /* Gray Scale */
   --color-gray-50: #fafafa;
   --color-gray-100: #f8f9fa;
@@ -42,31 +42,35 @@
   --color-gray-700: #495057;
   --color-gray-800: #343a40;
   --color-gray-900: #212529;
-  
+
   /* Shadows */
   --shadow-none: none;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-base:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  
+
   /* Animation Durations */
   --duration-instant: 0ms;
   --duration-fast: 150ms;
   --duration-normal: 300ms;
   --duration-slow: 500ms;
   --duration-slower: 750ms;
-  
+
   /* Easing Functions */
   --easing-linear: linear;
   --easing-in: cubic-bezier(0.4, 0, 1, 1);
   --easing-out: cubic-bezier(0, 0, 0.2, 1);
   --easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  
+
   /* Typography */
   --font-size-xs: 0.75rem;
   --line-height-xs: 1rem;
@@ -94,27 +98,27 @@
   --color-primary: #ffffff;
   --color-secondary: #8b949e;
   --color-accent: #3b82f6;
-  
+
   --color-background: #0d1117;
   --color-surface: #161b22;
   --color-surface-elevated: #21262d;
-  
+
   --color-text: #f0f6fc;
   --color-text-secondary: #8b949e;
   --color-text-muted: #6e7681;
-  
+
   --color-border: #30363d;
   --color-border-light: #21262d;
-  
+
   --color-hover: #21262d;
   --color-active: #30363d;
   --color-disabled: #21262d;
-  
+
   --color-success: #3fb950;
   --color-warning: #d29922;
   --color-error: #f85149;
   --color-info: #79c0ff;
-  
+
   /* Dark Gray Scale */
   --color-gray-50: #0d1117;
   --color-gray-100: #161b22;
@@ -126,13 +130,16 @@
   --color-gray-700: #b1bac4;
   --color-gray-800: #c9d1d9;
   --color-gray-900: #f0f6fc;
-  
+
   /* Dark Shadows - More pronounced */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
 }
 
@@ -189,7 +196,12 @@
 }
 
 html {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
@@ -201,8 +213,9 @@ body {
   padding: 0;
   background-color: var(--color-background);
   color: var(--color-text);
-  transition: background-color var(--duration-normal) var(--easing-in-out),
-              color var(--duration-normal) var(--easing-in-out);
+  transition:
+    background-color var(--duration-normal) var(--easing-in-out),
+    color var(--duration-normal) var(--easing-in-out);
 }
 
 /* ============================================================================
@@ -432,8 +445,12 @@ body {
 }
 
 @keyframes unified-loading-shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 /* ============================================================================
@@ -445,13 +462,13 @@ body {
     padding: 1rem;
     border-radius: 0.5rem;
   }
-  
+
   .unified-button {
     padding: 0.625rem 1.25rem;
     min-height: 2.5rem;
     font-size: var(--font-size-sm);
   }
-  
+
   .unified-input {
     min-height: 2.75rem;
     padding: 0.75rem 1rem;
@@ -486,8 +503,14 @@ body {
 }
 
 /* Animation Level Classes */
-.animation-none * { animation: none !important; transition: none !important; }
-.animation-reduced * { animation-duration: 0.1s !important; transition-duration: 0.1s !important; }
+.animation-none * {
+  animation: none !important;
+  transition: none !important;
+}
+.animation-reduced * {
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+}
 
 .animation-normal {
   animation-duration: var(--duration-normal);
@@ -500,18 +523,43 @@ body {
 }
 
 /* Font Size Classes */
-.font-size-xs { font-size: var(--font-size-xs); line-height: var(--line-height-xs); }
-.font-size-sm { font-size: var(--font-size-sm); line-height: var(--line-height-sm); }
-.font-size-base { font-size: var(--font-size-base); line-height: var(--line-height-base); }
-.font-size-lg { font-size: var(--font-size-lg); line-height: var(--line-height-lg); }
-.font-size-xl { font-size: var(--font-size-xl); line-height: var(--line-height-xl); }
+.font-size-xs {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+}
+.font-size-sm {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+.font-size-base {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+.font-size-lg {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+}
+.font-size-xl {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-xl);
+}
 
 /* Border Radius Classes */
-.border-radius-none * { border-radius: 0 !important; }
-.border-radius-sm * { border-radius: 0.25rem !important; }
-.border-radius-base * { border-radius: 0.5rem !important; }
-.border-radius-lg * { border-radius: 0.75rem !important; }
-.border-radius-xl * { border-radius: 1rem !important; }
+.border-radius-none * {
+  border-radius: 0 !important;
+}
+.border-radius-sm * {
+  border-radius: 0.25rem !important;
+}
+.border-radius-base * {
+  border-radius: 0.5rem !important;
+}
+.border-radius-lg * {
+  border-radius: 0.75rem !important;
+}
+.border-radius-xl * {
+  border-radius: 1rem !important;
+}
 
 /* ============================================================================
    ACCESSIBILITY ENHANCEMENTS

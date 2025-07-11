@@ -24,7 +24,7 @@ interface ComponentNameProps extends BaseComponentProps {
   // Required props first
   title: string;
   data: any[];
-  
+
   // Optional props second
   variant?: 'primary' | 'secondary';
   onAction?: (item: any) => void;
@@ -46,21 +46,24 @@ export const ComponentName: React.FC<ComponentNameProps> = ({
 }) => {
   // State declarations
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Event handlers
-  const handleAction = useCallback((item: any) => {
-    if (disabled) return;
-    onAction?.(item);
-  }, [disabled, onAction]);
-  
+  const handleAction = useCallback(
+    (item: any) => {
+      if (disabled) return;
+      onAction?.(item);
+    },
+    [disabled, onAction]
+  );
+
   // Effects
   useEffect(() => {
     // Side effects
   }, []);
-  
+
   // Render
   return (
-    <div 
+    <div
       className={cn(
         'base-component-styles',
         variant === 'primary' && 'primary-styles',
@@ -121,18 +124,18 @@ export function useApi<T>(
 
   const fetchData = useCallback(async () => {
     if (!options.enabled && options.enabled !== undefined) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(url);
       const result = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(result.message || 'Request failed');
       }
-      
+
       setData(result.data);
       options.onSuccess?.(result.data);
     } catch (err) {
@@ -160,6 +163,7 @@ export function useApi<T>(
 ## 📁 File Organization Standards
 
 ### Directory Structure
+
 ```
 src/
 ├── types/                     # 📝 Global type definitions
@@ -197,6 +201,7 @@ src/
 ### Naming Conventions
 
 #### Files & Folders
+
 ```bash
 # ✅ Components (PascalCase)
 Button.tsx
@@ -225,6 +230,7 @@ auth-forms/
 ```
 
 #### Variables & Functions
+
 ```typescript
 // ✅ Variables (camelCase)
 const userName = 'john';
@@ -250,6 +256,7 @@ enum UserRole {}
 ## 🔗 TypeScript Patterns
 
 ### Interface Design
+
 ```typescript
 // ============================================================================
 // BASE INTERFACES
@@ -302,6 +309,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ```
 
 ### Union Types & Enums
+
 ```typescript
 // ✅ Union types for specific values
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success';
@@ -328,6 +336,7 @@ enum HttpStatus {
 ## 📦 Import/Export Patterns
 
 ### Import Order
+
 ```typescript
 // 1. External libraries
 import React, { useState, useEffect } from 'react';
@@ -350,6 +359,7 @@ import './styles.css';
 ```
 
 ### Export Patterns
+
 ```typescript
 // ✅ Named exports for components
 export const Button: React.FC<ButtonProps> = () => {};
@@ -371,35 +381,36 @@ export type { ButtonProps, ModalProps } from './types';
 ## 🎨 Styling Patterns
 
 ### CSS Classes with clsx
+
 ```typescript
 import { cn } from '@/lib/utils';
 
-const Button: React.FC<ButtonProps> = ({ 
-  variant = 'primary', 
+const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
   size = 'md',
   disabled = false,
   className,
-  children 
+  children
 }) => {
   return (
     <button
       className={cn(
         // Base styles
         'px-4 py-2 rounded-md font-medium transition-colors focus:outline-none',
-        
+
         // Variant styles
         variant === 'primary' && 'bg-blue-600 text-white hover:bg-blue-700',
         variant === 'secondary' && 'bg-gray-200 text-gray-900 hover:bg-gray-300',
         variant === 'danger' && 'bg-red-600 text-white hover:bg-red-700',
-        
+
         // Size styles
         size === 'sm' && 'px-3 py-1.5 text-sm',
         size === 'md' && 'px-4 py-2',
         size === 'lg' && 'px-6 py-3 text-lg',
-        
+
         // State styles
         disabled && 'opacity-50 cursor-not-allowed',
-        
+
         // Custom className
         className
       )}
@@ -412,6 +423,7 @@ const Button: React.FC<ButtonProps> = ({
 ```
 
 ### Theme Configuration
+
 ```typescript
 interface ThemeConfig {
   mode: 'light' | 'dark' | 'auto';
@@ -443,6 +455,7 @@ const THEME_COLORS = {
 ## 🔧 Error Handling Patterns
 
 ### API Error Handling
+
 ```typescript
 interface ApiError {
   message: string;
@@ -462,10 +475,10 @@ class ApiClient {
         details: errorData,
       });
     }
-    
+
     return response.json();
   }
-  
+
   async get<T>(url: string): Promise<T> {
     try {
       const response = await fetch(url);
@@ -484,6 +497,7 @@ class ApiClient {
 ```
 
 ### Component Error Boundaries
+
 ```typescript
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -527,14 +541,18 @@ class ErrorBoundary extends React.Component<
 ## 🎯 Performance Patterns
 
 ### Memoization
+
 ```typescript
 // Component memoization
-export const ExpensiveComponent = React.memo<Props>(({ data, onAction }) => {
-  // Component logic
-}, (prevProps, nextProps) => {
-  // Custom comparison logic
-  return prevProps.data.id === nextProps.data.id;
-});
+export const ExpensiveComponent = React.memo<Props>(
+  ({ data, onAction }) => {
+    // Component logic
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison logic
+    return prevProps.data.id === nextProps.data.id;
+  }
+);
 
 // Hook memoization
 export function useExpensiveComputation(data: any[]) {
@@ -554,6 +572,7 @@ export function useExpensiveComputation(data: any[]) {
 ```
 
 ### Lazy Loading
+
 ```typescript
 // Component lazy loading
 const LazyComponent = React.lazy(() => import('./LazyComponent'));
@@ -586,6 +605,7 @@ export function useDynamicImport<T>(importFunc: () => Promise<T>) {
 ## 📊 State Management Patterns
 
 ### Local State
+
 ```typescript
 // Simple state
 const [count, setCount] = useState(0);
@@ -597,7 +617,7 @@ interface State {
   error: string | null;
 }
 
-type Action = 
+type Action =
   | { type: 'FETCH_START' }
   | { type: 'FETCH_SUCCESS'; payload: any[] }
   | { type: 'FETCH_ERROR'; payload: string };
@@ -624,6 +644,7 @@ const [state, dispatch] = useReducer(dataReducer, {
 ```
 
 ### Context Pattern
+
 ```typescript
 // Context definition
 interface AppContextType {
@@ -675,6 +696,7 @@ export function useApp() {
 ## ✅ Best Practices Checklist
 
 ### Code Quality
+
 - [ ] All components have TypeScript interfaces
 - [ ] Error boundaries are implemented
 - [ ] Loading states are handled
@@ -683,6 +705,7 @@ export function useApp() {
 - [ ] Hooks follow the rules of hooks
 
 ### Performance
+
 - [ ] Large lists are virtualized
 - [ ] Images are optimized and lazy loaded
 - [ ] Bundle is analyzed and optimized
@@ -690,6 +713,7 @@ export function useApp() {
 - [ ] API calls are debounced/throttled when needed
 
 ### Accessibility
+
 - [ ] Semantic HTML is used
 - [ ] ARIA attributes are properly set
 - [ ] Keyboard navigation works
@@ -697,6 +721,7 @@ export function useApp() {
 - [ ] Screen reader support is implemented
 
 ### Security
+
 - [ ] User inputs are validated and sanitized
 - [ ] XSS protection is implemented
 - [ ] CSRF protection is in place
@@ -704,6 +729,7 @@ export function useApp() {
 - [ ] Sensitive data is not exposed
 
 ### Testing
+
 - [ ] Unit tests cover critical functions
 - [ ] Integration tests cover user flows
 - [ ] E2E tests cover main features
@@ -721,10 +747,11 @@ export function useApp() {
 6. **Add performance optimizations** where needed
 
 ### Priority Order
+
 1. **High Priority**: Types, Components, Hooks
 2. **Medium Priority**: Utils, API clients, Styling
 3. **Low Priority**: Documentation, Examples, Tests
 
 ---
 
-*Tài liệu này sẽ được cập nhật thường xuyên để phản ánh các thay đổi và cải tiến trong dự án.*
+_Tài liệu này sẽ được cập nhật thường xuyên để phản ánh các thay đổi và cải tiến trong dự án._

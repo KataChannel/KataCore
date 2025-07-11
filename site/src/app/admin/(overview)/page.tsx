@@ -1,9 +1,13 @@
-import CardWrapper from "@/components/ui/dashboard/cards";
-import LatestInvoices from "@/components/ui/dashboard/latest-invoices";
-import RevenueChart from "@/components/ui/dashboard/revenue-chart";
-import { lusitana } from "@/components/ui/fonts";
-import { CardsSkeleton, RevenueChartSkeleton, LatestInvoicesSkeleton } from "@/components/ui/skeletons";
-import { Suspense } from "react";
+import CardWrapper from '@/components/ui/dashboard/cards';
+import LatestInvoices from '@/components/ui/dashboard/latest-invoices';
+import RevenueChart from '@/components/ui/dashboard/revenue-chart';
+import { lusitana } from '@/components/ui/fonts';
+import {
+  CardsSkeleton,
+  RevenueChartSkeleton,
+  LatestInvoicesSkeleton,
+} from '@/components/ui/skeletons';
+import { Suspense } from 'react';
 
 export default async function Page() {
   return (

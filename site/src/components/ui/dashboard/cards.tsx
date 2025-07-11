@@ -20,7 +20,12 @@ export default async function CardWrapper() {
     numberOfCustomers,
     totalPaidInvoices,
     totalPendingInvoices,
-  }  = {numberOfInvoices:0, numberOfCustomers:0, totalPaidInvoices:0, totalPendingInvoices:0};
+  } = {
+    numberOfInvoices: 0,
+    numberOfCustomers: 0,
+    totalPaidInvoices: 0,
+    totalPendingInvoices: 0,
+  };
 
   return (
     <>

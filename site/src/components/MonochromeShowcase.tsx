@@ -1,47 +1,55 @@
 'use client';
 
 import React from 'react';
-import { 
-  SunIcon, 
-  MoonIcon, 
+import {
+  SunIcon,
+  MoonIcon,
   ComputerDesktopIcon,
   SwatchIcon,
   DevicePhoneMobileIcon,
   LanguageIcon,
   SparklesIcon,
-  EyeIcon
+  EyeIcon,
 } from '@heroicons/react/24/outline';
 import { useMonochrome } from '../hooks/useMonochromeTheme';
 import { useTranslation } from '../lib/config/i18n';
 
 const MonochromeShowcase: React.FC = () => {
-  const { 
-    mode, 
-    actualMode, 
-    toggleMode, 
+  const {
+    mode,
+    actualMode,
+    toggleMode,
     setMode,
-    language, 
+    language,
     toggleLanguage,
-    isLoading 
+    isLoading,
   } = useMonochrome();
-  
+
   const { t } = useTranslation(language);
 
   const getModeIcon = () => {
     switch (mode) {
-      case 'light': return <SunIcon className="h-5 w-5" />;
-      case 'dark': return <MoonIcon className="h-5 w-5" />;
-      case 'auto': return <ComputerDesktopIcon className="h-5 w-5" />;
-      default: return <SunIcon className="h-5 w-5" />;
+      case 'light':
+        return <SunIcon className="h-5 w-5" />;
+      case 'dark':
+        return <MoonIcon className="h-5 w-5" />;
+      case 'auto':
+        return <ComputerDesktopIcon className="h-5 w-5" />;
+      default:
+        return <SunIcon className="h-5 w-5" />;
     }
   };
 
   const getModeText = () => {
     switch (mode) {
-      case 'light': return t('lightMode', 'Light Mode');
-      case 'dark': return t('darkMode', 'Dark Mode');
-      case 'auto': return t('autoMode', 'Auto Mode');
-      default: return t('lightMode', 'Light Mode');
+      case 'light':
+        return t('lightMode', 'Light Mode');
+      case 'dark':
+        return t('darkMode', 'Dark Mode');
+      case 'auto':
+        return t('autoMode', 'Auto Mode');
+      default:
+        return t('lightMode', 'Light Mode');
     }
   };
 
@@ -49,45 +57,51 @@ const MonochromeShowcase: React.FC = () => {
     {
       icon: SwatchIcon,
       title: language === 'en' ? 'Monochrome Design' : 'Thiết kế đơn sắc',
-      description: language === 'en' 
-        ? 'Clean black and white aesthetic with subtle gray tones'
-        : 'Thẩm mỹ trắng đen sạch sẽ với tông màu xám tinh tế'
+      description:
+        language === 'en'
+          ? 'Clean black and white aesthetic with subtle gray tones'
+          : 'Thẩm mỹ trắng đen sạch sẽ với tông màu xám tinh tế',
     },
     {
       icon: SunIcon,
       title: language === 'en' ? 'Dark Mode Support' : 'Hỗ trợ chế độ tối',
-      description: language === 'en'
-        ? 'Automatic dark mode detection with manual toggle and auto mode'
-        : 'Tự động phát hiện chế độ tối với khả năng chuyển đổi thủ công và chế độ tự động'
+      description:
+        language === 'en'
+          ? 'Automatic dark mode detection with manual toggle and auto mode'
+          : 'Tự động phát hiện chế độ tối với khả năng chuyển đổi thủ công và chế độ tự động',
     },
     {
       icon: DevicePhoneMobileIcon,
       title: language === 'en' ? 'Fully Responsive' : 'Hoàn toàn responsive',
-      description: language === 'en'
-        ? 'Optimized for all screen sizes and devices'
-        : 'Được tối ưu hóa cho tất cả kích thước màn hình và thiết bị'
+      description:
+        language === 'en'
+          ? 'Optimized for all screen sizes and devices'
+          : 'Được tối ưu hóa cho tất cả kích thước màn hình và thiết bị',
     },
     {
       icon: LanguageIcon,
       title: language === 'en' ? 'Multilingual' : 'Đa ngôn ngữ',
-      description: language === 'en'
-        ? 'Support for Vietnamese and English with easy switching'
-        : 'Hỗ trợ tiếng Việt và tiếng Anh với khả năng chuyển đổi dễ dàng'
+      description:
+        language === 'en'
+          ? 'Support for Vietnamese and English with easy switching'
+          : 'Hỗ trợ tiếng Việt và tiếng Anh với khả năng chuyển đổi dễ dàng',
     },
     {
       icon: SparklesIcon,
       title: language === 'en' ? 'Smooth Animations' : 'Hoạt ảnh mượt mà',
-      description: language === 'en'
-        ? 'Carefully crafted transitions and micro-interactions'
-        : 'Chuyển tiếp và tương tác vi mô được chế tác cẩn thận'
+      description:
+        language === 'en'
+          ? 'Carefully crafted transitions and micro-interactions'
+          : 'Chuyển tiếp và tương tác vi mô được chế tác cẩn thận',
     },
     {
       icon: EyeIcon,
       title: language === 'en' ? 'Accessibility' : 'Khả năng tiếp cận',
-      description: language === 'en'
-        ? 'WCAG compliant with high contrast and reduced motion support'
-        : 'Tuân thủ WCAG với độ tương phản cao và hỗ trợ giảm chuyển động'
-    }
+      description:
+        language === 'en'
+          ? 'WCAG compliant with high contrast and reduced motion support'
+          : 'Tuân thủ WCAG với độ tương phản cao và hỗ trợ giảm chuyển động',
+    },
   ];
 
   if (isLoading) {
@@ -107,12 +121,16 @@ const MonochromeShowcase: React.FC = () => {
             <button
               onClick={toggleMode}
               className="mono-button secondary"
-              title={language === 'en' ? 'Toggle theme mode' : 'Chuyển đổi chế độ theme'}
+              title={
+                language === 'en'
+                  ? 'Toggle theme mode'
+                  : 'Chuyển đổi chế độ theme'
+              }
             >
               {getModeIcon()}
               {getModeText()}
             </button>
-            
+
             <button
               onClick={toggleLanguage}
               className="mono-button secondary"
@@ -122,34 +140,38 @@ const MonochromeShowcase: React.FC = () => {
               {language === 'vi' ? 'Tiếng Việt' : 'English'}
             </button>
           </div>
-          
+
           <h1 className="mono-heading text-4xl font-bold mb-4">
-            {language === 'en' ? 'TazaCore Monochrome UI System' : 'Hệ thống giao diện đơn sắc TazaCore'}
+            {language === 'en'
+              ? 'TazaCore Monochrome UI System'
+              : 'Hệ thống giao diện đơn sắc TazaCore'}
           </h1>
-          
+
           <p className="mono-text-secondary text-lg max-w-2xl mx-auto">
-            {language === 'en' 
+            {language === 'en'
               ? 'A modern, unified design system with dark mode support and multilingual capabilities.'
-              : 'Hệ thống thiết kế hiện đại và thống nhất với hỗ trợ chế độ tối và khả năng đa ngôn ngữ.'
-            }
+              : 'Hệ thống thiết kế hiện đại và thống nhất với hỗ trợ chế độ tối và khả năng đa ngôn ngữ.'}
           </p>
-          
+
           <div className="mono-badge accent mt-4">
-            {language === 'en' ? 'Current Mode' : 'Chế độ hiện tại'}: {actualMode} • {language}
+            {language === 'en' ? 'Current Mode' : 'Chế độ hiện tại'}:{' '}
+            {actualMode} • {language}
           </div>
         </div>
 
         {/* Features Grid */}
         <div className="mono-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-12">
           {features.map((feature, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="mono-card mono-animate-fade-in-up group"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <feature.icon className="h-6 w-6 text-accent mono-transition group-hover:scale-110" />
-                <h3 className="mono-heading text-lg font-semibold">{feature.title}</h3>
+                <h3 className="mono-heading text-lg font-semibold">
+                  {feature.title}
+                </h3>
               </div>
               <p className="mono-text-secondary">{feature.description}</p>
             </div>
@@ -161,7 +183,7 @@ const MonochromeShowcase: React.FC = () => {
           <h2 className="mono-heading text-2xl font-bold mb-6">
             {language === 'en' ? 'Component Showcase' : 'Showcase Component'}
           </h2>
-          
+
           {/* Buttons */}
           <div className="mb-8">
             <h3 className="mono-heading text-lg font-semibold mb-4">
@@ -192,26 +214,34 @@ const MonochromeShowcase: React.FC = () => {
               {language === 'en' ? 'Form Elements' : 'Phần tử Form'}
             </h3>
             <div className="mono-grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input 
+              <input
                 className="mono-input"
-                placeholder={language === 'en' ? 'Enter text...' : 'Nhập văn bản...'}
+                placeholder={
+                  language === 'en' ? 'Enter text...' : 'Nhập văn bản...'
+                }
               />
               <select className="mono-input mono-select">
-                <option>{language === 'en' ? 'Select option' : 'Chọn tùy chọn'}</option>
+                <option>
+                  {language === 'en' ? 'Select option' : 'Chọn tùy chọn'}
+                </option>
                 <option>Option 1</option>
                 <option>Option 2</option>
               </select>
-              <textarea 
+              <textarea
                 className="mono-input"
                 rows={3}
-                placeholder={language === 'en' ? 'Enter description...' : 'Nhập mô tả...'}
+                placeholder={
+                  language === 'en' ? 'Enter description...' : 'Nhập mô tả...'
+                }
               />
               <div className="space-y-2">
                 <label className="mono-checkbox flex items-center gap-2">
                   <input type="checkbox" />
                   <span className="checkmark"></span>
                   <span className="mono-text-secondary">
-                    {language === 'en' ? 'Checkbox option' : 'Tùy chọn checkbox'}
+                    {language === 'en'
+                      ? 'Checkbox option'
+                      : 'Tùy chọn checkbox'}
                   </span>
                 </label>
                 <label className="mono-radio flex items-center gap-2">
@@ -255,13 +285,19 @@ const MonochromeShowcase: React.FC = () => {
                 {language === 'en' ? 'Heading 3' : 'Tiêu đề 3'}
               </h3>
               <p className="mono-text-primary">
-                {language === 'en' ? 'Primary text content' : 'Nội dung văn bản chính'}
+                {language === 'en'
+                  ? 'Primary text content'
+                  : 'Nội dung văn bản chính'}
               </p>
               <p className="mono-text-secondary">
-                {language === 'en' ? 'Secondary text content' : 'Nội dung văn bản phụ'}
+                {language === 'en'
+                  ? 'Secondary text content'
+                  : 'Nội dung văn bản phụ'}
               </p>
               <p className="mono-text-muted">
-                {language === 'en' ? 'Muted text content' : 'Nội dung văn bản mờ'}
+                {language === 'en'
+                  ? 'Muted text content'
+                  : 'Nội dung văn bản mờ'}
               </p>
               <a href="#" className="mono-link">
                 {language === 'en' ? 'Link example' : 'Ví dụ liên kết'}

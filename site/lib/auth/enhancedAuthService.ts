@@ -71,14 +71,15 @@ export interface RegisterData {
 
 class EnhancedAuthService {
   private JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-  private JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
+  private JWT_REFRESH_SECRET =
+    process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
 
   // Generate JWT tokens with theme preferences
   generateTokens(user: AuthUser) {
     const accessToken = jwt.sign(
-      { 
-        userId: user.id, 
-        email: user.email, 
+      {
+        userId: user.id,
+        email: user.email,
         phone: user.phone,
         roleId: user.roleId,
         permissions: user.role.permissions,
@@ -123,7 +124,10 @@ class EnhancedAuthService {
   }
 
   // Save user theme preferences
-  async saveThemePreferences(userId: string, themePreferences: Partial<ThemeConfig>): Promise<void> {
+  async saveThemePreferences(
+    userId: string,
+    themePreferences: Partial<ThemeConfig>
+  ): Promise<void> {
     try {
       await prisma.user.update({
         where: { id: userId },
@@ -156,15 +160,15 @@ class EnhancedAuthService {
 
   // Register user with theme preferences
   async register(data: RegisterData): Promise<AuthUser> {
-    const { 
-      email, 
-      phone, 
-      username, 
-      password, 
-      displayName, 
+    const {
+      email,
+      phone,
+      username,
+      password,
+      displayName,
       provider = 'email',
       themePreferences = {},
-      preferredLanguage = 'vi'
+      preferredLanguage = 'vi',
     } = data;
 
     // Check if user exists
@@ -193,7 +197,7 @@ class EnhancedAuthService {
 
     // Create user with theme preferences
     const hashedPassword = password ? await this.hashPassword(password) : null;
-    
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -221,14 +225,16 @@ class EnhancedAuthService {
   }
 
   // Login with theme context
-  async login(credentials: LoginCredentials): Promise<{ user: AuthUser; tokens: any }> {
-    const { 
-      email, 
-      phone, 
-      username, 
-      password, 
+  async login(
+    credentials: LoginCredentials
+  ): Promise<{ user: AuthUser; tokens: any }> {
+    const {
+      email,
+      phone,
+      username,
+      password,
       provider = 'email',
-      clientTheme 
+      clientTheme,
     } = credentials;
 
     // Find user
@@ -258,8 +264,11 @@ class EnhancedAuthService {
       if (!user.password) {
         throw new Error('Password not set for this account');
       }
-      
-      const isPasswordValid = await this.comparePassword(password, user.password);
+
+      const isPasswordValid = await this.comparePassword(
+        password,
+        user.password
+      );
       if (!isPasswordValid) {
         throw new Error('Invalid password');
       }
@@ -267,12 +276,12 @@ class EnhancedAuthService {
 
     // Update user's last seen and sync theme preferences if provided
     const updateData: any = { lastSeen: new Date() };
-    
+
     if (clientTheme) {
-      const currentPreferences = user.themePreferences 
-        ? JSON.parse(user.themePreferences as string) 
+      const currentPreferences = user.themePreferences
+        ? JSON.parse(user.themePreferences as string)
         : UNIFIED_THEME_CONFIG.defaults;
-      
+
       updateData.themePreferences = JSON.stringify({
         ...currentPreferences,
         ...clientTheme,
@@ -292,7 +301,10 @@ class EnhancedAuthService {
   }
 
   // Login with OTP (for phone)
-  async loginWithOTP(phone: string, otpCode: string): Promise<{ user: AuthUser; tokens: any }> {
+  async loginWithOTP(
+    phone: string,
+    otpCode: string
+  ): Promise<{ user: AuthUser; tokens: any }> {
     const user = await prisma.user.findFirst({
       where: { phone },
       include: { role: true },
@@ -353,23 +365,20 @@ class EnhancedAuthService {
 
     // TODO: Implement SMS service (Twilio, AWS SNS, etc.)
     console.log(`OTP for ${phone}: ${otpCode}`);
-    
+
     return true;
   }
 
   // Google OAuth login with theme preferences
   async googleLogin(
-    googleId: string, 
-    email: string, 
+    googleId: string,
+    email: string,
     displayName: string,
     themePreferences?: Partial<ThemeConfig>
   ): Promise<{ user: AuthUser; tokens: any }> {
     let user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { googleId },
-          { email },
-        ],
+        OR: [{ googleId }, { email }],
       },
       include: { role: true },
     });
@@ -401,12 +410,12 @@ class EnhancedAuthService {
     } else if (!user.googleId) {
       // Link Google account to existing user
       const updateData: any = { googleId };
-      
+
       if (themePreferences) {
-        const currentPreferences = user.themePreferences 
-          ? JSON.parse(user.themePreferences as string) 
+        const currentPreferences = user.themePreferences
+          ? JSON.parse(user.themePreferences as string)
           : UNIFIED_THEME_CONFIG.defaults;
-        
+
         updateData.themePreferences = JSON.stringify({
           ...currentPreferences,
           ...themePreferences,
@@ -431,7 +440,7 @@ class EnhancedAuthService {
       where: { id: userId },
       include: { role: true },
     });
-    
+
     return user ? this.transformUserData(user) : null;
   }
 
@@ -458,13 +467,13 @@ class EnhancedAuthService {
       where: { id: userId },
       data: { lastSeen: new Date() },
     });
-    
+
     return true;
   }
 
   // Update user theme preferences
   async updateUserThemePreferences(
-    userId: string, 
+    userId: string,
     themePreferences: Partial<ThemeConfig>
   ): Promise<AuthUser | null> {
     try {
@@ -486,7 +495,7 @@ class EnhancedAuthService {
   // Helper function to transform user data with permissions and theme preferences
   private transformUserData(user: any): AuthUser {
     let themePreferences = UNIFIED_THEME_CONFIG.defaults;
-    
+
     if (user.themePreferences) {
       try {
         themePreferences = {
@@ -502,7 +511,7 @@ class EnhancedAuthService {
       ...user,
       role: {
         ...user.role,
-        permissions: JSON.parse(user.role.permissions || '[]')
+        permissions: JSON.parse(user.role.permissions || '[]'),
       },
       themePreferences,
       preferredLanguage: user.preferredLanguage || 'vi',

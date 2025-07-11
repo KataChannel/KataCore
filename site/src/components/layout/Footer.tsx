@@ -1,5 +1,13 @@
 import React from 'react';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
+} from 'lucide-react';
 
 interface FooterLink {
   name: string;
@@ -32,42 +40,46 @@ export interface FooterProps {
 }
 
 // Default values
-const defaultCompanyName = "Taza Offical";
-const defaultDescription = "Your trusted partner in web development and digital solutions.";
+const defaultCompanyName = 'Taza Offical';
+const defaultDescription =
+  'Your trusted partner in web development and digital solutions.';
 const defaultContact = {
-  address: "123 Taza Street, City, Country",
-  phone: "+1 (234) 567-890",    
-  email: "info@tazaofficial.com"
+  address: '123 Taza Street, City, Country',
+  phone: '+1 (234) 567-890',
+  email: 'info@tazaofficial.com',
 };
 const defaultFooterLinks: FooterLinks = {
   company: [
-    { name: "About Us", href: "/about" },
-    { name: "Careers", href: "/careers" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "/contact" }
+    { name: 'About Us', href: '/about' },
+    { name: 'Careers', href: '/careers' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Contact', href: '/contact' },
   ],
   services: [
-    { name: "Web Development", href: "/services/web-development" },
-    { name: "Mobile App Development", href: "/services/mobile-app-development" },
-    { name: "UI/UX Design", href: "/services/ui-ux-design" },
-    { name: "Digital Marketing", href: "/services/digital-marketing" }
+    { name: 'Web Development', href: '/services/web-development' },
+    {
+      name: 'Mobile App Development',
+      href: '/services/mobile-app-development',
+    },
+    { name: 'UI/UX Design', href: '/services/ui-ux-design' },
+    { name: 'Digital Marketing', href: '/services/digital-marketing' },
   ],
   resources: [
-    { name: "Documentation", href: "/docs" },
-    { name: "API Reference", href: "/api" },
-    { name: "Support", href: "/support" }
+    { name: 'Documentation', href: '/docs' },
+    { name: 'API Reference', href: '/api' },
+    { name: 'Support', href: '/support' },
   ],
   legal: [
-    { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "Terms of Service", href: "/terms-of-service" }
-  ]
+    { name: 'Privacy Policy', href: '/privacy-policy' },
+    { name: 'Terms of Service', href: '/terms-of-service' },
+  ],
 };
 const defaultSocialLinks: SocialLink[] = [
-  { name: "Facebook", icon: Facebook, href: "https://facebook.com" },
-  { name: "Twitter", icon: Twitter, href: "https://twitter.com" },
-  { name: "Instagram", icon: Instagram, href: "https://instagram.com" },
-  { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com" },
-  { name: "Email", icon: Mail, href: "mailto:info@tazaofficial.com" }
+  { name: 'Facebook', icon: Facebook, href: 'https://facebook.com' },
+  { name: 'Twitter', icon: Twitter, href: 'https://twitter.com' },
+  { name: 'Instagram', icon: Instagram, href: 'https://instagram.com' },
+  { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com' },
+  { name: 'Email', icon: Mail, href: 'mailto:info@tazaofficial.com' },
 ];
 
 export default function Footer({
@@ -75,7 +87,7 @@ export default function Footer({
   description = defaultDescription,
   contact = defaultContact,
   footerLinks = defaultFooterLinks,
-  socialLinks = defaultSocialLinks
+  socialLinks = defaultSocialLinks,
 }: Partial<FooterProps>) {
   const currentYear = new Date().getFullYear();
 
@@ -87,10 +99,12 @@ export default function Footer({
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="mb-4">
-              <h3 className="text-2xl font-bold text-white mb-2">{companyName}</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {companyName}
+              </h3>
               <p className="text-gray-400 mb-4">{description}</p>
             </div>
-            
+
             {/* Contact Info */}
             <div className="space-y-2 text-sm text-gray-400">
               <div className="flex items-center space-x-2">
@@ -112,9 +126,9 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Company</h4>
             <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
+              {footerLinks.company.map(link => (
                 <li key={link.name}>
-                  <a 
+                  <a
                     href={link.href}
                     className="text-gray-400 hover:text-white transition-colors duration-200"
                   >
@@ -129,9 +143,9 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Services</h4>
             <ul className="space-y-2">
-              {footerLinks.services.map((link) => (
+              {footerLinks.services.map(link => (
                 <li key={link.name}>
-                  <a 
+                  <a
                     href={link.href}
                     className="text-gray-400 hover:text-white transition-colors duration-200"
                   >
@@ -146,9 +160,9 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Resources</h4>
             <ul className="space-y-2">
-              {footerLinks.resources.map((link) => (
+              {footerLinks.resources.map(link => (
                 <li key={link.name}>
-                  <a 
+                  <a
                     href={link.href}
                     className="text-gray-400 hover:text-white transition-colors duration-200"
                   >
@@ -163,9 +177,9 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Legal</h4>
             <ul className="space-y-2">
-              {footerLinks.legal.map((link) => (
+              {footerLinks.legal.map(link => (
                 <li key={link.name}>
-                  <a 
+                  <a
                     href={link.href}
                     className="text-gray-400 hover:text-white transition-colors duration-200"
                   >
@@ -211,7 +225,7 @@ export default function Footer({
 
             {/* Social Links */}
             <div className="flex space-x-4">
-              {socialLinks.map((social) => {
+              {socialLinks.map(social => {
                 const IconComponent = social.icon;
                 return (
                   <a

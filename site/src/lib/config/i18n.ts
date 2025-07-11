@@ -1,7 +1,7 @@
 export const i18nConfig = {
   defaultLocale: 'vi',
   locales: ['vi', 'en'],
-  
+
   // Common translations
   common: {
     vi: {
@@ -29,7 +29,7 @@ export const i18nConfig = {
       lightMode: 'Chế độ sáng',
       language: 'Ngôn ngữ',
       toggleDarkMode: 'Chuyển chế độ tối',
-      toggleLanguage: 'Chuyển ngôn ngữ'
+      toggleLanguage: 'Chuyển ngôn ngữ',
     },
     en: {
       welcome: 'Welcome',
@@ -56,8 +56,8 @@ export const i18nConfig = {
       lightMode: 'Light Mode',
       language: 'Language',
       toggleDarkMode: 'Toggle Dark Mode',
-      toggleLanguage: 'Toggle Language'
-    }
+      toggleLanguage: 'Toggle Language',
+    },
   },
 
   // HR module translations
@@ -76,7 +76,7 @@ export const i18nConfig = {
       totalEmployees: 'Tổng số nhân viên',
       activeEmployees: 'Nhân viên hoạt động',
       onLeave: 'Đang nghỉ phép',
-      newHires: 'Nhân viên mới'
+      newHires: 'Nhân viên mới',
     },
     en: {
       title: 'HR Management',
@@ -92,9 +92,9 @@ export const i18nConfig = {
       totalEmployees: 'Total Employees',
       activeEmployees: 'Active Employees',
       onLeave: 'On Leave',
-      newHires: 'New Hires'
-    }
-  }
+      newHires: 'New Hires',
+    },
+  },
 };
 
 // Helper function to get translation
@@ -103,11 +103,11 @@ export function useTranslation(locale: 'vi' | 'en' = 'vi') {
     const keys = key.split('.');
     const translations = i18nConfig[module] as any;
     let value: any = translations[locale];
-    
+
     for (const k of keys) {
       value = value?.[k];
     }
-    
+
     return value || key;
   };
 

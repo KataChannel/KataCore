@@ -1,36 +1,36 @@
-import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
-import { siteConfig } from "../lib/config/site";
-import { MaintenanceGuard } from "../components/auth";
-import ThemeManager, { ThemeInitScript } from "@/components/ThemeManager";
+import '@/styles/globals.css';
+import { Metadata, Viewport } from 'next';
+import { siteConfig } from '../lib/config/site';
+import { MaintenanceGuard } from '../components/auth';
+import ThemeManager, { ThemeInitScript } from '@/components/ThemeManager';
 
 export const metadata: Metadata = {
   title: siteConfig.title,
   description: siteConfig.description,
-  manifest: "/manifest.json",
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "TazaCore HR",
+    statusBarStyle: 'default',
+    title: 'TazaCore HR',
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
-    type: "website",
-    siteName: "TazaCore HR Management System",
+    type: 'website',
+    siteName: 'TazaCore HR Management System',
     title: siteConfig.title,
     description: siteConfig.description,
   },
   twitter: {
-    card: "summary",
+    card: 'summary',
     title: siteConfig.title,
     description: siteConfig.description,
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4f46e5",
+  themeColor: '#4f46e5',
 };
 
 export default function RootLayout({
@@ -114,9 +114,9 @@ export default function RootLayout({
         <MaintenanceGuard>
           <ThemeManager
             defaultConfig={{
-              mode: "light",
-              language: "vi",
-              colorScheme: "monochrome",
+              mode: 'light',
+              language: 'vi',
+              colorScheme: 'monochrome',
             }}
             enablePersistence={true}
             enableSystemListener={true}

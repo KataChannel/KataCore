@@ -25,7 +25,7 @@ async function authenticate(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = await authenticate(request);
-    
+
     // Check permissions
     if (!user.role.permissions.includes('READ_ROLES')) {
       return NextResponse.json(
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await authenticate(request);
-    
+
     // Check permissions
     if (!user.role.permissions.includes('CREATE_ROLES')) {
       return NextResponse.json(

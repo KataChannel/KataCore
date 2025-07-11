@@ -8,23 +8,23 @@ interface ResourceItemProps {
   changeAmount?: number;
 }
 
-const ResourceItem: React.FC<ResourceItemProps> = ({ 
-  resource, 
-  amount, 
-  showChange = false, 
-  changeAmount = 0 
+const ResourceItem: React.FC<ResourceItemProps> = ({
+  resource,
+  amount,
+  showChange = false,
+  changeAmount = 0,
 }) => {
   // Icon mapping cho các loại resource
   const getResourceIcon = (resourceType: string) => {
     const icons = {
       wood: '🌲',
-      stone: '🪨', 
+      stone: '🪨',
       food: '🍖',
       water: '💧',
       metal: '⚔️',
       gem: '💎',
       energy: '⚡',
-      gold: '🪙'
+      gold: '🪙',
     };
     return icons[resourceType as keyof typeof icons] || '📦';
   };
@@ -65,16 +65,18 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
             </span>
           )}
         </div>
-        
+
         {/* Hiển thị thay đổi nếu có */}
         {showChange && changeAmount !== 0 && (
-          <div className={`text-sm flex items-center justify-end space-x-1 ${
-            changeAmount > 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
+          <div
+            className={`text-sm flex items-center justify-end space-x-1 ${
+              changeAmount > 0 ? 'text-green-400' : 'text-red-400'
+            }`}
+          >
             <span>{changeAmount > 0 ? '↗' : '↘'}</span>
             <span>
-              {changeAmount > 0 ? '+' : ''}{formatNumber(changeAmount)} 
-              ({getChangePercentage()}%)
+              {changeAmount > 0 ? '+' : ''}
+              {formatNumber(changeAmount)}({getChangePercentage()}%)
             </span>
           </div>
         )}
@@ -83,13 +85,16 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
         {resource.maxCapacity && (
           <div className="mt-2 w-20">
             <div className="bg-gray-700 rounded-full h-1.5">
-              <div 
+              <div
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  (amount / resource.maxCapacity) > 0.8 ? 'bg-red-500' :
-                  (amount / resource.maxCapacity) > 0.6 ? 'bg-yellow-500' : 'bg-green-500'
+                  amount / resource.maxCapacity > 0.8
+                    ? 'bg-red-500'
+                    : amount / resource.maxCapacity > 0.6
+                      ? 'bg-yellow-500'
+                      : 'bg-green-500'
                 }`}
-                style={{ 
-                  width: `${Math.min((amount / resource.maxCapacity) * 100, 100)}%` 
+                style={{
+                  width: `${Math.min((amount / resource.maxCapacity) * 100, 100)}%`,
                 }}
               />
             </div>

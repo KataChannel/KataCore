@@ -18,16 +18,26 @@ export default function DashboardPage() {
     const checkAuth = async () => {
       try {
         // Check token from localStorage/sessionStorage first
-        let token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        console.log('Dashboard: checking token from storage:', token ? '***' + token.slice(-10) : 'null');
-        
+        let token =
+          localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log(
+          'Dashboard: checking token from storage:',
+          token ? '***' + token.slice(-10) : 'null'
+        );
+
         // If no token in storage, check cookie (for SSR/middleware)
         if (!token) {
-          const cookieToken = document.cookie.split(';').find(row => row.startsWith('token='))?.split('=')[1];
-          console.log('Dashboard: checking token from cookie:', cookieToken ? '***' + cookieToken.slice(-10) : 'null');
+          const cookieToken = document.cookie
+            .split(';')
+            .find(row => row.startsWith('token='))
+            ?.split('=')[1];
+          console.log(
+            'Dashboard: checking token from cookie:',
+            cookieToken ? '***' + cookieToken.slice(-10) : 'null'
+          );
           token = cookieToken || null;
         }
-        
+
         if (!token) {
           console.log('Dashboard: No token found, redirecting to login');
           router.push('/login');
@@ -36,7 +46,7 @@ export default function DashboardPage() {
 
         const response = await fetch('/api/auth/me', {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -51,7 +61,8 @@ export default function DashboardPage() {
           // Token invalid, redirect to login
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
-          document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+          document.cookie =
+            'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
           router.push('/login');
         }
       } catch (error) {
@@ -97,7 +108,8 @@ export default function DashboardPage() {
                   onClick={() => {
                     localStorage.removeItem('token');
                     sessionStorage.removeItem('token');
-                    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                    document.cookie =
+                      'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                     router.push('/login');
                   }}
                   className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"

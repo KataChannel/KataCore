@@ -39,7 +39,9 @@ export function useEnhancedHRPermissions(userId?: string) {
   }, [userId]);
 
   const hasPermission = (resource: string, action: string) => {
-    return permissions.some(p => p.resource === resource && p.action === action);
+    return permissions.some(
+      p => p.resource === resource && p.action === action
+    );
   };
 
   return {
@@ -73,8 +75,16 @@ export const HR_PERMISSIONS = {
   ATTENDANCE_CREATE: { resource: 'attendance', action: 'create' },
   ATTENDANCE_EDIT: { resource: 'attendance', action: 'edit' },
   ATTENDANCE_DELETE: { resource: 'attendance', action: 'delete' },
-  ATTENDANCE_VIEW_OWN: { resource: 'attendance', action: 'view', condition: 'own' },
-  ATTENDANCE_EDIT_OWN: { resource: 'attendance', action: 'edit', condition: 'own' },
+  ATTENDANCE_VIEW_OWN: {
+    resource: 'attendance',
+    action: 'view',
+    condition: 'own',
+  },
+  ATTENDANCE_EDIT_OWN: {
+    resource: 'attendance',
+    action: 'edit',
+    condition: 'own',
+  },
 
   // Leave permissions
   LEAVE_VIEW: { resource: 'leave', action: 'view' },
@@ -95,7 +105,11 @@ export const HR_PERMISSIONS = {
   PERFORMANCE_CREATE: { resource: 'performance', action: 'create' },
   PERFORMANCE_EDIT: { resource: 'performance', action: 'edit' },
   PERFORMANCE_DELETE: { resource: 'performance', action: 'delete' },
-  PERFORMANCE_VIEW_OWN: { resource: 'performance', action: 'view', condition: 'own' },
+  PERFORMANCE_VIEW_OWN: {
+    resource: 'performance',
+    action: 'view',
+    condition: 'own',
+  },
 
   // Position permissions
   POSITION_VIEW: { resource: 'position', action: 'view' },
@@ -130,7 +144,7 @@ export const HR_PERMISSIONS = {
 export const ROLE_TEMPLATES = {
   ADMIN: {
     name: 'Administrator',
-    permissions: [HR_PERMISSIONS.ADMIN_FULL]
+    permissions: [HR_PERMISSIONS.ADMIN_FULL],
   },
   HR_MANAGER: {
     name: 'HR Manager',
@@ -169,7 +183,7 @@ export const ROLE_TEMPLATES = {
       HR_PERMISSIONS.REPORT_VIEW,
       HR_PERMISSIONS.REPORT_CREATE,
       HR_PERMISSIONS.REPORT_EXPORT,
-    ]
+    ],
   },
   HR_STAFF: {
     name: 'HR Staff',
@@ -187,7 +201,7 @@ export const ROLE_TEMPLATES = {
       HR_PERMISSIONS.POSITION_VIEW,
       HR_PERMISSIONS.USER_VIEW,
       HR_PERMISSIONS.REPORT_VIEW,
-    ]
+    ],
   },
   MANAGER: {
     name: 'Department Manager',
@@ -202,7 +216,7 @@ export const ROLE_TEMPLATES = {
       HR_PERMISSIONS.PERFORMANCE_EDIT,
       HR_PERMISSIONS.REPORT_VIEW,
       HR_PERMISSIONS.USER_VIEW,
-    ]
+    ],
   },
   EMPLOYEE: {
     name: 'Employee',
@@ -217,8 +231,8 @@ export const ROLE_TEMPLATES = {
       HR_PERMISSIONS.PERFORMANCE_VIEW_OWN,
       HR_PERMISSIONS.USER_VIEW_OWN,
       HR_PERMISSIONS.USER_EDIT_OWN,
-    ]
-  }
+    ],
+  },
 };
 
 // Permission checking utility
@@ -231,22 +245,31 @@ export class PermissionChecker {
     this.userId = userId;
   }
 
-  hasPermission(resource: string, action: string, targetUserId?: string): boolean {
+  hasPermission(
+    resource: string,
+    action: string,
+    targetUserId?: string
+  ): boolean {
     // Check for admin permission (wildcard)
-    if (this.userPermissions.some(p => p.resource === '*' && p.action === '*')) {
+    if (
+      this.userPermissions.some(p => p.resource === '*' && p.action === '*')
+    ) {
       return true;
     }
 
     // Check for exact match
-    const exactMatch = this.userPermissions.find(p => 
-      p.resource === resource && p.action === action && !p.condition
+    const exactMatch = this.userPermissions.find(
+      p => p.resource === resource && p.action === action && !p.condition
     );
     if (exactMatch) return true;
 
     // Check for conditional permission (own resource)
     if (targetUserId && targetUserId === this.userId) {
-      const ownPermission = this.userPermissions.find(p => 
-        p.resource === resource && p.action === action && p.condition === 'own'
+      const ownPermission = this.userPermissions.find(
+        p =>
+          p.resource === resource &&
+          p.action === action &&
+          p.condition === 'own'
       );
       if (ownPermission) return true;
     }
@@ -296,7 +319,10 @@ export class PermissionChecker {
   }
 
   canManageLeaves(): boolean {
-    return this.canView('leave') && (this.canApprove('leave') || this.canReject('leave'));
+    return (
+      this.canView('leave') &&
+      (this.canApprove('leave') || this.canReject('leave'))
+    );
   }
 
   canManagePayroll(): boolean {
@@ -330,12 +356,17 @@ export class PermissionChecker {
 
   // Check if user has any admin permissions
   isAdmin(): boolean {
-    return this.userPermissions.some(p => p.resource === '*' && p.action === '*');
+    return this.userPermissions.some(
+      p => p.resource === '*' && p.action === '*'
+    );
   }
 }
 
 // Utility function to create permission checker from user data
-export function createPermissionChecker(userPermissions: string[], userId: string): PermissionChecker {
+export function createPermissionChecker(
+  userPermissions: string[],
+  userId: string
+): PermissionChecker {
   // Convert string permissions to Permission objects
   const permissions: Permission[] = userPermissions.map(permStr => {
     // Parse permission string format: "resource:action" or "resource:action:condition"
@@ -346,9 +377,10 @@ export function createPermissionChecker(userPermissions: string[], userId: strin
       return { resource: parts[0], action: parts[1], condition: parts[2] };
     }
     // Fallback for simple permission names
-    const permission = Object.values(HR_PERMISSIONS).find(p => 
-      permStr.toLowerCase().includes(p.resource.toLowerCase()) && 
-      permStr.toLowerCase().includes(p.action.toLowerCase())
+    const permission = Object.values(HR_PERMISSIONS).find(
+      p =>
+        permStr.toLowerCase().includes(p.resource.toLowerCase()) &&
+        permStr.toLowerCase().includes(p.action.toLowerCase())
     );
     return permission || { resource: 'unknown', action: 'unknown' };
   });
@@ -360,5 +392,5 @@ export default {
   HR_PERMISSIONS,
   ROLE_TEMPLATES,
   PermissionChecker,
-  createPermissionChecker
+  createPermissionChecker,
 };

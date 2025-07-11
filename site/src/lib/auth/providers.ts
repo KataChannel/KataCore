@@ -10,7 +10,7 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -18,16 +18,19 @@ export const authOptions: NextAuthOptions = {
         }
 
         // TODO: Replace with actual user lookup from database
-        const user = { 
-          id: '1', 
-          email: credentials.email, 
+        const user = {
+          id: '1',
+          email: credentials.email,
           name: 'Admin User',
-          role: 'admin' 
+          role: 'admin',
         };
 
         // TODO: Replace with actual password verification
-        const isValidPassword = await bcrypt.compare(credentials.password, '$2a$10$hashedpassword');
-        
+        const isValidPassword = await bcrypt.compare(
+          credentials.password,
+          '$2a$10$hashedpassword'
+        );
+
         if (user && isValidPassword) {
           return {
             id: user.id,
@@ -35,10 +38,10 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
           };
         }
-        
+
         return null;
-      }
-    })
+      },
+    }),
   ],
   session: {
     strategy: 'jwt',

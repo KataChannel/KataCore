@@ -64,29 +64,29 @@ const mockActivities: Activity[] = [
     type: 'hire',
     message: 'John Doe joined as Software Engineer',
     timestamp: '2 hours ago',
-    user: 'HR Team'
+    user: 'HR Team',
   },
   {
     id: '2',
     type: 'leave',
-    message: 'Jane Smith\'s leave request approved',
+    message: "Jane Smith's leave request approved",
     timestamp: '4 hours ago',
-    user: 'Manager'
+    user: 'Manager',
   },
   {
     id: '3',
     type: 'payroll',
     message: 'Monthly payroll processed',
     timestamp: '1 day ago',
-    user: 'Finance'
+    user: 'Finance',
   },
   {
     id: '4',
     type: 'attendance',
     message: 'Daily attendance report generated',
     timestamp: '1 day ago',
-    user: 'System'
-  }
+    user: 'System',
+  },
 ];
 
 export default function HRDashboard() {
@@ -98,7 +98,7 @@ export default function HRDashboard() {
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Get dark mode preference from localStorage
     const savedDarkMode = localStorage.getItem('admin-theme') === 'dark';
     setDarkMode(savedDarkMode);
@@ -114,7 +114,7 @@ export default function HRDashboard() {
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
-    
+
     localStorage.setItem('admin-theme', newDarkMode ? 'dark' : 'light');
     if (newDarkMode) {
       document.documentElement.classList.add('dark');
@@ -136,7 +136,7 @@ export default function HRDashboard() {
       changeType: 'increase',
       icon: UsersIcon,
       color: 'blue',
-      description: 'All registered employees'
+      description: 'All registered employees',
     },
     {
       name: 'Active Employees',
@@ -145,7 +145,7 @@ export default function HRDashboard() {
       changeType: 'increase',
       icon: UserGroupIcon,
       color: 'green',
-      description: 'Currently active staff'
+      description: 'Currently active staff',
     },
     {
       name: 'Departments',
@@ -154,7 +154,7 @@ export default function HRDashboard() {
       changeType: 'increase',
       icon: BuildingOfficeIcon,
       color: 'purple',
-      description: 'Active departments'
+      description: 'Active departments',
     },
     {
       name: 'Pending Leaves',
@@ -163,16 +163,16 @@ export default function HRDashboard() {
       changeType: 'decrease',
       icon: CalendarIcon,
       color: 'orange',
-      description: 'Awaiting approval'
+      description: 'Awaiting approval',
     },
     {
-      name: 'Today\'s Attendance',
+      name: "Today's Attendance",
       value: `${stats.todayAttendance}%`,
       change: '+3%',
       changeType: 'increase',
       icon: ClockIcon,
       color: 'green',
-      description: 'Present today'
+      description: 'Present today',
     },
     {
       name: 'Monthly Payroll',
@@ -181,7 +181,7 @@ export default function HRDashboard() {
       changeType: 'increase',
       icon: CurrencyDollarIcon,
       color: 'blue',
-      description: 'This month\'s total'
+      description: "This month's total",
     },
     {
       name: 'New Hires',
@@ -190,7 +190,7 @@ export default function HRDashboard() {
       changeType: 'increase',
       icon: BriefcaseIcon,
       color: 'purple',
-      description: 'This month'
+      description: 'This month',
     },
     {
       name: 'Average Salary',
@@ -199,7 +199,7 @@ export default function HRDashboard() {
       changeType: 'increase',
       icon: ChartBarIcon,
       color: 'green',
-      description: 'Company average'
+      description: 'Company average',
     },
   ];
 
@@ -239,11 +239,11 @@ export default function HRDashboard() {
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
             <div className="text-right">
               <p className="text-sm text-text-secondary">
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
                 })}
               </p>
               <p className="text-xs text-text-secondary">
@@ -267,44 +267,71 @@ export default function HRDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card) => (
-          <div key={card.name} className="mono-card p-6 hover:shadow-lg transition-all duration-300 group">
+        {statCards.map(card => (
+          <div
+            key={card.name}
+            className="mono-card p-6 hover:shadow-lg transition-all duration-300 group"
+          >
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
-                  <div className={`p-2 rounded-lg ${
-                    card.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                    card.color === 'green' ? 'bg-green-100 dark:bg-green-900/30' :
-                    card.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/30' :
-                    card.color === 'orange' ? 'bg-orange-100 dark:bg-orange-900/30' :
-                    'bg-gray-100 dark:bg-gray-900/30'
-                  }`}>
-                    <card.icon className={`h-5 w-5 ${
-                      card.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
-                      card.color === 'green' ? 'text-green-600 dark:text-green-400' :
-                      card.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
-                      card.color === 'orange' ? 'text-orange-600 dark:text-orange-400' :
-                      'text-gray-600 dark:text-gray-400'
-                    }`} />
+                  <div
+                    className={`p-2 rounded-lg ${
+                      card.color === 'blue'
+                        ? 'bg-blue-100 dark:bg-blue-900/30'
+                        : card.color === 'green'
+                          ? 'bg-green-100 dark:bg-green-900/30'
+                          : card.color === 'purple'
+                            ? 'bg-purple-100 dark:bg-purple-900/30'
+                            : card.color === 'orange'
+                              ? 'bg-orange-100 dark:bg-orange-900/30'
+                              : 'bg-gray-100 dark:bg-gray-900/30'
+                    }`}
+                  >
+                    <card.icon
+                      className={`h-5 w-5 ${
+                        card.color === 'blue'
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : card.color === 'green'
+                            ? 'text-green-600 dark:text-green-400'
+                            : card.color === 'purple'
+                              ? 'text-purple-600 dark:text-purple-400'
+                              : card.color === 'orange'
+                                ? 'text-orange-600 dark:text-orange-400'
+                                : 'text-gray-600 dark:text-gray-400'
+                      }`}
+                    />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-text-secondary">{card.name}</p>
-                    <p className="text-xs text-text-secondary">{card.description}</p>
+                    <p className="text-sm font-medium text-text-secondary">
+                      {card.name}
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      {card.description}
+                    </p>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-primary mb-2">{card.value}</p>
+                <p className="text-2xl font-bold text-primary mb-2">
+                  {card.value}
+                </p>
                 <div className="flex items-center space-x-1">
                   {card.changeType === 'increase' ? (
                     <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />
                   ) : (
                     <ArrowTrendingDownIcon className="h-4 w-4 text-red-500" />
                   )}
-                  <span className={`text-sm font-medium ${
-                    card.changeType === 'increase' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                  }`}>
+                  <span
+                    className={`text-sm font-medium ${
+                      card.changeType === 'increase'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
+                    }`}
+                  >
                     {card.change}
                   </span>
-                  <span className="text-xs text-text-secondary">vs last month</span>
+                  <span className="text-xs text-text-secondary">
+                    vs last month
+                  </span>
                 </div>
               </div>
             </div>
@@ -315,24 +342,43 @@ export default function HRDashboard() {
       {/* Recent Activity and Department Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="mono-card p-6">
-          <h3 className="text-lg font-semibold text-primary mb-4">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-primary mb-4">
+            Recent Activity
+          </h3>
           <div className="space-y-4">
-            {activities.map((activity) => (
+            {activities.map(activity => (
               <div key={activity.id} className="flex items-start space-x-3">
-                <div className={`p-2 rounded-lg ${
-                  activity.type === 'hire' ? 'bg-green-100 dark:bg-green-900/30' :
-                  activity.type === 'leave' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                  activity.type === 'payroll' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                  'bg-gray-100 dark:bg-gray-900/30'
-                }`}>
-                  {activity.type === 'hire' && <UsersIcon className="h-4 w-4 text-green-600 dark:text-green-400" />}
-                  {activity.type === 'leave' && <CalendarIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />}
-                  {activity.type === 'payroll' && <CurrencyDollarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-                  {activity.type === 'attendance' && <ClockIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />}
+                <div
+                  className={`p-2 rounded-lg ${
+                    activity.type === 'hire'
+                      ? 'bg-green-100 dark:bg-green-900/30'
+                      : activity.type === 'leave'
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30'
+                        : activity.type === 'payroll'
+                          ? 'bg-blue-100 dark:bg-blue-900/30'
+                          : 'bg-gray-100 dark:bg-gray-900/30'
+                  }`}
+                >
+                  {activity.type === 'hire' && (
+                    <UsersIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  )}
+                  {activity.type === 'leave' && (
+                    <CalendarIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                  )}
+                  {activity.type === 'payroll' && (
+                    <CurrencyDollarIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  )}
+                  {activity.type === 'attendance' && (
+                    <ClockIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  )}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-primary">{activity.message}</p>
-                  <p className="text-xs text-text-secondary">{activity.timestamp} • {activity.user}</p>
+                  <p className="text-sm font-medium text-primary">
+                    {activity.message}
+                  </p>
+                  <p className="text-xs text-text-secondary">
+                    {activity.timestamp} • {activity.user}
+                  </p>
                 </div>
               </div>
             ))}
@@ -345,7 +391,9 @@ export default function HRDashboard() {
         </div>
 
         <div className="mono-card p-6">
-          <h3 className="text-lg font-semibold text-primary mb-4">Department Overview</h3>
+          <h3 className="text-lg font-semibold text-primary mb-4">
+            Department Overview
+          </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -353,7 +401,9 @@ export default function HRDashboard() {
                   <BuildingOfficeIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-primary">Engineering</p>
+                  <p className="text-sm font-medium text-primary">
+                    Engineering
+                  </p>
                   <p className="text-xs text-text-secondary">45 employees</p>
                 </div>
               </div>
@@ -362,7 +412,7 @@ export default function HRDashboard() {
                 <p className="text-xs text-text-secondary">Attendance</p>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -378,7 +428,7 @@ export default function HRDashboard() {
                 <p className="text-xs text-text-secondary">Attendance</p>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">

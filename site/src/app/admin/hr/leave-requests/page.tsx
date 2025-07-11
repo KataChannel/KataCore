@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  CalendarIcon, 
-  ClockIcon, 
+import {
+  CalendarIcon,
+  ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
@@ -25,7 +25,13 @@ interface LeaveRequest {
     department: string;
     avatar?: string;
   };
-  type: 'ANNUAL' | 'SICK' | 'PERSONAL' | 'MATERNITY' | 'PATERNITY' | 'EMERGENCY';
+  type:
+    | 'ANNUAL'
+    | 'SICK'
+    | 'PERSONAL'
+    | 'MATERNITY'
+    | 'PATERNITY'
+    | 'EMERGENCY';
   startDate: string;
   endDate: string;
   days: number;
@@ -173,9 +179,13 @@ export default function LeaveRequestsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
-  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(
+    null
+  );
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
+  const [approvalAction, setApprovalAction] = useState<
+    'approve' | 'reject' | null
+  >(null);
   const [approvalNotes, setApprovalNotes] = useState('');
 
   useEffect(() => {
@@ -187,14 +197,20 @@ export default function LeaveRequestsPage() {
   }, []);
 
   const filteredRequests = leaveRequests.filter(request => {
-    const matchesSearch = request.employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         request.employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         request.reason.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+    const matchesSearch =
+      request.employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.employee.employeeId
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      request.reason.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' || request.status === statusFilter;
     const matchesType = typeFilter === 'all' || request.type === typeFilter;
-    const matchesDepartment = departmentFilter === 'all' || request.employee.department === departmentFilter;
-    
+    const matchesDepartment =
+      departmentFilter === 'all' ||
+      request.employee.department === departmentFilter;
+
     return matchesSearch && matchesStatus && matchesType && matchesDepartment;
   });
 
@@ -203,14 +219,19 @@ export default function LeaveRequestsPage() {
     const pending = leaveRequests.filter(r => r.status === 'PENDING').length;
     const approved = leaveRequests.filter(r => r.status === 'APPROVED').length;
     const rejected = leaveRequests.filter(r => r.status === 'REJECTED').length;
-    
+
     return { total, pending, approved, rejected };
   };
 
   const summary = getRequestSummary();
-  const departments = [...new Set(leaveRequests.map(r => r.employee.department))];
+  const departments = [
+    ...new Set(leaveRequests.map(r => r.employee.department)),
+  ];
 
-  const handleApprovalAction = (request: LeaveRequest, action: 'approve' | 'reject') => {
+  const handleApprovalAction = (
+    request: LeaveRequest,
+    action: 'approve' | 'reject'
+  ) => {
     setSelectedRequest(request);
     setApprovalAction(action);
     setShowApprovalModal(true);
@@ -218,22 +239,29 @@ export default function LeaveRequestsPage() {
 
   const confirmApproval = () => {
     if (!selectedRequest || !approvalAction) return;
-    
+
     const updatedRequests = leaveRequests.map(request => {
       if (request.id === selectedRequest.id) {
         return {
           ...request,
-          status: (approvalAction === 'approve' ? 'APPROVED' : 'REJECTED') as 'APPROVED' | 'REJECTED',
-          ...(approvalAction === 'approve' 
-            ? { approvedBy: 'Current User', approvedAt: new Date().toISOString() }
-            : { rejectedBy: 'Current User', rejectedAt: new Date().toISOString() }
-          ),
+          status: (approvalAction === 'approve' ? 'APPROVED' : 'REJECTED') as
+            | 'APPROVED'
+            | 'REJECTED',
+          ...(approvalAction === 'approve'
+            ? {
+                approvedBy: 'Current User',
+                approvedAt: new Date().toISOString(),
+              }
+            : {
+                rejectedBy: 'Current User',
+                rejectedAt: new Date().toISOString(),
+              }),
           notes: approvalNotes || request.notes,
         };
       }
       return request;
     });
-    
+
     setLeaveRequests(updatedRequests);
     setShowApprovalModal(false);
     setSelectedRequest(null);
@@ -274,7 +302,9 @@ export default function LeaveRequestsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Leave Requests</h1>
-            <p className="text-gray-600">Review and manage employee leave requests</p>
+            <p className="text-gray-600">
+              Review and manage employee leave requests
+            </p>
           </div>
           <Link
             href="/hr/leave-requests/new"
@@ -294,8 +324,12 @@ export default function LeaveRequestsPage() {
               <CalendarIcon className="h-6 w-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Requests</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.total}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Requests
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.total}
+              </p>
             </div>
           </div>
         </div>
@@ -306,7 +340,9 @@ export default function LeaveRequestsPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.pending}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.pending}
+              </p>
             </div>
           </div>
         </div>
@@ -317,7 +353,9 @@ export default function LeaveRequestsPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Approved</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.approved}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.approved}
+              </p>
             </div>
           </div>
         </div>
@@ -328,7 +366,9 @@ export default function LeaveRequestsPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Rejected</p>
-              <p className="text-2xl font-bold text-gray-900">{summary.rejected}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {summary.rejected}
+              </p>
             </div>
           </div>
         </div>
@@ -348,7 +388,7 @@ export default function LeaveRequestsPage() {
                   placeholder="Search requests..."
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -358,7 +398,7 @@ export default function LeaveRequestsPage() {
                 <select
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={e => setStatusFilter(e.target.value)}
                 >
                   <option value="all">All Status</option>
                   <option value="PENDING">Pending</option>
@@ -371,7 +411,7 @@ export default function LeaveRequestsPage() {
                 <select
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
+                  onChange={e => setTypeFilter(e.target.value)}
                 >
                   <option value="all">All Types</option>
                   <option value="ANNUAL">Annual</option>
@@ -386,11 +426,13 @@ export default function LeaveRequestsPage() {
                 <select
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   value={departmentFilter}
-                  onChange={(e) => setDepartmentFilter(e.target.value)}
+                  onChange={e => setDepartmentFilter(e.target.value)}
                 >
                   <option value="all">All Departments</option>
                   {departments.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -437,7 +479,7 @@ export default function LeaveRequestsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredRequests.map((request) => {
+              {filteredRequests.map(request => {
                 const StatusIcon = statusIcons[request.status];
                 return (
                   <tr key={request.id} className="hover:bg-gray-50">
@@ -446,7 +488,10 @@ export default function LeaveRequestsPage() {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                             <span className="text-sm font-medium text-gray-600">
-                              {request.employee.name.split(' ').map(n => n[0]).join('')}
+                              {request.employee.name
+                                .split(' ')
+                                .map(n => n[0])
+                                .join('')}
                             </span>
                           </div>
                         </div>
@@ -455,13 +500,16 @@ export default function LeaveRequestsPage() {
                             {request.employee.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {request.employee.employeeId} • {request.employee.department}
+                            {request.employee.employeeId} •{' '}
+                            {request.employee.department}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${leaveTypeColors[request.type]}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${leaveTypeColors[request.type]}`}
+                      >
                         {request.type}
                       </span>
                     </td>
@@ -479,7 +527,9 @@ export default function LeaveRequestsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <StatusIcon className="h-4 w-4 mr-2 text-gray-400" />
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[request.status]}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[request.status]}`}
+                        >
                           {request.status}
                         </span>
                       </div>
@@ -499,14 +549,18 @@ export default function LeaveRequestsPage() {
                         </button>
                         {request.status === 'PENDING' && (
                           <>
-                            <button 
-                              onClick={() => handleApprovalAction(request, 'approve')}
+                            <button
+                              onClick={() =>
+                                handleApprovalAction(request, 'approve')
+                              }
                               className="text-green-600 hover:text-green-900"
                             >
                               <CheckCircleIcon className="h-4 w-4" />
                             </button>
-                            <button 
-                              onClick={() => handleApprovalAction(request, 'reject')}
+                            <button
+                              onClick={() =>
+                                handleApprovalAction(request, 'reject')
+                              }
                               className="text-red-600 hover:text-red-900"
                             >
                               <XCircleIcon className="h-4 w-4" />
@@ -532,14 +586,16 @@ export default function LeaveRequestsPage() {
                 <UserIcon className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mt-4 text-center">
-                {approvalAction === 'approve' ? 'Approve' : 'Reject'} Leave Request
+                {approvalAction === 'approve' ? 'Approve' : 'Reject'} Leave
+                Request
               </h3>
               <div className="mt-4 text-center">
                 <p className="text-sm text-gray-600">
                   {selectedRequest.employee.name} - {selectedRequest.type} Leave
                 </p>
                 <p className="text-sm text-gray-600">
-                  {new Date(selectedRequest.startDate).toLocaleDateString()} - {new Date(selectedRequest.endDate).toLocaleDateString()}
+                  {new Date(selectedRequest.startDate).toLocaleDateString()} -{' '}
+                  {new Date(selectedRequest.endDate).toLocaleDateString()}
                 </p>
                 <p className="text-sm text-gray-600">
                   {selectedRequest.days} days
@@ -553,7 +609,7 @@ export default function LeaveRequestsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                   value={approvalNotes}
-                  onChange={(e) => setApprovalNotes(e.target.value)}
+                  onChange={e => setApprovalNotes(e.target.value)}
                   placeholder="Add any comments..."
                 />
               </div>
@@ -561,7 +617,7 @@ export default function LeaveRequestsPage() {
                 <button
                   onClick={confirmApproval}
                   className={`px-4 py-2 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                    approvalAction === 'approve' 
+                    approvalAction === 'approve'
                       ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
                       : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
                   }`}

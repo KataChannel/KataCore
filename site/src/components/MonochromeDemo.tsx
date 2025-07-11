@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import { useLanguage } from '../hooks/useTheme';
 import { useTranslation } from '../lib/config/i18n';
-import { 
-  SunIcon, 
-  MoonIcon, 
+import {
+  SunIcon,
+  MoonIcon,
   LanguageIcon,
   Cog6ToothIcon,
   UserIcon,
   BellIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 
 export function MonochromeDemo() {
@@ -35,13 +35,22 @@ export function MonochromeDemo() {
 
             {/* Navigation */}
             <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-text hover:text-accent mono-transition px-3 py-2 rounded-md text-sm font-medium">
+              <a
+                href="#"
+                className="text-text hover:text-accent mono-transition px-3 py-2 rounded-md text-sm font-medium"
+              >
                 {t('dashboard')}
               </a>
-              <a href="#" className="text-text-secondary hover:text-accent mono-transition px-3 py-2 rounded-md text-sm font-medium">
+              <a
+                href="#"
+                className="text-text-secondary hover:text-accent mono-transition px-3 py-2 rounded-md text-sm font-medium"
+              >
                 {t('hr.employees')}
               </a>
-              <a href="#" className="text-text-secondary hover:text-accent mono-transition px-3 py-2 rounded-md text-sm font-medium">
+              <a
+                href="#"
+                className="text-text-secondary hover:text-accent mono-transition px-3 py-2 rounded-md text-sm font-medium"
+              >
                 {t('hr.reports')}
               </a>
             </nav>
@@ -92,14 +101,23 @@ export function MonochromeDemo() {
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded-lg shadow-mono-lg z-10">
                     <div className="py-1">
-                      <a href="#" className="block px-4 py-2 text-sm text-text hover:bg-mono-100 mono-transition">
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-text hover:bg-mono-100 mono-transition"
+                      >
                         {t('profile')}
                       </a>
-                      <a href="#" className="block px-4 py-2 text-sm text-text hover:bg-mono-100 mono-transition">
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-text hover:bg-mono-100 mono-transition"
+                      >
                         {t('settings')}
                       </a>
                       <hr className="my-1 border-border" />
-                      <a href="#" className="block px-4 py-2 text-sm text-text hover:bg-mono-100 mono-transition">
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-text hover:bg-mono-100 mono-transition"
+                      >
                         {t('logout')}
                       </a>
                     </div>
@@ -118,10 +136,9 @@ export function MonochromeDemo() {
             {t('welcome')} - Monochrome UI Demo
           </h1>
           <p className="text-text-secondary">
-            {language === 'vi' 
-              ? 'Giao diện đơn sắc với hỗ trợ chế độ tối và đa ngôn ngữ' 
-              : 'Monochrome interface with dark mode and multi-language support'
-            }
+            {language === 'vi'
+              ? 'Giao diện đơn sắc với hỗ trợ chế độ tối và đa ngôn ngữ'
+              : 'Monochrome interface with dark mode and multi-language support'}
           </p>
         </div>
 
@@ -131,7 +148,9 @@ export function MonochromeDemo() {
           <div className="mono-card">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-text-secondary">{t('hr.totalEmployees')}</p>
+                <p className="text-sm font-medium text-text-secondary">
+                  {t('hr.totalEmployees')}
+                </p>
                 <p className="text-2xl font-bold text-primary">1,234</p>
               </div>
               <div className="p-3 bg-mono-100 rounded-lg">
@@ -148,23 +167,24 @@ export function MonochromeDemo() {
 
           {/* Action Card */}
           <div className="mono-card">
-            <h3 className="text-lg font-semibold text-primary mb-4">{t('hr.addEmployee')}</h3>
+            <h3 className="text-lg font-semibold text-primary mb-4">
+              {t('hr.addEmployee')}
+            </h3>
             <p className="text-text-secondary mb-4">
-              {language === 'vi' 
-                ? 'Thêm nhân viên mới vào hệ thống' 
-                : 'Add new employee to the system'
-              }
+              {language === 'vi'
+                ? 'Thêm nhân viên mới vào hệ thống'
+                : 'Add new employee to the system'}
             </p>
-            <button className="mono-button accent">
-              {t('add')}
-            </button>
+            <button className="mono-button accent">{t('add')}</button>
           </div>
 
           {/* Settings Card */}
           <div className="mono-card">
             <div className="flex items-center mb-4">
               <Cog6ToothIcon className="h-5 w-5 text-text-secondary mr-2" />
-              <h3 className="text-lg font-semibold text-primary">{t('settings')}</h3>
+              <h3 className="text-lg font-semibold text-primary">
+                {t('settings')}
+              </h3>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -208,7 +228,9 @@ export function MonochromeDemo() {
               <input
                 type="text"
                 className="mono-input"
-                placeholder={language === 'vi' ? 'Nhập tên của bạn' : 'Enter your name'}
+                placeholder={
+                  language === 'vi' ? 'Nhập tên của bạn' : 'Enter your name'
+                }
               />
             </div>
             <div>
@@ -218,7 +240,9 @@ export function MonochromeDemo() {
               <input
                 type="email"
                 className="mono-input"
-                placeholder={language === 'vi' ? 'Nhập email của bạn' : 'Enter your email'}
+                placeholder={
+                  language === 'vi' ? 'Nhập email của bạn' : 'Enter your email'
+                }
               />
             </div>
             <div>
@@ -228,7 +252,11 @@ export function MonochromeDemo() {
               <textarea
                 className="mono-input"
                 rows={4}
-                placeholder={language === 'vi' ? 'Nhập tin nhắn của bạn' : 'Enter your message'}
+                placeholder={
+                  language === 'vi'
+                    ? 'Nhập tin nhắn của bạn'
+                    : 'Enter your message'
+                }
               />
             </div>
             <div className="flex space-x-4">

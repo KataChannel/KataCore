@@ -12,15 +12,15 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const where: any = {};
-    
+
     if (status && status !== 'all') {
       where.status = status;
     }
-    
+
     if (employeeId && employeeId !== 'all') {
       where.employeeId = employeeId;
     }
-    
+
     if (type && type !== 'all') {
       where.type = type;
     }
@@ -33,26 +33,26 @@ export async function GET(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
     });
 
     const total = await prisma.leaveRequest.count({ where });
@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Error fetching leave requests:', error);
@@ -79,20 +79,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      employeeId,
-      startDate,
-      endDate,
-      days,
-      type,
-      reason,
-      notes
-    } = body;
+    const { employeeId, startDate, endDate, days, type, reason, notes } = body;
 
     // Kiểm tra nhân viên tồn tại
     const employee = await prisma.employee.findUnique({
       where: { id: employeeId },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!employee) {
@@ -107,19 +99,19 @@ export async function POST(request: NextRequest) {
       where: {
         employeeId,
         status: {
-          in: ['PENDING', 'APPROVED']
+          in: ['PENDING', 'APPROVED'],
         },
         OR: [
           {
             startDate: {
-              lte: new Date(endDate)
+              lte: new Date(endDate),
             },
             endDate: {
-              gte: new Date(startDate)
-            }
-          }
-        ]
-      }
+              gte: new Date(startDate),
+            },
+          },
+        ],
+      },
     });
 
     if (conflictingRequests.length > 0) {
@@ -139,7 +131,7 @@ export async function POST(request: NextRequest) {
         type,
         reason,
         notes,
-        status: 'PENDING'
+        status: 'PENDING',
       },
       include: {
         employee: {
@@ -147,21 +139,21 @@ export async function POST(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json(leaveRequest, { status: 201 });

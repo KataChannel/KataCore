@@ -1,22 +1,22 @@
 // "use client"
 // import React, { useState, createContext, useContext, ReactNode, FC } from 'react';
-// import { 
-//     Menu, 
-//     X, 
-//     Search, 
-//     ChevronDown, 
-//     User, 
-//     Settings, 
+// import {
+//     Menu,
+//     X,
+//     Search,
+//     ChevronDown,
+//     User,
+//     Settings,
 //     LogOut,
 //     ShoppingCart,
 //     Bell,
-//     Facebook, 
-//     Twitter, 
-//     Instagram, 
-//     Linkedin, 
-//     Mail, 
-//     Phone, 
-//     MapPin 
+//     Facebook,
+//     Twitter,
+//     Instagram,
+//     Linkedin,
+//     Mail,
+//     Phone,
+//     MapPin
 // } from 'lucide-react';
 
 // // Types
@@ -162,7 +162,7 @@
 //                                             <span>{item.name}</span>
 //                                             <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openDropdown === item.name ? 'rotate-180' : ''}`} />
 //                                         </button>
-                                        
+
 //                                         {openDropdown === item.name && (
 //                                             <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
 //                                                 {item.dropdownItems?.map((dropdownItem) => (
@@ -389,7 +389,7 @@
 //                             <h3 className="text-2xl font-bold text-white mb-2">{company.name}</h3>
 //                             <p className="text-gray-400 mb-4">{company.description}</p>
 //                         </div>
-                        
+
 //                         {/* Contact Info */}
 //                         <div className="space-y-2 text-sm text-gray-400">
 //                             <div className="flex items-center space-x-2">
@@ -411,15 +411,15 @@
 //                     {Object.entries(links).map(([key, items]) => (
 //                         <div key={key}>
 //                             <h4 className="font-semibold text-white mb-4 capitalize">
-//                                 {key === 'company' ? 'Công ty' : 
-//                                  key === 'services' ? 'Dịch vụ' : 
-//                                  key === 'resources' ? 'Tài nguyên' : 
+//                                 {key === 'company' ? 'Công ty' :
+//                                  key === 'services' ? 'Dịch vụ' :
+//                                  key === 'resources' ? 'Tài nguyên' :
 //                                  key === 'legal' ? 'Pháp lý' : key}
 //                             </h4>
 //                             <ul className="space-y-2">
 //                                 {items.map((link) => (
 //                                     <li key={link.name}>
-//                                         <a 
+//                                         <a
 //                                             href={link.href}
 //                                             className="text-gray-400 hover:text-white transition-colors duration-200"
 //                                         >
@@ -499,7 +499,7 @@
 // };
 
 // // Main Layout Component
-// const Layout: FC<LayoutProps> = ({ 
+// const Layout: FC<LayoutProps> = ({
 //     children,
 //     layoutConfig = {},
 //     headerProps = {},
@@ -518,7 +518,7 @@
 //             <div className={`min-h-screen flex flex-col ${backgroundColor}`}>
 //                 {/* Header */}
 //                 {showHeader && <Header {...headerProps} />}
-                
+
 //                 {/* Main Content */}
 //                 <main className={`flex-1 ${mainProps.className || ''}`} {...mainProps}>
 //                     {mainProps.useContainer !== false ? (
@@ -529,7 +529,7 @@
 //                         children
 //                     )}
 //                 </main>
-                
+
 //                 {/* Footer */}
 //                 {showFooter && <Footer {...footerProps} />}
 //             </div>
@@ -566,8 +566,8 @@
 //         showNotifications: true,
 //         navigationItems: [
 //             { name: 'Trang chủ', href: '/' },
-//             { 
-//                 name: 'Sản phẩm', 
+//             {
+//                 name: 'Sản phẩm',
 //                 href: '/products',
 //                 hasDropdown: true,
 //                 dropdownItems: [
@@ -635,7 +635,7 @@
 //     };
 
 //     return (
-//         <Layout 
+//         <Layout
 //             layoutConfig={layoutConfig}
 //             headerProps={headerProps}
 //             footerProps={footerProps}
@@ -647,7 +647,7 @@
 //                         Chào mừng đến với Vietnam Tech
 //                     </h1>
 //                     <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-//                         Chúng tôi tạo ra những giải pháp công nghệ tiên tiến để giúp doanh nghiệp 
+//                         Chúng tôi tạo ra những giải pháp công nghệ tiên tiến để giúp doanh nghiệp
 //                         của bạn phát triển trong thời đại số.
 //                     </p>
 //                 </div>

@@ -12,11 +12,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
 
     const where: any = {};
-    
+
     if (employeeId && employeeId !== 'all') {
       where.employeeId = employeeId;
     }
-    
+
     if (period) {
       where.period = period;
     }
@@ -37,29 +37,26 @@ export async function GET(request: NextRequest) {
               user: {
                 select: {
                   displayName: true,
-                  avatar: true
-                }
+                  avatar: true,
+                },
               },
               position: {
                 include: {
                   department: {
                     select: {
-                      name: true
-                    }
-                  }
-                }
-              }
-            }
-          }
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-        orderBy: [
-          { period: 'desc' },
-          { createdAt: 'desc' }
-        ],
+        orderBy: [{ period: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
-        take: limit
+        take: limit,
       }),
-      prisma.payroll.count({ where })
+      prisma.payroll.count({ where }),
     ]);
 
     // Transform data for frontend
@@ -81,13 +78,13 @@ export async function GET(request: NextRequest) {
         position: {
           title: payroll.employee.position.title,
           department: {
-            name: payroll.employee.position.department.name
-          }
+            name: payroll.employee.position.department.name,
+          },
         },
-        user: payroll.employee.user
+        user: payroll.employee.user,
       },
       createdAt: payroll.createdAt.toISOString(),
-      updatedAt: payroll.updatedAt.toISOString()
+      updatedAt: payroll.updatedAt.toISOString(),
     }));
 
     // Calculate summary statistics
@@ -98,15 +95,15 @@ export async function GET(request: NextRequest) {
         overtime: true,
         bonus: true,
         deductions: true,
-        netSalary: true
+        netSalary: true,
       },
       _count: {
-        id: true
-      }
+        id: true,
+      },
     });
 
     const paidCount = await prisma.payroll.count({
-      where: { ...where, paidAt: { not: null } }
+      where: { ...where, paidAt: { not: null } },
     });
 
     return NextResponse.json({
@@ -116,7 +113,7 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limit),
       },
       summary: {
         totalRecords: summary._count.id,
@@ -126,10 +123,9 @@ export async function GET(request: NextRequest) {
         totalDeductions: summary._sum.deductions || 0,
         totalNetSalary: summary._sum.netSalary || 0,
         paidRecords: paidCount,
-        unpaidRecords: (summary._count.id || 0) - paidCount
-      }
+        unpaidRecords: (summary._count.id || 0) - paidCount,
+      },
     });
-
   } catch (error) {
     console.error('Error fetching payrolls:', error);
     return NextResponse.json(
@@ -143,7 +139,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { employeeId, period, basicSalary, overtime, bonus, deductions, notes } = body;
+    const {
+      employeeId,
+      period,
+      basicSalary,
+      overtime,
+      bonus,
+      deductions,
+      notes,
+    } = body;
 
     if (!employeeId || !period || !basicSalary) {
       return NextResponse.json(
@@ -154,7 +158,7 @@ export async function POST(request: NextRequest) {
 
     // Kiểm tra employee có tồn tại không
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+      where: { id: employeeId },
     });
 
     if (!employee) {
@@ -169,9 +173,9 @@ export async function POST(request: NextRequest) {
       where: {
         employeeId_period: {
           employeeId,
-          period
-        }
-      }
+          period,
+        },
+      },
     });
 
     if (existingPayroll) {
@@ -182,7 +186,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Tính toán lương thực nhận
-    const netSalary = basicSalary + (overtime || 0) + (bonus || 0) - (deductions || 0);
+    const netSalary =
+      basicSalary + (overtime || 0) + (bonus || 0) - (deductions || 0);
 
     const payroll = await prisma.payroll.create({
       data: {
@@ -194,7 +199,7 @@ export async function POST(request: NextRequest) {
         bonus: bonus || 0,
         deductions: deductions || 0,
         netSalary,
-        notes
+        notes,
       },
       include: {
         employee: {
@@ -202,29 +207,28 @@ export async function POST(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
       data: payroll,
-      message: 'Tạo bảng lương thành công'
+      message: 'Tạo bảng lương thành công',
     });
-
   } catch (error) {
     console.error('Error creating payroll:', error);
     return NextResponse.json(
@@ -238,7 +242,8 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, basicSalary, overtime, bonus, deductions, notes, paidAt } = body;
+    const { id, basicSalary, overtime, bonus, deductions, notes, paidAt } =
+      body;
 
     if (!id) {
       return NextResponse.json(
@@ -248,7 +253,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const existingPayroll = await prisma.payroll.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingPayroll) {
@@ -259,10 +264,11 @@ export async function PUT(request: NextRequest) {
     }
 
     // Tính toán lại lương thực nhận
-    const netSalary = (basicSalary || existingPayroll.basicSalary) + 
-                     (overtime || existingPayroll.overtime) + 
-                     (bonus || existingPayroll.bonus) - 
-                     (deductions || existingPayroll.deductions);
+    const netSalary =
+      (basicSalary || existingPayroll.basicSalary) +
+      (overtime || existingPayroll.overtime) +
+      (bonus || existingPayroll.bonus) -
+      (deductions || existingPayroll.deductions);
 
     const payroll = await prisma.payroll.update({
       where: { id },
@@ -273,7 +279,12 @@ export async function PUT(request: NextRequest) {
         deductions: deductions || existingPayroll.deductions,
         netSalary,
         notes: notes !== undefined ? notes : existingPayroll.notes,
-        paidAt: paidAt !== undefined ? (paidAt ? new Date(paidAt) : null) : existingPayroll.paidAt
+        paidAt:
+          paidAt !== undefined
+            ? paidAt
+              ? new Date(paidAt)
+              : null
+            : existingPayroll.paidAt,
       },
       include: {
         employee: {
@@ -281,29 +292,28 @@ export async function PUT(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
       data: payroll,
-      message: 'Cập nhật bảng lương thành công'
+      message: 'Cập nhật bảng lương thành công',
     });
-
   } catch (error) {
     console.error('Error updating payroll:', error);
     return NextResponse.json(
@@ -327,7 +337,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const existingPayroll = await prisma.payroll.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingPayroll) {
@@ -346,14 +356,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     await prisma.payroll.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Xóa bảng lương thành công'
+      message: 'Xóa bảng lương thành công',
     });
-
   } catch (error) {
     console.error('Error deleting payroll:', error);
     return NextResponse.json(

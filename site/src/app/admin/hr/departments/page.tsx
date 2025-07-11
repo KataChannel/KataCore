@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
   EyeIcon,
@@ -50,11 +50,11 @@ const mockDepartments: Department[] = [
     manager: {
       id: '1',
       name: 'John Smith',
-      email: 'john.smith@company.com'
+      email: 'john.smith@company.com',
     },
     employeeCount: 25,
     createdAt: '2023-01-15T10:00:00Z',
-    updatedAt: '2023-12-01T14:30:00Z'
+    updatedAt: '2023-12-01T14:30:00Z',
   },
   {
     id: '2',
@@ -69,11 +69,11 @@ const mockDepartments: Department[] = [
     manager: {
       id: '2',
       name: 'Sarah Johnson',
-      email: 'sarah.johnson@company.com'
+      email: 'sarah.johnson@company.com',
     },
     employeeCount: 15,
     createdAt: '2023-01-20T09:30:00Z',
-    updatedAt: '2023-11-15T16:45:00Z'
+    updatedAt: '2023-11-15T16:45:00Z',
   },
   {
     id: '3',
@@ -88,11 +88,11 @@ const mockDepartments: Department[] = [
     manager: {
       id: '3',
       name: 'Michael Brown',
-      email: 'michael.brown@company.com'
+      email: 'michael.brown@company.com',
     },
     employeeCount: 20,
     createdAt: '2023-02-01T11:15:00Z',
-    updatedAt: '2023-12-10T13:20:00Z'
+    updatedAt: '2023-12-10T13:20:00Z',
   },
   {
     id: '4',
@@ -107,11 +107,11 @@ const mockDepartments: Department[] = [
     manager: {
       id: '4',
       name: 'Emily Davis',
-      email: 'emily.davis@company.com'
+      email: 'emily.davis@company.com',
     },
     employeeCount: 8,
     createdAt: '2023-01-10T08:00:00Z',
-    updatedAt: '2023-11-30T12:00:00Z'
+    updatedAt: '2023-11-30T12:00:00Z',
   },
   {
     id: '5',
@@ -126,7 +126,7 @@ const mockDepartments: Department[] = [
     manager: null,
     employeeCount: 12,
     createdAt: '2023-01-25T15:30:00Z',
-    updatedAt: '2023-12-05T10:15:00Z'
+    updatedAt: '2023-12-05T10:15:00Z',
   },
   {
     id: '6',
@@ -141,7 +141,7 @@ const mockDepartments: Department[] = [
     manager: null,
     employeeCount: 0,
     createdAt: '2023-06-01T14:00:00Z',
-    updatedAt: '2023-08-15T09:45:00Z'
+    updatedAt: '2023-08-15T09:45:00Z',
   },
 ];
 
@@ -150,9 +150,12 @@ export default function DepartmentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [deleteModal, setDeleteModal] = useState<{ show: boolean; department: Department | null }>({
+  const [deleteModal, setDeleteModal] = useState<{
+    show: boolean;
+    department: Department | null;
+  }>({
     show: false,
-    department: null
+    department: null,
   });
 
   useEffect(() => {
@@ -164,14 +167,16 @@ export default function DepartmentsPage() {
   }, []);
 
   const filteredDepartments = departments.filter(dept => {
-    const matchesSearch = dept.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         dept.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         dept.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'active' && dept.isActive) ||
-                         (statusFilter === 'inactive' && !dept.isActive);
-    
+    const matchesSearch =
+      dept.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      dept.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      dept.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && dept.isActive) ||
+      (statusFilter === 'inactive' && !dept.isActive);
+
     return matchesSearch && matchesStatus;
   });
 
@@ -181,7 +186,9 @@ export default function DepartmentsPage() {
 
   const confirmDelete = () => {
     if (deleteModal.department) {
-      setDepartments(prev => prev.filter(dept => dept.id !== deleteModal.department!.id));
+      setDepartments(prev =>
+        prev.filter(dept => dept.id !== deleteModal.department!.id)
+      );
       setDeleteModal({ show: false, department: null });
     }
   };
@@ -227,7 +234,9 @@ export default function DepartmentsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Departments</h1>
-            <p className="text-gray-600">Manage organizational departments and structure</p>
+            <p className="text-gray-600">
+              Manage organizational departments and structure
+            </p>
           </div>
           <Link
             href="/hr/departments/new"
@@ -247,8 +256,12 @@ export default function DepartmentsPage() {
               <BuildingOfficeIcon className="h-6 w-6 text-indigo-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Departments</p>
-              <p className="text-2xl font-bold text-gray-900">{departments.length}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Departments
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {departments.length}
+              </p>
             </div>
           </div>
         </div>
@@ -258,8 +271,12 @@ export default function DepartmentsPage() {
               <UsersIcon className="h-6 w-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Employees</p>
-              <p className="text-2xl font-bold text-gray-900">{getTotalEmployees()}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Employees
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {getTotalEmployees()}
+              </p>
             </div>
           </div>
         </div>
@@ -270,7 +287,9 @@ export default function DepartmentsPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Budget</p>
-              <p className="text-2xl font-bold text-gray-900">${getTotalBudget().toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                ${getTotalBudget().toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -290,7 +309,7 @@ export default function DepartmentsPage() {
                   placeholder="Search departments..."
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -298,7 +317,7 @@ export default function DepartmentsPage() {
               <select
                 className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={e => setStatusFilter(e.target.value)}
               >
                 <option value="all">All Departments</option>
                 <option value="active">Active</option>
@@ -311,8 +330,11 @@ export default function DepartmentsPage() {
 
       {/* Departments Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredDepartments.map((department) => (
-          <div key={department.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+        {filteredDepartments.map(department => (
+          <div
+            key={department.id}
+            className="bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -322,23 +344,29 @@ export default function DepartmentsPage() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{department.name}</h3>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {department.name}
+                    </h3>
                     <p className="text-sm text-gray-500">{department.code}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    department.isActive 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      department.isActive
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {department.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
               </div>
-              
-              <p className="text-sm text-gray-600 mb-4">{department.description}</p>
-              
+
+              <p className="text-sm text-gray-600 mb-4">
+                {department.description}
+              </p>
+
               <div className="space-y-2 mb-4">
                 <div className="flex items-center text-sm text-gray-500">
                   <UsersIcon className="h-4 w-4 mr-2" />
@@ -359,7 +387,7 @@ export default function DepartmentsPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <div className="flex items-center text-sm text-gray-500">
                   <PhoneIcon className="h-4 w-4 mr-1" />
@@ -371,7 +399,7 @@ export default function DepartmentsPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -387,7 +415,7 @@ export default function DepartmentsPage() {
                   >
                     <PencilIcon className="h-4 w-4" />
                   </Link>
-                  <button 
+                  <button
                     onClick={() => handleDelete(department)}
                     className="text-red-600 hover:text-red-900"
                   >
@@ -411,10 +439,13 @@ export default function DepartmentsPage() {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                 <TrashIcon className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mt-4">Delete Department</h3>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">
+                Delete Department
+              </h3>
               <div className="mt-2 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Are you sure you want to delete "{deleteModal.department?.name}"? This action cannot be undone.
+                  Are you sure you want to delete "
+                  {deleteModal.department?.name}"? This action cannot be undone.
                 </p>
               </div>
               <div className="items-center px-4 py-3">
@@ -425,7 +456,9 @@ export default function DepartmentsPage() {
                   Delete
                 </button>
                 <button
-                  onClick={() => setDeleteModal({ show: false, department: null })}
+                  onClick={() =>
+                    setDeleteModal({ show: false, department: null })
+                  }
                   className="px-4 py-2 bg-gray-300 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   Cancel

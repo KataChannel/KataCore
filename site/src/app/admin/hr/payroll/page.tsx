@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  CurrencyDollarIcon, 
+import {
+  CurrencyDollarIcon,
   UsersIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -65,8 +65,8 @@ const mockPayrollRecords: PayrollRecord[] = [
       employeeId: 'EMP001',
       position: {
         title: 'Senior Software Engineer',
-        department: { name: 'Engineering' }
-      }
+        department: { name: 'Engineering' },
+      },
     },
     period: '2024-01',
     basicSalary: 85000,
@@ -87,8 +87,8 @@ const mockPayrollRecords: PayrollRecord[] = [
       employeeId: 'EMP002',
       position: {
         title: 'Marketing Manager',
-        department: { name: 'Marketing' }
-      }
+        department: { name: 'Marketing' },
+      },
     },
     period: '2024-01',
     basicSalary: 75000,
@@ -109,8 +109,8 @@ const mockPayrollRecords: PayrollRecord[] = [
       employeeId: 'EMP003',
       position: {
         title: 'Sales Representative',
-        department: { name: 'Sales' }
-      }
+        department: { name: 'Sales' },
+      },
     },
     period: '2024-01',
     basicSalary: 55000,
@@ -130,8 +130,8 @@ const mockPayrollRecords: PayrollRecord[] = [
       employeeId: 'EMP004',
       position: {
         title: 'HR Specialist',
-        department: { name: 'HR' }
-      }
+        department: { name: 'HR' },
+      },
     },
     period: '2024-01',
     basicSalary: 60000,
@@ -151,8 +151,8 @@ const mockPayrollRecords: PayrollRecord[] = [
       employeeId: 'EMP005',
       position: {
         title: 'Financial Analyst',
-        department: { name: 'Finance' }
-      }
+        department: { name: 'Finance' },
+      },
     },
     period: '2024-01',
     basicSalary: 70000,
@@ -179,7 +179,9 @@ export default function PayrollPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedPayroll, setSelectedPayroll] = useState<PayrollRecord | null>(null);
+  const [selectedPayroll, setSelectedPayroll] = useState<PayrollRecord | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('2024-01');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -193,7 +195,7 @@ export default function PayrollPage() {
     overtime: '',
     bonus: '',
     deductions: '',
-    notes: ''
+    notes: '',
   });
 
   useEffect(() => {
@@ -206,12 +208,20 @@ export default function PayrollPage() {
 
   const filteredRecords = payrollRecords.filter(record => {
     const matchesPeriod = record.period === selectedPeriod;
-    const matchesSearch = record.employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         record.employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
-    const matchesDepartment = departmentFilter === 'all' || record.employee.position.department.name === departmentFilter;
-    
+    const matchesSearch =
+      record.employee.fullName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      record.employee.employeeId
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' || record.status === statusFilter;
+    const matchesDepartment =
+      departmentFilter === 'all' ||
+      record.employee.position.department.name === departmentFilter;
+
     return matchesPeriod && matchesSearch && matchesStatus && matchesDepartment;
   });
 
@@ -230,18 +240,20 @@ export default function PayrollPage() {
   };
 
   const summary = getSummary();
-  const departments = [...new Set(payrollRecords.map(r => r.employee.position.department.name))];
+  const departments = [
+    ...new Set(payrollRecords.map(r => r.employee.position.department.name)),
+  ];
 
   const handleBulkProcess = () => {
     const draftRecords = filteredRecords.filter(r => r.status === 'DRAFT');
-    
+
     const updatedRecords = payrollRecords.map(record => {
       if (draftRecords.some(draft => draft.id === record.id)) {
         return { ...record, status: 'PROCESSED' as const };
       }
       return record;
     });
-    
+
     setPayrollRecords(updatedRecords);
     setShowBulkProcessModal(false);
   };
@@ -249,15 +261,15 @@ export default function PayrollPage() {
   const handleMarkAsPaid = (recordId: string) => {
     const updatedRecords = payrollRecords.map(record => {
       if (record.id === recordId) {
-        return { 
-          ...record, 
-          status: 'PAID' as const, 
-          paidAt: new Date().toISOString() 
+        return {
+          ...record,
+          status: 'PAID' as const,
+          paidAt: new Date().toISOString(),
         };
       }
       return record;
     });
-    
+
     setPayrollRecords(updatedRecords);
   };
 
@@ -270,17 +282,18 @@ export default function PayrollPage() {
       overtime: payroll.overtime.toString(),
       bonus: payroll.bonus.toString(),
       deductions: payroll.deductions.toString(),
-      notes: ''
+      notes: '',
     });
     setShowModal(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const netSalary = parseFloat(formData.basicSalary) + 
-                     parseFloat(formData.overtime || '0') + 
-                     parseFloat(formData.bonus || '0') - 
-                     parseFloat(formData.deductions || '0');
+    const netSalary =
+      parseFloat(formData.basicSalary) +
+      parseFloat(formData.overtime || '0') +
+      parseFloat(formData.bonus || '0') -
+      parseFloat(formData.deductions || '0');
 
     if (selectedPayroll) {
       const updatedRecords = payrollRecords.map(record => {
@@ -292,7 +305,7 @@ export default function PayrollPage() {
             bonus: parseFloat(formData.bonus || '0'),
             deductions: parseFloat(formData.deductions || '0'),
             netSalary: netSalary,
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           };
         }
         return record;
@@ -309,8 +322,8 @@ export default function PayrollPage() {
             employeeId: employee.employeeId,
             position: {
               title: 'Employee',
-              department: { name: 'General' }
-            }
+              department: { name: 'General' },
+            },
           },
           period: formData.period,
           basicSalary: parseFloat(formData.basicSalary),
@@ -320,12 +333,12 @@ export default function PayrollPage() {
           netSalary: netSalary,
           status: 'DRAFT',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         };
         setPayrollRecords([...payrollRecords, newRecord]);
       }
     }
-    
+
     setShowModal(false);
     resetForm();
   };
@@ -338,7 +351,7 @@ export default function PayrollPage() {
       overtime: '',
       bonus: '',
       deductions: '',
-      notes: ''
+      notes: '',
     });
     setSelectedPayroll(null);
   };
@@ -346,7 +359,7 @@ export default function PayrollPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'VND',
     }).format(amount);
   };
 
@@ -365,8 +378,12 @@ export default function PayrollPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Payroll Management</h1>
-              <p className="text-gray-600 mt-1">Manage employee payroll and salary payments</p>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Payroll Management
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Manage employee payroll and salary payments
+              </p>
             </div>
             <div className="flex space-x-4">
               <button
@@ -392,8 +409,12 @@ export default function PayrollPage() {
           <div className="bg-blue-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Total Records</p>
-                <p className="text-2xl font-bold text-blue-900">{summary.totalRecords}</p>
+                <p className="text-sm font-medium text-blue-600">
+                  Total Records
+                </p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {summary.totalRecords}
+                </p>
               </div>
               <UsersIcon className="h-8 w-8 text-blue-600" />
             </div>
@@ -402,8 +423,12 @@ export default function PayrollPage() {
           <div className="bg-green-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Total Net Salary</p>
-                <p className="text-2xl font-bold text-green-900">{formatCurrency(summary.totalNetSalary)}</p>
+                <p className="text-sm font-medium text-green-600">
+                  Total Net Salary
+                </p>
+                <p className="text-2xl font-bold text-green-900">
+                  {formatCurrency(summary.totalNetSalary)}
+                </p>
               </div>
               <CurrencyDollarIcon className="h-8 w-8 text-green-600" />
             </div>
@@ -412,8 +437,12 @@ export default function PayrollPage() {
           <div className="bg-yellow-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-yellow-600">Paid Records</p>
-                <p className="text-2xl font-bold text-yellow-900">{summary.paidRecords}</p>
+                <p className="text-sm font-medium text-yellow-600">
+                  Paid Records
+                </p>
+                <p className="text-2xl font-bold text-yellow-900">
+                  {summary.paidRecords}
+                </p>
               </div>
               <CheckCircleIcon className="h-8 w-8 text-yellow-600" />
             </div>
@@ -422,8 +451,12 @@ export default function PayrollPage() {
           <div className="bg-red-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600">Unpaid Records</p>
-                <p className="text-2xl font-bold text-red-900">{summary.unpaidRecords}</p>
+                <p className="text-sm font-medium text-red-600">
+                  Unpaid Records
+                </p>
+                <p className="text-2xl font-bold text-red-900">
+                  {summary.unpaidRecords}
+                </p>
               </div>
               <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
             </div>
@@ -435,24 +468,28 @@ export default function PayrollPage() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by name or ID..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Period</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Period
+            </label>
             <select
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
+              onChange={e => setSelectedPeriod(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="2024-01">January 2024</option>
@@ -471,10 +508,12 @@ export default function PayrollPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Status
+            </label>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
@@ -485,15 +524,19 @@ export default function PayrollPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Department
+            </label>
             <select
               value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
+              onChange={e => setDepartmentFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Departments</option>
               {departments.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
               ))}
             </select>
           </div>
@@ -536,7 +579,7 @@ export default function PayrollPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredRecords.map((record) => (
+              {filteredRecords.map(record => (
                 <tr key={record.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -574,13 +617,15 @@ export default function PayrollPage() {
                     {formatCurrency(record.netSalary)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      record.status === 'PAID' 
-                        ? 'bg-green-100 text-green-800' 
-                        : record.status === 'PROCESSED'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        record.status === 'PAID'
+                          ? 'bg-green-100 text-green-800'
+                          : record.status === 'PROCESSED'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {record.status}
                     </span>
                   </td>
@@ -642,7 +687,9 @@ export default function PayrollPage() {
                 </label>
                 <select
                   value={formData.employeeId}
-                  onChange={(e) => setFormData({...formData, employeeId: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, employeeId: e.target.value })
+                  }
                   required
                   disabled={!!selectedPayroll}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -663,7 +710,9 @@ export default function PayrollPage() {
                 <input
                   type="month"
                   value={formData.period}
-                  onChange={(e) => setFormData({...formData, period: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, period: e.target.value })
+                  }
                   required
                   disabled={!!selectedPayroll}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -677,7 +726,9 @@ export default function PayrollPage() {
                 <input
                   type="number"
                   value={formData.basicSalary}
-                  onChange={(e) => setFormData({...formData, basicSalary: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, basicSalary: e.target.value })
+                  }
                   required
                   min="0"
                   step="1000"
@@ -692,7 +743,9 @@ export default function PayrollPage() {
                 <input
                   type="number"
                   value={formData.overtime}
-                  onChange={(e) => setFormData({...formData, overtime: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, overtime: e.target.value })
+                  }
                   min="0"
                   step="1000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -706,7 +759,9 @@ export default function PayrollPage() {
                 <input
                   type="number"
                   value={formData.bonus}
-                  onChange={(e) => setFormData({...formData, bonus: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, bonus: e.target.value })
+                  }
                   min="0"
                   step="1000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -720,7 +775,9 @@ export default function PayrollPage() {
                 <input
                   type="number"
                   value={formData.deductions}
-                  onChange={(e) => setFormData({...formData, deductions: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, deductions: e.target.value })
+                  }
                   min="0"
                   step="1000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -733,7 +790,9 @@ export default function PayrollPage() {
                 </label>
                 <textarea
                   value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, notes: e.target.value })
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -778,10 +837,12 @@ export default function PayrollPage() {
 
             <div className="mb-4">
               <p className="text-sm text-gray-600">
-                This will process all draft payroll records for the selected period.
+                This will process all draft payroll records for the selected
+                period.
               </p>
               <p className="text-sm text-gray-600 mt-2">
-                <strong>Records to process:</strong> {filteredRecords.filter(r => r.status === 'DRAFT').length}
+                <strong>Records to process:</strong>{' '}
+                {filteredRecords.filter(r => r.status === 'DRAFT').length}
               </p>
             </div>
 

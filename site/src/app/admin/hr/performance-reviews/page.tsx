@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  StarIcon, 
-  TrophyIcon, 
+import {
+  StarIcon,
+  TrophyIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -75,7 +75,8 @@ const PerformanceReviewManagement = () => {
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<PerformanceReview | null>(null);
+  const [selectedReview, setSelectedReview] =
+    useState<PerformanceReview | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [periodFilter, setPeriodFilter] = useState('');
   const [reviewerFilter, setReviewerFilter] = useState('all');
@@ -83,7 +84,7 @@ const PerformanceReviewManagement = () => {
   const [summary, setSummary] = useState<Summary>({
     totalReviews: 0,
     averageRating: 0,
-    ratingDistribution: []
+    ratingDistribution: [],
   });
 
   const [formData, setFormData] = useState({
@@ -93,7 +94,7 @@ const PerformanceReviewManagement = () => {
     goals: '',
     achievements: '',
     rating: '',
-    feedback: ''
+    feedback: '',
   });
 
   useEffect(() => {
@@ -153,7 +154,7 @@ const PerformanceReviewManagement = () => {
     try {
       const method = selectedReview ? 'PUT' : 'POST';
       const url = '/api/hr/performance-reviews';
-      
+
       const payload: any = {
         ...formData,
         rating: formData.rating ? parseFloat(formData.rating) : undefined,
@@ -195,7 +196,7 @@ const PerformanceReviewManagement = () => {
       goals: review.goals || '',
       achievements: review.achievements || '',
       rating: review.rating?.toString() || '',
-      feedback: review.feedback || ''
+      feedback: review.feedback || '',
     });
     setShowModal(true);
   };
@@ -203,9 +204,12 @@ const PerformanceReviewManagement = () => {
   const handleDelete = async (review: PerformanceReview) => {
     if (confirm('Bạn có chắc chắn muốn xóa đánh giá hiệu suất này?')) {
       try {
-        const response = await fetch(`/api/hr/performance-reviews?id=${review.id}`, {
-          method: 'DELETE',
-        });
+        const response = await fetch(
+          `/api/hr/performance-reviews?id=${review.id}`,
+          {
+            method: 'DELETE',
+          }
+        );
 
         if (response.ok) {
           await fetchReviews();
@@ -229,15 +233,20 @@ const PerformanceReviewManagement = () => {
       goals: '',
       achievements: '',
       rating: '',
-      feedback: ''
+      feedback: '',
     });
     setSelectedReview(null);
   };
 
   const filteredReviews = reviews.filter(review => {
-    const matchesSearch = review.employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         review.employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch =
+      review.employee.fullName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      review.employee.employeeId
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
     return matchesSearch;
   });
 
@@ -265,11 +274,15 @@ const PerformanceReviewManagement = () => {
         {[...Array(fullStars)].map((_, i) => (
           <StarIcon key={i} className="h-4 w-4 text-yellow-400 fill-current" />
         ))}
-        {hasHalfStar && <StarIcon className="h-4 w-4 text-yellow-400 fill-current opacity-50" />}
+        {hasHalfStar && (
+          <StarIcon className="h-4 w-4 text-yellow-400 fill-current opacity-50" />
+        )}
         {[...Array(emptyStars)].map((_, i) => (
           <StarIcon key={i} className="h-4 w-4 text-gray-300" />
         ))}
-        <span className="ml-1 text-sm text-gray-600">({rating.toFixed(1)})</span>
+        <span className="ml-1 text-sm text-gray-600">
+          ({rating.toFixed(1)})
+        </span>
       </div>
     );
   };
@@ -287,8 +300,12 @@ const PerformanceReviewManagement = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Quản lý đánh giá hiệu suất</h1>
-          <p className="text-gray-600">Theo dõi và đánh giá hiệu suất làm việc của nhân viên</p>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Quản lý đánh giá hiệu suất
+          </h1>
+          <p className="text-gray-600">
+            Theo dõi và đánh giá hiệu suất làm việc của nhân viên
+          </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -312,8 +329,12 @@ const PerformanceReviewManagement = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Tổng số đánh giá</p>
-              <p className="text-2xl font-semibold text-gray-900">{summary.totalReviews}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Tổng số đánh giá
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {summary.totalReviews}
+              </p>
             </div>
             <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <DocumentTextIcon className="h-6 w-6 text-blue-600" />
@@ -324,8 +345,12 @@ const PerformanceReviewManagement = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Điểm trung bình</p>
-              <p className="text-2xl font-semibold text-gray-900">{summary.averageRating.toFixed(1)}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Điểm trung bình
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {summary.averageRating.toFixed(1)}
+              </p>
             </div>
             <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
               <StarIcon className="h-6 w-6 text-yellow-600" />
@@ -338,7 +363,9 @@ const PerformanceReviewManagement = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Hiệu suất cao</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {summary.ratingDistribution.filter(item => item.rating >= 4).reduce((acc, item) => acc + item.count, 0)}
+                {summary.ratingDistribution
+                  .filter(item => item.rating >= 4)
+                  .reduce((acc, item) => acc + item.count, 0)}
               </p>
             </div>
             <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -358,7 +385,7 @@ const PerformanceReviewManagement = () => {
                 type="text"
                 placeholder="Tìm kiếm theo tên hoặc mã nhân viên..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -366,7 +393,7 @@ const PerformanceReviewManagement = () => {
           <div className="flex gap-4">
             <select
               value={periodFilter}
-              onChange={(e) => setPeriodFilter(e.target.value)}
+              onChange={e => setPeriodFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Tất cả kỳ đánh giá</option>
@@ -378,7 +405,7 @@ const PerformanceReviewManagement = () => {
             </select>
             <select
               value={reviewerFilter}
-              onChange={(e) => setReviewerFilter(e.target.value)}
+              onChange={e => setReviewerFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tất cả người đánh giá</option>
@@ -422,7 +449,7 @@ const PerformanceReviewManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredReviews.map((review) => (
+              {filteredReviews.map(review => (
                 <tr key={review.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -436,7 +463,8 @@ const PerformanceReviewManagement = () => {
                           {review.employee.fullName}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {review.employee.employeeId} • {review.employee.position.title}
+                          {review.employee.employeeId} •{' '}
+                          {review.employee.position.title}
                         </div>
                       </div>
                     </div>
@@ -445,18 +473,24 @@ const PerformanceReviewManagement = () => {
                     <div className="text-sm text-gray-900">{review.period}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{review.reviewer.displayName}</div>
+                    <div className="text-sm text-gray-900">
+                      {review.reviewer.displayName}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {review.rating ? (
                       <div className="flex flex-col">
                         {renderStars(review.rating)}
-                        <span className={`text-xs font-medium ${getRatingColor(review.rating)}`}>
+                        <span
+                          className={`text-xs font-medium ${getRatingColor(review.rating)}`}
+                        >
                           {getRatingText(review.rating)}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-sm text-gray-500">Chưa có điểm</span>
+                      <span className="text-sm text-gray-500">
+                        Chưa có điểm
+                      </span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -519,7 +553,9 @@ const PerformanceReviewManagement = () => {
                   </label>
                   <select
                     value={formData.employeeId}
-                    onChange={(e) => setFormData({...formData, employeeId: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, employeeId: e.target.value })
+                    }
                     required
                     disabled={!!selectedReview}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -539,7 +575,9 @@ const PerformanceReviewManagement = () => {
                   </label>
                   <select
                     value={formData.reviewerId}
-                    onChange={(e) => setFormData({...formData, reviewerId: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, reviewerId: e.target.value })
+                    }
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -560,7 +598,9 @@ const PerformanceReviewManagement = () => {
                   </label>
                   <select
                     value={formData.period}
-                    onChange={(e) => setFormData({...formData, period: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, period: e.target.value })
+                    }
                     required
                     disabled={!!selectedReview}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -581,7 +621,9 @@ const PerformanceReviewManagement = () => {
                   <input
                     type="number"
                     value={formData.rating}
-                    onChange={(e) => setFormData({...formData, rating: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, rating: e.target.value })
+                    }
                     min="1"
                     max="5"
                     step="0.1"
@@ -596,7 +638,9 @@ const PerformanceReviewManagement = () => {
                 </label>
                 <textarea
                   value={formData.goals}
-                  onChange={(e) => setFormData({...formData, goals: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, goals: e.target.value })
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Mô tả mục tiêu của nhân viên..."
@@ -609,7 +653,9 @@ const PerformanceReviewManagement = () => {
                 </label>
                 <textarea
                   value={formData.achievements}
-                  onChange={(e) => setFormData({...formData, achievements: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, achievements: e.target.value })
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Mô tả thành tích đạt được..."
@@ -622,7 +668,9 @@ const PerformanceReviewManagement = () => {
                 </label>
                 <textarea
                   value={formData.feedback}
-                  onChange={(e) => setFormData({...formData, feedback: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, feedback: e.target.value })
+                  }
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Nhận xét và phản hồi về hiệu suất..."

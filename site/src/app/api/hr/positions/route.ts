@@ -11,11 +11,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const where: any = {};
-    
+
     if (departmentId && departmentId !== 'all') {
       where.departmentId = departmentId;
     }
-    
+
     if (status && status !== 'all') {
       where.isActive = status === 'active';
     }
@@ -26,22 +26,22 @@ export async function GET(request: NextRequest) {
         department: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         _count: {
           select: {
-            employees: true
-          }
-        }
+            employees: true,
+          },
+        },
       },
       orderBy: [
         { department: { name: 'asc' } },
         { level: 'desc' },
-        { title: 'asc' }
+        { title: 'asc' },
       ],
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
     });
 
     const total = await prisma.position.count({ where });
@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Error fetching positions:', error);
@@ -76,15 +76,15 @@ export async function POST(request: NextRequest) {
       maxSalary,
       requirements,
       isActive = true,
-      departmentId
+      departmentId,
     } = body;
 
     // Kiểm tra chức vụ đã tồn tại trong phòng ban
     const existingPosition = await prisma.position.findFirst({
       where: {
         title,
-        departmentId
-      }
+        departmentId,
+      },
     });
 
     if (existingPosition) {
@@ -103,21 +103,21 @@ export async function POST(request: NextRequest) {
         maxSalary,
         requirements,
         isActive,
-        departmentId
+        departmentId,
       },
       include: {
         department: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         _count: {
           select: {
-            employees: true
-          }
-        }
-      }
+            employees: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(position, { status: 201 });

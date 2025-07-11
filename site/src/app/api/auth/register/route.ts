@@ -4,16 +4,16 @@ import authService from '../../../../../lib/auth/authService';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      email, 
-      phone, 
-      username, 
-      password, 
-      displayName, 
+    const {
+      email,
+      phone,
+      username,
+      password,
+      displayName,
       provider = 'email',
       googleId,
       facebookId,
-      appleId 
+      appleId,
     } = body;
 
     // Validate required fields

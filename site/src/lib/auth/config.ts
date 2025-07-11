@@ -16,23 +16,23 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnRoot = nextUrl.pathname === '/';
-      
+
       // Cho phép truy cập trang chủ mà không cần đăng nhập
       if (isOnRoot) {
         return true;
       }
-      
+
       // Yêu cầu đăng nhập cho trang admin
       if (isOnAdmin) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
       }
-      
+
       // Redirect logged in users từ login page đến admin
       if (nextUrl.pathname.startsWith('/login') && isLoggedIn) {
         return Response.redirect(new URL('/admin', nextUrl));
       }
-      
+
       return true;
     },
   },

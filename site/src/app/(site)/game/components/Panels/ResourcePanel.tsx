@@ -8,10 +8,10 @@ interface ResourcePanelProps {
   activeSpiritBeastBonuses: Record<string, number>;
 }
 
-export const ResourcePanel = ({ 
-  resources, 
-  animatedResourceChanges, 
-  activeSpiritBeastBonuses 
+export const ResourcePanel = ({
+  resources,
+  animatedResourceChanges,
+  activeSpiritBeastBonuses,
 }: ResourcePanelProps) => {
   return (
     <div className="bg-gray-800 rounded-lg p-4">

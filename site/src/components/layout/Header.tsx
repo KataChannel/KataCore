@@ -1,16 +1,16 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import React, { useState, useEffect } from "react";
-import { Menu, X, ChevronDown, Search, User, Sun, Moon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { siteConfig } from "../../lib/config/site";
-import SearchDialog, { 
-  SearchDialogTrigger, 
-  SearchDialogContent, 
+'use client';
+import Link from 'next/link';
+import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
+import { Menu, X, ChevronDown, Search, User, Sun, Moon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { siteConfig } from '../../lib/config/site';
+import SearchDialog, {
+  SearchDialogTrigger,
+  SearchDialogContent,
   SearchResults,
-  SearchResult 
-} from "./search";
+  SearchResult,
+} from './search';
 
 export interface NavigationItem {
   name: string;
@@ -21,27 +21,31 @@ export interface NavigationItem {
 }
 
 const defaultNavigationItems: NavigationItem[] = [
-  { name: "Trang chủ", href: "/", visible: true },
+  { name: 'Trang chủ', href: '/', visible: true },
   {
-    name: "Dịch vụ",
+    name: 'Dịch vụ',
     hasDropdown: true,
     visible: true,
     dropdownItems: [
-      { name: "Phát triển Web", href: "/services/web-development", visible: true },
-      { name: "Ứng dụng di động", href: "/services/mobile-app", visible: true },
-      { name: "Thiết kế UI/UX", href: "/services/ui-ux", visible: true },
-      { name: "Tư vấn IT", href: "/services/consulting", visible: true },
-      { name: "Bảo trì & Hỗ trợ", href: "/services/support", visible: true },
+      {
+        name: 'Phát triển Web',
+        href: '/services/web-development',
+        visible: true,
+      },
+      { name: 'Ứng dụng di động', href: '/services/mobile-app', visible: true },
+      { name: 'Thiết kế UI/UX', href: '/services/ui-ux', visible: true },
+      { name: 'Tư vấn IT', href: '/services/consulting', visible: true },
+      { name: 'Bảo trì & Hỗ trợ', href: '/services/support', visible: true },
     ],
   },
-  { name: "Sản phẩm", href: "/products", visible: true },
-  { name: "Dự án", href: "/projects", visible: true },
-  { name: "Blog", href: "/blog", visible: true },
-  { name: "Liên hệ", href: "/contact", visible: true },
+  { name: 'Sản phẩm', href: '/products', visible: true },
+  { name: 'Dự án', href: '/projects', visible: true },
+  { name: 'Blog', href: '/blog', visible: true },
+  { name: 'Liên hệ', href: '/contact', visible: true },
 ];
 
 interface HeaderProps {
-  drawerPosition?: "left" | "right";
+  drawerPosition?: 'left' | 'right';
   menuItems?: NavigationItem[];
   showAuthButton?: boolean;
 }
@@ -56,16 +60,16 @@ const Dropdown: React.FC<DropdownProps> = ({ item, mobile = false }) => {
   const toggle = () => setOpen(!open);
 
   const containerClasses = mobile
-    ? "pl-6 space-y-1"
-    : "absolute top-full left-0 mt-1 w-56 bg-gray-50 dark:bg-gray-800 rounded-md shadow border border-gray-300 dark:border-gray-600 py-1";
+    ? 'pl-6 space-y-1'
+    : 'absolute top-full left-0 mt-1 w-56 bg-gray-50 dark:bg-gray-800 rounded-md shadow border border-gray-300 dark:border-gray-600 py-1';
 
   const buttonClasses = mobile
-    ? "flex items-center justify-between w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-base font-medium text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg"
-    : "flex items-center space-x-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg";
+    ? 'flex items-center justify-between w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-base font-medium text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg'
+    : 'flex items-center space-x-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg';
 
   const linkClasses = mobile
-    ? "block px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg"
-    : "block px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg";
+    ? 'block px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg'
+    : 'block px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg';
 
   return (
     <div className="relative">
@@ -77,15 +81,19 @@ const Dropdown: React.FC<DropdownProps> = ({ item, mobile = false }) => {
       >
         <span>{item.name}</span>
         <ChevronDown
-          className={`h-4 w-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {open && (
         <div id={`${item.name}-dropdown`} className={containerClasses}>
           {item.dropdownItems
-            ?.filter((dropItem) => dropItem.visible !== false)
-            .map((dropItem) => (
-              <Link key={dropItem.name} href={dropItem.href} className={linkClasses}>
+            ?.filter(dropItem => dropItem.visible !== false)
+            .map(dropItem => (
+              <Link
+                key={dropItem.name}
+                href={dropItem.href}
+                className={linkClasses}
+              >
                 {dropItem.name}
               </Link>
             ))}
@@ -96,7 +104,7 @@ const Dropdown: React.FC<DropdownProps> = ({ item, mobile = false }) => {
 };
 
 const Header: React.FC<HeaderProps> = ({
-  drawerPosition = "left",
+  drawerPosition = 'left',
   menuItems = defaultNavigationItems,
   showAuthButton = true,
 }) => {
@@ -109,8 +117,10 @@ const Header: React.FC<HeaderProps> = ({
   // Initialize dark mode from localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+    const systemPrefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+
     if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
@@ -124,7 +134,7 @@ const Header: React.FC<HeaderProps> = ({
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
-    
+
     if (newDarkMode) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -142,7 +152,7 @@ const Header: React.FC<HeaderProps> = ({
       description: 'Trở về trang chính',
       category: 'Trang',
       url: '/',
-      icon: <Search className="w-4 h-4" />
+      icon: <Search className="w-4 h-4" />,
     },
     {
       id: '2',
@@ -150,7 +160,7 @@ const Header: React.FC<HeaderProps> = ({
       description: 'Xem các dịch vụ của chúng tôi',
       category: 'Trang',
       url: '/services',
-      icon: <Search className="w-4 h-4" />
+      icon: <Search className="w-4 h-4" />,
     },
     {
       id: '3',
@@ -158,8 +168,8 @@ const Header: React.FC<HeaderProps> = ({
       description: 'Thông tin liên hệ',
       category: 'Trang',
       url: '/contact',
-      icon: <Search className="w-4 h-4" />
-    }
+      icon: <Search className="w-4 h-4" />,
+    },
   ];
 
   const handleSearchSelect = (result: SearchResult) => {
@@ -168,21 +178,22 @@ const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
+  const toggleMobileMenu = () => setIsMobileMenuOpen(prev => !prev);
 
   const handleAuthIcon = () => {
     if (!isLoggedIn) {
-      router.push("/login");
+      router.push('/login');
     } else {
-      router.push("/register");
+      router.push('/register');
     }
   };
 
   // Filter menu items that should be visible
-  const visibleMenuItems = menuItems.filter((item) => item.visible !== false);
+  const visibleMenuItems = menuItems.filter(item => item.visible !== false);
 
   // Classes for mobile drawer position
-  const drawerPositionClasses = drawerPosition === "left" ? "left-0" : "right-0";
+  const drawerPositionClasses =
+    drawerPosition === 'left' ? 'left-0' : 'right-0';
 
   return (
     <>
@@ -201,24 +212,29 @@ const Header: React.FC<HeaderProps> = ({
             )}
           </button>
         </div>
-        
+
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" className="transition-opacity hover:opacity-80">
-            <Image src={siteConfig.logo.default} alt="Logo" width={40} height={40} />
+            <Image
+              src={siteConfig.logo.default}
+              alt="Logo"
+              width={40}
+              height={40}
+            />
           </Link>
         </div>
-        
+
         {/* Navigation for Desktop */}
         <nav className="hidden lg:block">
           <div className="flex items-center space-x-1">
-            {visibleMenuItems.map((item) =>
+            {visibleMenuItems.map(item =>
               item.hasDropdown ? (
                 <Dropdown key={item.name} item={item} />
               ) : (
                 <Link
                   key={item.name}
-                  href={item.href || "#"}
+                  href={item.href || '#'}
                   className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-200 rounded-md"
                 >
                   {item.name}
@@ -227,7 +243,7 @@ const Header: React.FC<HeaderProps> = ({
             )}
           </div>
         </nav>
-        
+
         {/* Action Icons: Search, Dark Mode Toggle & Auth */}
         <div className="flex items-center space-x-2">
           <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
@@ -240,14 +256,14 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             </SearchDialogTrigger>
             <SearchDialogContent placeholder="Tìm kiếm...">
-              <SearchResults 
+              <SearchResults
                 results={searchResults}
                 onSelect={handleSearchSelect}
                 emptyMessage="Không tìm thấy kết quả"
               />
             </SearchDialogContent>
           </SearchDialog>
-          
+
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
@@ -293,7 +309,7 @@ const Header: React.FC<HeaderProps> = ({
                   >
                     <X className="h-5 w-5" />
                   </button>
-                  
+
                   {/* Dark Mode Toggle in Mobile Menu */}
                   <button
                     onClick={toggleDarkMode}
@@ -307,16 +323,16 @@ const Header: React.FC<HeaderProps> = ({
                     )}
                   </button>
                 </div>
-                
+
                 {/* Mobile Navigation */}
                 <nav className="space-y-2">
-                  {visibleMenuItems.map((item) =>
+                  {visibleMenuItems.map(item =>
                     item.hasDropdown ? (
                       <Dropdown key={item.name} item={item} mobile />
                     ) : (
                       <Link
                         key={item.name}
-                        href={item.href || "#"}
+                        href={item.href || '#'}
                         onClick={toggleMobileMenu}
                         className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-200 rounded-md"
                       >

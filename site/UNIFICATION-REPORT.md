@@ -3,16 +3,19 @@
 ## ✅ Đã hoàn thành
 
 ### 1. 📁 Cấu trúc thư mục chuẩn hóa
+
 - ✅ Tạo cấu trúc thư mục theo convention mới
 - ✅ Thêm barrel exports cho components, types, hooks
 - ✅ Tổ chức lại utils và config files
 
 ### 2. 📝 Documentation & Standards
+
 - ✅ Tạo `UNIFIED-DESIGN-PATTERNS.md` - Hướng dẫn chi tiết patterns
 - ✅ Cập nhật `CODING_STANDARDS.md` với rules mới
 - ✅ Thiết lập Prettier và ESLint configuration
 
 ### 3. 🔧 Development Tools
+
 - ✅ Cập nhật ESLint với rules cho naming conventions
 - ✅ Thiết lập Prettier với import ordering
 - ✅ Tạo script `unify-code-patterns.sh` để automation
@@ -20,6 +23,7 @@
 ## 🎯 Patterns đã đồng nhất
 
 ### React Component Pattern
+
 ```tsx
 // Standard component structure
 interface ComponentProps extends BaseComponentProps {
@@ -41,6 +45,7 @@ export const Component: React.FC<ComponentProps> = ({
 ```
 
 ### Hook Pattern
+
 ```tsx
 // Standard hook structure
 interface UseHookOptions<T> {
@@ -56,12 +61,13 @@ export function useHook<T>(options: UseHookOptions<T>) {
 ```
 
 ### Import/Export Pattern
+
 ```tsx
 // Standard import order
-import React from 'react';           // 1. External libraries
+import React from 'react'; // 1. External libraries
 import { NextPage } from 'next';
 
-import { cn } from '@/lib/utils';    // 2. Internal utilities
+import { cn } from '@/lib/utils'; // 2. Internal utilities
 import { Button } from '@/components/ui'; // 3. Components
 import type { User } from '@/types'; // 4. Types
 
@@ -71,6 +77,7 @@ export type { ComponentProps };
 ```
 
 ### File Naming Conventions
+
 - ✅ Components: `PascalCase.tsx` (Button.tsx, UserProfile.tsx)
 - ✅ Hooks: `camelCase.ts` (useAuth.ts, useLocalStorage.ts)
 - ✅ Utils: `camelCase.ts` (helpers.ts, constants.ts)
@@ -78,6 +85,7 @@ export type { ComponentProps };
 - ✅ Folders: `kebab-case` (user-profile/, data-table/)
 
 ### TypeScript Patterns
+
 - ✅ Interface naming: `PascalCase` (không dùng prefix `I`)
 - ✅ Type aliases: `PascalCase`
 - ✅ Enums: `PascalCase`
@@ -124,6 +132,7 @@ src/
 ## 🎨 Styling Patterns
 
 ### CSS Classes với clsx
+
 ```tsx
 // Standard className pattern
 const Button = ({ variant, size, disabled, className }) => (
@@ -140,6 +149,7 @@ const Button = ({ variant, size, disabled, className }) => (
 ```
 
 ### Theme Configuration
+
 ```tsx
 // Standard theme structure
 interface ThemeConfig {
@@ -152,12 +162,14 @@ interface ThemeConfig {
 ## 🔧 Development Tools Setup
 
 ### ESLint Rules
+
 - ✅ Naming conventions enforcement
 - ✅ Import order rules
 - ✅ Component definition patterns
 - ✅ TypeScript specific rules
 
 ### Prettier Configuration
+
 - ✅ Import ordering
 - ✅ Code formatting standards
 - ✅ Consistent style rules
@@ -165,18 +177,21 @@ interface ThemeConfig {
 ## 📋 Checklist cho việc áp dụng
 
 ### Ưu tiên cao (Tuần này)
+
 - [ ] **Migrate all components** theo pattern mới
 - [ ] **Consolidate type definitions** vào src/types/
 - [ ] **Update import statements** sử dụng barrel exports
 - [ ] **Fix naming conventions** theo standards
 
 ### Ưu tiên trung bình (Tháng này)
+
 - [ ] **Add error boundaries** cho tất cả components
 - [ ] **Implement performance optimizations** (memo, useCallback)
 - [ ] **Add comprehensive testing** cho components và hooks
 - [ ] **Update documentation** với examples
 
 ### Ưu tiên thấp (Sau này)
+
 - [ ] **Add accessibility features** (ARIA, keyboard navigation)
 - [ ] **Optimize bundle size** với code splitting
 - [ ] **Add internationalization** support
@@ -185,12 +200,14 @@ interface ThemeConfig {
 ## 🚀 Tools để hỗ trợ migration
 
 ### Scripts đã tạo
+
 1. **`unify-code-patterns.sh`** - Automated standardization
 2. **ESLint rules** - Enforce naming conventions
 3. **Prettier config** - Auto-format code
 4. **Barrel exports** - Clean import statements
 
 ### Commands hữu ích
+
 ```bash
 # Format toàn bộ code
 cd site && bun run format
@@ -208,8 +225,9 @@ cd site && bun run type-check
 ## 📊 Progress Tracking
 
 ### Components (0/20 completed)
+
 - [ ] Button component
-- [ ] Input component  
+- [ ] Input component
 - [ ] Dialog component
 - [ ] Card component
 - [ ] Table component
@@ -218,6 +236,7 @@ cd site && bun run type-check
 - [ ] Feature components
 
 ### Types & Interfaces (5/10 completed)
+
 - [x] Global types
 - [x] API types
 - [x] Auth types
@@ -230,6 +249,7 @@ cd site && bun run type-check
 - [ ] Permission types
 
 ### Hooks (3/8 completed)
+
 - [x] useAuth
 - [x] useApi
 - [x] useUnifiedTheme
@@ -240,6 +260,7 @@ cd site && bun run type-check
 - [ ] useChart
 
 ### Utils & Config (8/10 completed)
+
 - [x] Helper functions
 - [x] Constants
 - [x] Theme config
@@ -272,6 +293,7 @@ cd site && bun run type-check
 ## 🔍 Code Review Guidelines
 
 Khi review code, kiểm tra:
+
 - [ ] Component follow standard structure
 - [ ] Props interface được define đầy đủ
 - [ ] Import order theo convention

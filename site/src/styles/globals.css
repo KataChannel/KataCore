@@ -1,5 +1,5 @@
 /* TazaCore Unified Theme System - Global Styles */
-@import "../styles/unified-theme.css";
+@import '../styles/unified-theme.css';
 
 /* Legacy imports for backward compatibility */
 /* All styles are now centralized in unified-theme.css */
@@ -56,11 +56,11 @@ body {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
-  
+
   .unified-button {
     border: 1px solid currentColor;
   }
-  
+
   .no-print {
     display: none !important;
   }
@@ -69,10 +69,13 @@ body {
 /* Root variables for light mode */
 :root {
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
   /* Animation variables */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -95,7 +98,7 @@ body {
   --color-border-light: #21262d;
   --color-hover: #21262d;
   --color-active: #30363d;
-  
+
   /* Dark mode gray scale */
   --color-gray-50: #0d1117;
   --color-gray-100: #161b22;
@@ -107,18 +110,21 @@ body {
   --color-gray-700: #b1bac4;
   --color-gray-800: #c9d1d9;
   --color-gray-900: #f0f6fc;
-  
+
   /* Dark mode semantic colors */
   --color-success: #3fb950;
   --color-warning: #d29922;
   --color-error: #f85149;
   --color-info: #79c0ff;
-  
+
   /* Enhanced dark shadows */
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 10px 10px -5px rgba(0, 0, 0, 0.6);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 10px 10px -5px rgba(0, 0, 0, 0.6);
 }
 
 /* Global styles */
@@ -134,9 +140,17 @@ html {
 body {
   background-color: var(--color-background);
   color: var(--color-text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    sans-serif;
   line-height: 1.6;
-  transition: background-color var(--transition-slow), color var(--transition-slow);
+  transition:
+    background-color var(--transition-slow),
+    color var(--transition-slow);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -170,7 +184,12 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
@@ -311,7 +330,12 @@ body {
 /* Modern dividers */
 .mono-divider {
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border),
+    transparent
+  );
   border: none;
   margin: 32px 0;
 }
@@ -324,18 +348,33 @@ body {
 
 /* Enhanced loading animations */
 @keyframes mono-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 @keyframes mono-skeleton {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes mono-fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mono-loading {
@@ -343,7 +382,12 @@ body {
 }
 
 .mono-skeleton {
-  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-hover) 50%, var(--color-surface) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    var(--color-hover) 50%,
+    var(--color-surface) 75%
+  );
   background-size: 200% 100%;
   animation: mono-skeleton 1.5s ease-in-out infinite;
 }
@@ -451,7 +495,7 @@ body {
     background: white !important;
     box-shadow: none !important;
   }
-  
+
   .dark-mode-toggle {
     display: none !important;
   }
@@ -463,13 +507,13 @@ body {
     padding: 20px;
     border-radius: 12px;
   }
-  
+
   .mono-button {
     padding: 12px 24px;
     font-size: 13px;
     min-height: 44px;
   }
-  
+
   .dark-mode-toggle {
     width: 48px;
     height: 48px;
@@ -483,7 +527,7 @@ body {
     padding: 16px;
     border-radius: 8px;
   }
-  
+
   .mono-button {
     padding: 10px 20px;
     min-height: 40px;
@@ -525,11 +569,11 @@ body {
   .mono-transition-slow {
     transition: none;
   }
-  
+
   .mono-card:hover {
     transform: none;
   }
-  
+
   .mono-button:hover {
     transform: none;
   }

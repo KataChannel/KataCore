@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect } from 'react';
 import {
   MoonIcon,
   SunIcon,
@@ -19,7 +19,7 @@ import {
   ChartBarIcon,
   DocumentTextIcon,
   BriefcaseIcon,
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 
 interface HRLayoutProps {
   children: ReactNode;
@@ -27,7 +27,7 @@ interface HRLayoutProps {
 
 export default function HRLayout({ children }: HRLayoutProps) {
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState<"en" | "vi">("vi");
+  const [language, setLanguage] = useState<'en' | 'vi'>('vi');
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -35,22 +35,22 @@ export default function HRLayout({ children }: HRLayoutProps) {
     setMounted(true);
 
     // Get theme preference
-    const savedTheme = localStorage.getItem("admin-theme");
-    if (savedTheme === "dark") {
+    const savedTheme = localStorage.getItem('admin-theme');
+    if (savedTheme === 'dark') {
       setDarkMode(true);
-      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add('dark');
     } else {
       const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        '(prefers-color-scheme: dark)'
       ).matches;
       if (prefersDark) {
         setDarkMode(true);
-        document.documentElement.classList.add("dark");
+        document.documentElement.classList.add('dark');
       }
     }
 
     // Get language preference
-    const savedLanguage = localStorage.getItem("admin-language") as "en" | "vi";
+    const savedLanguage = localStorage.getItem('admin-language') as 'en' | 'vi';
     if (savedLanguage) {
       setLanguage(savedLanguage);
     }
@@ -59,19 +59,19 @@ export default function HRLayout({ children }: HRLayoutProps) {
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
-    localStorage.setItem("admin-theme", newDarkMode ? "dark" : "light");
+    localStorage.setItem('admin-theme', newDarkMode ? 'dark' : 'light');
 
     if (newDarkMode) {
-      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add('dark');
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove('dark');
     }
   };
 
   const toggleLanguage = () => {
-    const newLanguage = language === "en" ? "vi" : "en";
+    const newLanguage = language === 'en' ? 'vi' : 'en';
     setLanguage(newLanguage);
-    localStorage.setItem("admin-language", newLanguage);
+    localStorage.setItem('admin-language', newLanguage);
   };
 
   const toggleSidebar = () => {
@@ -79,7 +79,7 @@ export default function HRLayout({ children }: HRLayoutProps) {
   };
 
   const getText = (en: string, vi: string) => {
-    return language === "en" ? en : vi;
+    return language === 'en' ? en : vi;
   };
 
   if (!mounted) {
@@ -88,7 +88,7 @@ export default function HRLayout({ children }: HRLayoutProps) {
 
   return (
     <div
-      className={`min-h-screen bg-background transition-colors duration-300 ${darkMode ? "dark" : ""}`}
+      className={`min-h-screen bg-background transition-colors duration-300 ${darkMode ? 'dark' : ''}`}
     >
       <div className="flex">
         {/* Mobile sidebar overlay */}

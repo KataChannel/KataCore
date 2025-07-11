@@ -5,18 +5,21 @@ Hệ thống giao diện đơn sắc với hỗ trợ đa ngôn ngữ và chế 
 ## 🌟 Tính năng chính
 
 ### 🌍 Đa ngôn ngữ (Multi-language)
+
 - Hỗ trợ Tiếng Việt và Tiếng Anh
 - Tự động phát hiện ngôn ngữ từ trình duyệt
 - Lưu trữ lựa chọn ngôn ngữ của người dùng
 - Dễ dàng mở rộng thêm ngôn ngữ mới
 
 ### 🌙 Chế độ tối (Dark Mode)
+
 - Chuyển đổi mượt mà giữa light và dark mode
 - Tự động theo system preference
 - Lưu trữ lựa chọn theme của người dùng
 - Hiệu ứng transition mượt mà
 
 ### 🎨 Giao diện đơn sắc (Monochrome UI)
+
 - Thiết kế tối giản, tập trung vào nội dung
 - Bảng màu xám chủ đạo với accent color duy nhất
 - Nhất quán về typography và spacing
@@ -58,9 +61,7 @@ export default function RootLayout({
     <html lang="vi">
       <body>
         <ThemeProvider defaultMode="light">
-          <LanguageProvider defaultLanguage="vi">
-            {children}
-          </LanguageProvider>
+          <LanguageProvider defaultLanguage="vi">{children}</LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
@@ -82,11 +83,11 @@ function MyComponent() {
   return (
     <div className="bg-background text-text">
       <h1>{t('welcome')}</h1>
-      
+
       <button onClick={toggleMode}>
         {mode === 'light' ? t('darkMode') : t('lightMode')}
       </button>
-      
+
       <button onClick={toggleLanguage}>
         {language === 'vi' ? 'English' : 'Tiếng Việt'}
       </button>
@@ -103,14 +104,10 @@ function MonochromeCard() {
     <div className="mono-card">
       <h3 className="text-primary font-semibold">Tiêu đề</h3>
       <p className="text-text-secondary">Nội dung mô tả</p>
-      
+
       <div className="flex space-x-4 mt-4">
-        <button className="mono-button accent">
-          Nút chính
-        </button>
-        <button className="mono-button secondary">
-          Nút phụ
-        </button>
+        <button className="mono-button accent">Nút chính</button>
+        <button className="mono-button secondary">Nút phụ</button>
       </div>
     </div>
   );
@@ -124,10 +121,7 @@ function ResponsiveComponent() {
   return (
     <div className="bg-surface border border-border rounded-lg p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <input 
-          className="mono-input"
-          placeholder="Nhập văn bản..."
-        />
+        <input className="mono-input" placeholder="Nhập văn bản..." />
         <select className="mono-input">
           <option>Tùy chọn 1</option>
           <option>Tùy chọn 2</option>
@@ -141,18 +135,21 @@ function ResponsiveComponent() {
 ## 🎨 Color System
 
 ### Light Mode
+
 - `--color-background`: #ffffff (Nền chính)
 - `--color-surface`: #f9fafb (Nền thẻ)
 - `--color-primary`: #1a1a1a (Văn bản chính)
 - `--color-accent`: #2563eb (Màu nhấn)
 
 ### Dark Mode
+
 - `--color-background`: #0a0a0a (Nền chính)
 - `--color-surface`: #18181b (Nền thẻ)
 - `--color-primary`: #ffffff (Văn bản chính)
 - `--color-accent`: #3b82f6 (Màu nhấn)
 
 ### Gray Scale
+
 - `mono-50` đến `mono-900`: Bảng màu xám từ sáng đến tối
 
 ## 📖 API Reference
@@ -161,10 +158,10 @@ function ResponsiveComponent() {
 
 ```tsx
 const {
-  mode,           // 'light' | 'dark'
-  colors,         // Object chứa tất cả màu sắc
-  toggleMode,     // Function chuyển đổi theme
-  setMode        // Function set theme cụ thể
+  mode, // 'light' | 'dark'
+  colors, // Object chứa tất cả màu sắc
+  toggleMode, // Function chuyển đổi theme
+  setMode, // Function set theme cụ thể
 } = useTheme();
 ```
 
@@ -172,9 +169,9 @@ const {
 
 ```tsx
 const {
-  language,       // 'vi' | 'en'
-  setLanguage,    // Function set ngôn ngữ
-  toggleLanguage  // Function chuyển đổi ngôn ngữ
+  language, // 'vi' | 'en'
+  setLanguage, // Function set ngôn ngữ
+  toggleLanguage, // Function chuyển đổi ngôn ngữ
 } = useLanguage();
 ```
 
@@ -184,9 +181,9 @@ const {
 const { t } = useTranslation(language);
 
 // Sử dụng:
-t('welcome')              // "Chào mừng" hoặc "Welcome"
-t('hr.employees')         // "Nhân viên" hoặc "Employees"
-t('save')                 // "Lưu" hoặc "Save"
+t('welcome'); // "Chào mừng" hoặc "Welcome"
+t('hr.employees'); // "Nhân viên" hoặc "Employees"
+t('save'); // "Lưu" hoặc "Save"
 ```
 
 ## 🛠️ Tùy chỉnh
@@ -199,10 +196,16 @@ t('save')                 // "Lưu" hoặc "Save"
 export const i18nConfig = {
   // ...existing config
   common: {
-    vi: { /* Vietnamese translations */ },
-    en: { /* English translations */ },
-    ja: { /* Japanese translations */ },  // Thêm mới
-  }
+    vi: {
+      /* Vietnamese translations */
+    },
+    en: {
+      /* English translations */
+    },
+    ja: {
+      /* Japanese translations */
+    }, // Thêm mới
+  },
 };
 ```
 
@@ -220,10 +223,10 @@ type Language = 'vi' | 'en' | 'ja';
 export const themeConfig = {
   colors: {
     light: {
-      accent: "#your-custom-color",
+      accent: '#your-custom-color',
       // ...other colors
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -243,9 +246,11 @@ export function CustomMonoComponent() {
   const { mode } = useTheme();
   const { language } = useLanguage();
   const { t } = useTranslation(language);
-  
+
   return (
-    <div className={`mono-card ${mode === 'dark' ? 'dark-specific-class' : ''}`}>
+    <div
+      className={`mono-card ${mode === 'dark' ? 'dark-specific-class' : ''}`}
+    >
       <h2 className="text-primary">{t('custom.title')}</h2>
       <p className="text-text-secondary">{t('custom.description')}</p>
     </div>
@@ -280,14 +285,17 @@ Hệ thống sử dụng Tailwind CSS breakpoints:
 ## 🔧 Troubleshooting
 
 ### Theme không thay đổi
+
 - Kiểm tra `ThemeProvider` đã được wrap đúng chưa
 - Đảm bảo CSS variables được load trong `globals.css`
 
 ### Translation không hiển thị
+
 - Kiểm tra `LanguageProvider` đã được setup
 - Đảm bảo key translation tồn tại trong `i18nConfig`
 
 ### CSS không load
+
 - Đảm bảo `globals.css` được import trong `layout.tsx`
 - Kiểm tra Tailwind config đã include đúng paths
 

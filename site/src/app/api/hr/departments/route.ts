@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const where: any = {};
-    
+
     if (status && status !== 'all') {
       where.isActive = status === 'active';
     }
@@ -23,34 +23,34 @@ export async function GET(request: NextRequest) {
             id: true,
             displayName: true,
             avatar: true,
-            email: true
-          }
+            email: true,
+          },
         },
         parent: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         children: {
           select: {
             id: true,
             name: true,
-            isActive: true
-          }
+            isActive: true,
+          },
         },
         _count: {
           select: {
             employees: true,
-            positions: true
-          }
-        }
+            positions: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
     });
 
     const total = await prisma.department.count({ where });
@@ -61,8 +61,8 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Error fetching departments:', error);
@@ -87,17 +87,14 @@ export async function POST(request: NextRequest) {
       email,
       isActive = true,
       managerId,
-      parentId
+      parentId,
     } = body;
 
     // Kiểm tra tên và mã phòng ban đã tồn tại
     const existingDepartment = await prisma.department.findFirst({
       where: {
-        OR: [
-          { name },
-          { code }
-        ]
-      }
+        OR: [{ name }, { code }],
+      },
     });
 
     if (existingDepartment) {
@@ -118,7 +115,7 @@ export async function POST(request: NextRequest) {
         email,
         isActive,
         ...(managerId && { managerId }),
-        ...(parentId && { parentId })
+        ...(parentId && { parentId }),
       },
       include: {
         manager: {
@@ -126,22 +123,22 @@ export async function POST(request: NextRequest) {
             id: true,
             displayName: true,
             avatar: true,
-            email: true
-          }
+            email: true,
+          },
         },
         parent: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         _count: {
           select: {
             employees: true,
-            positions: true
-          }
-        }
-      }
+            positions: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(department, { status: 201 });

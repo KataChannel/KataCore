@@ -8,9 +8,11 @@ interface UnifiedLayoutProviderProps {
   children: ReactNode;
 }
 
-export function UnifiedLayoutProvider({ children }: UnifiedLayoutProviderProps) {
+export function UnifiedLayoutProvider({
+  children,
+}: UnifiedLayoutProviderProps) {
   return (
-    <MonochromeProvider 
+    <MonochromeProvider
       defaultMode={monochromeThemeConfig.defaults.mode}
       defaultLanguage={monochromeThemeConfig.defaults.language}
     >

@@ -116,9 +116,6 @@
 //   }
 // }
 
-
-
-
 // import bcrypt from 'bcrypt';
 // import { PrismaClient } from '@prisma/client';
 
@@ -303,7 +300,7 @@
 //       const users = await seedUsers(roles);
 //       const conversations = await seedConversations(users);
 //       await seedMessages(conversations.conversation, users);
-      
+
 //       // Add general message
 //       await tx.message.create({
 //         data: {

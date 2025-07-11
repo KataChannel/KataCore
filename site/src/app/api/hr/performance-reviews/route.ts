@@ -12,15 +12,15 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
 
     const where: any = {};
-    
+
     if (employeeId && employeeId !== 'all') {
       where.employeeId = employeeId;
     }
-    
+
     if (reviewerId && reviewerId !== 'all') {
       where.reviewerId = reviewerId;
     }
-    
+
     if (period) {
       where.period = period;
     }
@@ -34,36 +34,33 @@ export async function GET(request: NextRequest) {
               user: {
                 select: {
                   displayName: true,
-                  avatar: true
-                }
+                  avatar: true,
+                },
               },
               position: {
                 include: {
                   department: {
                     select: {
-                      name: true
-                    }
-                  }
-                }
-              }
-            }
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
           },
           reviewer: {
             select: {
               id: true,
               displayName: true,
-              avatar: true
-            }
-          }
+              avatar: true,
+            },
+          },
         },
-        orderBy: [
-          { period: 'desc' },
-          { createdAt: 'desc' }
-        ],
+        orderBy: [{ period: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
-        take: limit
+        take: limit,
       }),
-      prisma.performanceReview.count({ where })
+      prisma.performanceReview.count({ where }),
     ]);
 
     // Transform data for frontend
@@ -81,33 +78,33 @@ export async function GET(request: NextRequest) {
         position: {
           title: review.employee.position.title,
           department: {
-            name: review.employee.position.department.name
-          }
+            name: review.employee.position.department.name,
+          },
         },
-        user: review.employee.user
+        user: review.employee.user,
       },
       reviewer: review.reviewer,
       createdAt: review.createdAt.toISOString(),
-      updatedAt: review.updatedAt.toISOString()
+      updatedAt: review.updatedAt.toISOString(),
     }));
 
     // Calculate summary statistics
     const summary = await prisma.performanceReview.aggregate({
       where,
       _avg: {
-        rating: true
+        rating: true,
       },
       _count: {
-        id: true
-      }
+        id: true,
+      },
     });
 
     const ratingDistribution = await prisma.performanceReview.groupBy({
       by: ['rating'],
       where,
       _count: {
-        rating: true
-      }
+        rating: true,
+      },
     });
 
     return NextResponse.json({
@@ -117,18 +114,17 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limit),
       },
       summary: {
         totalReviews: summary._count.id,
         averageRating: summary._avg.rating || 0,
         ratingDistribution: ratingDistribution.map((item: any) => ({
           rating: item.rating,
-          count: item._count.rating
-        }))
-      }
+          count: item._count.rating,
+        })),
+      },
     });
-
   } catch (error) {
     console.error('Error fetching performance reviews:', error);
     return NextResponse.json(
@@ -142,7 +138,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { employeeId, reviewerId, period, goals, achievements, rating, feedback } = body;
+    const {
+      employeeId,
+      reviewerId,
+      period,
+      goals,
+      achievements,
+      rating,
+      feedback,
+    } = body;
 
     if (!employeeId || !reviewerId || !period) {
       return NextResponse.json(
@@ -153,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     // Kiểm tra employee có tồn tại không
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+      where: { id: employeeId },
     });
 
     if (!employee) {
@@ -165,7 +169,7 @@ export async function POST(request: NextRequest) {
 
     // Kiểm tra reviewer có tồn tại không
     const reviewer = await prisma.user.findUnique({
-      where: { id: reviewerId }
+      where: { id: reviewerId },
     });
 
     if (!reviewer) {
@@ -180,9 +184,9 @@ export async function POST(request: NextRequest) {
       where: {
         employeeId_period: {
           employeeId,
-          period
-        }
-      }
+          period,
+        },
+      },
     });
 
     if (existingReview) {
@@ -209,7 +213,7 @@ export async function POST(request: NextRequest) {
         goals,
         achievements,
         rating,
-        feedback
+        feedback,
       },
       include: {
         employee: {
@@ -217,36 +221,35 @@ export async function POST(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
         },
         reviewer: {
           select: {
             id: true,
             displayName: true,
-            avatar: true
-          }
-        }
-      }
+            avatar: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
       data: review,
-      message: 'Tạo đánh giá hiệu suất thành công'
+      message: 'Tạo đánh giá hiệu suất thành công',
     });
-
   } catch (error) {
     console.error('Error creating performance review:', error);
     return NextResponse.json(
@@ -270,7 +273,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const existingReview = await prisma.performanceReview.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingReview) {
@@ -292,9 +295,12 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         goals: goals !== undefined ? goals : existingReview.goals,
-        achievements: achievements !== undefined ? achievements : existingReview.achievements,
+        achievements:
+          achievements !== undefined
+            ? achievements
+            : existingReview.achievements,
         rating: rating !== undefined ? rating : existingReview.rating,
-        feedback: feedback !== undefined ? feedback : existingReview.feedback
+        feedback: feedback !== undefined ? feedback : existingReview.feedback,
       },
       include: {
         employee: {
@@ -302,36 +308,35 @@ export async function PUT(request: NextRequest) {
             user: {
               select: {
                 displayName: true,
-                avatar: true
-              }
+                avatar: true,
+              },
             },
             position: {
               include: {
                 department: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
         },
         reviewer: {
           select: {
             id: true,
             displayName: true,
-            avatar: true
-          }
-        }
-      }
+            avatar: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
       data: review,
-      message: 'Cập nhật đánh giá hiệu suất thành công'
+      message: 'Cập nhật đánh giá hiệu suất thành công',
     });
-
   } catch (error) {
     console.error('Error updating performance review:', error);
     return NextResponse.json(
@@ -355,7 +360,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const existingReview = await prisma.performanceReview.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingReview) {
@@ -366,14 +371,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     await prisma.performanceReview.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Xóa đánh giá hiệu suất thành công'
+      message: 'Xóa đánh giá hiệu suất thành công',
     });
-
   } catch (error) {
     console.error('Error deleting performance review:', error);
     return NextResponse.json(

@@ -1,8 +1,8 @@
-import Footer from "@/components/common/Footer";
-import Header from "@/components/common/Header";
+import Footer from '@/components/common/Footer';
+import Header from '@/components/common/Header';
 
 export const metadata = {
-  title: "Taza Offical",
+  title: 'Taza Offical',
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

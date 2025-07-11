@@ -7,20 +7,24 @@ Hệ thống theme thống nhất của TazaCore cung cấp một giải pháp t
 ## ✨ Tính năng chính
 
 ### 🌓 Dark Mode & Theme Mode
+
 - **Light Mode**: Giao diện sáng với màu nền trắng
 - **Dark Mode**: Giao diện tối với màu nền đen
 - **Auto Mode**: Tự động theo system preference
 
 ### 🎨 Color Scheme
+
 - **Monochrome**: Thiết kế đơn sắc với bảng màu xám tinh tế
 - **Colorful**: Thiết kế nhiều màu sắc (có thể mở rộng)
 
 ### 🌍 Multi-language
+
 - Hỗ trợ Tiếng Việt và Tiếng Anh
 - Tự động phát hiện ngôn ngữ từ trình duyệt
 - Dễ dàng mở rộng thêm ngôn ngữ
 
 ### ♿ Accessibility
+
 - High Contrast Mode
 - Reduced Motion Support
 - Focus Management
@@ -73,13 +77,13 @@ import { useUnifiedTheme } from '@/src/hooks/useUnifiedTheme';
 
 export function MyComponent() {
   const {
-    config,           // Cấu hình theme hiện tại
-    actualMode,       // 'light' | 'dark' (mode thực tế)
-    colors,           // Object chứa tất cả màu sắc
-    isLoading,        // Trạng thái loading
-    toggleMode,       // Chuyển đổi theme mode
-    toggleLanguage,   // Chuyển đổi ngôn ngữ
-    updateConfig,     // Cập nhật cấu hình
+    config, // Cấu hình theme hiện tại
+    actualMode, // 'light' | 'dark' (mode thực tế)
+    colors, // Object chứa tất cả màu sắc
+    isLoading, // Trạng thái loading
+    toggleMode, // Chuyển đổi theme mode
+    toggleLanguage, // Chuyển đổi ngôn ngữ
+    updateConfig, // Cập nhật cấu hình
   } = useUnifiedTheme();
 
   return (
@@ -87,11 +91,11 @@ export function MyComponent() {
       <h1 style={{ color: colors.text }}>
         {config.language === 'vi' ? 'Xin chào' : 'Hello'}
       </h1>
-      
+
       <button onClick={toggleMode} className="unified-button">
         {config.mode === 'light' ? '🌙' : '☀️'}
       </button>
-      
+
       <button onClick={toggleLanguage} className="unified-button secondary">
         {config.language === 'vi' ? '🇺🇸 EN' : '🇻🇳 VI'}
       </button>
@@ -108,7 +112,7 @@ import { useThemeMode } from '@/src/hooks/useUnifiedTheme';
 
 export function ThemeToggle() {
   const { mode, actualMode, toggleMode, isSystemMode } = useThemeMode();
-  
+
   return (
     <button onClick={toggleMode} className="unified-button ghost">
       {actualMode === 'dark' ? '🌙' : '☀️'}
@@ -122,7 +126,7 @@ import { useLanguage } from '@/src/hooks/useUnifiedTheme';
 
 export function LanguageSwitch() {
   const { language, toggleLanguage } = useLanguage();
-  
+
   return (
     <button onClick={toggleLanguage} className="unified-button ghost">
       {language === 'vi' ? '🇻🇳' : '🇺🇸'}
@@ -135,7 +139,7 @@ import { useThemeColors } from '@/src/hooks/useUnifiedTheme';
 
 export function ThemedIcon() {
   const { colors, mode } = useThemeColors();
-  
+
   return (
     <svg fill={colors.accent} className="w-6 h-6">
       {/* SVG content */}
@@ -148,7 +152,7 @@ import { useIsDarkMode } from '@/src/hooks/useUnifiedTheme';
 
 export function ConditionalComponent() {
   const isDark = useIsDarkMode();
-  
+
   return (
     <div className={isDark ? 'dark-specific-class' : 'light-specific-class'}>
       Content
@@ -160,10 +164,10 @@ export function ConditionalComponent() {
 ### 4. Sử dụng Components có sẵn
 
 ```tsx
-import { 
-  ThemeModeToggle, 
-  LanguageToggle, 
-  ThemeControlPanel 
+import {
+  ThemeModeToggle,
+  LanguageToggle,
+  ThemeControlPanel,
 } from '@/src/components/ThemeManager';
 
 export function Header() {
@@ -171,11 +175,11 @@ export function Header() {
     <header className="unified-card">
       <div className="flex items-center gap-4">
         <h1>TazaCore</h1>
-        
+
         {/* Toggle đơn giản */}
         <ThemeModeToggle />
         <LanguageToggle />
-        
+
         {/* Toggle với label */}
         <ThemeModeToggle showLabel={true} />
         <LanguageToggle showLabel={true} />
@@ -188,7 +192,7 @@ export function SettingsPage() {
   return (
     <div className="p-6">
       <h1>Cài đặt</h1>
-      
+
       {/* Panel điều khiển đầy đủ */}
       <ThemeControlPanel className="max-w-md" />
     </div>
@@ -233,9 +237,9 @@ export function SettingsPage() {
 
 // Responsive design
 <div className="
-  unified-card 
-  bg-surface 
-  hover:bg-surface-elevated 
+  unified-card
+  bg-surface
+  hover:bg-surface-elevated
   transition-all duration-normal
 ">
   Content
@@ -290,9 +294,7 @@ const customConfig: Partial<ThemeConfig> = {
 };
 
 // Sử dụng trong ThemeManager
-<ThemeManager defaultConfig={customConfig}>
-  {children}
-</ThemeManager>
+<ThemeManager defaultConfig={customConfig}>{children}</ThemeManager>;
 ```
 
 ### Authentication Integration
@@ -304,7 +306,7 @@ import { useUnifiedTheme } from '@/src/hooks/useUnifiedTheme';
 
 export function AuthenticatedApp() {
   const { config, updateConfig } = useUnifiedTheme();
-  
+
   // Sync theme với user preferences
   useEffect(() => {
     const syncUserTheme = async () => {
@@ -313,16 +315,19 @@ export function AuthenticatedApp() {
         updateConfig(user.themePreferences);
       }
     };
-    
+
     syncUserTheme();
   }, []);
-  
+
   // Save theme changes
-  const handleThemeChange = useCallback((newConfig) => {
-    updateConfig(newConfig);
-    enhancedAuthService.updateUserThemePreferences(userId, newConfig);
-  }, [userId]);
-  
+  const handleThemeChange = useCallback(
+    newConfig => {
+      updateConfig(newConfig);
+      enhancedAuthService.updateUserThemePreferences(userId, newConfig);
+    },
+    [userId]
+  );
+
   return <div>App content</div>;
 }
 ```
@@ -344,7 +349,9 @@ const ThemedComponent = withTheme(({ theme, ...props }) => {
 // Chỉ inject theme mode
 const ModeAwareComponent = withThemeMode(({ themeMode, ...props }) => {
   return (
-    <div className={themeMode.actualMode === 'dark' ? 'dark-style' : 'light-style'}>
+    <div
+      className={themeMode.actualMode === 'dark' ? 'dark-style' : 'light-style'}
+    >
       Current mode: {themeMode.mode}
     </div>
   );
@@ -355,12 +362,14 @@ const ModeAwareComponent = withThemeMode(({ themeMode, ...props }) => {
 
 ```tsx
 // Mobile-first approach
-<div className="
+<div
+  className="
   unified-card
   p-4 md:p-6 lg:p-8
   text-sm md:text-base lg:text-lg
   border-radius-sm md:border-radius-base lg:border-radius-lg
-">
+"
+>
   Responsive content
 </div>
 ```
@@ -371,24 +380,24 @@ const ModeAwareComponent = withThemeMode(({ themeMode, ...props }) => {
 import { useAccessibility } from '@/src/hooks/useUnifiedTheme';
 
 export function AccessibleComponent() {
-  const { 
-    highContrast, 
-    reducedMotion, 
-    enableHighContrast, 
-    enableReducedMotion 
+  const {
+    highContrast,
+    reducedMotion,
+    enableHighContrast,
+    enableReducedMotion,
   } = useAccessibility();
-  
+
   return (
     <div>
-      <button 
+      <button
         onClick={() => enableHighContrast(!highContrast)}
         className="unified-button"
         aria-label="Toggle high contrast"
       >
         High Contrast: {highContrast ? 'ON' : 'OFF'}
       </button>
-      
-      <button 
+
+      <button
         onClick={() => enableReducedMotion(!reducedMotion)}
         className="unified-button"
         aria-label="Toggle reduced motion"
@@ -464,7 +473,7 @@ useEffect(() => {
       window.location.reload();
     }
   };
-  
+
   window.addEventListener('storage', handleStorageChange);
   return () => window.removeEventListener('storage', handleStorageChange);
 }, []);
@@ -477,9 +486,7 @@ useEffect(() => {
 import '@/src/styles/unified-theme.css';
 
 // Kiểm tra ThemeManager wrap app
-<ThemeManager>
-  {children}
-</ThemeManager>
+<ThemeManager>{children}</ThemeManager>;
 ```
 
 ## 📚 API Reference
@@ -494,7 +501,7 @@ interface UnifiedThemeContextType {
   classes: ThemeClasses;
   isLoading: boolean;
   isSystemMode: boolean;
-  
+
   // Actions
   setMode: (mode: ThemeMode) => void;
   setLanguage: (language: Language) => void;
@@ -502,7 +509,7 @@ interface UnifiedThemeContextType {
   toggleMode: () => void;
   toggleLanguage: () => void;
   updateConfig: (updates: Partial<ThemeConfig>) => void;
-  
+
   // Accessibility
   enableHighContrast: (enabled: boolean) => void;
   enableReducedMotion: (enabled: boolean) => void;

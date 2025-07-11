@@ -20,10 +20,23 @@ export interface BaseComponentProps {
 // UI COMPONENT TYPES
 // ============================================================================
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info';
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'danger'
+  | 'success'
+  | 'warning'
+  | 'info';
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+export type InputType =
+  | 'text'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'tel'
+  | 'url'
+  | 'search';
 export type InputSize = 'sm' | 'md' | 'lg';
 
 export type ModalSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -178,7 +191,16 @@ export interface SortConfig {
 export interface FilterConfig {
   key: string;
   value: any;
-  operator?: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith';
+  operator?:
+    | 'eq'
+    | 'ne'
+    | 'gt'
+    | 'gte'
+    | 'lt'
+    | 'lte'
+    | 'contains'
+    | 'startsWith'
+    | 'endsWith';
 }
 
 // ============================================================================
@@ -337,14 +359,14 @@ export interface MediaFile {
 // ============================================================================
 
 // Re-export commonly used React types for convenience
-import type { 
-  ReactNode, 
-  ComponentType, 
-  FC, 
-  HTMLAttributes, 
-  ButtonHTMLAttributes, 
+import type {
+  ReactNode,
+  ComponentType,
+  FC,
+  HTMLAttributes,
+  ButtonHTMLAttributes,
   InputHTMLAttributes,
-  FormHTMLAttributes 
+  FormHTMLAttributes,
 } from 'react';
 
 export type {

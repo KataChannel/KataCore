@@ -13,7 +13,7 @@ import { customers, invoices, revenue } from './placeholder-data';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 export async function fetchRevenue() {
-  return revenue
+  return revenue;
   // try {
   //   // Artificially delay a response for demo purposes.
   //   // Don't do this in production :)
@@ -33,16 +33,16 @@ export async function fetchRevenue() {
 }
 
 export async function fetchLatestInvoices() {
-    return invoices.slice(0, 5).map((invoice, index) => {
-      const customer = customers.find(c => c.id === invoice.customer_id);
-      return {
-        id: index.toString(),
-        amount: formatCurrency(invoice.amount),
-        name: customer?.name || '',
-        image_url: customer?.image_url || '',
-        email: customer?.email || ''
-      };
-    });
+  return invoices.slice(0, 5).map((invoice, index) => {
+    const customer = customers.find(c => c.id === invoice.customer_id);
+    return {
+      id: index.toString(),
+      amount: formatCurrency(invoice.amount),
+      name: customer?.name || '',
+      image_url: customer?.image_url || '',
+      email: customer?.email || '',
+    };
+  });
   // try {
   //   const data = await sql<LatestInvoiceRaw[]>`
   //     SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
@@ -100,7 +100,7 @@ export async function fetchCardData() {
 const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
-  currentPage: number,
+  currentPage: number
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -166,7 +166,7 @@ export async function fetchInvoiceById(id: string) {
       WHERE invoices.id = ${id};
     `;
 
-    const invoice = data.map((invoice) => ({
+    const invoice = data.map(invoice => ({
       ...invoice,
       // Convert amount from cents to dollars
       amount: invoice.amount / 100,
@@ -216,7 +216,7 @@ export async function fetchFilteredCustomers(query: string) {
 		ORDER BY customers.name ASC
 	  `;
 
-    const customers = data.map((customer) => ({
+    const customers = data.map(customer => ({
       ...customer,
       total_pending: formatCurrency(customer.total_pending),
       total_paid: formatCurrency(customer.total_paid),

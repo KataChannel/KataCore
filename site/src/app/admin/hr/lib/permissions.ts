@@ -21,40 +21,40 @@ export const HR_PERMISSIONS = {
   EMPLOYEE_CREATE: { action: 'create', resource: 'employee' },
   EMPLOYEE_UPDATE: { action: 'update', resource: 'employee' },
   EMPLOYEE_DELETE: { action: 'delete', resource: 'employee' },
-  
+
   // Department Management
   DEPARTMENT_READ: { action: 'read', resource: 'department' },
   DEPARTMENT_CREATE: { action: 'create', resource: 'department' },
   DEPARTMENT_UPDATE: { action: 'update', resource: 'department' },
   DEPARTMENT_DELETE: { action: 'delete', resource: 'department' },
-  
+
   // Attendance Management
   ATTENDANCE_READ: { action: 'read', resource: 'attendance' },
   ATTENDANCE_CREATE: { action: 'create', resource: 'attendance' },
   ATTENDANCE_UPDATE: { action: 'update', resource: 'attendance' },
   ATTENDANCE_DELETE: { action: 'delete', resource: 'attendance' },
-  
+
   // Leave Management
   LEAVE_READ: { action: 'read', resource: 'leave' },
   LEAVE_CREATE: { action: 'create', resource: 'leave' },
   LEAVE_APPROVE: { action: 'approve', resource: 'leave' },
   LEAVE_REJECT: { action: 'reject', resource: 'leave' },
-  
+
   // Payroll Management
   PAYROLL_READ: { action: 'read', resource: 'payroll' },
   PAYROLL_CREATE: { action: 'create', resource: 'payroll' },
   PAYROLL_UPDATE: { action: 'update', resource: 'payroll' },
   PAYROLL_DELETE: { action: 'delete', resource: 'payroll' },
-  
+
   // Performance Management
   PERFORMANCE_READ: { action: 'read', resource: 'performance' },
   PERFORMANCE_CREATE: { action: 'create', resource: 'performance' },
   PERFORMANCE_UPDATE: { action: 'update', resource: 'performance' },
-  
+
   // Reports and Analytics
   REPORTS_READ: { action: 'read', resource: 'reports' },
   REPORTS_EXPORT: { action: 'export', resource: 'reports' },
-  
+
   // System Administration
   SETTINGS_READ: { action: 'read', resource: 'settings' },
   SETTINGS_UPDATE: { action: 'update', resource: 'settings' },
@@ -195,7 +195,12 @@ export class HRPermissionService {
   /**
    * Check if user has permission to perform an action on a resource
    */
-  hasPermission(action: string, resource: string, targetDepartment?: string, targetUserId?: string): boolean {
+  hasPermission(
+    action: string,
+    resource: string,
+    targetDepartment?: string,
+    targetUserId?: string
+  ): boolean {
     if (!this.userRole) return false;
 
     const permission = this.userRole.permissions.find(
@@ -221,7 +226,12 @@ export class HRPermissionService {
    * Check if user can read employee data
    */
   canReadEmployee(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('read', 'employee', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'read',
+      'employee',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   /**
@@ -235,21 +245,34 @@ export class HRPermissionService {
    * Check if user can update employee data
    */
   canUpdateEmployee(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('update', 'employee', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'update',
+      'employee',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   /**
    * Check if user can delete employees
    */
   canDeleteEmployee(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('delete', 'employee', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'delete',
+      'employee',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   /**
    * Check if user can manage departments
    */
   canManageDepartments(): boolean {
-    return this.hasPermission('create', 'department') || this.hasPermission('update', 'department');
+    return (
+      this.hasPermission('create', 'department') ||
+      this.hasPermission('update', 'department')
+    );
   }
 
   /**
@@ -270,7 +293,12 @@ export class HRPermissionService {
    * Check if user can access payroll data
    */
   canAccessPayroll(targetDepartment?: string, targetUserId?: string): boolean {
-    return this.hasPermission('read', 'payroll', targetDepartment, targetUserId);
+    return this.hasPermission(
+      'read',
+      'payroll',
+      targetDepartment,
+      targetUserId
+    );
   }
 
   /**
@@ -311,52 +339,56 @@ export class HRPermissionService {
   /**
    * Get filtered navigation items based on user permissions
    */
-  getAuthorizedNavigation(): Array<{name: string, href: string, permission: () => boolean}> {
+  getAuthorizedNavigation(): Array<{
+    name: string;
+    href: string;
+    permission: () => boolean;
+  }> {
     return [
       {
         name: 'Dashboard',
         href: '/hr',
-        permission: () => true // Everyone can access dashboard
+        permission: () => true, // Everyone can access dashboard
       },
       {
         name: 'Employees',
         href: '/hr/employees',
-        permission: () => this.canReadEmployee()
+        permission: () => this.canReadEmployee(),
       },
       {
         name: 'Departments',
         href: '/hr/departments',
-        permission: () => this.hasPermission('read', 'department')
+        permission: () => this.hasPermission('read', 'department'),
       },
       {
         name: 'Attendance',
         href: '/hr/attendance',
-        permission: () => this.hasPermission('read', 'attendance')
+        permission: () => this.hasPermission('read', 'attendance'),
       },
       {
         name: 'Leave Requests',
         href: '/hr/leave-requests',
-        permission: () => this.hasPermission('read', 'leave')
+        permission: () => this.hasPermission('read', 'leave'),
       },
       {
         name: 'Payroll',
         href: '/hr/payroll',
-        permission: () => this.hasPermission('read', 'payroll')
+        permission: () => this.hasPermission('read', 'payroll'),
       },
       {
         name: 'Performance',
         href: '/hr/performance',
-        permission: () => this.hasPermission('read', 'performance')
+        permission: () => this.hasPermission('read', 'performance'),
       },
       {
         name: 'Reports',
         href: '/hr/reports',
-        permission: () => this.hasPermission('read', 'reports')
+        permission: () => this.hasPermission('read', 'reports'),
       },
       {
         name: 'Settings',
         href: '/hr/settings',
-        permission: () => this.hasPermission('read', 'settings')
+        permission: () => this.hasPermission('read', 'settings'),
       },
     ].filter(item => item.permission());
   }
@@ -365,12 +397,30 @@ export class HRPermissionService {
 /**
  * React hook for HR permissions
  */
-export const useHRPermissions = (roleId: string, departmentId?: string, userId?: string) => {
-  const permissionService = new HRPermissionService(roleId, departmentId, userId);
-  
+export const useHRPermissions = (
+  roleId: string,
+  departmentId?: string,
+  userId?: string
+) => {
+  const permissionService = new HRPermissionService(
+    roleId,
+    departmentId,
+    userId
+  );
+
   return {
-    hasPermission: (action: string, resource: string, targetDepartment?: string, targetUserId?: string) =>
-      permissionService.hasPermission(action, resource, targetDepartment, targetUserId),
+    hasPermission: (
+      action: string,
+      resource: string,
+      targetDepartment?: string,
+      targetUserId?: string
+    ) =>
+      permissionService.hasPermission(
+        action,
+        resource,
+        targetDepartment,
+        targetUserId
+      ),
     canReadEmployee: (targetDepartment?: string, targetUserId?: string) =>
       permissionService.canReadEmployee(targetDepartment, targetUserId),
     canCreateEmployee: () => permissionService.canCreateEmployee(),
@@ -379,15 +429,18 @@ export const useHRPermissions = (roleId: string, departmentId?: string, userId?:
     canDeleteEmployee: (targetDepartment?: string, targetUserId?: string) =>
       permissionService.canDeleteEmployee(targetDepartment, targetUserId),
     canManageDepartments: () => permissionService.canManageDepartments(),
-    canApproveLeave: (targetDepartment?: string) => permissionService.canApproveLeave(targetDepartment),
-    canRejectLeave: (targetDepartment?: string) => permissionService.canRejectLeave(targetDepartment),
+    canApproveLeave: (targetDepartment?: string) =>
+      permissionService.canApproveLeave(targetDepartment),
+    canRejectLeave: (targetDepartment?: string) =>
+      permissionService.canRejectLeave(targetDepartment),
     canAccessPayroll: (targetDepartment?: string, targetUserId?: string) =>
       permissionService.canAccessPayroll(targetDepartment, targetUserId),
     canManageSettings: () => permissionService.canManageSettings(),
     canExportReports: () => permissionService.canExportReports(),
     getUserRole: () => permissionService.getUserRole(),
     getPermissionLevel: () => permissionService.getPermissionLevel(),
-    hasPermissionLevel: (level: number) => permissionService.hasPermissionLevel(level),
+    hasPermissionLevel: (level: number) =>
+      permissionService.hasPermissionLevel(level),
     getAuthorizedNavigation: () => permissionService.getAuthorizedNavigation(),
   };
 };

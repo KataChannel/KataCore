@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
+import {
+  PlusIcon,
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
@@ -11,7 +11,7 @@ import {
   MapPinIcon,
   PhoneIcon,
   EnvelopeIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../../hooks/useAuth';
 
@@ -53,7 +53,8 @@ const DepartmentManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+  const [selectedDepartment, setSelectedDepartment] =
+    useState<Department | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [error, setError] = useState('');
@@ -67,7 +68,7 @@ const DepartmentManagement: React.FC = () => {
     email: '',
     isActive: true,
     managerId: '',
-    parentId: ''
+    parentId: '',
   });
 
   useEffect(() => {
@@ -117,7 +118,7 @@ const DepartmentManagement: React.FC = () => {
         email: department.email || '',
         isActive: department.isActive,
         managerId: department.manager?.id || '',
-        parentId: department.parent?.id || ''
+        parentId: department.parent?.id || '',
       });
     } else {
       setSelectedDepartment(null);
@@ -131,7 +132,7 @@ const DepartmentManagement: React.FC = () => {
         email: '',
         isActive: true,
         managerId: '',
-        parentId: ''
+        parentId: '',
       });
     }
     setShowModal(true);
@@ -151,7 +152,7 @@ const DepartmentManagement: React.FC = () => {
       }
 
       const method = selectedDepartment ? 'PUT' : 'POST';
-      const url = selectedDepartment 
+      const url = selectedDepartment
         ? `/api/hr/departments/${selectedDepartment.id}`
         : '/api/hr/departments';
 
@@ -196,14 +197,19 @@ const DepartmentManagement: React.FC = () => {
   };
 
   const filteredDepartments = departments.filter(department => {
-    const matchesSearch = department.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         department.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (department.description && department.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'active' && department.isActive) ||
-                         (statusFilter === 'inactive' && !department.isActive);
-    
+    const matchesSearch =
+      department.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      department.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (department.description &&
+        department.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()));
+
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && department.isActive) ||
+      (statusFilter === 'inactive' && !department.isActive);
+
     return matchesSearch && matchesStatus;
   });
 
@@ -212,7 +218,9 @@ const DepartmentManagement: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý phòng ban</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Quản lý phòng ban
+          </h1>
           <p className="text-gray-600">Quản lý cơ cấu tổ chức và phòng ban</p>
         </div>
         <button
@@ -239,47 +247,60 @@ const DepartmentManagement: React.FC = () => {
               <BuildingOfficeIcon className="h-8 w-8 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Tổng phòng ban</p>
-              <p className="text-2xl font-bold text-gray-900">{departments.length}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Tổng phòng ban
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {departments.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <BuildingOfficeIcon className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Đang hoạt động</p>
+              <p className="text-sm font-medium text-gray-500">
+                Đang hoạt động
+              </p>
               <p className="text-2xl font-bold text-gray-900">
                 {departments.filter(d => d.isActive).length}
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <UsersIcon className="h-8 w-8 text-purple-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Tổng nhân viên</p>
+              <p className="text-sm font-medium text-gray-500">
+                Tổng nhân viên
+              </p>
               <p className="text-2xl font-bold text-gray-900">
-                {departments.reduce((total, d) => total + (d._count?.employees || 0), 0)}
+                {departments.reduce(
+                  (total, d) => total + (d._count?.employees || 0),
+                  0
+                )}
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <CurrencyDollarIcon className="h-8 w-8 text-orange-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Tổng ngân sách</p>
+              <p className="text-sm font-medium text-gray-500">
+                Tổng ngân sách
+              </p>
               <p className="text-2xl font-bold text-gray-900">
                 {new Intl.NumberFormat('vi-VN').format(
                   departments.reduce((total, d) => total + (d.budget || 0), 0)
@@ -299,14 +320,14 @@ const DepartmentManagement: React.FC = () => {
               type="text"
               placeholder="Tìm kiếm phòng ban..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={e => setStatusFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">Tất cả trạng thái</option>
@@ -320,7 +341,10 @@ const DepartmentManagement: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow p-6 animate-pulse">
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow p-6 animate-pulse"
+            >
               <div className="h-4 bg-gray-200 rounded mb-4"></div>
               <div className="h-3 bg-gray-200 rounded mb-2"></div>
               <div className="h-3 bg-gray-200 rounded mb-4"></div>
@@ -334,8 +358,11 @@ const DepartmentManagement: React.FC = () => {
             <p className="text-gray-400">Hãy thêm phòng ban đầu tiên</p>
           </div>
         ) : (
-          filteredDepartments.map((department) => (
-            <div key={department.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+          filteredDepartments.map(department => (
+            <div
+              key={department.id}
+              className="bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
@@ -372,7 +399,10 @@ const DepartmentManagement: React.FC = () => {
                   <div className="flex items-center mb-3">
                     <img
                       className="h-8 w-8 rounded-full mr-3"
-                      src={department.manager.avatar || `https://ui-avatars.com/api/?name=${department.manager.displayName}&background=3b82f6&color=fff`}
+                      src={
+                        department.manager.avatar ||
+                        `https://ui-avatars.com/api/?name=${department.manager.displayName}&background=3b82f6&color=fff`
+                      }
                       alt={department.manager.displayName}
                     />
                     <div>
@@ -428,7 +458,7 @@ const DepartmentManagement: React.FC = () => {
                     <p className="text-lg font-bold text-orange-600">
                       {new Intl.NumberFormat('vi-VN', {
                         style: 'currency',
-                        currency: 'VND'
+                        currency: 'VND',
                       }).format(department.budget)}
                     </p>
                     <p className="text-xs text-orange-600">Ngân sách</p>
@@ -437,14 +467,16 @@ const DepartmentManagement: React.FC = () => {
 
                 {/* Status */}
                 <div className="flex justify-between items-center">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    department.isActive 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      department.isActive
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {department.isActive ? 'Hoạt động' : 'Không hoạt động'}
                   </span>
-                  
+
                   {department.parent && (
                     <span className="text-xs text-gray-500">
                       Thuộc: {department.parent.name}
@@ -463,9 +495,11 @@ const DepartmentManagement: React.FC = () => {
           <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {selectedDepartment ? 'Cập nhật phòng ban' : 'Thêm phòng ban mới'}
+                {selectedDepartment
+                  ? 'Cập nhật phòng ban'
+                  : 'Thêm phòng ban mới'}
               </h3>
-              
+
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                   {error}
@@ -480,11 +514,13 @@ const DepartmentManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Mã phòng ban *
@@ -492,61 +528,69 @@ const DepartmentManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, code: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Mô tả
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trưởng phòng
                   </label>
                   <select
                     value={formData.managerId}
-                    onChange={(e) => setFormData({ ...formData, managerId: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, managerId: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Chọn trưởng phòng</option>
-                    {users.map((user) => (
+                    {users.map(user => (
                       <option key={user.id} value={user.id}>
                         {user.displayName}
                       </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phòng ban cha
                   </label>
                   <select
                     value={formData.parentId}
-                    onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, parentId: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Không có</option>
                     {departments
                       .filter(d => d.id !== selectedDepartment?.id)
-                      .map((dept) => (
+                      .map(dept => (
                         <option key={dept.id} value={dept.id}>
                           {dept.name}
                         </option>
                       ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Địa điểm
@@ -554,11 +598,13 @@ const DepartmentManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Số điện thoại
@@ -566,11 +612,13 @@ const DepartmentManagement: React.FC = () => {
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email
@@ -578,11 +626,13 @@ const DepartmentManagement: React.FC = () => {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Ngân sách
@@ -590,11 +640,16 @@ const DepartmentManagement: React.FC = () => {
                   <input
                     type="number"
                     value={formData.budget}
-                    onChange={(e) => setFormData({ ...formData, budget: Number(e.target.value) })}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        budget: Number(e.target.value),
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Trạng thái
@@ -603,7 +658,9 @@ const DepartmentManagement: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      onChange={e =>
+                        setFormData({ ...formData, isActive: e.target.checked })
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label className="ml-2 text-sm text-gray-700">

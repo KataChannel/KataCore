@@ -1,7 +1,14 @@
 // Unified Theme Hook - Centralized theme management for TazaCore
 // Replaces all other theme hooks with a single, synchronized solution
 'use client';
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  ReactNode,
+} from 'react';
 import {
   UNIFIED_THEME_CONFIG,
   ThemeConfig,
@@ -26,16 +33,16 @@ import {
 interface UnifiedThemeContextType {
   // Current configuration
   config: ThemeConfig;
-  
+
   // Derived values
   actualMode: 'light' | 'dark';
   colors: ColorPalette;
   classes: ReturnType<typeof getThemeClasses>;
-  
+
   // State
   isLoading: boolean;
   isSystemMode: boolean;
-  
+
   // Actions
   setMode: (mode: ThemeMode) => void;
   setLanguage: (language: Language) => void;
@@ -43,13 +50,13 @@ interface UnifiedThemeContextType {
   setAnimationLevel: (level: AnimationLevel) => void;
   setFontSize: (size: ThemeConfig['fontSize']) => void;
   setBorderRadius: (radius: ThemeConfig['borderRadius']) => void;
-  
+
   // Utilities
   toggleMode: () => void;
   toggleLanguage: () => void;
   resetToDefaults: () => void;
   updateConfig: (updates: Partial<ThemeConfig>) => void;
-  
+
   // Accessibility
   enableHighContrast: (enabled: boolean) => void;
   enableReducedMotion: (enabled: boolean) => void;
@@ -59,7 +66,9 @@ interface UnifiedThemeContextType {
 // CONTEXT CREATION
 // ============================================================================
 
-const UnifiedThemeContext = createContext<UnifiedThemeContextType | undefined>(undefined);
+const UnifiedThemeContext = createContext<UnifiedThemeContextType | undefined>(
+  undefined
+);
 
 // ============================================================================
 // PROVIDER COMPONENT
@@ -83,7 +92,7 @@ export function UnifiedThemeProvider({
     const defaults = { ...UNIFIED_THEME_CONFIG.defaults, ...defaultConfig };
     return enablePersistence ? loadThemeConfig() : defaults;
   });
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [actualMode, setActualMode] = useState<'light' | 'dark'>('light');
   const [colors, setColors] = useState<ColorPalette>(getThemeColors('light'));
@@ -108,7 +117,7 @@ export function UnifiedThemeProvider({
       setActualMode(applied);
       setColors(getThemeColors(applied));
       applyCSSVariables(config);
-      
+
       if (enablePersistence) {
         saveThemeConfig(config);
       }
@@ -141,7 +150,7 @@ export function UnifiedThemeProvider({
     };
 
     mediaQuery.addEventListener('change', handleChange);
-    
+
     // Check initial state
     if (mediaQuery.matches && !config.reducedMotion) {
       updateConfigInternal({ reducedMotion: true });
@@ -159,39 +168,60 @@ export function UnifiedThemeProvider({
   // ACTION FUNCTIONS
   // ============================================================================
 
-  const setMode = useCallback((mode: ThemeMode) => {
-    updateConfigInternal({ mode });
-  }, [updateConfigInternal]);
+  const setMode = useCallback(
+    (mode: ThemeMode) => {
+      updateConfigInternal({ mode });
+    },
+    [updateConfigInternal]
+  );
 
-  const setLanguage = useCallback((language: Language) => {
-    updateConfigInternal({ language });
-    
-    // Update document language
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = language;
-    }
-  }, [updateConfigInternal]);
+  const setLanguage = useCallback(
+    (language: Language) => {
+      updateConfigInternal({ language });
 
-  const setColorScheme = useCallback((colorScheme: ColorScheme) => {
-    updateConfigInternal({ colorScheme });
-  }, [updateConfigInternal]);
+      // Update document language
+      if (typeof document !== 'undefined') {
+        document.documentElement.lang = language;
+      }
+    },
+    [updateConfigInternal]
+  );
 
-  const setAnimationLevel = useCallback((animationLevel: AnimationLevel) => {
-    updateConfigInternal({ animationLevel });
-  }, [updateConfigInternal]);
+  const setColorScheme = useCallback(
+    (colorScheme: ColorScheme) => {
+      updateConfigInternal({ colorScheme });
+    },
+    [updateConfigInternal]
+  );
 
-  const setFontSize = useCallback((fontSize: ThemeConfig['fontSize']) => {
-    updateConfigInternal({ fontSize });
-  }, [updateConfigInternal]);
+  const setAnimationLevel = useCallback(
+    (animationLevel: AnimationLevel) => {
+      updateConfigInternal({ animationLevel });
+    },
+    [updateConfigInternal]
+  );
 
-  const setBorderRadius = useCallback((borderRadius: ThemeConfig['borderRadius']) => {
-    updateConfigInternal({ borderRadius });
-  }, [updateConfigInternal]);
+  const setFontSize = useCallback(
+    (fontSize: ThemeConfig['fontSize']) => {
+      updateConfigInternal({ fontSize });
+    },
+    [updateConfigInternal]
+  );
+
+  const setBorderRadius = useCallback(
+    (borderRadius: ThemeConfig['borderRadius']) => {
+      updateConfigInternal({ borderRadius });
+    },
+    [updateConfigInternal]
+  );
 
   const toggleMode = useCallback(() => {
-    const nextMode: ThemeMode = 
-      config.mode === 'light' ? 'dark' : 
-      config.mode === 'dark' ? 'auto' : 'light';
+    const nextMode: ThemeMode =
+      config.mode === 'light'
+        ? 'dark'
+        : config.mode === 'dark'
+          ? 'auto'
+          : 'light';
     setMode(nextMode);
   }, [config.mode, setMode]);
 
@@ -205,46 +235,55 @@ export function UnifiedThemeProvider({
     setConfigState(defaults);
   }, [defaultConfig]);
 
-  const updateConfig = useCallback((updates: Partial<ThemeConfig>) => {
-    updateConfigInternal(updates);
-  }, [updateConfigInternal]);
+  const updateConfig = useCallback(
+    (updates: Partial<ThemeConfig>) => {
+      updateConfigInternal(updates);
+    },
+    [updateConfigInternal]
+  );
 
-  const enableHighContrast = useCallback((enabled: boolean) => {
-    updateConfigInternal({ highContrast: enabled });
-    
-    // Apply high contrast class
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('high-contrast', enabled);
-    }
-  }, [updateConfigInternal]);
+  const enableHighContrast = useCallback(
+    (enabled: boolean) => {
+      updateConfigInternal({ highContrast: enabled });
 
-  const enableReducedMotion = useCallback((enabled: boolean) => {
-    updateConfigInternal({ 
-      reducedMotion: enabled,
-      enableAnimations: enabled ? false : config.enableAnimations,
-      enableTransitions: enabled ? false : config.enableTransitions,
-    });
-    
-    // Apply reduced motion class
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('reduced-motion', enabled);
-    }
-  }, [updateConfigInternal, config.enableAnimations, config.enableTransitions]);
+      // Apply high contrast class
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('high-contrast', enabled);
+      }
+    },
+    [updateConfigInternal]
+  );
+
+  const enableReducedMotion = useCallback(
+    (enabled: boolean) => {
+      updateConfigInternal({
+        reducedMotion: enabled,
+        enableAnimations: enabled ? false : config.enableAnimations,
+        enableTransitions: enabled ? false : config.enableTransitions,
+      });
+
+      // Apply reduced motion class
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('reduced-motion', enabled);
+      }
+    },
+    [updateConfigInternal, config.enableAnimations, config.enableTransitions]
+  );
 
   // Context value
   const contextValue: UnifiedThemeContextType = {
     // Current configuration
     config,
-    
+
     // Derived values
     actualMode,
     colors,
     classes,
-    
+
     // State
     isLoading,
     isSystemMode,
-    
+
     // Actions
     setMode,
     setLanguage,
@@ -252,13 +291,13 @@ export function UnifiedThemeProvider({
     setAnimationLevel,
     setFontSize,
     setBorderRadius,
-    
+
     // Utilities
     toggleMode,
     toggleLanguage,
     resetToDefaults,
     updateConfig,
-    
+
     // Accessibility
     enableHighContrast,
     enableReducedMotion,
@@ -281,7 +320,9 @@ export function UnifiedThemeProvider({
 export function useUnifiedTheme(): UnifiedThemeContextType {
   const context = useContext(UnifiedThemeContext);
   if (context === undefined) {
-    throw new Error('useUnifiedTheme must be used within a UnifiedThemeProvider');
+    throw new Error(
+      'useUnifiedTheme must be used within a UnifiedThemeProvider'
+    );
   }
   return context;
 }
@@ -290,7 +331,8 @@ export function useUnifiedTheme(): UnifiedThemeContextType {
  * Hook for theme mode only
  */
 export function useThemeMode() {
-  const { config, actualMode, setMode, toggleMode, isSystemMode } = useUnifiedTheme();
+  const { config, actualMode, setMode, toggleMode, isSystemMode } =
+    useUnifiedTheme();
   return {
     mode: config.mode,
     actualMode,
@@ -340,12 +382,8 @@ export function useCurrentLanguage() {
  * Hook for accessibility features
  */
 export function useAccessibility() {
-  const { 
-    config, 
-    enableHighContrast, 
-    enableReducedMotion 
-  } = useUnifiedTheme();
-  
+  const { config, enableHighContrast, enableReducedMotion } = useUnifiedTheme();
+
   return {
     highContrast: config.highContrast,
     reducedMotion: config.reducedMotion,
@@ -374,7 +412,9 @@ export function withTheme<P extends object>(
  * HOC to inject only theme mode
  */
 export function withThemeMode<P extends object>(
-  Component: React.ComponentType<P & { themeMode: ReturnType<typeof useThemeMode> }>
+  Component: React.ComponentType<
+    P & { themeMode: ReturnType<typeof useThemeMode> }
+  >
 ) {
   return function ThemedComponent(props: P) {
     const themeMode = useThemeMode();
@@ -386,7 +426,9 @@ export function withThemeMode<P extends object>(
  * HOC to inject only language
  */
 export function withLanguage<P extends object>(
-  Component: React.ComponentType<P & { language: ReturnType<typeof useLanguage> }>
+  Component: React.ComponentType<
+    P & { language: ReturnType<typeof useLanguage> }
+  >
 ) {
   return function ThemedComponent(props: P) {
     const language = useLanguage();
@@ -403,19 +445,19 @@ export function withLanguage<P extends object>(
  */
 export function createThemeClassNames(config: ThemeConfig) {
   const classes = getThemeClasses(config);
-  
+
   return {
     // Mode classes
     mode: classes.mode,
     isDark: classes.mode === 'dark',
     isLight: classes.mode === 'light',
-    
+
     // Feature classes
     colorScheme: `color-scheme-${classes.colorScheme}`,
     animation: `animation-${classes.animationLevel}`,
     fontSize: `font-size-${classes.fontSize}`,
     borderRadius: `border-radius-${classes.borderRadius}`,
-    
+
     // Combined class
     combined: [
       classes.mode,
@@ -433,12 +475,12 @@ export function createThemeClassNames(config: ThemeConfig) {
 export function getThemeValue(path: string, config: ThemeConfig): any {
   const keys = path.split('.');
   let value: any = UNIFIED_THEME_CONFIG;
-  
+
   for (const key of keys) {
     value = value?.[key];
     if (value === undefined) break;
   }
-  
+
   return value;
 }
 

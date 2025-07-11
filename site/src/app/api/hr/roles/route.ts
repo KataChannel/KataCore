@@ -12,15 +12,15 @@ export async function GET(request: NextRequest) {
       include: {
         _count: {
           select: {
-            users: true
-          }
-        }
+            users: true,
+          },
+        },
       },
       orderBy: {
-        name: 'asc'
+        name: 'asc',
       },
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
     });
 
     const total = await prisma.role.count();
@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Error fetching roles:', error);
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     // Kiểm tra vai trò đã tồn tại
     const existingRole = await prisma.role.findUnique({
-      where: { name }
+      where: { name },
     });
 
     if (existingRole) {
@@ -65,15 +65,15 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
-        permissions
+        permissions,
       },
       include: {
         _count: {
           select: {
-            users: true
-          }
-        }
-      }
+            users: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(role, { status: 201 });

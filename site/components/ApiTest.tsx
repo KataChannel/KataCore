@@ -37,7 +37,7 @@ export default function ApiTest() {
   return (
     <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-800">
       <h2 className="text-xl font-bold mb-4">API Connection Test</h2>
-      
+
       <button
         onClick={testApi}
         disabled={loading}
@@ -49,7 +49,9 @@ export default function ApiTest() {
       {apiResponse && (
         <div className="mt-4">
           <h3 className="font-semibold">API Response:</h3>
-          <p className="bg-gray-100 dark:bg-gray-700 p-2 rounded">{apiResponse}</p>
+          <p className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
+            {apiResponse}
+          </p>
         </div>
       )}
 

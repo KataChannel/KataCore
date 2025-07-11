@@ -17,21 +17,21 @@ export async function GET(
             id: true,
             displayName: true,
             avatar: true,
-            email: true
-          }
+            email: true,
+          },
         },
         parent: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         children: {
           select: {
             id: true,
             name: true,
-            isActive: true
-          }
+            isActive: true,
+          },
         },
         employees: {
           select: {
@@ -41,10 +41,10 @@ export async function GET(
             fullName: true,
             position: {
               select: {
-                title: true
-              }
-            }
-          }
+                title: true,
+              },
+            },
+          },
         },
         positions: {
           select: {
@@ -53,18 +53,18 @@ export async function GET(
             level: true,
             _count: {
               select: {
-                employees: true
-              }
-            }
-          }
+                employees: true,
+              },
+            },
+          },
         },
         _count: {
           select: {
             employees: true,
-            positions: true
-          }
-        }
-      }
+            positions: true,
+          },
+        },
+      },
     });
 
     if (!department) {
@@ -102,12 +102,12 @@ export async function PUT(
       email,
       isActive,
       managerId,
-      parentId
+      parentId,
     } = body;
 
     // Kiểm tra phòng ban tồn tại
     const existingDepartment = await prisma.department.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!existingDepartment) {
@@ -120,12 +120,9 @@ export async function PUT(
     // Kiểm tra trùng tên/mã với phòng ban khác
     const duplicateDepartment = await prisma.department.findFirst({
       where: {
-        OR: [
-          { name },
-          { code }
-        ],
-        NOT: { id }
-      }
+        OR: [{ name }, { code }],
+        NOT: { id },
+      },
     });
 
     if (duplicateDepartment) {
@@ -147,7 +144,7 @@ export async function PUT(
         email,
         isActive,
         ...(managerId && { managerId }),
-        ...(parentId && { parentId })
+        ...(parentId && { parentId }),
       },
       include: {
         manager: {
@@ -155,22 +152,22 @@ export async function PUT(
             id: true,
             displayName: true,
             avatar: true,
-            email: true
-          }
+            email: true,
+          },
         },
         parent: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         _count: {
           select: {
             employees: true,
-            positions: true
-          }
-        }
-      }
+            positions: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(department);
@@ -197,8 +194,8 @@ export async function DELETE(
       include: {
         employees: true,
         positions: true,
-        children: true
-      }
+        children: true,
+      },
     });
 
     if (!department) {
@@ -233,7 +230,7 @@ export async function DELETE(
     }
 
     await prisma.department.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Xóa phòng ban thành công' });

@@ -17,20 +17,20 @@ export async function GET(
             displayName: true,
             avatar: true,
             email: true,
-            phone: true
-          }
+            phone: true,
+          },
         },
         position: {
           include: {
             department: {
               select: {
                 id: true,
-                name: true
-              }
-            }
-          }
-        }
-      }
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!employee) {
@@ -42,9 +42,8 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: employee
+      data: employee,
     });
-
   } catch (error) {
     console.error('Error fetching employee:', error);
     return NextResponse.json(
@@ -62,23 +61,23 @@ export async function PUT(
   try {
     const { id } = params;
     const body = await request.json();
-    const { 
-      firstName, 
-      lastName, 
-      fullName, 
-      email, 
-      phone, 
-      positionId, 
-      salary, 
-      hireDate, 
-      status, 
-      contractType 
+    const {
+      firstName,
+      lastName,
+      fullName,
+      email,
+      phone,
+      positionId,
+      salary,
+      hireDate,
+      status,
+      contractType,
     } = body;
 
     // Kiểm tra nhân viên có tồn tại không
     const existingEmployee = await prisma.employee.findUnique({
       where: { id },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!existingEmployee) {
@@ -95,8 +94,8 @@ export async function PUT(
         data: {
           ...(email && { email }),
           ...(phone && { phone }),
-          displayName: fullName || `${firstName} ${lastName}`
-        }
+          displayName: fullName || `${firstName} ${lastName}`,
+        },
       });
     }
 
@@ -112,7 +111,7 @@ export async function PUT(
         ...(salary && { salary: parseFloat(salary) }),
         ...(hireDate && { hireDate: new Date(hireDate) }),
         ...(status && { status }),
-        ...(contractType && { contractType })
+        ...(contractType && { contractType }),
       },
       include: {
         user: {
@@ -120,27 +119,26 @@ export async function PUT(
             displayName: true,
             avatar: true,
             email: true,
-            phone: true
-          }
+            phone: true,
+          },
         },
         position: {
           include: {
             department: {
               select: {
                 id: true,
-                name: true
-              }
-            }
-          }
-        }
-      }
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       success: true,
-      data: updatedEmployee
+      data: updatedEmployee,
     });
-
   } catch (error) {
     console.error('Error updating employee:', error);
     return NextResponse.json(
@@ -161,7 +159,7 @@ export async function DELETE(
     // Kiểm tra nhân viên có tồn tại không
     const existingEmployee = await prisma.employee.findUnique({
       where: { id },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!existingEmployee) {
@@ -174,21 +172,20 @@ export async function DELETE(
     // Xóa nhân viên và user liên quan (nếu có)
     await prisma.$transaction(async (tx: any) => {
       await tx.employee.delete({
-        where: { id }
+        where: { id },
       });
 
       if (existingEmployee.userId) {
         await tx.user.delete({
-          where: { id: existingEmployee.userId }
+          where: { id: existingEmployee.userId },
         });
       }
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Xóa nhân viên thành công'
+      message: 'Xóa nhân viên thành công',
     });
-
   } catch (error) {
     console.error('Error deleting employee:', error);
     return NextResponse.json(

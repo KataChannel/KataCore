@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Paper, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   IconButton,
   Dialog,
   DialogTitle,
@@ -27,7 +27,7 @@ import {
   Skeleton,
   InputAdornment,
   Tooltip,
-  Alert
+  Alert,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -41,7 +41,7 @@ import {
   CalendarToday as CalendarIcon,
   Badge as BadgeIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon
+  FilterList as FilterIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../../hooks/useAuth';
 
@@ -92,7 +92,9 @@ const EmployeeManagement: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -108,7 +110,7 @@ const EmployeeManagement: React.FC = () => {
     status: 'ACTIVE',
     contractType: 'FULL_TIME',
     hireDate: new Date().toISOString().split('T')[0],
-    salary: 0
+    salary: 0,
   });
 
   useEffect(() => {
@@ -172,7 +174,7 @@ const EmployeeManagement: React.FC = () => {
         status: employee.status,
         contractType: employee.contractType,
         hireDate: employee.hireDate.split('T')[0],
-        salary: employee.salary || 0
+        salary: employee.salary || 0,
       });
     } else {
       setSelectedEmployee(null);
@@ -187,7 +189,7 @@ const EmployeeManagement: React.FC = () => {
         status: 'ACTIVE',
         contractType: 'FULL_TIME',
         hireDate: new Date().toISOString().split('T')[0],
-        salary: 0
+        salary: 0,
       });
     }
     setOpenDialog(true);
@@ -207,7 +209,7 @@ const EmployeeManagement: React.FC = () => {
       }
 
       const method = selectedEmployee ? 'PUT' : 'POST';
-      const url = selectedEmployee 
+      const url = selectedEmployee
         ? `/api/hr/employees/${selectedEmployee.id}`
         : '/api/hr/employees';
 
@@ -253,51 +255,81 @@ const EmployeeManagement: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'success';
-      case 'INACTIVE': return 'default';
-      case 'TERMINATED': return 'error';
-      case 'ON_LEAVE': return 'warning';
-      case 'PROBATION': return 'info';
-      default: return 'default';
+      case 'ACTIVE':
+        return 'success';
+      case 'INACTIVE':
+        return 'default';
+      case 'TERMINATED':
+        return 'error';
+      case 'ON_LEAVE':
+        return 'warning';
+      case 'PROBATION':
+        return 'info';
+      default:
+        return 'default';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'Đang làm việc';
-      case 'INACTIVE': return 'Không hoạt động';
-      case 'TERMINATED': return 'Đã nghỉ việc';
-      case 'ON_LEAVE': return 'Nghỉ phép';
-      case 'PROBATION': return 'Thử việc';
-      default: return status;
+      case 'ACTIVE':
+        return 'Đang làm việc';
+      case 'INACTIVE':
+        return 'Không hoạt động';
+      case 'TERMINATED':
+        return 'Đã nghỉ việc';
+      case 'ON_LEAVE':
+        return 'Nghỉ phép';
+      case 'PROBATION':
+        return 'Thử việc';
+      default:
+        return status;
     }
   };
 
   const getContractTypeLabel = (type: string) => {
     switch (type) {
-      case 'FULL_TIME': return 'Toàn thời gian';
-      case 'PART_TIME': return 'Bán thời gian';
-      case 'CONTRACT': return 'Hợp đồng';
-      case 'INTERNSHIP': return 'Thực tập';
-      case 'FREELANCE': return 'Tự do';
-      default: return type;
+      case 'FULL_TIME':
+        return 'Toàn thời gian';
+      case 'PART_TIME':
+        return 'Bán thời gian';
+      case 'CONTRACT':
+        return 'Hợp đồng';
+      case 'INTERNSHIP':
+        return 'Thực tập';
+      case 'FREELANCE':
+        return 'Tự do';
+      default:
+        return type;
     }
   };
 
   const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (employee.email && employee.email.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || employee.status === statusFilter;
-    const matchesDepartment = departmentFilter === 'all' || employee.position.department.id === departmentFilter;
-    
+    const matchesSearch =
+      employee.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (employee.email &&
+        employee.email.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesStatus =
+      statusFilter === 'all' || employee.status === statusFilter;
+    const matchesDepartment =
+      departmentFilter === 'all' ||
+      employee.position.department.id === departmentFilter;
+
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
           Quản lý nhân viên
         </Typography>
@@ -399,7 +431,7 @@ const EmployeeManagement: React.FC = () => {
               fullWidth
               placeholder="Tìm kiếm nhân viên..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -415,7 +447,7 @@ const EmployeeManagement: React.FC = () => {
               select
               label="Trạng thái"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
             >
               <MenuItem value="all">Tất cả</MenuItem>
               <MenuItem value="ACTIVE">Đang làm việc</MenuItem>
@@ -431,10 +463,10 @@ const EmployeeManagement: React.FC = () => {
               select
               label="Phòng ban"
               value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
+              onChange={e => setDepartmentFilter(e.target.value)}
             >
               <MenuItem value="all">Tất cả</MenuItem>
-              {departments.map((dept) => (
+              {departments.map(dept => (
                 <MenuItem key={dept.id} value={dept.id}>
                   {dept.name}
                 </MenuItem>
@@ -465,22 +497,42 @@ const EmployeeManagement: React.FC = () => {
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
-                    <TableCell><Skeleton width="100%" /></TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton width="100%" />
+                    </TableCell>
                   </TableRow>
                 ))
               ) : filteredEmployees.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
                     <Box sx={{ py: 4 }}>
-                      <PersonIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
+                      <PersonIcon
+                        sx={{ fontSize: 64, color: 'grey.300', mb: 2 }}
+                      />
                       <Typography variant="h6" color="text.secondary">
                         Chưa có nhân viên nào
                       </Typography>
@@ -491,10 +543,12 @@ const EmployeeManagement: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredEmployees.map((employee) => (
+                filteredEmployees.map(employee => (
                   <TableRow key={employee.id} hover>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+                      >
                         <Avatar
                           src={employee.user?.avatar}
                           alt={employee.fullName}
@@ -523,15 +577,32 @@ const EmployeeManagement: React.FC = () => {
                     <TableCell>
                       <Box>
                         {employee.email && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                              mb: 0.5,
+                            }}
+                          >
                             <EmailIcon fontSize="small" color="action" />
-                            <Typography variant="body2">{employee.email}</Typography>
+                            <Typography variant="body2">
+                              {employee.email}
+                            </Typography>
                           </Box>
                         )}
                         {employee.phone && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
                             <PhoneIcon fontSize="small" color="action" />
-                            <Typography variant="body2">{employee.phone}</Typography>
+                            <Typography variant="body2">
+                              {employee.phone}
+                            </Typography>
                           </Box>
                         )}
                       </Box>
@@ -559,10 +630,14 @@ const EmployeeManagement: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
                         <CalendarIcon fontSize="small" color="action" />
                         <Typography variant="body2">
-                          {new Date(employee.hireDate).toLocaleDateString('vi-VN')}
+                          {new Date(employee.hireDate).toLocaleDateString(
+                            'vi-VN'
+                          )}
                         </Typography>
                       </Box>
                     </TableCell>
@@ -595,7 +670,12 @@ const EmployeeManagement: React.FC = () => {
       </Paper>
 
       {/* Employee Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>
           {selectedEmployee ? 'Cập nhật nhân viên' : 'Thêm nhân viên mới'}
         </DialogTitle>
@@ -611,7 +691,9 @@ const EmployeeManagement: React.FC = () => {
                 fullWidth
                 label="Mã nhân viên"
                 value={formData.employeeId}
-                onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, employeeId: e.target.value })
+                }
                 disabled={!!selectedEmployee}
                 required
               />
@@ -621,7 +703,9 @@ const EmployeeManagement: React.FC = () => {
                 fullWidth
                 label="Họ"
                 value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
                 required
               />
             </Grid>
@@ -630,7 +714,9 @@ const EmployeeManagement: React.FC = () => {
                 fullWidth
                 label="Tên"
                 value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
                 required
               />
             </Grid>
@@ -640,7 +726,9 @@ const EmployeeManagement: React.FC = () => {
                 label="Email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -648,7 +736,9 @@ const EmployeeManagement: React.FC = () => {
                 fullWidth
                 label="Số điện thoại"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -657,10 +747,12 @@ const EmployeeManagement: React.FC = () => {
                 select
                 label="Phòng ban"
                 value={formData.departmentId}
-                onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, departmentId: e.target.value })
+                }
                 required
               >
-                {departments.map((dept) => (
+                {departments.map(dept => (
                   <MenuItem key={dept.id} value={dept.id}>
                     {dept.name}
                   </MenuItem>
@@ -673,12 +765,14 @@ const EmployeeManagement: React.FC = () => {
                 select
                 label="Chức vụ"
                 value={formData.positionId}
-                onChange={(e) => setFormData({ ...formData, positionId: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, positionId: e.target.value })
+                }
                 required
               >
                 {positions
                   .filter(pos => pos.department.id === formData.departmentId)
-                  .map((pos) => (
+                  .map(pos => (
                     <MenuItem key={pos.id} value={pos.id}>
                       {pos.title}
                     </MenuItem>
@@ -691,7 +785,9 @@ const EmployeeManagement: React.FC = () => {
                 select
                 label="Trạng thái"
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
               >
                 <MenuItem value="ACTIVE">Đang làm việc</MenuItem>
                 <MenuItem value="INACTIVE">Không hoạt động</MenuItem>
@@ -706,7 +802,9 @@ const EmployeeManagement: React.FC = () => {
                 select
                 label="Loại hợp đồng"
                 value={formData.contractType}
-                onChange={(e) => setFormData({ ...formData, contractType: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, contractType: e.target.value })
+                }
               >
                 <MenuItem value="FULL_TIME">Toàn thời gian</MenuItem>
                 <MenuItem value="PART_TIME">Bán thời gian</MenuItem>
@@ -721,7 +819,9 @@ const EmployeeManagement: React.FC = () => {
                 type="date"
                 label="Ngày vào làm"
                 value={formData.hireDate}
-                onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, hireDate: e.target.value })
+                }
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
@@ -731,7 +831,9 @@ const EmployeeManagement: React.FC = () => {
                 type="number"
                 label="Lương cơ bản"
                 value={formData.salary}
-                onChange={(e) => setFormData({ ...formData, salary: Number(e.target.value) })}
+                onChange={e =>
+                  setFormData({ ...formData, salary: Number(e.target.value) })
+                }
               />
             </Grid>
           </Grid>

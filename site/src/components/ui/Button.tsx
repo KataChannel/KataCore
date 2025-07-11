@@ -8,27 +8,36 @@ import type { FC } from '@/types/global';
 // COMPONENT INTERFACE
 // ============================================================================
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Button content
    */
   children: React.ReactNode;
-  
+
   /**
    * Button variant
    */
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'info' | 'outline' | 'ghost';
-  
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'danger'
+    | 'success'
+    | 'warning'
+    | 'info'
+    | 'outline'
+    | 'ghost';
+
   /**
    * Button size
    */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  
+
   /**
    * Loading state
    */
   loading?: boolean;
-  
+
   /**
    * Full width button
    */
@@ -40,27 +49,28 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 // ============================================================================
 
 const getButtonStyles = (variant: string = 'primary', size: string = 'md') => {
-  const baseStyles = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none";
-  
+  const baseStyles =
+    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 disabled:pointer-events-none';
+
   const variantStyles = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700",
-    secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
-    danger: "bg-red-600 text-white hover:bg-red-700",
-    success: "bg-green-600 text-white hover:bg-green-700",
-    warning: "bg-yellow-600 text-white hover:bg-yellow-700",
-    info: "bg-blue-500 text-white hover:bg-blue-600",
-    outline: "border border-gray-300 hover:bg-gray-50",
-    ghost: "hover:bg-gray-100",
+    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
+    danger: 'bg-red-600 text-white hover:bg-red-700',
+    success: 'bg-green-600 text-white hover:bg-green-700',
+    warning: 'bg-yellow-600 text-white hover:bg-yellow-700',
+    info: 'bg-blue-500 text-white hover:bg-blue-600',
+    outline: 'border border-gray-300 hover:bg-gray-50',
+    ghost: 'hover:bg-gray-100',
   };
-  
+
   const sizeStyles = {
-    xs: "h-7 px-2 text-xs",
-    sm: "h-8 px-3 text-sm",
-    md: "h-9 px-4",
-    lg: "h-10 px-6",
-    xl: "h-11 px-8 text-lg",
+    xs: 'h-7 px-2 text-xs',
+    sm: 'h-8 px-3 text-sm',
+    md: 'h-9 px-4',
+    lg: 'h-10 px-6',
+    xl: 'h-11 px-8 text-lg',
   };
-  
+
   return `${baseStyles} ${variantStyles[variant as keyof typeof variantStyles]} ${sizeStyles[size as keyof typeof sizeStyles]}`;
 };
 
@@ -108,10 +118,8 @@ export const Button: FC<ButtonProps> = ({
           />
         </svg>
       )}
-      
-      <span>
-        {loading ? 'Loading...' : children}
-      </span>
+
+      <span>{loading ? 'Loading...' : children}</span>
     </button>
   );
 };
@@ -120,4 +128,4 @@ export const Button: FC<ButtonProps> = ({
 // COMPONENT DISPLAY NAME
 // ============================================================================
 
-Button.displayName = "Button";
+Button.displayName = 'Button';

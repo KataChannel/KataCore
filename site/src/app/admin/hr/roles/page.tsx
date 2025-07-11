@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  UserIcon, 
-  ShieldCheckIcon, 
-  PlusIcon, 
-  PencilIcon, 
+import {
+  UserIcon,
+  ShieldCheckIcon,
+  PlusIcon,
+  PencilIcon,
   TrashIcon,
   EyeIcon,
   ExclamationTriangleIcon,
@@ -32,7 +32,14 @@ interface Permission {
   resource: string;
   action: string;
   description: string;
-  category: 'employee' | 'department' | 'attendance' | 'leave' | 'payroll' | 'reports' | 'settings';
+  category:
+    | 'employee'
+    | 'department'
+    | 'attendance'
+    | 'leave'
+    | 'payroll'
+    | 'reports'
+    | 'settings';
 }
 
 interface Role {
@@ -61,42 +68,210 @@ interface User {
 // Mock data for permissions
 const allPermissions: Permission[] = [
   // Employee Management
-  { id: 'emp_read', name: 'View Employees', resource: 'employee', action: 'read', description: 'View employee information', category: 'employee' },
-  { id: 'emp_create', name: 'Create Employees', resource: 'employee', action: 'create', description: 'Add new employees', category: 'employee' },
-  { id: 'emp_update', name: 'Update Employees', resource: 'employee', action: 'update', description: 'Edit employee information', category: 'employee' },
-  { id: 'emp_delete', name: 'Delete Employees', resource: 'employee', action: 'delete', description: 'Remove employees', category: 'employee' },
-  
+  {
+    id: 'emp_read',
+    name: 'View Employees',
+    resource: 'employee',
+    action: 'read',
+    description: 'View employee information',
+    category: 'employee',
+  },
+  {
+    id: 'emp_create',
+    name: 'Create Employees',
+    resource: 'employee',
+    action: 'create',
+    description: 'Add new employees',
+    category: 'employee',
+  },
+  {
+    id: 'emp_update',
+    name: 'Update Employees',
+    resource: 'employee',
+    action: 'update',
+    description: 'Edit employee information',
+    category: 'employee',
+  },
+  {
+    id: 'emp_delete',
+    name: 'Delete Employees',
+    resource: 'employee',
+    action: 'delete',
+    description: 'Remove employees',
+    category: 'employee',
+  },
+
   // Department Management
-  { id: 'dept_read', name: 'View Departments', resource: 'department', action: 'read', description: 'View department information', category: 'department' },
-  { id: 'dept_create', name: 'Create Departments', resource: 'department', action: 'create', description: 'Add new departments', category: 'department' },
-  { id: 'dept_update', name: 'Update Departments', resource: 'department', action: 'update', description: 'Edit department information', category: 'department' },
-  { id: 'dept_delete', name: 'Delete Departments', resource: 'department', action: 'delete', description: 'Remove departments', category: 'department' },
-  
+  {
+    id: 'dept_read',
+    name: 'View Departments',
+    resource: 'department',
+    action: 'read',
+    description: 'View department information',
+    category: 'department',
+  },
+  {
+    id: 'dept_create',
+    name: 'Create Departments',
+    resource: 'department',
+    action: 'create',
+    description: 'Add new departments',
+    category: 'department',
+  },
+  {
+    id: 'dept_update',
+    name: 'Update Departments',
+    resource: 'department',
+    action: 'update',
+    description: 'Edit department information',
+    category: 'department',
+  },
+  {
+    id: 'dept_delete',
+    name: 'Delete Departments',
+    resource: 'department',
+    action: 'delete',
+    description: 'Remove departments',
+    category: 'department',
+  },
+
   // Attendance Management
-  { id: 'att_read', name: 'View Attendance', resource: 'attendance', action: 'read', description: 'View attendance records', category: 'attendance' },
-  { id: 'att_create', name: 'Record Attendance', resource: 'attendance', action: 'create', description: 'Record attendance', category: 'attendance' },
-  { id: 'att_update', name: 'Update Attendance', resource: 'attendance', action: 'update', description: 'Edit attendance records', category: 'attendance' },
-  { id: 'att_delete', name: 'Delete Attendance', resource: 'attendance', action: 'delete', description: 'Remove attendance records', category: 'attendance' },
-  
+  {
+    id: 'att_read',
+    name: 'View Attendance',
+    resource: 'attendance',
+    action: 'read',
+    description: 'View attendance records',
+    category: 'attendance',
+  },
+  {
+    id: 'att_create',
+    name: 'Record Attendance',
+    resource: 'attendance',
+    action: 'create',
+    description: 'Record attendance',
+    category: 'attendance',
+  },
+  {
+    id: 'att_update',
+    name: 'Update Attendance',
+    resource: 'attendance',
+    action: 'update',
+    description: 'Edit attendance records',
+    category: 'attendance',
+  },
+  {
+    id: 'att_delete',
+    name: 'Delete Attendance',
+    resource: 'attendance',
+    action: 'delete',
+    description: 'Remove attendance records',
+    category: 'attendance',
+  },
+
   // Leave Management
-  { id: 'leave_read', name: 'View Leave Requests', resource: 'leave', action: 'read', description: 'View leave requests', category: 'leave' },
-  { id: 'leave_create', name: 'Create Leave Requests', resource: 'leave', action: 'create', description: 'Submit leave requests', category: 'leave' },
-  { id: 'leave_approve', name: 'Approve Leave', resource: 'leave', action: 'approve', description: 'Approve leave requests', category: 'leave' },
-  { id: 'leave_reject', name: 'Reject Leave', resource: 'leave', action: 'reject', description: 'Reject leave requests', category: 'leave' },
-  
+  {
+    id: 'leave_read',
+    name: 'View Leave Requests',
+    resource: 'leave',
+    action: 'read',
+    description: 'View leave requests',
+    category: 'leave',
+  },
+  {
+    id: 'leave_create',
+    name: 'Create Leave Requests',
+    resource: 'leave',
+    action: 'create',
+    description: 'Submit leave requests',
+    category: 'leave',
+  },
+  {
+    id: 'leave_approve',
+    name: 'Approve Leave',
+    resource: 'leave',
+    action: 'approve',
+    description: 'Approve leave requests',
+    category: 'leave',
+  },
+  {
+    id: 'leave_reject',
+    name: 'Reject Leave',
+    resource: 'leave',
+    action: 'reject',
+    description: 'Reject leave requests',
+    category: 'leave',
+  },
+
   // Payroll Management
-  { id: 'payroll_read', name: 'View Payroll', resource: 'payroll', action: 'read', description: 'View payroll information', category: 'payroll' },
-  { id: 'payroll_create', name: 'Create Payroll', resource: 'payroll', action: 'create', description: 'Create payroll entries', category: 'payroll' },
-  { id: 'payroll_update', name: 'Update Payroll', resource: 'payroll', action: 'update', description: 'Edit payroll information', category: 'payroll' },
-  { id: 'payroll_delete', name: 'Delete Payroll', resource: 'payroll', action: 'delete', description: 'Remove payroll entries', category: 'payroll' },
-  
+  {
+    id: 'payroll_read',
+    name: 'View Payroll',
+    resource: 'payroll',
+    action: 'read',
+    description: 'View payroll information',
+    category: 'payroll',
+  },
+  {
+    id: 'payroll_create',
+    name: 'Create Payroll',
+    resource: 'payroll',
+    action: 'create',
+    description: 'Create payroll entries',
+    category: 'payroll',
+  },
+  {
+    id: 'payroll_update',
+    name: 'Update Payroll',
+    resource: 'payroll',
+    action: 'update',
+    description: 'Edit payroll information',
+    category: 'payroll',
+  },
+  {
+    id: 'payroll_delete',
+    name: 'Delete Payroll',
+    resource: 'payroll',
+    action: 'delete',
+    description: 'Remove payroll entries',
+    category: 'payroll',
+  },
+
   // Reports
-  { id: 'reports_read', name: 'View Reports', resource: 'reports', action: 'read', description: 'View system reports', category: 'reports' },
-  { id: 'reports_export', name: 'Export Reports', resource: 'reports', action: 'export', description: 'Export reports to files', category: 'reports' },
-  
+  {
+    id: 'reports_read',
+    name: 'View Reports',
+    resource: 'reports',
+    action: 'read',
+    description: 'View system reports',
+    category: 'reports',
+  },
+  {
+    id: 'reports_export',
+    name: 'Export Reports',
+    resource: 'reports',
+    action: 'export',
+    description: 'Export reports to files',
+    category: 'reports',
+  },
+
   // Settings
-  { id: 'settings_read', name: 'View Settings', resource: 'settings', action: 'read', description: 'View system settings', category: 'settings' },
-  { id: 'settings_update', name: 'Update Settings', resource: 'settings', action: 'update', description: 'Modify system settings', category: 'settings' },
+  {
+    id: 'settings_read',
+    name: 'View Settings',
+    resource: 'settings',
+    action: 'read',
+    description: 'View system settings',
+    category: 'settings',
+  },
+  {
+    id: 'settings_update',
+    name: 'Update Settings',
+    resource: 'settings',
+    action: 'update',
+    description: 'Modify system settings',
+    category: 'settings',
+  },
 ];
 
 // Mock data for roles
@@ -117,7 +292,9 @@ const mockRoles: Role[] = [
     name: 'HR Manager',
     description: 'Management level access to HR functions',
     level: 4,
-    permissions: allPermissions.filter(p => !['emp_delete', 'dept_delete', 'settings_update'].includes(p.id)),
+    permissions: allPermissions.filter(
+      p => !['emp_delete', 'dept_delete', 'settings_update'].includes(p.id)
+    ),
     userCount: 5,
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
@@ -128,7 +305,21 @@ const mockRoles: Role[] = [
     name: 'HR Specialist',
     description: 'Standard HR operations access',
     level: 3,
-    permissions: allPermissions.filter(p => ['emp_read', 'emp_create', 'emp_update', 'dept_read', 'att_read', 'att_create', 'att_update', 'leave_read', 'leave_create', 'payroll_read', 'reports_read'].includes(p.id)),
+    permissions: allPermissions.filter(p =>
+      [
+        'emp_read',
+        'emp_create',
+        'emp_update',
+        'dept_read',
+        'att_read',
+        'att_create',
+        'att_update',
+        'leave_read',
+        'leave_create',
+        'payroll_read',
+        'reports_read',
+      ].includes(p.id)
+    ),
     userCount: 8,
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
@@ -139,7 +330,18 @@ const mockRoles: Role[] = [
     name: 'Department Manager',
     description: 'Department-level HR access',
     level: 3,
-    permissions: allPermissions.filter(p => ['emp_read', 'emp_update', 'att_read', 'att_update', 'leave_read', 'leave_approve', 'leave_reject', 'reports_read'].includes(p.id)),
+    permissions: allPermissions.filter(p =>
+      [
+        'emp_read',
+        'emp_update',
+        'att_read',
+        'att_update',
+        'leave_read',
+        'leave_approve',
+        'leave_reject',
+        'reports_read',
+      ].includes(p.id)
+    ),
     userCount: 12,
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
@@ -150,7 +352,9 @@ const mockRoles: Role[] = [
     name: 'Employee',
     description: 'Basic employee self-service access',
     level: 1,
-    permissions: allPermissions.filter(p => ['emp_read', 'att_read', 'leave_read', 'leave_create'].includes(p.id)),
+    permissions: allPermissions.filter(p =>
+      ['emp_read', 'att_read', 'leave_read', 'leave_create'].includes(p.id)
+    ),
     userCount: 150,
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
@@ -233,7 +437,9 @@ const categoryColors = {
 };
 
 export default function RolesPermissionsPage() {
-  const [activeTab, setActiveTab] = useState<'roles' | 'permissions' | 'users'>('roles');
+  const [activeTab, setActiveTab] = useState<'roles' | 'permissions' | 'users'>(
+    'roles'
+  );
   const [roles, setRoles] = useState<Role[]>(mockRoles);
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
@@ -241,7 +447,10 @@ export default function RolesPermissionsPage() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: 'role' | 'user', id: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: 'role' | 'user';
+    id: string;
+  } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -251,21 +460,25 @@ export default function RolesPermissionsPage() {
 
   // Filter and sort data
   const filteredRoles = roles.filter(role => {
-    const matchesSearch = role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         role.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'active' && role.isActive) ||
-                         (statusFilter === 'inactive' && !role.isActive);
+    const matchesSearch =
+      role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      role.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && role.isActive) ||
+      (statusFilter === 'inactive' && !role.isActive);
     return matchesSearch && matchesStatus;
   });
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.department.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'active' && user.isActive) ||
-                         (statusFilter === 'inactive' && !user.isActive);
+    const matchesSearch =
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.department.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && user.isActive) ||
+      (statusFilter === 'inactive' && !user.isActive);
     const matchesRole = roleFilter === 'all' || user.role.id === roleFilter;
     return matchesSearch && matchesStatus && matchesRole;
   });
@@ -374,8 +587,12 @@ export default function RolesPermissionsPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Roles & Permissions</h1>
-            <p className="text-gray-600">Manage user roles, permissions, and access control</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Roles & Permissions
+            </h1>
+            <p className="text-gray-600">
+              Manage user roles, permissions, and access control
+            </p>
           </div>
           <div className="flex items-center space-x-3">
             <button
@@ -454,7 +671,7 @@ export default function RolesPermissionsPage() {
                   type="text"
                   placeholder={`Search ${activeTab}...`}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
@@ -462,7 +679,7 @@ export default function RolesPermissionsPage() {
                 <FunnelIcon className="h-5 w-5 text-gray-400" />
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={e => setStatusFilter(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                 >
                   <option value="all">All Status</option>
@@ -474,12 +691,14 @@ export default function RolesPermissionsPage() {
                 <div>
                   <select
                     value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
+                    onChange={e => setRoleFilter(e.target.value)}
                     className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   >
                     <option value="all">All Roles</option>
                     {roles.map(role => (
-                      <option key={role.id} value={role.id}>{role.name}</option>
+                      <option key={role.id} value={role.id}>
+                        {role.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -501,29 +720,35 @@ export default function RolesPermissionsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center">
                       Role Name
-                      {sortBy === 'name' && (
-                        sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                      )}
+                      {sortBy === 'name' &&
+                        (sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Description
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('level')}
                   >
                     <div className="flex items-center">
                       Level
-                      {sortBy === 'level' && (
-                        sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                      )}
+                      {sortBy === 'level' &&
+                        (sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -541,7 +766,7 @@ export default function RolesPermissionsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sortedRoles.map((role) => (
+                {sortedRoles.map(role => (
                   <tr key={role.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -581,11 +806,13 @@ export default function RolesPermissionsPage() {
                       {role.userCount} users
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        role.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          role.isActive
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {role.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
@@ -622,11 +849,14 @@ export default function RolesPermissionsPage() {
       {activeTab === 'permissions' && (
         <div className="space-y-6">
           {Object.entries(
-            allPermissions.reduce((acc, permission) => {
-              if (!acc[permission.category]) acc[permission.category] = [];
-              acc[permission.category].push(permission);
-              return acc;
-            }, {} as Record<string, Permission[]>)
+            allPermissions.reduce(
+              (acc, permission) => {
+                if (!acc[permission.category]) acc[permission.category] = [];
+                acc[permission.category].push(permission);
+                return acc;
+              },
+              {} as Record<string, Permission[]>
+            )
           ).map(([category, permissions]) => {
             const Icon = categoryIcons[category as keyof typeof categoryIcons];
             return (
@@ -644,7 +874,7 @@ export default function RolesPermissionsPage() {
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {permissions.map((permission) => (
+                    {permissions.map(permission => (
                       <div
                         key={permission.id}
                         className={`p-4 border rounded-lg ${categoryColors[category as keyof typeof categoryColors]}`}
@@ -688,15 +918,18 @@ export default function RolesPermissionsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center">
                       User
-                      {sortBy === 'name' && (
-                        sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                      )}
+                      {sortBy === 'name' &&
+                        (sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -717,14 +950,17 @@ export default function RolesPermissionsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sortedUsers.map((user) => (
+                {sortedUsers.map(user => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                             <span className="text-sm font-medium text-gray-600">
-                              {user.name.split(' ').map(n => n[0]).join('')}
+                              {user.name
+                                .split(' ')
+                                .map(n => n[0])
+                                .join('')}
                             </span>
                           </div>
                         </div>
@@ -750,11 +986,13 @@ export default function RolesPermissionsPage() {
                       {new Date(user.lastLogin).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          user.isActive
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {user.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
@@ -801,7 +1039,8 @@ export default function RolesPermissionsPage() {
               </h3>
               <div className="mt-4 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Are you sure you want to delete this {deleteTarget?.type}? This action cannot be undone.
+                  Are you sure you want to delete this {deleteTarget?.type}?
+                  This action cannot be undone.
                 </p>
               </div>
               <div className="flex justify-center space-x-4 mt-6">

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  UserIcon, 
-  PlusIcon, 
-  PencilIcon, 
+import {
+  UserIcon,
+  PlusIcon,
+  PencilIcon,
   TrashIcon,
   EyeIcon,
   ExclamationTriangleIcon,
@@ -49,7 +49,12 @@ interface Employee {
   } | null;
   hireDate: string;
   status: 'ACTIVE' | 'INACTIVE' | 'TERMINATED' | 'ON_LEAVE' | 'PROBATION';
-  contractType: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'FREELANCE';
+  contractType:
+    | 'FULL_TIME'
+    | 'PART_TIME'
+    | 'CONTRACT'
+    | 'INTERNSHIP'
+    | 'FREELANCE';
   salary: number;
   address: string;
   dateOfBirth: string;
@@ -238,9 +243,19 @@ const mockDepartments: Department[] = [
 ];
 
 const mockPositions: Position[] = [
-  { id: '1', title: 'Senior Software Engineer', departmentId: '1', level: 'Senior' },
+  {
+    id: '1',
+    title: 'Senior Software Engineer',
+    departmentId: '1',
+    level: 'Senior',
+  },
   { id: '2', title: 'Marketing Manager', departmentId: '2', level: 'Manager' },
-  { id: '3', title: 'Sales Representative', departmentId: '3', level: 'Junior' },
+  {
+    id: '3',
+    title: 'Sales Representative',
+    departmentId: '3',
+    level: 'Junior',
+  },
   { id: '4', title: 'HR Specialist', departmentId: '4', level: 'Mid' },
   { id: '5', title: 'Financial Analyst', departmentId: '5', level: 'Mid' },
 ];
@@ -264,10 +279,16 @@ const contractTypeColors = {
 export default function AdvancedEmployeePage() {
   // Simulate current user for permissions (in real app, this would come from auth context)
   const currentUser = { roleId: 'hr_admin', departmentId: '4', userId: '4' };
-  const permissions = useEnhancedHRPermissions(currentUser.roleId, currentUser.departmentId, currentUser.userId);
+  const permissions = useEnhancedHRPermissions(
+    currentUser.roleId,
+    currentUser.departmentId,
+    currentUser.userId
+  );
 
   const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -281,17 +302,26 @@ export default function AdvancedEmployeePage() {
 
   // Filter employees based on search and filters
   const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = employee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.department.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.position.title.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || employee.status === statusFilter;
-    const matchesDepartment = departmentFilter === 'all' || employee.department.id === departmentFilter;
-    const matchesContractType = contractTypeFilter === 'all' || employee.contractType === contractTypeFilter;
-    
-    return matchesSearch && matchesStatus && matchesDepartment && matchesContractType;
+    const matchesSearch =
+      employee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.department.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      employee.position.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' || employee.status === statusFilter;
+    const matchesDepartment =
+      departmentFilter === 'all' || employee.department.id === departmentFilter;
+    const matchesContractType =
+      contractTypeFilter === 'all' ||
+      employee.contractType === contractTypeFilter;
+
+    return (
+      matchesSearch && matchesStatus && matchesDepartment && matchesContractType
+    );
   });
 
   // Sort employees
@@ -359,12 +389,17 @@ export default function AdvancedEmployeePage() {
       return;
     }
     // Simulate export functionality
-    const csvContent = employees.map(emp => 
-      `${emp.employeeId},${emp.fullName},${emp.email},${emp.department.name},${emp.position.title},${emp.status}`
-    ).join('\n');
-    
-    const blob = new Blob([`Employee ID,Name,Email,Department,Position,Status\n${csvContent}`], 
-      { type: 'text/csv' });
+    const csvContent = employees
+      .map(
+        emp =>
+          `${emp.employeeId},${emp.fullName},${emp.email},${emp.department.name},${emp.position.title},${emp.status}`
+      )
+      .join('\n');
+
+    const blob = new Blob(
+      [`Employee ID,Name,Email,Department,Position,Status\n${csvContent}`],
+      { type: 'text/csv' }
+    );
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -381,7 +416,7 @@ export default function AdvancedEmployeePage() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.csv,.xlsx';
-    input.onchange = (e) => {
+    input.onchange = e => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         console.log('Importing file:', file.name);
@@ -428,8 +463,12 @@ export default function AdvancedEmployeePage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Employee Management</h1>
-            <p className="text-gray-600">Manage your organization's workforce with advanced features</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Employee Management
+            </h1>
+            <p className="text-gray-600">
+              Manage your organization's workforce with advanced features
+            </p>
           </div>
           <div className="flex items-center space-x-3">
             <button
@@ -469,8 +508,12 @@ export default function AdvancedEmployeePage() {
               <UserIcon className="h-6 w-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Employees</p>
-              <p className="text-2xl font-bold text-gray-900">{employees.length}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Employees
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {employees.length}
+              </p>
             </div>
           </div>
         </div>
@@ -480,7 +523,9 @@ export default function AdvancedEmployeePage() {
               <UserIcon className="h-6 w-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Active Employees</p>
+              <p className="text-sm font-medium text-gray-600">
+                Active Employees
+              </p>
               <p className="text-2xl font-bold text-gray-900">
                 {employees.filter(emp => emp.status === 'ACTIVE').length}
               </p>
@@ -494,7 +539,9 @@ export default function AdvancedEmployeePage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Departments</p>
-              <p className="text-2xl font-bold text-gray-900">{mockDepartments.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {mockDepartments.length}
+              </p>
             </div>
           </div>
         </div>
@@ -504,9 +551,16 @@ export default function AdvancedEmployeePage() {
               <StarIcon className="h-6 w-6 text-purple-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg Performance</p>
+              <p className="text-sm font-medium text-gray-600">
+                Avg Performance
+              </p>
               <p className="text-2xl font-bold text-gray-900">
-                {(employees.reduce((acc, emp) => acc + emp.performanceRating, 0) / employees.length).toFixed(1)}
+                {(
+                  employees.reduce(
+                    (acc, emp) => acc + emp.performanceRating,
+                    0
+                  ) / employees.length
+                ).toFixed(1)}
               </p>
             </div>
           </div>
@@ -526,7 +580,7 @@ export default function AdvancedEmployeePage() {
                   type="text"
                   placeholder="Search employees..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
@@ -534,7 +588,7 @@ export default function AdvancedEmployeePage() {
                 <FunnelIcon className="h-5 w-5 text-gray-400" />
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={e => setStatusFilter(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                 >
                   <option value="all">All Status</option>
@@ -548,19 +602,21 @@ export default function AdvancedEmployeePage() {
               <div>
                 <select
                   value={departmentFilter}
-                  onChange={(e) => setDepartmentFilter(e.target.value)}
+                  onChange={e => setDepartmentFilter(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                 >
                   <option value="all">All Departments</option>
                   {mockDepartments.map(dept => (
-                    <option key={dept.id} value={dept.id}>{dept.name}</option>
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
                 <select
                   value={contractTypeFilter}
-                  onChange={(e) => setContractTypeFilter(e.target.value)}
+                  onChange={e => setContractTypeFilter(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                 >
                   <option value="all">All Contract Types</option>
@@ -576,8 +632,8 @@ export default function AdvancedEmployeePage() {
               <button
                 onClick={() => setViewMode('table')}
                 className={`px-3 py-2 text-sm font-medium rounded-md ${
-                  viewMode === 'table' 
-                    ? 'bg-indigo-100 text-indigo-700' 
+                  viewMode === 'table'
+                    ? 'bg-indigo-100 text-indigo-700'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -586,8 +642,8 @@ export default function AdvancedEmployeePage() {
               <button
                 onClick={() => setViewMode('cards')}
                 className={`px-3 py-2 text-sm font-medium rounded-md ${
-                  viewMode === 'cards' 
-                    ? 'bg-indigo-100 text-indigo-700' 
+                  viewMode === 'cards'
+                    ? 'bg-indigo-100 text-indigo-700'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -610,40 +666,49 @@ export default function AdvancedEmployeePage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('fullName')}
                   >
                     <div className="flex items-center">
                       Employee
-                      {sortBy === 'fullName' && (
-                        sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                      )}
+                      {sortBy === 'fullName' &&
+                        (sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4 ml-1" />
+                        ))}
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('department')}
                   >
                     <div className="flex items-center">
                       Department
-                      {sortBy === 'department' && (
-                        sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                      )}
+                      {sortBy === 'department' &&
+                        (sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Position
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('hireDate')}
                   >
                     <div className="flex items-center">
                       Hire Date
-                      {sortBy === 'hireDate' && (
-                        sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                      )}
+                      {sortBy === 'hireDate' &&
+                        (sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -661,14 +726,15 @@ export default function AdvancedEmployeePage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sortedEmployees.map((employee) => (
+                {sortedEmployees.map(employee => (
                   <tr key={employee.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                             <span className="text-sm font-medium text-gray-600">
-                              {employee.firstName[0]}{employee.lastName[0]}
+                              {employee.firstName[0]}
+                              {employee.lastName[0]}
                             </span>
                           </div>
                         </div>
@@ -693,19 +759,29 @@ export default function AdvancedEmployeePage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex items-center">
-                        <StarIcon className={`h-4 w-4 mr-1 ${getPerformanceColor(employee.performanceRating)}`} />
-                        <span className={getPerformanceColor(employee.performanceRating)}>
+                        <StarIcon
+                          className={`h-4 w-4 mr-1 ${getPerformanceColor(employee.performanceRating)}`}
+                        />
+                        <span
+                          className={getPerformanceColor(
+                            employee.performanceRating
+                          )}
+                        >
                           {employee.performanceRating.toFixed(1)}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${contractTypeColors[employee.contractType]}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${contractTypeColors[employee.contractType]}`}
+                      >
                         {employee.contractType.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[employee.status]}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[employee.status]}`}
+                      >
                         {employee.status.replace('_', ' ')}
                       </span>
                     </td>
@@ -718,7 +794,10 @@ export default function AdvancedEmployeePage() {
                         >
                           <EyeIcon className="h-4 w-4" />
                         </button>
-                        {permissions.canUpdateEmployee(employee.department.id, employee.id) && (
+                        {permissions.canUpdateEmployee(
+                          employee.department.id,
+                          employee.id
+                        ) && (
                           <Link
                             href={`/hr/employees/${employee.id}/edit`}
                             className="text-green-600 hover:text-green-900"
@@ -727,7 +806,10 @@ export default function AdvancedEmployeePage() {
                             <PencilIcon className="h-4 w-4" />
                           </Link>
                         )}
-                        {permissions.canDeleteEmployee(employee.department.id, employee.id) && (
+                        {permissions.canDeleteEmployee(
+                          employee.department.id,
+                          employee.id
+                        ) && (
                           <button
                             onClick={() => handleDelete(employee)}
                             className="text-red-600 hover:text-red-900"
@@ -746,26 +828,34 @@ export default function AdvancedEmployeePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedEmployees.map((employee) => (
-            <div key={employee.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+          {sortedEmployees.map(employee => (
+            <div
+              key={employee.id}
+              className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+            >
               <div className="p-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
                     <span className="text-lg font-medium text-gray-600">
-                      {employee.firstName[0]}{employee.lastName[0]}
+                      {employee.firstName[0]}
+                      {employee.lastName[0]}
                     </span>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-medium text-gray-900 truncate">
                       {employee.fullName}
                     </h3>
-                    <p className="text-sm text-gray-500">{employee.employeeId}</p>
+                    <p className="text-sm text-gray-500">
+                      {employee.employeeId}
+                    </p>
                   </div>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[employee.status]}`}>
+                  <span
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[employee.status]}`}
+                  >
                     {employee.status.replace('_', ' ')}
                   </span>
                 </div>
-                
+
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-600">
                     <BuildingOfficeIcon className="h-4 w-4 mr-2" />
@@ -787,14 +877,22 @@ export default function AdvancedEmployeePage() {
 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
-                    <StarIcon className={`h-4 w-4 mr-1 ${getPerformanceColor(employee.performanceRating)}`} />
-                    <span className={`text-sm font-medium ${getPerformanceColor(employee.performanceRating)}`}>
+                    <StarIcon
+                      className={`h-4 w-4 mr-1 ${getPerformanceColor(employee.performanceRating)}`}
+                    />
+                    <span
+                      className={`text-sm font-medium ${getPerformanceColor(employee.performanceRating)}`}
+                    >
                       {employee.performanceRating.toFixed(1)}
                     </span>
                   </div>
                   <div className="flex items-center">
-                    <ClockIcon className={`h-4 w-4 mr-1 ${getAttendanceColor(employee.attendanceRate)}`} />
-                    <span className={`text-sm font-medium ${getAttendanceColor(employee.attendanceRate)}`}>
+                    <ClockIcon
+                      className={`h-4 w-4 mr-1 ${getAttendanceColor(employee.attendanceRate)}`}
+                    />
+                    <span
+                      className={`text-sm font-medium ${getAttendanceColor(employee.attendanceRate)}`}
+                    >
                       {employee.attendanceRate.toFixed(1)}%
                     </span>
                   </div>
@@ -808,7 +906,10 @@ export default function AdvancedEmployeePage() {
                     <EyeIcon className="h-4 w-4 mr-1" />
                     View
                   </button>
-                  {permissions.canUpdateEmployee(employee.department.id, employee.id) && (
+                  {permissions.canUpdateEmployee(
+                    employee.department.id,
+                    employee.id
+                  ) && (
                     <Link
                       href={`/hr/employees/${employee.id}/edit`}
                       className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -816,7 +917,10 @@ export default function AdvancedEmployeePage() {
                       <PencilIcon className="h-4 w-4" />
                     </Link>
                   )}
-                  {permissions.canDeleteEmployee(employee.department.id, employee.id) && (
+                  {permissions.canDeleteEmployee(
+                    employee.department.id,
+                    employee.id
+                  ) && (
                     <button
                       onClick={() => handleDelete(employee)}
                       className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -837,119 +941,205 @@ export default function AdvancedEmployeePage() {
           <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-medium text-gray-900">Employee Details</h3>
+                <h3 className="text-lg font-medium text-gray-900">
+                  Employee Details
+                </h3>
                 <button
                   onClick={() => setShowDetailModal(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Basic Information */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-medium text-gray-900 border-b pb-2">Basic Information</h4>
+                  <h4 className="text-md font-medium text-gray-900 border-b pb-2">
+                    Basic Information
+                  </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Employee ID</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.employeeId}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Employee ID
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedEmployee.employeeId}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.fullName}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Full Name
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedEmployee.fullName}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Email</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.email}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Email
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedEmployee.email}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Phone</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.phone}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Phone
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedEmployee.phone}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Gender</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.gender}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Gender
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedEmployee.gender}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Nationality</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.nationality}</p>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Nationality
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedEmployee.nationality}
+                      </p>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Address</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedEmployee.address}</p>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Address
+                    </label>
+                    <p className="mt-1 text-sm text-gray-900">
+                      {selectedEmployee.address}
+                    </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedEmployee.emergencyContact}</p>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Emergency Contact
+                    </label>
+                    <p className="mt-1 text-sm text-gray-900">
+                      {selectedEmployee.emergencyContact}
+                    </p>
                   </div>
                 </div>
 
                 {/* Employment Information */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-medium text-gray-900 border-b pb-2">Employment Information</h4>
+                  <h4 className="text-md font-medium text-gray-900 border-b pb-2">
+                    Employment Information
+                  </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Department</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.department.name}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Position</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedEmployee.position.title}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Manager</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Department
+                      </label>
                       <p className="mt-1 text-sm text-gray-900">
-                        {selectedEmployee.manager?.name || 'No manager assigned'}
+                        {selectedEmployee.department.name}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Hire Date</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Position
+                      </label>
                       <p className="mt-1 text-sm text-gray-900">
-                        {new Date(selectedEmployee.hireDate).toLocaleDateString()}
+                        {selectedEmployee.position.title}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Contract Type</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Manager
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedEmployee.manager?.name ||
+                          'No manager assigned'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Hire Date
+                      </label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {new Date(
+                          selectedEmployee.hireDate
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Contract Type
+                      </label>
                       <p className="mt-1 text-sm text-gray-900">
                         {selectedEmployee.contractType.replace('_', ' ')}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Status</label>
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[selectedEmployee.status]}`}>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Status
+                      </label>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[selectedEmployee.status]}`}
+                      >
                         {selectedEmployee.status.replace('_', ' ')}
                       </span>
                     </div>
-                    {permissions.canAccessPayroll(selectedEmployee.department.id, selectedEmployee.id) && (
+                    {permissions.canAccessPayroll(
+                      selectedEmployee.department.id,
+                      selectedEmployee.id
+                    ) && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Salary</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Salary
+                        </label>
                         <p className="mt-1 text-sm text-gray-900">
                           ${selectedEmployee.salary.toLocaleString()}
                         </p>
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Performance Metrics */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Performance Rating</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Performance Rating
+                      </label>
                       <div className="flex items-center mt-1">
-                        <StarIcon className={`h-4 w-4 mr-1 ${getPerformanceColor(selectedEmployee.performanceRating)}`} />
-                        <span className={`text-sm font-medium ${getPerformanceColor(selectedEmployee.performanceRating)}`}>
+                        <StarIcon
+                          className={`h-4 w-4 mr-1 ${getPerformanceColor(selectedEmployee.performanceRating)}`}
+                        />
+                        <span
+                          className={`text-sm font-medium ${getPerformanceColor(selectedEmployee.performanceRating)}`}
+                        >
                           {selectedEmployee.performanceRating.toFixed(1)} / 5.0
                         </span>
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Attendance Rate</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Attendance Rate
+                      </label>
                       <div className="flex items-center mt-1">
-                        <ClockIcon className={`h-4 w-4 mr-1 ${getAttendanceColor(selectedEmployee.attendanceRate)}`} />
-                        <span className={`text-sm font-medium ${getAttendanceColor(selectedEmployee.attendanceRate)}`}>
+                        <ClockIcon
+                          className={`h-4 w-4 mr-1 ${getAttendanceColor(selectedEmployee.attendanceRate)}`}
+                        />
+                        <span
+                          className={`text-sm font-medium ${getAttendanceColor(selectedEmployee.attendanceRate)}`}
+                        >
                           {selectedEmployee.attendanceRate.toFixed(1)}%
                         </span>
                       </div>
@@ -958,21 +1148,31 @@ export default function AdvancedEmployeePage() {
 
                   {/* Skills and Certifications */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Skills</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Skills
+                    </label>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {selectedEmployee.skills.map((skill, index) => (
-                        <span key={index} className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                        <span
+                          key={index}
+                          className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
+                        >
                           {skill}
                         </span>
                       ))}
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Certifications</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Certifications
+                    </label>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {selectedEmployee.certifications.map((cert, index) => (
-                        <span key={index} className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                        <span
+                          key={index}
+                          className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"
+                        >
                           {cert}
                         </span>
                       ))}
@@ -980,10 +1180,15 @@ export default function AdvancedEmployeePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Tags</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Tags
+                    </label>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {selectedEmployee.tags.map((tag, index) => (
-                        <span key={index} className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                        <span
+                          key={index}
+                          className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -999,7 +1204,10 @@ export default function AdvancedEmployeePage() {
                 >
                   Close
                 </button>
-                {permissions.canUpdateEmployee(selectedEmployee.department.id, selectedEmployee.id) && (
+                {permissions.canUpdateEmployee(
+                  selectedEmployee.department.id,
+                  selectedEmployee.id
+                ) && (
                   <Link
                     href={`/hr/employees/${selectedEmployee.id}/edit`}
                     className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -1021,11 +1229,15 @@ export default function AdvancedEmployeePage() {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                 <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mt-4">Delete Employee</h3>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">
+                Delete Employee
+              </h3>
               <div className="mt-4 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Are you sure you want to delete <strong>{selectedEmployee.fullName}</strong>? 
-                  This action cannot be undone and will permanently remove all employee data.
+                  Are you sure you want to delete{' '}
+                  <strong>{selectedEmployee.fullName}</strong>? This action
+                  cannot be undone and will permanently remove all employee
+                  data.
                 </p>
               </div>
               <div className="flex justify-center space-x-4 mt-6">

@@ -1,6 +1,7 @@
 # Coding Standards & Design Patterns - TazaGroup
 
 ## 📋 Table of Contents
+
 1. [TypeScript Patterns](#typescript-patterns)
 2. [React Component Patterns](#react-component-patterns)
 3. [File Organization](#file-organization)
@@ -11,6 +12,7 @@
 ## 🎯 TypeScript Patterns
 
 ### Interface Naming
+
 ```typescript
 // ✅ Good - Use PascalCase with descriptive names
 interface UserProfile {
@@ -25,11 +27,12 @@ interface ComponentProps {
 }
 
 // ❌ Bad
-interface userProfile { }
-interface props { }
+interface userProfile {}
+interface props {}
 ```
 
 ### Type Definitions
+
 ```typescript
 // ✅ Good - Use union types for specific values
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
@@ -46,6 +49,7 @@ interface ApiResponse<T> {
 ## ⚛️ React Component Patterns
 
 ### Function Component Definition
+
 ```typescript
 // ✅ Good - Standard pattern với interface Props
 interface ButtonProps {
@@ -80,23 +84,25 @@ export default function Button(props: any) { }
 ```
 
 ### Props Interface Pattern
+
 ```typescript
 // ✅ Good - Always define props interface
 interface ComponentNameProps {
   // Required props first
   title: string;
   data: DataType[];
-  
+
   // Optional props second
   className?: string;
   onAction?: (item: DataType) => void;
-  
+
   // Children last if needed
   children?: React.ReactNode;
 }
 ```
 
 ### Export Pattern
+
 ```typescript
 // ✅ Good - Named exports preferred
 export const ComponentName: React.FC<ComponentNameProps> = (props) => {
@@ -112,11 +118,12 @@ export default function PageName() {
 ## 📁 File Organization
 
 ### Directory Structure
+
 ```
 src/
 ├── types/              # Global type definitions
 │   ├── api.ts         # API related types
-│   ├── auth.ts        # Authentication types  
+│   ├── auth.ts        # Authentication types
 │   ├── common.ts      # Common shared types
 │   └── ui.ts          # UI component types
 ├── components/        # Shared components
@@ -133,13 +140,14 @@ src/
 ```
 
 ### Component File Naming
+
 ```
 // ✅ Good
 Button.tsx
 UserProfile.tsx
 DataTable.tsx
 
-// ❌ Bad  
+// ❌ Bad
 button.tsx
 userprofile.tsx
 dataTable.tsx
@@ -148,6 +156,7 @@ dataTable.tsx
 ## 🏷️ Naming Conventions
 
 ### Variables & Functions
+
 ```typescript
 // ✅ Good - camelCase
 const userName = 'john';
@@ -160,6 +169,7 @@ const FetchUserData = async () => {};
 ```
 
 ### Constants
+
 ```typescript
 // ✅ Good - SCREAMING_SNAKE_CASE
 const API_BASE_URL = 'https://api.example.com';
@@ -170,19 +180,21 @@ const apiBaseUrl = 'https://api.example.com';
 ```
 
 ### Component & Interface Names
+
 ```typescript
 // ✅ Good - PascalCase
-interface UserProfileProps { }
+interface UserProfileProps {}
 const UserProfile: React.FC<UserProfileProps> = () => {};
 
 // ❌ Bad
-interface userProfileProps { }
+interface userProfileProps {}
 const userProfile = () => {};
 ```
 
 ## 🔗 Interface & Type Patterns
 
 ### Base Interfaces
+
 ```typescript
 // Common base patterns to extend
 interface BaseEntity {
@@ -203,6 +215,7 @@ interface BaseModalProps extends BaseComponentProps {
 ```
 
 ### API Response Types
+
 ```typescript
 interface ApiResponse<T = any> {
   success: boolean;
@@ -224,6 +237,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ## 📦 Import/Export Patterns
 
 ### Import Order
+
 ```typescript
 // 1. External libraries
 import React, { useState, useEffect } from 'react';
@@ -246,6 +260,7 @@ import './styles.css';
 ```
 
 ### Export Patterns
+
 ```typescript
 // ✅ Good - Named exports for components
 export const Button: React.FC<ButtonProps> = () => {};
@@ -264,13 +279,14 @@ export default function HomePage() {}
 ## 🎨 Theme & Styling Patterns
 
 ### CSS Class Naming
+
 ```typescript
 // ✅ Good - Use utility function for className management
 import { cn } from '@/lib/utils';
 
 const Button: React.FC<ButtonProps> = ({ className, variant }) => {
   return (
-    <button 
+    <button
       className={cn(
         'px-4 py-2 rounded-md font-medium transition-colors',
         variant === 'primary' && 'bg-blue-600 text-white hover:bg-blue-700',
@@ -283,6 +299,7 @@ const Button: React.FC<ButtonProps> = ({ className, variant }) => {
 ```
 
 ### Theme Configuration
+
 ```typescript
 // Use centralized theme configuration
 interface ThemeConfig {
@@ -303,10 +320,7 @@ interface UseApiOptions<T> {
   onError?: (error: Error) => void;
 }
 
-export function useApi<T>(
-  url: string, 
-  options: UseApiOptions<T> = {}
-) {
+export function useApi<T>(url: string, options: UseApiOptions<T> = {}) {
   const [data, setData] = useState<T | undefined>(options.initialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -325,7 +339,7 @@ export function useApi<T>(
 ## ✅ Best Practices Summary
 
 1. **Always use TypeScript** - Define interfaces for all props and data structures
-2. **Consistent component patterns** - Use React.FC with proper props interfaces  
+2. **Consistent component patterns** - Use React.FC with proper props interfaces
 3. **File organization** - Follow the established directory structure
 4. **Naming conventions** - PascalCase for components/interfaces, camelCase for variables
 5. **Import organization** - Follow the specified import order

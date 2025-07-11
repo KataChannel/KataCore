@@ -61,24 +61,27 @@ my-nextjs-app/
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL database
 - pnpm (recommended) or npm
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd my-nextjs-app
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
@@ -86,16 +89,19 @@ cp .env.example .env.local
 4. Configure your database connection in `.env.local`
 
 5. Run database migrations:
+
 ```bash
 pnpm db:migrate
 ```
 
 6. Seed the database (optional):
+
 ```bash
 pnpm db:seed
 ```
 
 7. Start the development server:
+
 ```bash
 pnpm dev
 ```
@@ -121,6 +127,7 @@ This project uses ESLint and Prettier for code formatting. The configuration fol
 ### Testing
 
 Run tests with:
+
 ```bash
 pnpm test
 ```
@@ -130,6 +137,7 @@ pnpm test
 ### Docker
 
 Build and run with Docker:
+
 ```bash
 docker build -t my-nextjs-app .
 docker run -p 3000:3000 my-nextjs-app
@@ -138,6 +146,7 @@ docker run -p 3000:3000 my-nextjs-app
 ### Vercel
 
 Deploy to Vercel:
+
 ```bash
 npx vercel
 ```

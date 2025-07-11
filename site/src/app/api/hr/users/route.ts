@@ -10,12 +10,12 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
 
     const where: any = {
-      isActive: true
+      isActive: true,
     };
-    
+
     if (role && role !== 'all') {
       where.role = {
-        name: role
+        name: role,
       };
     }
 
@@ -28,15 +28,15 @@ export async function GET(request: NextRequest) {
         avatar: true,
         role: {
           select: {
-            name: true
-          }
-        }
+            name: true,
+          },
+        },
       },
       orderBy: {
-        displayName: 'asc'
+        displayName: 'asc',
       },
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
     });
 
     const total = await prisma.user.count({ where });
@@ -47,8 +47,8 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Error fetching users:', error);

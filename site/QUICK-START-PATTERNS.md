@@ -1,11 +1,13 @@
 # 🚀 Quick Start - Áp dụng Design Patterns mới
 
 ## 🎯 Mục tiêu
+
 Hướng dẫn nhanh để áp dụng design patterns và coding standards mới trong TazaCore.
 
 ## 📋 Checklist nhanh
 
 ### 1. Thiết lập môi trường (5 phút)
+
 ```bash
 # Di chuyển đến thư mục site
 cd site
@@ -24,21 +26,23 @@ bun run type-check
 ```
 
 ### 2. Cập nhật import statements (10 phút)
+
 Thay đổi tất cả imports theo pattern mới:
 
 ```tsx
 // ❌ Cũ
-import Button from '../../../components/ui/Button'
-import { User } from '../../../types/user'
+import Button from '../../../components/ui/Button';
+import { User } from '../../../types/user';
 
 // ✅ Mới
-import { Button } from '@/components/ui'
-import type { User } from '@/types'
+import { Button } from '@/components/ui';
+import type { User } from '@/types';
 ```
 
 ### 3. Chuẩn hóa component structure (15 phút mỗi component)
 
 #### Template component mới:
+
 ```tsx
 // ============================================================================
 // IMPORTS
@@ -71,14 +75,14 @@ export const Component: React.FC<ComponentProps> = ({
   ...props
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleAction = useCallback(() => {
     if (disabled) return;
     onAction?.();
   }, [disabled, onAction]);
-  
+
   return (
-    <div 
+    <div
       className={cn(
         'base-styles',
         variant === 'primary' && 'primary-styles',
@@ -103,6 +107,7 @@ export type { ComponentProps };
 ### 4. Chuẩn hóa hook structure (10 phút mỗi hook)
 
 #### Template hook mới:
+
 ```tsx
 // ============================================================================
 // IMPORTS
@@ -155,6 +160,7 @@ export function useHook<T>(
 ## 🎨 Styling Quick Guide
 
 ### 1. Sử dụng clsx pattern
+
 ```tsx
 import { cn } from '@/lib/utils';
 
@@ -168,14 +174,15 @@ const className = cn(
 ```
 
 ### 2. Theme-aware components
+
 ```tsx
 import { useUnifiedTheme } from '@/hooks';
 
 export const ThemedComponent = () => {
   const { colors, actualMode } = useUnifiedTheme();
-  
+
   return (
-    <div 
+    <div
       className={cn(
         'unified-card',
         actualMode === 'dark' && 'dark-theme-specific'
@@ -191,6 +198,7 @@ export const ThemedComponent = () => {
 ## 📁 File Organization Quick Actions
 
 ### 1. Di chuyển files vào structure mới
+
 ```bash
 # Components
 mkdir -p src/components/{ui,forms,layout,features,common}
@@ -198,7 +206,7 @@ mkdir -p src/components/{ui,forms,layout,features,common}
 # Types
 mkdir -p src/types
 
-# Hooks  
+# Hooks
 mkdir -p src/hooks
 
 # Utils
@@ -206,6 +214,7 @@ mkdir -p src/lib/{utils,config,api,validators}
 ```
 
 ### 2. Tạo barrel exports
+
 ```tsx
 // src/components/ui/index.ts
 export { Button } from './Button';
@@ -228,28 +237,37 @@ export { useUnifiedTheme } from './useUnifiedTheme';
 ## ⚡ Performance Quick Wins
 
 ### 1. Component memoization
+
 ```tsx
-export const ExpensiveComponent = React.memo<Props>(({ data }) => {
-  // Component logic
-}, (prevProps, nextProps) => {
-  return prevProps.data.id === nextProps.data.id;
-});
+export const ExpensiveComponent = React.memo<Props>(
+  ({ data }) => {
+    // Component logic
+  },
+  (prevProps, nextProps) => {
+    return prevProps.data.id === nextProps.data.id;
+  }
+);
 ```
 
 ### 2. Hook optimization
+
 ```tsx
 const expensiveValue = useMemo(() => {
   return data.reduce((acc, item) => acc + item.value, 0);
 }, [data]);
 
-const stableCallback = useCallback((item) => {
-  // Logic here
-}, [dependency]);
+const stableCallback = useCallback(
+  item => {
+    // Logic here
+  },
+  [dependency]
+);
 ```
 
 ## 🔧 Development Workflow
 
 ### 1. Trước khi code
+
 ```bash
 # Pull latest changes
 git pull origin main
@@ -262,6 +280,7 @@ bun run lint:fix
 ```
 
 ### 2. Khi develop
+
 ```bash
 # Chạy development server
 bun run dev
@@ -271,6 +290,7 @@ bun run type-check --watch
 ```
 
 ### 3. Trước khi commit
+
 ```bash
 # Format code
 bun run format
@@ -288,6 +308,7 @@ bun run test
 ## 🏃‍♂️ Quick Migration Checklist
 
 ### Component Migration (per component)
+
 - [ ] Move to correct folder structure
 - [ ] Update imports to use barrel exports
 - [ ] Add proper TypeScript interface
@@ -297,6 +318,7 @@ bun run test
 - [ ] Update exports in barrel file
 
 ### Hook Migration (per hook)
+
 - [ ] Move to src/hooks/
 - [ ] Follow hook structure template
 - [ ] Add proper TypeScript interfaces
@@ -305,6 +327,7 @@ bun run test
 - [ ] Add to hooks barrel export
 
 ### Type Migration
+
 - [ ] Move types to src/types/
 - [ ] Follow naming conventions
 - [ ] Extend base interfaces where appropriate
@@ -314,30 +337,33 @@ bun run test
 ## 🚨 Common Issues & Solutions
 
 ### 1. Import errors
+
 ```tsx
 // ❌ Error: Module not found
-import { Button } from './ui/Button'
+import { Button } from './ui/Button';
 
 // ✅ Solution: Use barrel exports
-import { Button } from '@/components/ui'
+import { Button } from '@/components/ui';
 ```
 
 ### 2. TypeScript errors
+
 ```tsx
 // ❌ Error: any type
-const data: any = fetchData()
+const data: any = fetchData();
 
 // ✅ Solution: Proper typing
-const data: ApiResponse<User[]> = await fetchData()
+const data: ApiResponse<User[]> = await fetchData();
 ```
 
 ### 3. Performance issues
+
 ```tsx
 // ❌ Problem: Re-rendering
-const onClick = () => doSomething()
+const onClick = () => doSomething();
 
 // ✅ Solution: useCallback
-const onClick = useCallback(() => doSomething(), [])
+const onClick = useCallback(() => doSomething(), []);
 ```
 
 ## 📚 Resources

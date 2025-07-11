@@ -24,12 +24,12 @@ interface ApiResponse<T> {
   total: number;
 }
 
-function AdvancedTable<T>({ 
-  columns, 
-  apiUrl, 
-  defaultSort = { key: columns[0].key, direction: 'asc' }, 
+function AdvancedTable<T>({
+  columns,
+  apiUrl,
+  defaultSort = { key: columns[0].key, direction: 'asc' },
   pageSizeOptions = [10, 25, 50, 100],
-  className = ''
+  className = '',
 }: TableProps<T>) {
   const [data, setData] = useState<T[]>([]);
   const [total, setTotal] = useState(0);
@@ -67,10 +67,11 @@ function AdvancedTable<T>({
   }, [fetchData]);
 
   const debouncedSearch = useMemo(
-    () => debounce((value: string) => {
-      setSearchTerm(value);
-      setPage(1);
-    }, 300),
+    () =>
+      debounce((value: string) => {
+        setSearchTerm(value);
+        setPage(1);
+      }, 300),
     []
   );
 
@@ -101,7 +102,7 @@ function AdvancedTable<T>({
             type="text"
             placeholder="Search..."
             className="w-full pl-10 pr-4 py-2 border rounded-lg"
-            onChange={(e) => debouncedSearch(e.target.value)}
+            onChange={e => debouncedSearch(e.target.value)}
           />
         </div>
       </div>
@@ -116,7 +117,7 @@ function AdvancedTable<T>({
                 type="text"
                 placeholder={`Filter ${col.header}`}
                 className="w-full px-4 py-2 border rounded-lg"
-                onChange={(e) => handleFilter(col.key, e.target.value)}
+                onChange={e => handleFilter(col.key, e.target.value)}
               />
             </div>
           ))}
@@ -167,10 +168,7 @@ function AdvancedTable<T>({
               </tr>
             ) : (
               data.map((row, index) => (
-                <tr
-                  key={index}
-                  className="border-t hover:bg-gray-50"
-                >
+                <tr key={index} className="border-t hover:bg-gray-50">
                   {columns.map(col => (
                     <td key={String(col.key)} className="p-3">
                       {col.render
@@ -191,7 +189,7 @@ function AdvancedTable<T>({
           <select
             className="border rounded-lg px-3 py-2"
             value={pageSize}
-            onChange={(e) => {
+            onChange={e => {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}

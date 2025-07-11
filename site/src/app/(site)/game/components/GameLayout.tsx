@@ -30,9 +30,11 @@ export const GameLayout = ({
   isAutoHarvesting,
   animatedResourceChanges,
   activeSpiritBeastBonuses,
-  actions
+  actions,
 }: GameLayoutProps) => {
-  const [activeTab, setActiveTab] = useState<'sources' | 'spirits' | 'logs'>('sources');
+  const [activeTab, setActiveTab] = useState<'sources' | 'spirits' | 'logs'>(
+    'sources'
+  );
 
   const currentMapData = gameState.maps[gameState.currentMapId];
   const isAdvancedPhase = gameState.currentMapId === GAME_PHASES.ADVANCED;
@@ -42,7 +44,7 @@ export const GameLayout = ({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-xl text-gray-400 mb-4">No map data available</p>
-          <button 
+          <button
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             onClick={() => window.location.reload()}
           >
@@ -122,7 +124,7 @@ export const GameLayout = ({
           {[
             { key: 'sources', label: 'Sources', icon: '⛏️' },
             { key: 'spirits', label: 'Spirits', icon: '🐉' },
-            { key: 'logs', label: 'Logs', icon: '📜' }
+            { key: 'logs', label: 'Logs', icon: '📜' },
           ].map(tab => (
             <button
               key={tab.key}
@@ -158,9 +160,7 @@ export const GameLayout = ({
             />
           )}
 
-          {activeTab === 'logs' && (
-            <ActivityLog logs={logs} />
-          )}
+          {activeTab === 'logs' && <ActivityLog logs={logs} />}
         </div>
       </div>
     </div>

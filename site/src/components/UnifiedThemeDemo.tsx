@@ -5,10 +5,16 @@ import { useIsDarkMode } from '@/hooks/useMonochromeTheme';
 import { useLanguage } from '@/hooks/useTheme';
 import useUnifiedTheme, { useThemeMode } from '@/hooks/useUnifiedTheme';
 import React, { useState } from 'react';
-import { ThemeModeToggle, LanguageToggle, ThemeControlPanel } from './ThemeManager';
+import {
+  ThemeModeToggle,
+  LanguageToggle,
+  ThemeControlPanel,
+} from './ThemeManager';
 export function UnifiedThemeDemo() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'controls' | 'examples'>('overview');
-  
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'controls' | 'examples'
+  >('overview');
+
   // Different ways to access theme data
   const theme = useUnifiedTheme();
   const { mode, actualMode, toggleMode } = useThemeMode();
@@ -36,7 +42,7 @@ export function UnifiedThemeDemo() {
                 )}
               </p>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <ThemeModeToggle showLabel={true} />
               <LanguageToggle showLabel={true} />
@@ -49,7 +55,7 @@ export function UnifiedThemeDemo() {
           <h2 className="text-xl font-semibold text-primary mb-4">
             {getText('Current Status', 'Trạng thái hiện tại')}
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-surface border border-border rounded-lg">
               <div className="text-sm text-text-secondary mb-1">
@@ -59,7 +65,7 @@ export function UnifiedThemeDemo() {
                 {mode} → {actualMode}
               </div>
             </div>
-            
+
             <div className="p-4 bg-surface border border-border rounded-lg">
               <div className="text-sm text-text-secondary mb-1">
                 {getText('Color Scheme', 'Bảng màu')}
@@ -68,7 +74,7 @@ export function UnifiedThemeDemo() {
                 {theme.config.colorScheme}
               </div>
             </div>
-            
+
             <div className="p-4 bg-surface border border-border rounded-lg">
               <div className="text-sm text-text-secondary mb-1">
                 {getText('Language', 'Ngôn ngữ')}
@@ -77,7 +83,7 @@ export function UnifiedThemeDemo() {
                 {language === 'vi' ? '🇻🇳 Tiếng Việt' : '🇺🇸 English'}
               </div>
             </div>
-            
+
             <div className="p-4 bg-surface border border-border rounded-lg">
               <div className="text-sm text-text-secondary mb-1">
                 {getText('Animation Level', 'Mức hoạt ảnh')}
@@ -93,11 +99,13 @@ export function UnifiedThemeDemo() {
         <div className="unified-card">
           <div className="border-b border-border mb-6">
             <nav className="flex space-x-8">
-              {([
-                { key: 'overview', en: 'Overview', vi: 'Tổng quan' },
-                { key: 'controls', en: 'Controls', vi: 'Điều khiển' },
-                { key: 'examples', en: 'Examples', vi: 'Ví dụ' },
-              ] as const).map((tab) => (
+              {(
+                [
+                  { key: 'overview', en: 'Overview', vi: 'Tổng quan' },
+                  { key: 'controls', en: 'Controls', vi: 'Điều khiển' },
+                  { key: 'examples', en: 'Examples', vi: 'Ví dụ' },
+                ] as const
+              ).map(tab => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
@@ -124,12 +132,15 @@ export function UnifiedThemeDemo() {
                   <h3 className="text-lg font-semibold text-primary mb-3">
                     {getText('Features', 'Tính năng')}
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                       {
                         icon: '🌓',
-                        title: getText('Smart Dark Mode', 'Dark Mode thông minh'),
+                        title: getText(
+                          'Smart Dark Mode',
+                          'Dark Mode thông minh'
+                        ),
                         desc: getText(
                           'Auto, light, dark modes with system sync',
                           'Chế độ tự động, sáng, tối với đồng bộ hệ thống'
@@ -165,8 +176,12 @@ export function UnifiedThemeDemo() {
                         className="p-4 bg-surface border border-border rounded-lg hover:bg-surface-elevated transition-colors duration-fast"
                       >
                         <div className="text-2xl mb-2">{feature.icon}</div>
-                        <h4 className="font-medium text-primary mb-1">{feature.title}</h4>
-                        <p className="text-sm text-text-secondary">{feature.desc}</p>
+                        <h4 className="font-medium text-primary mb-1">
+                          {feature.title}
+                        </h4>
+                        <p className="text-sm text-text-secondary">
+                          {feature.desc}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -176,7 +191,7 @@ export function UnifiedThemeDemo() {
                   <h3 className="text-lg font-semibold text-primary mb-3">
                     {getText('Color Palette', 'Bảng màu')}
                   </h3>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
                     {Object.entries(theme.colors.gray).map(([shade, color]) => (
                       <div key={shade} className="text-center">
@@ -210,7 +225,7 @@ export function UnifiedThemeDemo() {
                   <h3 className="text-lg font-semibold text-primary mb-4">
                     {getText('Component Examples', 'Ví dụ Components')}
                   </h3>
-                  
+
                   <div className="space-y-4">
                     {/* Buttons */}
                     <div>
@@ -307,7 +322,7 @@ export function UnifiedThemeDemo() {
                             )}
                           </p>
                         </div>
-                        
+
                         <div className="unified-card elevated">
                           <h5 className="font-medium text-primary mb-2">
                             {getText('Elevated Card', 'Thẻ nổi')}
@@ -329,7 +344,7 @@ export function UnifiedThemeDemo() {
                   <h3 className="text-lg font-semibold text-primary mb-4">
                     {getText('CSS Variables Demo', 'Demo CSS Variables')}
                   </h3>
-                  
+
                   <div className="unified-card bg-surface">
                     <div className="font-mono text-sm space-y-2">
                       <div className="flex justify-between">
@@ -373,8 +388,9 @@ export function UnifiedThemeDemo() {
             )}
           </p>
           <p className="mt-1">
-            {getText('Current mode', 'Chế độ hiện tại')}: {actualMode} | 
-            {getText('System mode', 'Chế độ hệ thống')}: {theme.isSystemMode ? 'ON' : 'OFF'}
+            {getText('Current mode', 'Chế độ hiện tại')}: {actualMode} |
+            {getText('System mode', 'Chế độ hệ thống')}:{' '}
+            {theme.isSystemMode ? 'ON' : 'OFF'}
           </p>
         </footer>
       </div>

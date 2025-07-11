@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 import {
   ThemeMode,
   Language,
@@ -34,7 +40,9 @@ interface LanguageContextType {
   isLoading: boolean;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
 // Theme Provider Props
 interface ThemeProviderProps {
@@ -57,7 +65,9 @@ interface MonochromeProviderProps {
 
 // Theme Provider Component
 export function ThemeProvider({ children, defaultMode }: ThemeProviderProps) {
-  const [mode, setModeState] = useState<ThemeMode>(defaultMode || monochromeThemeConfig.defaults.mode);
+  const [mode, setModeState] = useState<ThemeMode>(
+    defaultMode || monochromeThemeConfig.defaults.mode
+  );
   const [actualMode, setActualMode] = useState<'light' | 'dark'>('light');
   const [isLoading, setIsLoading] = useState(true);
   const [colors, setColors] = useState<ColorPalette>(getThemeColors('light'));
@@ -66,11 +76,11 @@ export function ThemeProvider({ children, defaultMode }: ThemeProviderProps) {
   useEffect(() => {
     const loadedMode = loadThemePreference();
     setModeState(loadedMode);
-    
+
     const applied = applyThemeMode(loadedMode);
     setActualMode(applied);
     setColors(getThemeColors(applied));
-    
+
     setIsLoading(false);
   }, []);
 
@@ -100,7 +110,8 @@ export function ThemeProvider({ children, defaultMode }: ThemeProviderProps) {
   }, [mode]);
 
   const toggleMode = () => {
-    const newMode: ThemeMode = mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
+    const newMode: ThemeMode =
+      mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
     setModeState(newMode);
   };
 
@@ -109,15 +120,22 @@ export function ThemeProvider({ children, defaultMode }: ThemeProviderProps) {
   };
 
   return (
-    <ThemeContext.Provider value={{ mode, actualMode, colors, toggleMode, setMode, isLoading }}>
+    <ThemeContext.Provider
+      value={{ mode, actualMode, colors, toggleMode, setMode, isLoading }}
+    >
       {children}
     </ThemeContext.Provider>
   );
 }
 
 // Language Provider Component
-export function LanguageProvider({ children, defaultLanguage }: LanguageProviderProps) {
-  const [language, setLanguageState] = useState<Language>(defaultLanguage || monochromeThemeConfig.defaults.language);
+export function LanguageProvider({
+  children,
+  defaultLanguage,
+}: LanguageProviderProps) {
+  const [language, setLanguageState] = useState<Language>(
+    defaultLanguage || monochromeThemeConfig.defaults.language
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize language on mount
@@ -143,18 +161,24 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
   };
 
   const toggleLanguage = () => {
-    setLanguageState(prev => prev === 'vi' ? 'en' : 'vi');
+    setLanguageState(prev => (prev === 'vi' ? 'en' : 'vi'));
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, isLoading }}>
+    <LanguageContext.Provider
+      value={{ language, setLanguage, toggleLanguage, isLoading }}
+    >
       {children}
     </LanguageContext.Provider>
   );
 }
 
 // Combined Provider Component
-export function MonochromeProvider({ children, defaultMode, defaultLanguage }: MonochromeProviderProps) {
+export function MonochromeProvider({
+  children,
+  defaultMode,
+  defaultLanguage,
+}: MonochromeProviderProps) {
   return (
     <ThemeProvider defaultMode={defaultMode}>
       <LanguageProvider defaultLanguage={defaultLanguage}>
@@ -168,7 +192,9 @@ export function MonochromeProvider({ children, defaultMode, defaultLanguage }: M
 export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider or MonochromeProvider');
+    throw new Error(
+      'useTheme must be used within a ThemeProvider or MonochromeProvider'
+    );
   }
   return context;
 }
@@ -177,7 +203,9 @@ export function useTheme(): ThemeContextType {
 export function useLanguage(): LanguageContextType {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider or MonochromeProvider');
+    throw new Error(
+      'useLanguage must be used within a LanguageProvider or MonochromeProvider'
+    );
   }
   return context;
 }
@@ -186,7 +214,7 @@ export function useLanguage(): LanguageContextType {
 export function useMonochrome() {
   const theme = useTheme();
   const language = useLanguage();
-  
+
   return {
     // Theme
     mode: theme.mode,
@@ -195,13 +223,13 @@ export function useMonochrome() {
     toggleMode: theme.toggleMode,
     setMode: theme.setMode,
     themeLoading: theme.isLoading,
-    
+
     // Language
     language: language.language,
     setLanguage: language.setLanguage,
     toggleLanguage: language.toggleLanguage,
     languageLoading: language.isLoading,
-    
+
     // Combined loading state
     isLoading: theme.isLoading || language.isLoading,
   };
@@ -229,29 +257,33 @@ export function withTheme<T extends object>(Component: React.ComponentType<T>) {
     const theme = useTheme();
     return <Component {...props} theme={theme} />;
   };
-  
+
   WrappedComponent.displayName = `withTheme(${Component.displayName || Component.name})`;
   return WrappedComponent;
 }
 
 // HOC for language-aware components
-export function withLanguage<T extends object>(Component: React.ComponentType<T>) {
+export function withLanguage<T extends object>(
+  Component: React.ComponentType<T>
+) {
   const WrappedComponent = (props: T) => {
     const language = useLanguage();
     return <Component {...props} language={language} />;
   };
-  
+
   WrappedComponent.displayName = `withLanguage(${Component.displayName || Component.name})`;
   return WrappedComponent;
 }
 
 // HOC for monochrome-aware components
-export function withMonochrome<T extends object>(Component: React.ComponentType<T>) {
+export function withMonochrome<T extends object>(
+  Component: React.ComponentType<T>
+) {
   const WrappedComponent = (props: T) => {
     const monochrome = useMonochrome();
     return <Component {...props} monochrome={monochrome} />;
   };
-  
+
   WrappedComponent.displayName = `withMonochrome(${Component.displayName || Component.name})`;
   return WrappedComponent;
 }

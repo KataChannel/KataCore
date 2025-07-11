@@ -71,27 +71,29 @@ export default function MonochromeShowcase() {
     {
       name: getText('Cards', 'Thẻ'),
       class: 'mono-card',
-      example: 'p-6 bg-surface border border-border rounded-lg'
+      example: 'p-6 bg-surface border border-border rounded-lg',
     },
     {
       name: getText('Buttons', 'Nút'),
       class: 'mono-button',
-      example: 'accent, secondary, ghost variants'
+      example: 'accent, secondary, ghost variants',
     },
     {
       name: getText('Inputs', 'Ô nhập liệu'),
       class: 'mono-input',
-      example: 'bg-surface border border-border rounded-lg'
+      example: 'bg-surface border border-border rounded-lg',
     },
     {
       name: getText('Typography', 'Typography'),
       class: 'text-primary',
-      example: 'text-primary, text-secondary, text-muted'
+      example: 'text-primary, text-secondary, text-muted',
     },
   ];
 
   return (
-    <div className={`min-h-screen bg-background transition-colors duration-300 ${darkMode ? 'dark' : ''}`}>
+    <div
+      className={`min-h-screen bg-background transition-colors duration-300 ${darkMode ? 'dark' : ''}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -101,7 +103,11 @@ export default function MonochromeShowcase() {
               className="mono-button secondary"
               title={getText('Toggle dark mode', 'Chuyển đổi chế độ tối')}
             >
-              {darkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+              {darkMode ? (
+                <SunIcon className="h-5 w-5" />
+              ) : (
+                <MoonIcon className="h-5 w-5" />
+              )}
               {getText('Dark Mode', 'Chế độ tối')}
             </button>
             <button
@@ -113,7 +119,7 @@ export default function MonochromeShowcase() {
               {language.toUpperCase()}
             </button>
           </div>
-          
+
           <h1 className="text-4xl font-bold text-primary mb-4">
             {getText('Monochrome UI System', 'Hệ thống giao diện đơn sắc')}
           </h1>
@@ -132,8 +138,12 @@ export default function MonochromeShowcase() {
               <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg inline-flex mb-4">
                 <feature.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-lg font-semibold text-primary mb-2">{feature.title}</h3>
-              <p className="text-text-secondary text-sm">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-primary mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-text-secondary text-sm">
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
@@ -143,7 +153,7 @@ export default function MonochromeShowcase() {
           <h2 className="text-2xl font-bold text-primary mb-6">
             {getText('Component Examples', 'Ví dụ về components')}
           </h2>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Buttons */}
             <div>
@@ -189,15 +199,22 @@ export default function MonochromeShowcase() {
           <h2 className="text-2xl font-bold text-primary mb-6">
             {getText('Available CSS Classes', 'Các lớp CSS có sẵn')}
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {components.map((component, index) => (
-              <div key={index} className="p-4 bg-mono-50 dark:bg-mono-900 rounded-lg">
-                <h4 className="font-semibold text-primary mb-2">{component.name}</h4>
+              <div
+                key={index}
+                className="p-4 bg-mono-50 dark:bg-mono-900 rounded-lg"
+              >
+                <h4 className="font-semibold text-primary mb-2">
+                  {component.name}
+                </h4>
                 <code className="text-sm text-accent bg-mono-100 dark:bg-mono-800 px-2 py-1 rounded">
                   .{component.class}
                 </code>
-                <p className="text-xs text-text-secondary mt-2">{component.example}</p>
+                <p className="text-xs text-text-secondary mt-2">
+                  {component.example}
+                </p>
               </div>
             ))}
           </div>
@@ -208,7 +225,7 @@ export default function MonochromeShowcase() {
           <h2 className="text-2xl font-bold text-primary mb-6">
             {getText('Color Palette', 'Bảng màu')}
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <h4 className="font-semibold text-primary mb-3">
@@ -229,7 +246,7 @@ export default function MonochromeShowcase() {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-semibold text-primary mb-3">
                 {getText('Surface Colors', 'Màu bề mặt')}

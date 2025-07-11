@@ -23,7 +23,10 @@ export async function GET() {
     return NextResponse.json({ message: 'GET endpoint working' });
   } catch (error) {
     console.error('Error seeding HRM data:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -39,7 +42,7 @@ export async function POST() {
     await prisma.employee.deleteMany();
     await prisma.position.deleteMany();
     await prisma.department.deleteMany();
-    
+
     // Clear existing users and roles for fresh start
     await prisma.user.deleteMany();
     await prisma.role.deleteMany();
@@ -51,24 +54,52 @@ export async function POST() {
       data: {
         name: 'HR_MANAGER',
         description: 'HR Manager with full access to HRM system',
-        permissions: JSON.stringify(['READ', 'WRITE', 'DELETE', 'READ_EMPLOYEES', 'WRITE_EMPLOYEES', 'DELETE_EMPLOYEES', 'READ_DEPARTMENTS', 'WRITE_DEPARTMENTS', 'DELETE_DEPARTMENTS', 'READ_ROLES', 'WRITE_ROLES', 'DELETE_ROLES', 'MANAGE_EMPLOYEES', 'MANAGE_PAYROLL', 'APPROVE_LEAVE'])
-      }
+        permissions: JSON.stringify([
+          'READ',
+          'WRITE',
+          'DELETE',
+          'READ_EMPLOYEES',
+          'WRITE_EMPLOYEES',
+          'DELETE_EMPLOYEES',
+          'READ_DEPARTMENTS',
+          'WRITE_DEPARTMENTS',
+          'DELETE_DEPARTMENTS',
+          'READ_ROLES',
+          'WRITE_ROLES',
+          'DELETE_ROLES',
+          'MANAGE_EMPLOYEES',
+          'MANAGE_PAYROLL',
+          'APPROVE_LEAVE',
+        ]),
+      },
     });
 
     const departmentManagerRole = await prisma.role.create({
       data: {
         name: 'DEPARTMENT_MANAGER',
         description: 'Department Manager with team management access',
-        permissions: JSON.stringify(['READ', 'WRITE', 'READ_EMPLOYEES', 'WRITE_EMPLOYEES', 'READ_DEPARTMENTS', 'MANAGE_TEAM', 'APPROVE_LEAVE'])
-      }
+        permissions: JSON.stringify([
+          'READ',
+          'WRITE',
+          'READ_EMPLOYEES',
+          'WRITE_EMPLOYEES',
+          'READ_DEPARTMENTS',
+          'MANAGE_TEAM',
+          'APPROVE_LEAVE',
+        ]),
+      },
     });
 
     const employeeRole = await prisma.role.create({
       data: {
         name: 'EMPLOYEE',
         description: 'Regular employee with basic access',
-        permissions: JSON.stringify(['READ', 'READ_EMPLOYEES', 'READ_DEPARTMENTS'])
-      }
+        permissions: JSON.stringify([
+          'READ',
+          'READ_EMPLOYEES',
+          'READ_DEPARTMENTS',
+        ]),
+      },
     });
 
     console.log('Roles created');
@@ -81,11 +112,12 @@ export async function POST() {
         phone: '+84901234567',
         displayName: 'HR Manager',
         password: await bcrypt.hash('hr123456', 10),
-        avatar: 'https://ui-avatars.com/api/?name=HR+Manager&background=e11d48&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=HR+Manager&background=e11d48&color=fff',
         isVerified: true,
         isActive: true,
-        roleId: hrManagerRole.id
-      }
+        roleId: hrManagerRole.id,
+      },
     });
 
     const itManager = await prisma.user.create({
@@ -95,11 +127,12 @@ export async function POST() {
         phone: '+84901234568',
         displayName: 'IT Manager',
         password: await bcrypt.hash('it123456', 10),
-        avatar: 'https://ui-avatars.com/api/?name=IT+Manager&background=3b82f6&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=IT+Manager&background=3b82f6&color=fff',
         isVerified: true,
         isActive: true,
-        roleId: departmentManagerRole.id
-      }
+        roleId: departmentManagerRole.id,
+      },
     });
 
     const salesManager = await prisma.user.create({
@@ -109,11 +142,12 @@ export async function POST() {
         phone: '+84901234569',
         displayName: 'Sales Manager',
         password: await bcrypt.hash('sales123456', 10),
-        avatar: 'https://ui-avatars.com/api/?name=Sales+Manager&background=10b981&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=Sales+Manager&background=10b981&color=fff',
         isVerified: true,
         isActive: true,
-        roleId: departmentManagerRole.id
-      }
+        roleId: departmentManagerRole.id,
+      },
     });
 
     const developer1 = await prisma.user.create({
@@ -123,11 +157,12 @@ export async function POST() {
         phone: '+84901234570',
         displayName: 'John Doe',
         password: await bcrypt.hash('john123456', 10),
-        avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=8b5cf6&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=John+Doe&background=8b5cf6&color=fff',
         isVerified: true,
         isActive: true,
-        roleId: employeeRole.id
-      }
+        roleId: employeeRole.id,
+      },
     });
 
     const developer2 = await prisma.user.create({
@@ -137,11 +172,12 @@ export async function POST() {
         phone: '+84901234571',
         displayName: 'Jane Smith',
         password: await bcrypt.hash('jane123456', 10),
-        avatar: 'https://ui-avatars.com/api/?name=Jane+Smith&background=f59e0b&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=Jane+Smith&background=f59e0b&color=fff',
         isVerified: true,
         isActive: true,
-        roleId: employeeRole.id
-      }
+        roleId: employeeRole.id,
+      },
     });
 
     const salesRep1 = await prisma.user.create({
@@ -151,11 +187,12 @@ export async function POST() {
         phone: '+84901234572',
         displayName: 'Mike Wilson',
         password: await bcrypt.hash('mike123456', 10),
-        avatar: 'https://ui-avatars.com/api/?name=Mike+Wilson&background=06b6d4&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=Mike+Wilson&background=06b6d4&color=fff',
         isVerified: true,
         isActive: true,
-        roleId: employeeRole.id
-      }
+        roleId: employeeRole.id,
+      },
     });
 
     const salesRep2 = await prisma.user.create({
@@ -165,11 +202,12 @@ export async function POST() {
         phone: '+84901234573',
         displayName: 'Sarah Jones',
         password: await bcrypt.hash('sarah123456', 10),
-        avatar: 'https://ui-avatars.com/api/?name=Sarah+Jones&background=ec4899&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=Sarah+Jones&background=ec4899&color=fff',
         isVerified: true,
         isActive: true,
-        roleId: employeeRole.id
-      }
+        roleId: employeeRole.id,
+      },
     });
 
     console.log('Users created');
@@ -185,36 +223,38 @@ export async function POST() {
         phone: '+84123456789',
         email: 'hr@company.com',
         managerId: hrManager.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     const itDepartment = await prisma.department.create({
       data: {
         name: 'Information Technology',
-        description: 'Manages IT infrastructure, software development, and technical support',
+        description:
+          'Manages IT infrastructure, software development, and technical support',
         code: 'IT',
         budget: 1000000,
         location: 'Floor 3, Building A',
         phone: '+84123456790',
         email: 'it@company.com',
         managerId: itManager.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     const salesDepartment = await prisma.department.create({
       data: {
         name: 'Sales & Marketing',
-        description: 'Manages sales operations, customer relations, and marketing campaigns',
+        description:
+          'Manages sales operations, customer relations, and marketing campaigns',
         code: 'SALES',
         budget: 800000,
         location: 'Floor 1, Building A',
         phone: '+84123456791',
         email: 'sales@company.com',
         managerId: salesManager.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     console.log('Departments created');
@@ -227,10 +267,11 @@ export async function POST() {
         level: 5,
         minSalary: 25000000,
         maxSalary: 35000000,
-        requirements: 'Bachelor degree in HR or related field, 5+ years experience',
+        requirements:
+          'Bachelor degree in HR or related field, 5+ years experience',
         departmentId: hrDepartment.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     const itManagerPosition = await prisma.position.create({
@@ -240,10 +281,11 @@ export async function POST() {
         level: 5,
         minSalary: 30000000,
         maxSalary: 40000000,
-        requirements: 'Bachelor degree in IT or related field, 5+ years experience',
+        requirements:
+          'Bachelor degree in IT or related field, 5+ years experience',
         departmentId: itDepartment.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     const salesManagerPosition = await prisma.position.create({
@@ -253,10 +295,11 @@ export async function POST() {
         level: 5,
         minSalary: 28000000,
         maxSalary: 38000000,
-        requirements: 'Bachelor degree in Business or related field, 5+ years experience',
+        requirements:
+          'Bachelor degree in Business or related field, 5+ years experience',
         departmentId: salesDepartment.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     const seniorDeveloperPosition = await prisma.position.create({
@@ -266,10 +309,11 @@ export async function POST() {
         level: 4,
         minSalary: 20000000,
         maxSalary: 30000000,
-        requirements: 'Bachelor degree in Computer Science, 3+ years experience',
+        requirements:
+          'Bachelor degree in Computer Science, 3+ years experience',
         departmentId: itDepartment.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     const softwareDeveloperPosition = await prisma.position.create({
@@ -279,10 +323,11 @@ export async function POST() {
         level: 3,
         minSalary: 15000000,
         maxSalary: 25000000,
-        requirements: 'Bachelor degree in Computer Science, 1+ years experience',
+        requirements:
+          'Bachelor degree in Computer Science, 1+ years experience',
         departmentId: itDepartment.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     const salesRepPosition = await prisma.position.create({
@@ -294,8 +339,8 @@ export async function POST() {
         maxSalary: 20000000,
         requirements: 'Bachelor degree in Business or related field',
         departmentId: salesDepartment.id,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     console.log('Positions created');
@@ -321,8 +366,8 @@ export async function POST() {
         notes: 'Experienced HR professional',
         userId: hrManager.id,
         departmentId: hrDepartment.id,
-        positionId: hrManagerPosition.id
-      }
+        positionId: hrManagerPosition.id,
+      },
     });
 
     const itManagerEmployee = await prisma.employee.create({
@@ -345,8 +390,8 @@ export async function POST() {
         notes: 'Strong technical leadership',
         userId: itManager.id,
         departmentId: itDepartment.id,
-        positionId: itManagerPosition.id
-      }
+        positionId: itManagerPosition.id,
+      },
     });
 
     const salesManagerEmployee = await prisma.employee.create({
@@ -369,8 +414,8 @@ export async function POST() {
         notes: 'Excellent sales track record',
         userId: salesManager.id,
         departmentId: salesDepartment.id,
-        positionId: salesManagerPosition.id
-      }
+        positionId: salesManagerPosition.id,
+      },
     });
 
     const johnDoeEmployee = await prisma.employee.create({
@@ -393,8 +438,8 @@ export async function POST() {
         notes: 'Skilled React developer',
         userId: developer1.id,
         departmentId: itDepartment.id,
-        positionId: seniorDeveloperPosition.id
-      }
+        positionId: seniorDeveloperPosition.id,
+      },
     });
 
     const janeSmithEmployee = await prisma.employee.create({
@@ -417,8 +462,8 @@ export async function POST() {
         notes: 'Full-stack developer',
         userId: developer2.id,
         departmentId: itDepartment.id,
-        positionId: softwareDeveloperPosition.id
-      }
+        positionId: softwareDeveloperPosition.id,
+      },
     });
 
     const mikeWilsonEmployee = await prisma.employee.create({
@@ -441,8 +486,8 @@ export async function POST() {
         notes: 'Top sales performer',
         userId: salesRep1.id,
         departmentId: salesDepartment.id,
-        positionId: salesRepPosition.id
-      }
+        positionId: salesRepPosition.id,
+      },
     });
 
     const sarahJonesEmployee = await prisma.employee.create({
@@ -465,8 +510,8 @@ export async function POST() {
         notes: 'Excellent customer service',
         userId: salesRep2.id,
         departmentId: salesDepartment.id,
-        positionId: salesRepPosition.id
-      }
+        positionId: salesRepPosition.id,
+      },
     });
 
     console.log('Employees created');
@@ -476,7 +521,7 @@ export async function POST() {
       johnDoeEmployee,
       janeSmithEmployee,
       mikeWilsonEmployee,
-      sarahJonesEmployee
+      sarahJonesEmployee,
     ];
 
     const users = [developer1, developer2, salesRep1, salesRep2];
@@ -484,28 +529,38 @@ export async function POST() {
     for (let i = 0; i < 30; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      
+
       // Skip weekends
       if (date.getDay() === 0 || date.getDay() === 6) continue;
 
       for (let j = 0; j < employees.length; j++) {
         const employee = employees[j];
         const user = users[j];
-        
+
         const timeIn = new Date(date);
-        timeIn.setHours(8 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 60));
-        
+        timeIn.setHours(
+          8 + Math.floor(Math.random() * 2),
+          Math.floor(Math.random() * 60)
+        );
+
         const timeOut = new Date(date);
-        timeOut.setHours(17 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 60));
-        
+        timeOut.setHours(
+          17 + Math.floor(Math.random() * 2),
+          Math.floor(Math.random() * 60)
+        );
+
         const breakStart = new Date(date);
         breakStart.setHours(12, 0);
-        
+
         const breakEnd = new Date(date);
         breakEnd.setHours(13, 0);
-        
-        const totalHours = (timeOut.getTime() - timeIn.getTime() - (breakEnd.getTime() - breakStart.getTime())) / (1000 * 60 * 60);
-        
+
+        const totalHours =
+          (timeOut.getTime() -
+            timeIn.getTime() -
+            (breakEnd.getTime() - breakStart.getTime())) /
+          (1000 * 60 * 60);
+
         await prisma.attendance.create({
           data: {
             date: date,
@@ -515,11 +570,12 @@ export async function POST() {
             breakEnd: breakEnd,
             totalHours: Math.round(totalHours * 100) / 100,
             overtime: totalHours > 8 ? totalHours - 8 : 0,
-            status: Math.random() > 0.95 ? 'LATE' as const : 'PRESENT' as const,
+            status:
+              Math.random() > 0.95 ? ('LATE' as const) : ('PRESENT' as const),
             notes: Math.random() > 0.9 ? 'Working on important project' : null,
             employeeId: employee.id,
-            userId: user.id
-          }
+            userId: user.id,
+          },
         });
       }
     }
@@ -538,7 +594,7 @@ export async function POST() {
         reason: 'Family wedding',
         status: 'APPROVED' as const,
         approvedBy: itManager.id,
-        approvedAt: new Date('2024-02-10')
+        approvedAt: new Date('2024-02-10'),
       },
       {
         employeeId: janeSmithEmployee.id,
@@ -550,7 +606,7 @@ export async function POST() {
         reason: 'Medical treatment',
         status: 'APPROVED' as const,
         approvedBy: itManager.id,
-        approvedAt: new Date('2024-03-08')
+        approvedAt: new Date('2024-03-08'),
       },
       {
         employeeId: mikeWilsonEmployee.id,
@@ -560,13 +616,13 @@ export async function POST() {
         days: 3,
         type: 'ANNUAL' as const,
         reason: 'Vacation with family',
-        status: 'PENDING' as const
-      }
+        status: 'PENDING' as const,
+      },
     ];
 
     for (const leaveRequest of leaveRequests) {
       await prisma.leaveRequest.create({
-        data: leaveRequest
+        data: leaveRequest,
       });
     }
 
@@ -576,22 +632,27 @@ export async function POST() {
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
-    
+
     const payrollEmployees = [
       { employee: hrManagerEmployee, user: hrManager, basicSalary: 30000000 },
       { employee: itManagerEmployee, user: itManager, basicSalary: 35000000 },
-      { employee: salesManagerEmployee, user: salesManager, basicSalary: 32000000 },
+      {
+        employee: salesManagerEmployee,
+        user: salesManager,
+        basicSalary: 32000000,
+      },
       { employee: johnDoeEmployee, user: developer1, basicSalary: 22000000 },
       { employee: janeSmithEmployee, user: developer2, basicSalary: 18000000 },
       { employee: mikeWilsonEmployee, user: salesRep1, basicSalary: 16000000 },
-      { employee: sarahJonesEmployee, user: salesRep2, basicSalary: 14000000 }
+      { employee: sarahJonesEmployee, user: salesRep2, basicSalary: 14000000 },
     ];
 
     for (const payrollEmployee of payrollEmployees) {
       const overtime = Math.floor(Math.random() * 20) * 100000; // Random overtime
       const bonus = Math.floor(Math.random() * 5) * 500000; // Random bonus
       const deductions = Math.floor(Math.random() * 3) * 200000; // Random deductions
-      const netSalary = payrollEmployee.basicSalary + overtime + bonus - deductions;
+      const netSalary =
+        payrollEmployee.basicSalary + overtime + bonus - deductions;
 
       await prisma.payroll.create({
         data: {
@@ -603,8 +664,8 @@ export async function POST() {
           netSalary: netSalary,
           notes: 'Monthly payroll',
           employeeId: payrollEmployee.employee.id,
-          userId: payrollEmployee.user.id
-        }
+          userId: payrollEmployee.user.id,
+        },
       });
     }
 
@@ -618,9 +679,11 @@ export async function POST() {
         reviewerId: itManager.id,
         period: '2024-Q1',
         goals: 'Complete React migration project, improve code quality',
-        achievements: 'Successfully migrated 80% of components to React, implemented testing framework',
+        achievements:
+          'Successfully migrated 80% of components to React, implemented testing framework',
         rating: 4.5,
-        feedback: 'Excellent performance, showing strong technical skills and leadership potential'
+        feedback:
+          'Excellent performance, showing strong technical skills and leadership potential',
       },
       {
         employeeId: janeSmithEmployee.id,
@@ -628,9 +691,11 @@ export async function POST() {
         reviewerId: itManager.id,
         period: '2024-Q1',
         goals: 'Learn new technologies, contribute to team projects',
-        achievements: 'Completed Next.js certification, delivered 3 major features',
+        achievements:
+          'Completed Next.js certification, delivered 3 major features',
         rating: 4.0,
-        feedback: 'Good progress, showing steady improvement and team collaboration'
+        feedback:
+          'Good progress, showing steady improvement and team collaboration',
       },
       {
         employeeId: mikeWilsonEmployee.id,
@@ -640,7 +705,7 @@ export async function POST() {
         goals: 'Increase sales by 20%, expand client base',
         achievements: 'Achieved 25% sales increase, acquired 15 new clients',
         rating: 4.8,
-        feedback: 'Outstanding sales performance, exceeded all targets'
+        feedback: 'Outstanding sales performance, exceeded all targets',
       },
       {
         employeeId: sarahJonesEmployee.id,
@@ -648,22 +713,24 @@ export async function POST() {
         reviewerId: salesManager.id,
         period: '2024-Q1',
         goals: 'Improve customer satisfaction, learn new sales techniques',
-        achievements: 'Maintained 95% customer satisfaction, completed sales training',
+        achievements:
+          'Maintained 95% customer satisfaction, completed sales training',
         rating: 4.2,
-        feedback: 'Great customer service skills, showing continuous improvement'
-      }
+        feedback:
+          'Great customer service skills, showing continuous improvement',
+      },
     ];
 
     for (const review of performanceReviews) {
       await prisma.performanceReview.create({
-        data: review
+        data: review,
       });
     }
 
     console.log('Performance reviews created');
 
     console.log('HRM data seeding completed successfully!');
-    
+
     const summary = {
       message: 'HRM data seeding completed successfully!',
       summary: {
@@ -675,7 +742,7 @@ export async function POST() {
         attendanceRecords: '~120',
         leaveRequests: 3,
         payrollRecords: 7,
-        performanceReviews: 4
+        performanceReviews: 4,
       },
       credentials: {
         hrManager: 'hr.manager@company.com / hr123456',
@@ -684,18 +751,20 @@ export async function POST() {
         johnDoe: 'john.doe@company.com / john123456',
         janeSmith: 'jane.smith@company.com / jane123456',
         mikeWilson: 'mike.wilson@company.com / mike123456',
-        sarahJones: 'sarah.jones@company.com / sarah123456'
-      }
+        sarahJones: 'sarah.jones@company.com / sarah123456',
+      },
     };
 
     return NextResponse.json(summary);
-
   } catch (error) {
     console.error('Error seeding HRM data:', error);
-    return NextResponse.json({ 
-      error: 'Seeding failed', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Seeding failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }

@@ -7,10 +7,7 @@ export async function POST(request: NextRequest) {
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token not found' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token not found' }, { status: 401 });
     }
 
     const decoded = authService.verifyToken(token);

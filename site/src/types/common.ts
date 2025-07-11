@@ -5,11 +5,7 @@ export * from './global';
 import type { SidebarItem } from './global';
 
 // Legacy compatibility exports (will be deprecated)
-export type {
-  SidebarItem,
-  SidebarConfig,
-  DashboardStats,
-} from './global';
+export type { SidebarItem, SidebarConfig, DashboardStats } from './global';
 
 // Additional common types specific to this application
 export interface MenuItem extends SidebarItem {

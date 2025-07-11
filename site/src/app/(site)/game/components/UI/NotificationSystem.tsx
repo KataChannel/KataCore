@@ -8,14 +8,19 @@ interface NotificationSystemProps {
   setNotifications: (notifications: LogEntry[]) => void;
 }
 
-export const NotificationSystem = ({ notifications, setNotifications }: NotificationSystemProps) => {
-  const [visibleNotifications, setVisibleNotifications] = useState<(LogEntry & { id: string })[]>([]);
+export const NotificationSystem = ({
+  notifications,
+  setNotifications,
+}: NotificationSystemProps) => {
+  const [visibleNotifications, setVisibleNotifications] = useState<
+    (LogEntry & { id: string })[]
+  >([]);
 
   useEffect(() => {
     if (notifications.length > 0) {
       const newNotifications = notifications.map(notification => ({
         ...notification,
-        id: `${notification.timestamp}-${Math.random()}`
+        id: `${notification.timestamp}-${Math.random()}`,
       }));
 
       setVisibleNotifications(prev => [...prev, ...newNotifications]);
@@ -24,7 +29,7 @@ export const NotificationSystem = ({ notifications, setNotifications }: Notifica
       // Auto remove notifications after 4 seconds
       newNotifications.forEach(notification => {
         setTimeout(() => {
-          setVisibleNotifications(prev => 
+          setVisibleNotifications(prev =>
             prev.filter(n => n.id !== notification.id)
           );
         }, 4000);
@@ -40,7 +45,7 @@ export const NotificationSystem = ({ notifications, setNotifications }: Notifica
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
-      {visibleNotifications.map((notification) => (
+      {visibleNotifications.map(notification => (
         <NotificationItem
           key={notification.id}
           notification={notification}
@@ -56,7 +61,10 @@ interface NotificationItemProps {
   onRemove: () => void;
 }
 
-const NotificationItem = ({ notification, onRemove }: NotificationItemProps) => {
+const NotificationItem = ({
+  notification,
+  onRemove,
+}: NotificationItemProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -94,9 +102,10 @@ const NotificationItem = ({ notification, onRemove }: NotificationItemProps) => 
       className={`
         relative p-3 rounded-lg border-l-4 shadow-lg transition-all duration-300 ease-in-out
         ${getNotificationStyles()}
-        ${isVisible 
-          ? 'transform translate-x-0 opacity-100' 
-          : 'transform translate-x-full opacity-0'
+        ${
+          isVisible
+            ? 'transform translate-x-0 opacity-100'
+            : 'transform translate-x-full opacity-0'
         }
       `}
     >
