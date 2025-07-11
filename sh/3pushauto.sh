@@ -60,11 +60,14 @@ check_service_health() {
                     local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker exec '$container_name' pg_isready -U postgres 2>/dev/null && echo 'healthy' || echo 'unhealthy'")
                     ;;
                 "redis")
-                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker exec '$container_name' redis-cli ping 2>/dev/null | grep -q PONG && echo 'healthy' || echo 'unhealthy'")
+                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker exec '$container_name' redis-cli --no-auth-warning -a \$REDIS_PASSWORD ping 2>/dev/null | grep -q PONG && echo 'healthy' || echo 'unhealthy'")
                     ;;
                 "api"|"site")
                     # Check if the service is responding on its port
-                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker logs '$container_name' 2>/dev/null | tail -20 | grep -i 'error\\|failed\\|exception' >/dev/null && echo 'unhealthy' || echo 'healthy'")
+                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker logs '$container_name' --tail 20 2>/dev/null | grep -i 'error\\|failed\\|exception' >/dev/null && echo 'unhealthy' || echo 'healthy'")
+                    ;;
+                "minio")
+                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker exec '$container_name' curl -f http://localhost:9000/minio/health/live 2>/dev/null && echo 'healthy' || echo 'unhealthy'")
                     ;;
                 *)
                     local health_check="healthy"
@@ -167,7 +170,7 @@ smart_deploy_services() {
                 # Start only the failed/missing services
                 for service in $failed_services; do
                     echo \"Starting service: \$service\"
-                    docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate \$service
+                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --build --force-recreate \$service
                     
                     # Wait a bit for the service to start
                     sleep 5
@@ -366,6 +369,11 @@ show_menu() {
 git_commit() {
     progress "Starting git operations..."
     
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        error "Not in a git repository. Please initialize git first."
+    fi
+    
     # Check if there are changes to commit
     if ! git diff --quiet || ! git diff --cached --quiet; then
         log "📝 Staging all changes..."
@@ -395,7 +403,7 @@ git_commit() {
 check_server_status() {
     progress "Checking server connection..."
     
-    if ssh -o ConnectTimeout=10 "$SSH_USER@$SERVER_IP" "echo 'Connection successful'" >/dev/null 2>&1; then
+    if ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" "echo 'Connection successful'" >/dev/null 2>&1; then
         success "Server connection established"
         
         progress "Checking PROJECT-ONLY status on server..."
@@ -415,7 +423,9 @@ check_server_status() {
                 ls -la | grep -E '(docker-compose|\.env|Dockerfile)' || echo '   No main config files found'
             else
                 echo '❌ Project directory missing: /opt/$PROJECT_NAME'
-                exit 1
+                echo 'Creating project directory...'
+                mkdir -p /opt/$PROJECT_NAME
+                echo '✅ Project directory created'
             fi
             echo ''
             
@@ -433,7 +443,7 @@ check_server_status() {
             echo '🔍 Service Health Analysis:'
             for service in api site postgres redis minio pgadmin; do
                 container_name=\"${PROJECT_NAME}-\$service\"
-                if docker ps --filter name=\"\$container_name\" --format '{{.Names}}' | grep -q \"^\$container_name\$\"; then
+                if docker ps --filter name=\"\$container_name\" --format '{{.Names}}' 2>/dev/null | grep -q \"^\$container_name\$\"; then
                     status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null)
                     echo \"  \$service: \$status ✅\"
                 else
@@ -506,7 +516,7 @@ check_server_status() {
             echo '✅ PROJECT-SCOPED operations ensure server isolation'
         "
     else
-        error "Cannot connect to server. Please check connection."
+        error "Cannot connect to server. Please check connection and SSH key authentication."
     fi
 }
 
@@ -523,17 +533,33 @@ deploy_to_server() {
     info "Excluding: .git, node_modules, *.log, .env, *.md, *.sh"
     
     # Copy all project files to temp directory
-    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+    if command -v rsync >/dev/null 2>&1; then
+        rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+    else
+        # Fallback to cp if rsync is not available
+        find . -type f \
+            ! -path './.git/*' \
+            ! -path './node_modules/*' \
+            ! -name '*.log' \
+            ! -name '.env*' \
+            ! -name '*.md' \
+            ! -name '*.sh' \
+            -exec cp --parents {} "$TEMP_DIR/" \; || error "Failed to copy files to temp directory"
+    fi
     
     # Show transfer size
     size=$(du -sh "$TEMP_DIR" | cut -f1)
     info "Transfer size: $size"
 
     progress "🌐 Transferring files to remote server PROJECT directory..."
-    rsync -avz --progress "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    if command -v rsync >/dev/null 2>&1; then
+        rsync -avz --progress "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    else
+        scp -r "$TEMP_DIR/"* "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    fi
     
     progress "🔧 Configuring PROJECT environment on remote server..."
-    ssh "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME/ && if [ -f .env.prod ]; then mv .env.prod .env && echo 'PROJECT environment file configured'; else echo 'No .env.prod found for PROJECT'; fi" || error "Failed to configure PROJECT environment"
+    ssh "$SSH_USER@$SERVER_IP" "cd /opt/$PROJECT_NAME/ && if [ -f .env.prod ]; then cp .env.prod .env && echo 'PROJECT environment file configured'; else echo 'No .env.prod found for PROJECT'; fi" || error "Failed to configure PROJECT environment"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
