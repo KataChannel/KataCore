@@ -1,0 +1,1 @@
+docker ps -a --filter "name=web" --format "{{.Names}}\t{{.Image}}"

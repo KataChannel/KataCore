@@ -110,7 +110,7 @@ services:
     container_name: tazacore-redis
     restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
     networks:
       - tazacore-network
