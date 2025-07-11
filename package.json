@@ -77,7 +77,8 @@
     "url": "https://github.com/chikiet/TazaCore/issues"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prisma": "^6.11.1"
   },
   "engines": {
     "node": ">=18.0.0",
