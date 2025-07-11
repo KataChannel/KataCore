@@ -200,7 +200,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-sm">K</span>
                   </div>
-                  <span className="text-lg font-semibold text-primary">KataCore</span>
+                  <span className="text-lg font-semibold text-primary">TazaCore</span>
                 </>
               )}
             </div>
@@ -288,7 +288,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">K</span>
               </div>
-              <span className="text-lg font-semibold text-primary">KataCore</span>
+              <span className="text-lg font-semibold text-primary">TazaCore</span>
             </div>
             <button
               onClick={toggleMobileMenu}

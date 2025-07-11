@@ -1,5 +1,5 @@
 // Application constants
-export const APP_NAME = 'KataCore HR Management';
+export const APP_NAME = 'TazaCore HR Management';
 export const APP_DESCRIPTION = 'Professional HR management system';
 
 // API endpoints

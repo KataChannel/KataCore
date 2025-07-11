@@ -470,7 +470,7 @@ npm test && ./autopush.sh
 
 ## 📄 License
 
-This script is part of the KataCore project and is licensed under the MIT License.
+This script is part of the TazaCore project and is licensed under the MIT License.
 
 ---
 

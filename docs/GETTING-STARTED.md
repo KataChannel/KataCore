@@ -1,10 +1,10 @@
-# 🚀 KataCore Enterprise Platform - Getting Started
+# 🚀 TazaCore Enterprise Platform - Getting Started
 
-Welcome to **KataCore**, your complete enterprise platform solution! This guide will help you set up and start using KataCore in just a few minutes.
+Welcome to **TazaCore**, your complete enterprise platform solution! This guide will help you set up and start using TazaCore in just a few minutes.
 
-## 🎯 What is KataCore?
+## 🎯 What is TazaCore?
 
-KataCore is a modern, full-stack enterprise platform that includes:
+TazaCore is a modern, full-stack enterprise platform that includes:
 - **Complete Human Resource Management (HRM) System**
 - **Automated Deployment System** for any server
 - **Modern Tech Stack** with Next.js 15, NestJS 11, and Bun.js
@@ -24,8 +24,8 @@ curl -fsSL https://bun.sh/install | bash
 ### Step 2: Clone and Setup
 ```bash
 # Clone the repository
-git clone https://github.com/chikiet/KataCore.git
-cd KataCore
+git clone https://github.com/chikiet/TazaCore.git
+cd TazaCore
 
 # Install all dependencies
 bun install:all
@@ -148,7 +148,7 @@ Edit `site/.env.local` and `api/.env` to configure:
 - External service integrations
 
 ### Database Configuration
-KataCore uses PostgreSQL with Prisma ORM. The database schema includes:
+TazaCore uses PostgreSQL with Prisma ORM. The database schema includes:
 - **Users** - Authentication and user management
 - **Employees** - Employee records and information
 - **Departments** - Organizational structure
@@ -234,13 +234,13 @@ docker stats
 ### Database Management
 ```bash
 # Access database
-docker-compose exec postgres psql -U katacore
+docker-compose exec postgres psql -U tazacore
 
 # Backup database
-docker-compose exec postgres pg_dump -U katacore katacore > backup.sql
+docker-compose exec postgres pg_dump -U tazacore tazacore > backup.sql
 
 # Restore database
-docker-compose exec postgres psql -U katacore katacore < backup.sql
+docker-compose exec postgres psql -U tazacore tazacore < backup.sql
 ```
 
 ### Updates and Maintenance
@@ -264,7 +264,7 @@ bun run build
 ### Support Channels
 - **GitHub Issues**: Report bugs and request features
 - **Discord Community**: Join our development community
-- **Email Support**: support@katacore.com
+- **Email Support**: support@tazacore.com
 
 ### Contributing
 We welcome contributions! Please read our contribution guidelines and submit pull requests.

@@ -1,6 +1,6 @@
-# 🚀 KataCore Quick Start Guide
+# 🚀 TazaCore Quick Start Guide
 
-Get KataCore up and running in **5 minutes**! This guide will help you set up a complete enterprise HRM platform with automated deployment capabilities.
+Get TazaCore up and running in **5 minutes**! This guide will help you set up a complete enterprise HRM platform with automated deployment capabilities.
 
 ## 📋 Prerequisites
 
@@ -14,8 +14,8 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 # Clone the repository
-git clone https://github.com/chikiet/KataCore.git
-cd KataCore
+git clone https://github.com/chikiet/TazaCore.git
+cd TazaCore
 
 # Install all dependencies (this may take 2-3 minutes)
 bun install:all
@@ -331,13 +331,13 @@ curl http://localhost:3001/health
 - 📖 **Documentation**: Check the `docs/` directory
 - 🐛 **Issues**: Report bugs on GitHub Issues
 - 💬 **Discussions**: Join our Discord community
-- 📧 **Email**: Contact support@katacore.com
+- 📧 **Email**: Contact support@tazacore.com
 
 ## 🎯 Success Checklist
 
 After completing this guide, you should have:
 
-- ✅ KataCore running locally on your machine
+- ✅ TazaCore running locally on your machine
 - ✅ Frontend accessible at http://localhost:3000
 - ✅ Backend API responding at http://localhost:3001
 - ✅ Database with sample employees and departments
@@ -347,7 +347,7 @@ After completing this guide, you should have:
 
 ## 🚀 Ready for More?
 
-Now that you have KataCore running, explore these advanced features:
+Now that you have TazaCore running, explore these advanced features:
 
 1. **📖 Read the [Development Guide](DEVELOPMENT.md)** - Learn the codebase structure
 2. **🏗️ Check the [Architecture Overview](ARCHITECTURE.md)** - Understand the system design
@@ -367,4 +367,4 @@ If you encounter any issues:
 
 ---
 
-🎉 **Congratulations!** You've successfully set up KataCore Enterprise Platform. Happy coding! 🚀
+🎉 **Congratulations!** You've successfully set up TazaCore Enterprise Platform. Happy coding! 🚀

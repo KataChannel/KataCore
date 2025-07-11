@@ -31,8 +31,8 @@ export function UnifiedThemeDemo() {
               </h1>
               <p className="text-text-secondary">
                 {getText(
-                  'Centralized dark mode and theme management for KataCore',
-                  'Quản lý dark mode và theme tập trung cho KataCore'
+                  'Centralized dark mode and theme management for TazaCore',
+                  'Quản lý dark mode và theme tập trung cho TazaCore'
                 )}
               </p>
             </div>
@@ -368,8 +368,8 @@ export function UnifiedThemeDemo() {
         <footer className="mt-8 text-center text-text-secondary text-sm">
           <p>
             {getText(
-              'KataCore Unified Theme System - Centralized dark mode and theme management',
-              'Hệ thống Theme Thống nhất KataCore - Quản lý dark mode và theme tập trung'
+              'TazaCore Unified Theme System - Centralized dark mode and theme management',
+              'Hệ thống Theme Thống nhất TazaCore - Quản lý dark mode và theme tập trung'
             )}
           </p>
           <p className="mt-1">

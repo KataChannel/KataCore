@@ -1,7 +1,7 @@
-# 🔐 KataCore Authentication API Documentation
+# 🔐 TazaCore Authentication API Documentation
 
 ## Overview
-The KataCore Authentication API provides secure user authentication, authorization, and session management for the KataCore platform. It supports multiple authentication methods including JWT tokens, OAuth2, and API keys.
+The TazaCore Authentication API provides secure user authentication, authorization, and session management for the TazaCore platform. It supports multiple authentication methods including JWT tokens, OAuth2, and API keys.
 
 ## Base URL
 ```
@@ -382,7 +382,7 @@ Authorization: Bearer <access-token>
     "apiKey": {
       "id": "key_001",
       "name": "Production API Key",
-      "key": "kata_live_sk_1234567890abcdef",
+      "key": "taza_live_sk_1234567890abcdef",
       "permissions": ["read", "write"],
       "expiresAt": "2024-12-31T23:59:59Z",
       "createdAt": "2024-01-15T10:30:00Z"
@@ -410,7 +410,7 @@ Authorization: Bearer <access-token>
       {
         "id": "key_001",
         "name": "Production API Key",
-        "keyPreview": "kata_live_sk_1234...cdef",
+        "keyPreview": "taza_live_sk_1234...cdef",
         "permissions": ["read", "write"],
         "lastUsed": "2024-01-15T10:30:00Z",
         "expiresAt": "2024-12-31T23:59:59Z",
@@ -853,7 +853,7 @@ X-RateLimit-RetryAfter: 60
 ```javascript
 const axios = require('axios');
 
-class KataCoreAuth {
+class TazaCoreAuth {
   constructor(baseURL) {
     this.baseURL = baseURL;
     this.accessToken = null;
@@ -928,7 +928,7 @@ class KataCoreAuth {
 }
 
 // Usage
-const auth = new KataCoreAuth('https://your-domain.com/api');
+const auth = new TazaCoreAuth('https://your-domain.com/api');
 await auth.login('user@example.com', 'password123');
 const profile = await auth.getProfile();
 ```
@@ -938,7 +938,7 @@ const profile = await auth.getProfile();
 import requests
 import time
 
-class KataCoreAuth:
+class TazaCoreAuth:
     def __init__(self, base_url):
         self.base_url = base_url
         self.access_token = None
@@ -992,7 +992,7 @@ class KataCoreAuth:
             raise Exception('Session expired. Please login again.')
 
 # Usage
-auth = KataCoreAuth('https://your-domain.com/api')
+auth = TazaCoreAuth('https://your-domain.com/api')
 auth.login('user@example.com', 'password123')
 profile = auth.get_profile()
 ```
@@ -1001,26 +1001,26 @@ profile = auth.get_profile()
 
 ### Demo Credentials
 ```
-Email: demo@katacore.com
+Email: demo@tazacore.com
 Password: Demo123456!
 ```
 
 ### Test Endpoints
 ```bash
 # Login
-curl -X POST "https://demo.katacore.com/api/auth/login" \
+curl -X POST "https://demo.tazacore.com/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "demo@katacore.com",
+    "email": "demo@tazacore.com",
     "password": "Demo123456!"
   }'
 
 # Get profile
-curl -X GET "https://demo.katacore.com/api/auth/me" \
+curl -X GET "https://demo.tazacore.com/api/auth/me" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 
 # Register new user
-curl -X POST "https://demo.katacore.com/api/auth/register" \
+curl -X POST "https://demo.tazacore.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Test",
@@ -1065,10 +1065,10 @@ The system can send webhook notifications for authentication events:
 ## Support
 
 For authentication API support:
-- 📧 Email: auth-support@katacore.com
-- 📚 Documentation: https://docs.katacore.com/api/auth
-- 🔒 Security Issues: security@katacore.com
-- 💬 Community: https://discord.gg/katacore
+- 📧 Email: auth-support@tazacore.com
+- 📚 Documentation: https://docs.tazacore.com/api/auth
+- 🔒 Security Issues: security@tazacore.com
+- 💬 Community: https://discord.gg/tazacore
 
 ---
 

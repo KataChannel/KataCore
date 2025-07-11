@@ -1,4 +1,4 @@
-# KataCore HR Management System
+# TazaCore HR Management System
 
 A comprehensive HR management system built with Next.js 14, TypeScript, and modern web technologies.
 

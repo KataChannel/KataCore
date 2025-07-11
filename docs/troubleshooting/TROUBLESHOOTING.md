@@ -1,4 +1,4 @@
-# 🔧 KataCore Troubleshooting Guide
+# 🔧 TazaCore Troubleshooting Guide
 
 ## Table of Contents
 1. [Common Issues](#common-issues)
@@ -131,7 +131,7 @@
 1. **Check Database Performance**
    ```bash
    # Connect to PostgreSQL
-   docker-compose exec postgres psql -U postgres -d katacore
+   docker-compose exec postgres psql -U postgres -d tazacore
    
    # Check slow queries
    SELECT query, mean_time, calls 
@@ -140,7 +140,7 @@
    LIMIT 10;
    
    # Check database size
-   SELECT pg_database_size('katacore');
+   SELECT pg_database_size('tazacore');
    ```
 
 2. **Check Redis Performance**
@@ -187,7 +187,7 @@
    ./deployment/scripts/deploy-production.sh --verbose
    
    # Check system logs
-   journalctl -u katacore
+   journalctl -u tazacore
    ```
 
 2. **Verify SSH Connection**
@@ -275,7 +275,7 @@
    docker-compose logs postgres
    
    # Test connection
-   docker-compose exec postgres psql -U postgres -d katacore -c "SELECT 1;"
+   docker-compose exec postgres psql -U postgres -d tazacore -c "SELECT 1;"
    ```
 
 2. **Check Connection Configuration**
@@ -326,7 +326,7 @@
 2. **Backup Database Before Migration**
    ```bash
    # Create backup
-   docker-compose exec postgres pg_dump -U postgres katacore > backup.sql
+   docker-compose exec postgres pg_dump -U postgres tazacore > backup.sql
    
    # Test migration on backup
    docker-compose exec postgres psql -U postgres -d test_db < backup.sql
@@ -553,7 +553,7 @@
    docker network ls
    
    # Inspect network configuration
-   docker network inspect katacore_default
+   docker network inspect tazacore_default
    
    # Check container network settings
    docker-compose exec app ip addr show
@@ -803,7 +803,7 @@
 #!/bin/bash
 # health-check.sh
 
-echo "=== KataCore Health Check ==="
+echo "=== TazaCore Health Check ==="
 echo "Timestamp: $(date)"
 echo
 
@@ -817,7 +817,7 @@ curl -s http://localhost:3000/api/health | jq '.'
 
 # Check database
 echo "=== Database Health ==="
-docker-compose exec postgres psql -U postgres -d katacore -c "SELECT 1;" > /dev/null 2>&1
+docker-compose exec postgres psql -U postgres -d tazacore -c "SELECT 1;" > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "Database: OK"
 else
@@ -850,7 +850,7 @@ echo "=== Health Check Complete ==="
 #!/bin/bash
 # analyze-logs.sh
 
-echo "=== KataCore Log Analysis ==="
+echo "=== TazaCore Log Analysis ==="
 
 # Check for errors
 echo "=== Recent Errors ==="
@@ -880,7 +880,7 @@ docker-compose logs app | grep -i "response time" | tail -10
 #!/bin/bash
 # performance-monitor.sh
 
-echo "=== KataCore Performance Monitor ==="
+echo "=== TazaCore Performance Monitor ==="
 
 # API Response Time
 echo "=== API Response Time ==="
@@ -888,7 +888,7 @@ curl -w "@curl-format.txt" -o /dev/null -s http://localhost:3000/api/health
 
 # Database Performance
 echo "=== Database Performance ==="
-docker-compose exec postgres psql -U postgres -d katacore -c "
+docker-compose exec postgres psql -U postgres -d tazacore -c "
 SELECT 
     calls,
     mean_time,
@@ -971,8 +971,8 @@ echo "Diagnostics collected in diagnostics_$TIMESTAMP.tar.gz"
    - Check recent changes: `git log --oneline -10`
 
 2. **Contact Support:**
-   - Email: emergency@katacore.com
-   - Phone: +1-555-KATA-911
+   - Email: emergency@tazacore.com
+   - Phone: +1-555-TAZA-911
    - Slack: #emergency-support
 
 ### 📚 Documentation & Resources
@@ -984,9 +984,9 @@ echo "Diagnostics collected in diagnostics_$TIMESTAMP.tar.gz"
 - [Deployment Guide](./DEPLOYMENT-GUIDE.md)
 
 **Community Resources:**
-- Discord: https://discord.gg/katacore
-- GitHub Issues: https://github.com/katacore/issues
-- Stack Overflow: Tag `katacore`
+- Discord: https://discord.gg/tazacore
+- GitHub Issues: https://github.com/tazacore/issues
+- Stack Overflow: Tag `tazacore`
 
 ### 🎯 Reporting Issues
 
@@ -1033,7 +1033,7 @@ What actually happens
 ## Environment
 - OS: [e.g., Ubuntu 22.04]
 - Docker Version: [e.g., 24.0.0]
-- KataCore Version: [e.g., 1.0.0]
+- TazaCore Version: [e.g., 1.0.0]
 
 ## Additional Context
 Any additional information
@@ -1061,7 +1061,7 @@ docker-compose logs --tail=50
 free -h && df -h
 
 # Test database connection
-docker-compose exec postgres psql -U postgres -d katacore -c "SELECT 1;"
+docker-compose exec postgres psql -U postgres -d tazacore -c "SELECT 1;"
 
 # Test Redis connection
 docker-compose exec redis redis-cli ping

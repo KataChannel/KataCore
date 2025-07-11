@@ -1,7 +1,7 @@
 {
-  "name": "katacore-enterprise",
+  "name": "tazacore-enterprise",
   "version": "2.0.0",
-  "description": "KataCore Enterprise Platform - Production-ready full-stack platform with automated deployment & Human Resource Management",
+  "description": "TazaCore Enterprise Platform - Production-ready full-stack platform with automated deployment & Human Resource Management",
   "private": true,
   "workspaces": [
     "site",
@@ -44,7 +44,7 @@
     "prisma:seed": "cd site && bun run prisma/seed.ts"
   },
   "keywords": [
-    "katacore",
+    "tazacore",
     "enterprise",
     "hrm",
     "human-resource-management",
@@ -66,15 +66,15 @@
     "prisma",
     "automated-deployment"
   ],
-  "author": "KataCore Team",
+  "author": "TazaCore Team",
   "license": "MIT",
-  "homepage": "https://github.com/chikiet/KataCore",
+  "homepage": "https://github.com/chikiet/TazaCore",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chikiet/KataCore.git"
+    "url": "https://github.com/chikiet/TazaCore.git"
   },
   "bugs": {
-    "url": "https://github.com/chikiet/KataCore/issues"
+    "url": "https://github.com/chikiet/TazaCore/issues"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

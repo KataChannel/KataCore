@@ -1,4 +1,4 @@
-# 🔧 KataCore Development Guide
+# 🔧 TazaCore Development Guide
 
 ## Development Environment Setup
 
@@ -12,8 +12,8 @@
 ### Initial Setup
 ```bash
 # Clone the repository
-git clone https://github.com/chikiet/KataCore.git
-cd KataCore
+git clone https://github.com/chikiet/TazaCore.git
+cd TazaCore
 
 # Install all dependencies
 bun install:all
@@ -45,7 +45,7 @@ NEXT_PUBLIC_MINIO_ENDPOINT=http://localhost:9000
 #### Backend Environment (api/.env)
 ```env
 # Database
-DATABASE_URL=postgresql://katacore:katacore@localhost:5432/katacore
+DATABASE_URL=postgresql://tazacore:tazacore@localhost:5432/tazacore
 
 # Authentication
 JWT_SECRET=your-generated-jwt-secret
@@ -666,4 +666,4 @@ bun add --dev husky lint-staged
 echo 'bun run lint && bun run test' > .husky/pre-commit
 ```
 
-This development guide provides comprehensive instructions for contributing to the KataCore project while maintaining code quality and consistency.
+This development guide provides comprehensive instructions for contributing to the TazaCore project while maintaining code quality and consistency.

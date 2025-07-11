@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 KataCore Auto Git Push - Enhanced Version
+# 🚀 TazaCore Auto Git Push - Enhanced Version
 # Improved autopush with better commit messages and validation
 # Version: 2.1.0 - Dynamic main branch support
 
@@ -26,7 +26,7 @@ show_banner() {
     echo -e "${PURPLE}"
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    🚀 KataCore Auto Git Push v2.1                           ║
+║                    🚀 TazaCore Auto Git Push v2.1                           ║
 ║                                                                              ║
 ║    Enhanced version with dynamic main branch and merge support              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝

@@ -21,8 +21,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:reset": "prisma migrate reset",
     "prisma:seed": "bun run src/prisma/seed.ts",
-    "docker:build": "docker build -t katacore-api .",
-    "docker:run": "docker run -p 3001:3001 katacore-api"
+    "docker:build": "docker build -t tazacore-api .",
+    "docker:run": "docker run -p 3001:3001 tazacore-api"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.3",

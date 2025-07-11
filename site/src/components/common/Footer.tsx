@@ -32,12 +32,12 @@ export interface FooterProps {
 }
 
 // Default values
-const defaultCompanyName = "Kata Offical";
+const defaultCompanyName = "Taza Offical";
 const defaultDescription = "Your trusted partner in web development and digital solutions.";
 const defaultContact = {
-  address: "123 Kata Street, City, Country",
+  address: "123 Taza Street, City, Country",
   phone: "+1 (234) 567-890",    
-  email: "info@kataofficial.com"
+  email: "info@tazaofficial.com"
 };
 const defaultFooterLinks: FooterLinks = {
   company: [
@@ -67,7 +67,7 @@ const defaultSocialLinks: SocialLink[] = [
   { name: "Twitter", icon: Twitter, href: "https://twitter.com" },
   { name: "Instagram", icon: Instagram, href: "https://instagram.com" },
   { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com" },
-  { name: "Email", icon: Mail, href: "mailto:info@kataofficial.com" }
+  { name: "Email", icon: Mail, href: "mailto:info@tazaofficial.com" }
 ];
 
 export default function Footer({

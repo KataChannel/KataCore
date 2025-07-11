@@ -11,14 +11,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "KataCore HR",
+    title: "TazaCore HR",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "KataCore HR Management System",
+    siteName: "TazaCore HR Management System",
     title: siteConfig.title,
     description: siteConfig.description,
   },
@@ -43,10 +43,10 @@ export default function RootLayout({
       <head>
         <ThemeInitScript />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="application-name" content="KataCore HR" />
+        <meta name="application-name" content="TazaCore HR" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="KataCore HR" />
+        <meta name="apple-mobile-web-app-title" content="TazaCore HR" />
         <meta
           name="description"
           content="Comprehensive HR management system with employee management, departments, attendance, payroll, and more"
@@ -86,28 +86,28 @@ export default function RootLayout({
         />
         <link rel="shortcut icon" href="/favicon.ico" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:url" content="https://katacore.hr" />
-        <meta name="twitter:title" content="KataCore HR Management System" />
+        <meta name="twitter:url" content="https://tazacore.hr" />
+        <meta name="twitter:title" content="TazaCore HR Management System" />
         <meta
           name="twitter:description"
           content="Comprehensive HR management system with employee management, departments, attendance, payroll, and more"
         />
         <meta
           name="twitter:image"
-          content="https://katacore.hr/icons/icon-192x192.png"
+          content="https://tazacore.hr/icons/icon-192x192.png"
         />
-        <meta name="twitter:creator" content="@katacore" />
+        <meta name="twitter:creator" content="@tazacore" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="KataCore HR Management System" />
+        <meta property="og:title" content="TazaCore HR Management System" />
         <meta
           property="og:description"
           content="Comprehensive HR management system with employee management, departments, attendance, payroll, and more"
         />
-        <meta property="og:site_name" content="KataCore HR Management System" />
-        <meta property="og:url" content="https://katacore.hr" />
+        <meta property="og:site_name" content="TazaCore HR Management System" />
+        <meta property="og:url" content="https://tazacore.hr" />
         <meta
           property="og:image"
-          content="https://katacore.hr/icons/icon-192x192.png"
+          content="https://tazacore.hr/icons/icon-192x192.png"
         />
       </head>
       <body suppressHydrationWarning>

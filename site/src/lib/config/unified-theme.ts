@@ -1,4 +1,4 @@
-// Unified Theme Configuration System for KataCore
+// Unified Theme Configuration System for TazaCore
 // Centralized dark mode and theme management
 
 import { z } from 'zod';
@@ -111,10 +111,10 @@ export const UNIFIED_THEME_CONFIG = {
 
   // Storage keys
   storageKeys: {
-    theme: 'kata-unified-theme',
-    preferences: 'kata-user-preferences',
-    language: 'kata-language',
-    mode: 'kata-theme-mode',
+    theme: 'taza-unified-theme',
+    preferences: 'taza-user-preferences',
+    language: 'taza-language',
+    mode: 'taza-theme-mode',
   },
 
   // Color palettes

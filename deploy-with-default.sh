@@ -3,9 +3,9 @@
 # 🚀 Tazav1 Deployment Helper with Generated SSH Key
 # Auto-generated helper script for deployment with key: default
 
-SSH_KEY="/home/kata/.ssh/default"
+SSH_KEY="/home/taza/.ssh/default"
 SSH_USER="root"
-SERVER_IP="116.118.48.143"
+SERVER_IP="116.118.49.243"
 
 # Check if key exists
 if [[ ! -f "$SSH_KEY" ]]; then

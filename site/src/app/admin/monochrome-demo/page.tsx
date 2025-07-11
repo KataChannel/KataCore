@@ -119,8 +119,8 @@ export default function MonochromeShowcase() {
           </h1>
           <p className="text-xl text-text-secondary max-w-2xl mx-auto">
             {getText(
-              'A modern, minimalist design system built for KataCore Admin with dark mode and responsive design.',
-              'Hệ thống thiết kế hiện đại, tối giản được xây dựng cho KataCore Admin với chế độ tối và thiết kế responsive.'
+              'A modern, minimalist design system built for TazaCore Admin with dark mode and responsive design.',
+              'Hệ thống thiết kế hiện đại, tối giản được xây dựng cho TazaCore Admin với chế độ tối và thiết kế responsive.'
             )}
           </p>
         </div>

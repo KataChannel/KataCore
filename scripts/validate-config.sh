@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# KataCore Configuration Validation Script
+# TazaCore Configuration Validation Script
 # Validates deployment configurations and environment files
-# Author: KataCore Team
+# Author: TazaCore Team
 # Version: 1.0.0
 
 set -euo pipefail
@@ -149,7 +149,7 @@ validate_ssh_configuration() {
     local ssh_keys=(
         "$HOME/.ssh/id_rsa"
         "$HOME/.ssh/id_ed25519"
-        "$HOME/.ssh/katacore-deploy"
+        "$HOME/.ssh/tazacore-deploy"
     )
     
     local found_keys=0
@@ -312,7 +312,7 @@ generate_validation_report() {
     log_header "Generating Validation Report"
     
     {
-        echo "KataCore Configuration Validation Report"
+        echo "TazaCore Configuration Validation Report"
         echo "Generated on: $(date)"
         echo "========================================"
         echo
@@ -369,7 +369,7 @@ generate_validation_report() {
 
 show_help() {
     cat << EOF
-${CYAN}KataCore Configuration Validator${NC}
+${CYAN}TazaCore Configuration Validator${NC}
 
 ${BLUE}USAGE:${NC}
     $0 [OPTIONS] [COMMAND]

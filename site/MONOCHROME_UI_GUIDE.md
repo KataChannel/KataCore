@@ -1,4 +1,4 @@
-# KataCore - Monochrome UI System
+# TazaCore - Monochrome UI System
 
 Hệ thống giao diện đơn sắc với hỗ trợ đa ngôn ngữ và chế độ tối cho ứng dụng Next.js.
 

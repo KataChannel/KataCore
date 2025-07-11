@@ -1,4 +1,4 @@
-// Unified Theme Hook - Centralized theme management for KataCore
+// Unified Theme Hook - Centralized theme management for TazaCore
 // Replaces all other theme hooks with a single, synchronized solution
 'use client';
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';

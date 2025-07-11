@@ -1,5 +1,5 @@
 // Unified Monochrome Theme Configuration
-// Centralized theme system for KataCore
+// Centralized theme system for TazaCore
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 export type Language = 'vi' | 'en';
@@ -54,9 +54,9 @@ export const monochromeThemeConfig = {
   
   // Storage keys for localStorage
   storageKeys: {
-    theme: 'kata-theme-mode',
-    language: 'kata-language',
-    userPreferences: 'kata-user-preferences',
+    theme: 'taza-theme-mode',
+    language: 'taza-language',
+    userPreferences: 'taza-user-preferences',
   },
   
   // Color palettes

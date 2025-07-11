@@ -1,8 +1,8 @@
-# Hệ thống Theme Thống Nhất - KataCore
+# Hệ thống Theme Thống Nhất - TazaCore
 
 ## 🎯 Tổng quan
 
-Hệ thống theme thống nhất của KataCore cung cấp một giải pháp tập trung để quản lý dark mode, theme config và cấu hình giao diện cho toàn bộ ứng dụng.
+Hệ thống theme thống nhất của TazaCore cung cấp một giải pháp tập trung để quản lý dark mode, theme config và cấu hình giao diện cho toàn bộ ứng dụng.
 
 ## ✨ Tính năng chính
 
@@ -170,7 +170,7 @@ export function Header() {
   return (
     <header className="unified-card">
       <div className="flex items-center gap-4">
-        <h1>KataCore</h1>
+        <h1>TazaCore</h1>
         
         {/* Toggle đơn giản */}
         <ThemeModeToggle />
@@ -459,7 +459,7 @@ background-color: var(--color-surface);
 // Sử dụng storage events
 useEffect(() => {
   const handleStorageChange = (e: StorageEvent) => {
-    if (e.key === 'kata-unified-theme') {
+    if (e.key === 'taza-unified-theme') {
       // Reload theme config
       window.location.reload();
     }

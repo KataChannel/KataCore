@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 KataCore Project Structure Optimizer
+# 🚀 TazaCore Project Structure Optimizer
 # Organizes project files into a clean, professional structure
 # Version: 2.0.0
 
@@ -25,7 +25,7 @@ show_banner() {
     echo -e "${BLUE}"
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    🚀 KataCore Project Structure Optimizer                  ║
+║                    🚀 TazaCore Project Structure Optimizer                  ║
 ║                                                                              ║
 ║    Organizes your project files into a clean, professional structure        ║
 ║    Version: 2.0.0                                                           ║
@@ -82,7 +82,7 @@ create_configs() {
 NODE_ENV=development
 PORT=3000
 API_PORT=3001
-DATABASE_URL=postgresql://dev_user:dev_pass@localhost:5432/katacore_dev
+DATABASE_URL=postgresql://dev_user:dev_pass@localhost:5432/tazacore_dev
 REDIS_URL=redis://localhost:6379
 LOG_LEVEL=debug
 JWT_SECRET=dev_jwt_secret_key
@@ -94,7 +94,7 @@ EOF
 NODE_ENV=production
 PORT=3000
 API_PORT=3001
-DATABASE_URL=postgresql://prod_user:prod_pass@postgres:5432/katacore
+DATABASE_URL=postgresql://prod_user:prod_pass@postgres:5432/tazacore
 REDIS_URL=redis://:redis_pass@redis:6379
 LOG_LEVEL=info
 JWT_SECRET=prod_jwt_secret_key
@@ -106,7 +106,7 @@ EOF
 NODE_ENV=staging
 PORT=3000
 API_PORT=3001
-DATABASE_URL=postgresql://staging_user:staging_pass@postgres:5432/katacore_staging
+DATABASE_URL=postgresql://staging_user:staging_pass@postgres:5432/tazacore_staging
 REDIS_URL=redis://:redis_pass@redis:6379
 LOG_LEVEL=info
 JWT_SECRET=staging_jwt_secret_key
@@ -153,8 +153,8 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-katacore}
-      - POSTGRES_USER=${POSTGRES_USER:-katacore}
+      - POSTGRES_DB=${POSTGRES_DB:-tazacore}
+      - POSTGRES_USER=${POSTGRES_USER:-tazacore}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -206,8 +206,8 @@ create_documentation() {
 
 ### 1. Clone and Install
 ```bash
-git clone https://github.com/chikiet/KataCore.git
-cd KataCore
+git clone https://github.com/chikiet/TazaCore.git
+cd TazaCore
 bun install:all
 ```
 
@@ -324,7 +324,7 @@ create_improved_autopush() {
     cat > scripts/maintenance/autopush.sh << 'EOF'
 #!/bin/bash
 
-# 🚀 KataCore Auto Git Push
+# 🚀 TazaCore Auto Git Push
 # Improved version with better commit messages and validation
 # Version: 2.0.0
 
@@ -407,7 +407,7 @@ create_master_deployment() {
     cat > scripts/deployment/deploy.sh << 'EOF'
 #!/bin/bash
 
-# 🚀 KataCore Master Deployment Script
+# 🚀 TazaCore Master Deployment Script
 # Unified deployment interface for all environments
 # Version: 2.0.0
 
@@ -434,7 +434,7 @@ error() { echo -e "${RED}❌ $1${NC}"; }
 # Show help
 show_help() {
     cat << 'EOF'
-🚀 KataCore Master Deployment Script
+🚀 TazaCore Master Deployment Script
 
 USAGE:
     ./deploy.sh [COMMAND] [OPTIONS]
@@ -459,7 +459,7 @@ EXAMPLES:
     ./deploy.sh wizard                   # Interactive deployment
     ./deploy.sh cleanup                  # Clean up deployment
 
-For more information, visit: https://docs.katacore.com
+For more information, visit: https://docs.tazacore.com
 EOF
 }
 
@@ -572,7 +572,7 @@ cleanup_old_files() {
 main() {
     show_banner
     
-    log "Starting KataCore project structure optimization..."
+    log "Starting TazaCore project structure optimization..."
     
     create_structure
     organize_deployment_files

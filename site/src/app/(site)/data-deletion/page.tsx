@@ -57,7 +57,7 @@ export default function HomePage() {
             Phạm vi áp dụng
           </h2>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-            Hướng dẫn áp dụng cho tất cả người dùng đã đăng ký tài khoản trên nền tảng kataoffical và quản trị viên hệ thống có quyền truy cập vào dữ liệu người dùng.
+            Hướng dẫn áp dụng cho tất cả người dùng đã đăng ký tài khoản trên nền tảng tazaoffical và quản trị viên hệ thống có quyền truy cập vào dữ liệu người dùng.
           </p>
         </section>
 
@@ -76,7 +76,7 @@ export default function HomePage() {
                 Người dùng cá nhân:
               </h4>
               <ol className="list-decimal list-inside space-y-2 pl-4 text-gray-700 dark:text-gray-300">
-                <li>Đăng nhập vào tài khoản của bạn trên kataoffical qua trang web kataoffical.online hoặc ứng dụng di động.</li>
+                <li>Đăng nhập vào tài khoản của bạn trên tazaoffical qua trang web tazaoffical.online hoặc ứng dụng di động.</li>
                 <li>Truy cập mục <strong className="text-gray-900 dark:text-white">Cài đặt tài khoản</strong> hoặc <strong className="text-gray-900 dark:text-white">Quyền riêng tư</strong> trong hồ sơ người dùng.</li>
                 <li>Chọn tùy chọn <strong className="text-gray-900 dark:text-white">Yêu cầu xóa dữ liệu</strong> và làm theo hướng dẫn.</li>
                 <li>Xác nhận danh tính bằng email hoặc mã OTP (nếu được yêu cầu).</li>
@@ -89,7 +89,7 @@ export default function HomePage() {
                 Quản trị viên (trong trường hợp xóa dữ liệu thay cho người dùng):
               </h4>
               <ol className="list-decimal list-inside space-y-2 pl-4 text-gray-700 dark:text-gray-300">
-                <li>Đăng nhập vào <strong className="text-gray-900 dark:text-white">Bảng điều khiển quản trị</strong> kataoffical.online.</li>
+                <li>Đăng nhập vào <strong className="text-gray-900 dark:text-white">Bảng điều khiển quản trị</strong> tazaoffical.online.</li>
                 <li>Truy cập mục <strong className="text-gray-900 dark:text-white">Quản lý người dùng</strong> và tìm kiếm người dùng bằng tên, email hoặc ID người dùng.</li>
                 <li>Chọn <strong className="text-gray-900 dark:text-white">Xóa dữ liệu người dùng</strong> và xác nhận hành động.</li>
               </ol>
@@ -140,7 +140,7 @@ export default function HomePage() {
               <li>Yêu cầu truy cập vào dữ liệu cá nhân của mình.</li>
               <li>Yêu cầu chỉnh sửa hoặc xóa dữ liệu.</li>
               <li>Từ chối một số hình thức thu thập dữ liệu (ví dụ: cookie không bắt buộc).</li>
-              <li>Liên hệ với chúng tôi để được hỗ trợ qua katachanneloffical@gmail.com hoặc 0906447889.</li>
+              <li>Liên hệ với chúng tôi để được hỗ trợ qua tazachanneloffical@gmail.com hoặc 0906447889.</li>
             </ul>
           </div>
 
@@ -152,9 +152,9 @@ export default function HomePage() {
               Nếu bạn có thắc mắc về việc xóa dữ liệu hoặc cần hỗ trợ thêm, vui lòng liên hệ:
             </p>
             <ul className="list-disc list-inside space-y-2 pl-4 text-gray-700 dark:text-gray-300">
-              <li><strong className="text-gray-900 dark:text-white">Email:</strong> katachanneloffical@gmail.com</li>
+              <li><strong className="text-gray-900 dark:text-white">Email:</strong> tazachanneloffical@gmail.com</li>
               <li><strong className="text-gray-900 dark:text-white">Điện thoại:</strong> 0906447889</li>
-              <li><strong className="text-gray-900 dark:text-white">Trang hỗ trợ:</strong> https://kataoffical.online/support</li>
+              <li><strong className="text-gray-900 dark:text-white">Trang hỗ trợ:</strong> https://tazaoffical.online/support</li>
             </ul>
           </div>
 

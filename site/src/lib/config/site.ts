@@ -1,5 +1,5 @@
 export const siteConfig = {
-    title: "KataCore - Monochrome UI",
+    title: "TazaCore - Monochrome UI",
     description: "Professional HR management system with modern design",
     offline: false, // Chỉ sử dụng khi website không cần kết nối internet
     maintenance: {
@@ -44,15 +44,15 @@ export const siteConfig = {
         light: "/images/logo-light.png", // Đường dẫn đến logo sáng
         width: 150, // Chiều rộng của logo
         height: 50, // Chiều cao của logo
-        alt: "KataCore - Monochrome UI System",
+        alt: "TazaCore - Monochrome UI System",
     },
     
     // SEO configuration
     seo: {
-        titleTemplate: "%s | KataCore",
+        titleTemplate: "%s | TazaCore",
         titleSeparator: "|",
-        titleSuffix: "KataCore",
-        description: "KataCore - Hệ thống giao diện đơn sắc với hỗ trợ đa ngôn ngữ và chế độ tối.",
+        titleSuffix: "TazaCore",
+        description: "TazaCore - Hệ thống giao diện đơn sắc với hỗ trợ đa ngôn ngữ và chế độ tối.",
         keywords: [
             "monochrome ui",
             "dark mode",
@@ -62,20 +62,20 @@ export const siteConfig = {
             "tailwindcss",
             "typescript"
         ],
-        url: "https://katacore.com",
+        url: "https://tazacore.com",
         image: "/images/og-image.png",
         twitterCard: "summary_large_image",
     },
     
     // Author information
     author: {
-        name: "KataCore Team",
-        email: "contact@katacore.com",
-        url: "https://katacore.com",
+        name: "TazaCore Team",
+        email: "contact@tazacore.com",
+        url: "https://tazacore.com",
         social: {
-            twitter: "@katacore",
-            github: "katacore",
-            linkedin: "katacore"
+            twitter: "@tazacore",
+            github: "tazacore",
+            linkedin: "tazacore"
         }
     },
     

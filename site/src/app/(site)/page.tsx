@@ -308,7 +308,7 @@ export default function HomePage() {
                 isDarkMode ? "text-gray-400" : "text-gray-500"
               }`}
             >
-              © 2024 KataCore. All rights reserved.
+              © 2024 TazaCore. All rights reserved.
             </p>
           </div>
         </footer>

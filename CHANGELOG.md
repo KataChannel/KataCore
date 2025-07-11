@@ -1,4 +1,4 @@
-# Changelog - KataCore Enterprise Platform
+# Changelog - TazaCore Enterprise Platform
 
 ## [2.0.0] - 2025-01-15
 

@@ -1,7 +1,7 @@
-# 🏢 KataCore HRM API Documentation
+# 🏢 TazaCore HRM API Documentation
 
 ## Overview
-The KataCore HRM (Human Resource Management) API provides comprehensive endpoints for managing employee data, organizational structure, and HR processes within the KataCore platform.
+The TazaCore HRM (Human Resource Management) API provides comprehensive endpoints for managing employee data, organizational structure, and HR processes within the TazaCore platform.
 
 ## Base URL
 ```
@@ -744,21 +744,21 @@ employees = hrm.get_employees()
 ## Testing
 
 ### Postman Collection
-A comprehensive Postman collection is available at `/docs/examples/KataCore-HRM-API.postman_collection.json`
+A comprehensive Postman collection is available at `/docs/examples/TazaCore-HRM-API.postman_collection.json`
 
 ### Test Credentials
 For testing purposes, you can use the following credentials:
 - **API Key**: `test_api_key_123456`
-- **Base URL**: `https://demo.katacore.com/api/hrm`
+- **Base URL**: `https://demo.tazacore.com/api/hrm`
 
 ### Example Test Cases
 ```bash
 # Test authentication
-curl -X GET "https://demo.katacore.com/api/hrm/employees" \
+curl -X GET "https://demo.tazacore.com/api/hrm/employees" \
   -H "Authorization: Bearer test_api_key_123456"
 
 # Test employee creation
-curl -X POST "https://demo.katacore.com/api/hrm/employees" \
+curl -X POST "https://demo.tazacore.com/api/hrm/employees" \
   -H "Authorization: Bearer test_api_key_123456" \
   -H "Content-Type: application/json" \
   -d '{
@@ -774,10 +774,10 @@ curl -X POST "https://demo.katacore.com/api/hrm/employees" \
 ## Support
 
 For API support and questions:
-- 📧 Email: api-support@katacore.com
-- 📚 Documentation: https://docs.katacore.com/api/hrm
-- 🐛 Bug Reports: https://github.com/katacore/issues
-- 💬 Community: https://discord.gg/katacore
+- 📧 Email: api-support@tazacore.com
+- 📚 Documentation: https://docs.tazacore.com/api/hrm
+- 🐛 Bug Reports: https://github.com/tazacore/issues
+- 💬 Community: https://discord.gg/tazacore
 
 ---
 

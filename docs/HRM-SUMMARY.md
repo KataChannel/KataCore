@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-The KataCore HRM system is a comprehensive human resource management solution built with modern web technologies. It provides complete employee lifecycle management, organizational structure management, and role-based access control.
+The TazaCore HRM system is a comprehensive human resource management solution built with modern web technologies. It provides complete employee lifecycle management, organizational structure management, and role-based access control.
 
 ## ✅ Completed Features
 

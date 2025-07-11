@@ -1,10 +1,10 @@
-# 🚀 KataCore - Advanced Full-Stack Development Platform
+# 🚀 TazaCore - Advanced Full-Stack Development Platform
 
 <div align="center">
 
-![KataCore Logo](https://via.placeholder.com/200x80/4A90E2/FFFFFF?text=KataCore)
+![TazaCore Logo](https://via.placeholder.com/200x80/4A90E2/FFFFFF?text=TazaCore)
 
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/your-org/KataCore)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/your-org/TazaCore)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://docker.com)
 [![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
@@ -50,7 +50,7 @@
 
 ## 🚀 Quick Start Scripts
 
-KataCore includes powerful automation scripts to streamline your development and deployment workflow.
+TazaCore includes powerful automation scripts to streamline your development and deployment workflow.
 
 ### 🔧 Main Deployment Script (`deploy-remote.sh`)
 
@@ -62,13 +62,13 @@ chmod +x deploy-remote.sh
 ./deploy-remote.sh --interactive
 
 # Quick full deployment with SSL
-./deploy-remote.sh 116.118.48.143 yourdomain.com
+./deploy-remote.sh 116.118.49.243 yourdomain.com
 
 # Simple deployment (no SSL, IP only)
 ./deploy-remote.sh --simple 192.168.1.100
 
 # Production deployment with all services
-./deploy-production.sh 116.118.48.143 yourdomain.com
+./deploy-production.sh 116.118.49.243 yourdomain.com
 ```
 
 **Features:**
@@ -139,9 +139,9 @@ Before using the deployment scripts, ensure you have:
 
 ## 📋 Overview
 
-**KataCore** là nền tảng phát triển full-stack hiện đại được thiết kế để đơn giản hóa quy trình phát triển và triển khai ứng dụng web. Với hai script tự động hóa chính `deploy-remote.sh` và `autopush.sh`, KataCore giúp developers tập trung vào việc phát triển tính năng thay vì lo lắng về infrastructure.
+**TazaCore** là nền tảng phát triển full-stack hiện đại được thiết kế để đơn giản hóa quy trình phát triển và triển khai ứng dụng web. Với hai script tự động hóa chính `deploy-remote.sh` và `autopush.sh`, TazaCore giúp developers tập trung vào việc phát triển tính năng thay vì lo lắng về infrastructure.
 
-### 🎯 What Makes KataCore Special
+### 🎯 What Makes TazaCore Special
 
 - **🏢 Complete HRM System** - Full-featured Human Resource Management with employee lifecycle, departments, and role-based access
 - **🚀 One-Command Deployment** - Deploy to any server with automated SSL, Docker orchestration, and environment setup  
@@ -155,12 +155,12 @@ Deploy your full-stack application in under 5 minutes:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/KataChannel/KataCore.git
-cd KataCore
+git clone https://github.com/TazaChannel/TazaCore.git
+cd TazaCore
 
 # 2. Deploy to your server (replace with your details)
 chmod +x deploy-remote.sh
-./deploy-remote.sh 116.118.48.143 myapp.com
+./deploy-remote.sh 116.118.49.243 myapp.com
 
 # 3. Your application is now live! 🎉
 ```
@@ -183,8 +183,8 @@ All services are automatically configured, secured, and monitored!
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/KataCore.git
-cd KataCore
+git clone https://github.com/your-org/TazaCore.git
+cd TazaCore
 
 # Cấp quyền thực thi cho scripts
 chmod +x deploy-remote.sh autopush.sh
@@ -266,7 +266,7 @@ cd api && npm run dev     # Backend: http://localhost:3001
 ### Project Structure
 
 ```
-KataCore/
+TazaCore/
 ├── 📁 api/                 # NestJS backend
 │   ├── src/
 │   ├── prisma/
@@ -329,7 +329,7 @@ Hướng dẫn từng bước qua CLI wizard.
 
 #### 2. Simple Deployment (IP only)
 ```bash
-./deploy-remote.sh --simple 116.118.48.143
+./deploy-remote.sh --simple 116.118.49.243
 ```
 - Không cần domain
 - Truy cập qua IP:PORT
@@ -337,7 +337,7 @@ Hướng dẫn từng bước qua CLI wizard.
 
 #### 3. Full Deployment (Domain + SSL)
 ```bash
-./deploy-remote.sh 116.118.48.143 kataoffical.online
+./deploy-remote.sh 116.118.49.243 tazaoffical.online
 ```
 - Auto SSL với Let's Encrypt
 - Nginx reverse proxy
@@ -351,7 +351,7 @@ Hướng dẫn từng bước qua CLI wizard.
   --install-redis \
   --install-minio \
   --nginxapi \
-  116.118.48.143 domain.com
+  116.118.49.243 domain.com
 ```
 
 ### Scripts & Automation
@@ -443,23 +443,23 @@ One-command production deployment:
 ## 🎯 Live Demo
 
 ### 🌐 Production Instance
-- **Main App**: [http://116.118.48.143:3000](http://116.118.48.143:3000)
-- **API Endpoint**: [http://116.118.48.143:3001](http://116.118.48.143:3001)
-- **Database Admin**: [http://116.118.48.143:5050](http://116.118.48.143:5050)
-- **File Storage**: [http://116.118.48.143:9000](http://116.118.48.143:9000)
+- **Main App**: [http://116.118.49.243:3000](http://116.118.49.243:3000)
+- **API Endpoint**: [http://116.118.49.243:3001](http://116.118.49.243:3001)
+- **Database Admin**: [http://116.118.49.243:5050](http://116.118.49.243:5050)
+- **File Storage**: [http://116.118.49.243:9000](http://116.118.49.243:9000)
 
 ### 🔑 Demo Credentials
 ```
 Admin User:
-- Email: admin@katacore.com
+- Email: admin@tazacore.com
 - Password: Admin123!
 
 Manager User:
-- Email: manager@katacore.com
+- Email: manager@tazacore.com
 - Password: Manager123!
 
 Employee User:
-- Email: employee@katacore.com
+- Email: employee@tazacore.com
 - Password: Employee123!
 ```
 
@@ -469,10 +469,10 @@ Employee User:
 
 ```bash
 # Kiểm tra containers đang chạy
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose ps'
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose ps'
 
 # Xem logs
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose logs'
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose logs'
 
 # Kiểm tra resource usage
 ssh -i ~/.ssh/id_rsa root@SERVER_IP 'docker stats --no-stream'
@@ -482,10 +482,10 @@ ssh -i ~/.ssh/id_rsa root@SERVER_IP 'docker stats --no-stream'
 
 ```bash
 # Restart tất cả services
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose restart'
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose restart'
 
 # Restart service cụ thể
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose restart api'
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose restart api'
 ```
 
 ### Update deployment
@@ -495,7 +495,7 @@ ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose restart 
 ./deploy-remote.sh --force-regen SERVER_IP DOMAIN
 
 # Update chỉ API
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/katacore && docker compose build api && docker compose up -d api'
+ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose build api && docker compose up -d api'
 ```
 
 ## 🔐 Security
@@ -539,9 +539,9 @@ chore: maintenance tasks
 
 ### Getting Help
 - 📖 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/your-org/KataCore/issues)
-- 💬 [Discussions](https://github.com/your-org/KataCore/discussions)
-- 📧 Email: support@katacore.com
+- 🐛 [Issue Tracker](https://github.com/your-org/TazaCore/issues)
+- 💬 [Discussions](https://github.com/your-org/TazaCore/discussions)
+- 📧 Email: support@tazacore.com
 
 ## 📄 License
 
@@ -558,9 +558,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Made with ❤️ by the KataCore Team**
+**Made with ❤️ by the TazaCore Team**
 
-[⬆ Back to top](#-katacore---advanced-full-stack-development-platform)
+[⬆ Back to top](#-tazacore---advanced-full-stack-development-platform)
 
 </div>
 │   ├── scripts/              # Automation scripts
@@ -585,8 +585,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### 1. 📥 Clone & Setup
 ```bash
 # Clone the repository
-git clone https://github.com/chikiet/KataCore.git
-cd KataCore
+git clone https://github.com/chikiet/TazaCore.git
+cd TazaCore
 
 # Install all dependencies (frontend + backend)
 bun run install:all
@@ -766,7 +766,7 @@ POST /api/seed/hrm              # Seed database with test data
 ## 🔧 Configuration
 
 ### 🌍 Environment Variables
-KataCore automatically generates secure environment variables during deployment:
+TazaCore automatically generates secure environment variables during deployment:
 
 ```bash
 # Application Configuration
@@ -775,9 +775,9 @@ API_VERSION=latest
 SITE_VERSION=latest
 
 # Database Configuration  
-DATABASE_URL=postgresql://user:pass@postgres:5432/katacore
-POSTGRES_DB=katacore
-POSTGRES_USER=katacore
+DATABASE_URL=postgresql://user:pass@postgres:5432/tazacore
+POSTGRES_DB=tazacore
+POSTGRES_USER=tazacore
 POSTGRES_PASSWORD=<auto-generated>
 
 # Authentication & Security
@@ -841,13 +841,13 @@ git pull
 ### 💾 Backup & Recovery
 ```bash
 # Database backup
-docker compose exec postgres pg_dump -U katacore katacore > backup.sql
+docker compose exec postgres pg_dump -U tazacore tazacore > backup.sql
 
 # Restore from backup
-docker compose exec -T postgres psql -U katacore -d katacore < backup.sql
+docker compose exec -T postgres psql -U tazacore -d tazacore < backup.sql
 
 # Full system backup
-tar -czf katacore-backup-$(date +%Y%m%d).tar.gz /opt/katacore/
+tar -czf tazacore-backup-$(date +%Y%m%d).tar.gz /opt/tazacore/
 ```
 
 ---
@@ -919,7 +919,7 @@ certbot renew --force-renewal
 
 ## 🌍 Cloud Provider Support
 
-KataCore is tested and supported on:
+TazaCore is tested and supported on:
 
 - **✅ DigitalOcean** - Droplets and Kubernetes
 - **✅ AWS** - EC2, ECS, and Lambda
@@ -945,8 +945,8 @@ We welcome contributions! Here's how to get started:
 ### 🔧 Development Setup
 ```bash
 # Fork and clone
-git clone https://github.com/yourusername/KataCore.git
-cd KataCore
+git clone https://github.com/yourusername/TazaCore.git
+cd TazaCore
 
 # Install dependencies
 bun run install:all
@@ -994,13 +994,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### 🆘 Getting Help
 
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red.svg)](https://github.com/chikiet/KataCore/issues)
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue.svg)](https://github.com/chikiet/KataCore/discussions)
-[![Documentation](https://img.shields.io/badge/Docs-Available-green.svg)](https://docs.katacore.com)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red.svg)](https://github.com/chikiet/TazaCore/issues)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue.svg)](https://github.com/chikiet/TazaCore/discussions)
+[![Documentation](https://img.shields.io/badge/Docs-Available-green.svg)](https://docs.tazacore.com)
 
-**📧 Email**: support@katacore.com  
-**💬 Community**: [Join our Discord](https://discord.gg/katacore)  
-**📚 Documentation**: [docs.katacore.com](https://docs.katacore.com)
+**📧 Email**: support@tazacore.com  
+**💬 Community**: [Join our Discord](https://discord.gg/tazacore)  
+**📚 Documentation**: [docs.tazacore.com](https://docs.tazacore.com)
 
 </div>
 
@@ -1026,7 +1026,7 @@ curl http://localhost:3001/health   # Test API
 
 **⭐ Star us on GitHub** • **🐛 Report Issues** • **💡 Request Features**
 
-**Made with ❤️ by the KataCore Team**
+**Made with ❤️ by the TazaCore Team**
 
 *Deploy once, scale everywhere!*
 

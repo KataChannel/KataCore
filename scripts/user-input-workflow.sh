@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🎯 KataCore User Input Workflow Manager
+# 🎯 TazaCore User Input Workflow Manager
 # Manages user input flows for different deployment scenarios
 
 set -euo pipefail
@@ -141,7 +141,7 @@ validate_path() {
 workflow_first_time_setup() {
     log "🎯 First-Time Setup Workflow"
     
-    echo -e "${BLUE}Welcome to KataCore! Let's get you set up.${NC}"
+    echo -e "${BLUE}Welcome to TazaCore! Let's get you set up.${NC}"
     echo "This workflow will help you configure your first deployment."
     echo ""
     
@@ -191,18 +191,18 @@ workflow_first_time_setup() {
         if [[ "$USE_EXISTING" == "true" ]]; then
             SSH_KEY_PATH="$DEFAULT_KEY"
         else
-            SSH_KEY_PATH=$(prompt_input "Path for new SSH key" "$HOME/.ssh/katacore-$ENV_KEY" "validate_path")
+            SSH_KEY_PATH=$(prompt_input "Path for new SSH key" "$HOME/.ssh/tazacore-$ENV_KEY" "validate_path")
             GENERATE_KEY="true"
         fi
     else
-        SSH_KEY_PATH=$(prompt_input "Path for new SSH key" "$HOME/.ssh/katacore-$ENV_KEY" "validate_path")
+        SSH_KEY_PATH=$(prompt_input "Path for new SSH key" "$HOME/.ssh/tazacore-$ENV_KEY" "validate_path")
         GENERATE_KEY="true"
     fi
     
     # Project configuration
     echo ""
     echo -e "${BLUE}📦 Project Configuration${NC}"
-    PROJECT_NAME=$(prompt_input "Project name" "katacore")
+    PROJECT_NAME=$(prompt_input "Project name" "tazacore")
     
     # Services selection
     echo ""
@@ -301,7 +301,7 @@ workflow_custom_deploy() {
     SSH_KEY_PATH=$(prompt_input "SSH key path" "$HOME/.ssh/id_rsa" "validate_path")
     
     # Project name
-    PROJECT_NAME=$(prompt_input "Project name" "katacore")
+    PROJECT_NAME=$(prompt_input "Project name" "tazacore")
     
     # Docker Compose file
     DOCKER_COMPOSE_FILE=$(prompt_select "Docker Compose configuration:" \
@@ -382,7 +382,7 @@ save_workflow_config() {
     mkdir -p "$(dirname "$config_file")"
     
     cat > "$config_file" << EOF
-# KataCore Environment Configuration: $env_key
+# TazaCore Environment Configuration: $env_key
 # Generated on $(date)
 
 # Server Configuration
@@ -415,7 +415,7 @@ EOF
 
 show_help() {
     cat << 'EOF'
-KataCore User Input Workflow Manager
+TazaCore User Input Workflow Manager
 
 USAGE:
     ./user-input-workflow.sh [WORKFLOW]
@@ -459,7 +459,7 @@ main() {
             ;;
         "")
             # Interactive workflow selection
-            echo -e "${BLUE}🎯 KataCore User Input Workflow Manager${NC}"
+            echo -e "${BLUE}🎯 TazaCore User Input Workflow Manager${NC}"
             echo ""
             
             WORKFLOW=$(prompt_select "Select a workflow:" \

@@ -1,6 +1,6 @@
-# ⚡ KataCore Quick Start Guide
+# ⚡ TazaCore Quick Start Guide
 
-Hướng dẫn bắt đầu nhanh cho KataCore - Deploy trong 5 phút!
+Hướng dẫn bắt đầu nhanh cho TazaCore - Deploy trong 5 phút!
 
 ## 🎯 Prerequisites
 
@@ -13,8 +13,8 @@ Hướng dẫn bắt đầu nhanh cho KataCore - Deploy trong 5 phút!
 ### Bước 1: Clone và Setup
 ```bash
 # Clone repository
-git clone https://github.com/your-org/KataCore.git
-cd KataCore
+git clone https://github.com/your-org/TazaCore.git
+cd TazaCore
 
 # Cấp quyền thực thi
 chmod +x deploy-remote.sh autopush.sh
@@ -64,20 +64,20 @@ curl -f http://your-server:3001/health
 
 ### Xem logs
 ```bash
-ssh root@YOUR_SERVER_IP 'cd /opt/katacore && docker compose logs -f'
+ssh root@YOUR_SERVER_IP 'cd /opt/tazacore && docker compose logs -f'
 ```
 
 ### Credentials
 ```bash
 # Xem passwords được tạo tự động
-ssh root@YOUR_SERVER_IP 'cat /opt/katacore/.env.prod'
+ssh root@YOUR_SERVER_IP 'cat /opt/tazacore/.env.prod'
 ```
 
 ## 🛠️ Management Commands
 
 ```bash
 # Restart services
-ssh root@SERVER_IP 'cd /opt/katacore && docker compose restart'
+ssh root@SERVER_IP 'cd /opt/tazacore && docker compose restart'
 
 # Update deployment
 ./deploy-remote.sh --force-regen SERVER_IP DOMAIN
@@ -101,10 +101,10 @@ ssh-copy-id root@SERVER_IP
 ### Services không start
 ```bash
 # Xem logs chi tiết
-ssh root@SERVER_IP 'cd /opt/katacore && docker compose logs'
+ssh root@SERVER_IP 'cd /opt/tazacore && docker compose logs'
 
 # Rebuild containers
-ssh root@SERVER_IP 'cd /opt/katacore && docker compose down && docker compose up -d --build'
+ssh root@SERVER_IP 'cd /opt/tazacore && docker compose down && docker compose up -d --build'
 ```
 
 ### SSL Certificate issues
@@ -121,13 +121,13 @@ ssh root@SERVER_IP 'certbot renew --force-renewal'
 
 ---
 
-**🎉 Congratulations! KataCore is now running!**  
+**🎉 Congratulations! TazaCore is now running!**  
 └── config               # SSH configuration
 
 # SSH Access Commands:
-ssh -i ~/.ssh/katacore-deploy root@116.118.85.41
+ssh -i ~/.ssh/tazacore-deploy root@116.118.85.41
 # OR using the auto-generated alias:
-ssh katacore-116.118.85.41
+ssh tazacore-116.118.85.41
 ```
 
 ## 🌐 Access Your Deployed Application
@@ -168,7 +168,7 @@ For your specific server `root@116.118.85.41`, just run:
 This single command will:
 1. ✅ Generate SSH keys
 2. ✅ Deploy keys to your server (password prompt)
-3. ✅ Install and configure KataCore
+3. ✅ Install and configure TazaCore
 4. ✅ Show access URLs
 5. ✅ Set up password-less SSH for future use
 
@@ -180,7 +180,7 @@ This single command will:
 |--------|---------|-------|
 | `quick-deploy.sh` | 🚀 Complete one-command deployment | `./quick-deploy.sh 116.118.85.41` |
 | `auto-ssh-deploy.sh` | 🔑 SSH key generation & deployment | `./auto-ssh-deploy.sh --auto-deploy 116.118.85.41` |
-| `deploy-remote.sh` | 🐳 KataCore deployment (enhanced) | `./deploy-remote.sh --simple 116.118.85.41 116.118.85.41` |
+| `deploy-remote.sh` | 🐳 TazaCore deployment (enhanced) | `./deploy-remote.sh --simple 116.118.85.41 116.118.85.41` |
 | `ssh-fix.sh` | 🔧 SSH troubleshooting | `./ssh-fix.sh --test-connection 116.118.85.41` |
 | `ssh-keygen-setup.sh` | 🔐 Advanced SSH key setup | `./ssh-keygen-setup.sh --server 116.118.85.41` |
 

@@ -194,7 +194,7 @@ OPTIONS:
     --type TYPE           Key type: ed25519 or rsa (default: ed25519)
     --bits BITS           Key bits for RSA (default: 4096)
     --path PATH           SSH directory path (default: ~/.ssh)
-    --domain DOMAIN       Server domain (default: kataoffical.online)
+    --domain DOMAIN       Server domain (default: tazaoffical.online)
     --user USER           SSH user (default: root)
     --force               Force overwrite existing keys
     --no-config           Skip SSH config file creation

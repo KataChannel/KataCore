@@ -124,7 +124,7 @@ const MonochromeShowcase: React.FC = () => {
           </div>
           
           <h1 className="mono-heading text-4xl font-bold mb-4">
-            {language === 'en' ? 'KataCore Monochrome UI System' : 'Hệ thống giao diện đơn sắc KataCore'}
+            {language === 'en' ? 'TazaCore Monochrome UI System' : 'Hệ thống giao diện đơn sắc TazaCore'}
           </h1>
           
           <p className="mono-text-secondary text-lg max-w-2xl mx-auto">

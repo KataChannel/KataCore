@@ -2,8 +2,8 @@
 
 # Set default variables
 SSH_USER="root"
-DEFAULT_SERVER_IP="116.118.48.143"
-DEFAULT_PROJECT_NAME="katacore"
+DEFAULT_SERVER_IP="116.118.49.243"
+DEFAULT_PROJECT_NAME="tazacore"
 TEMP_DIR="/tmp/deploy_$(date +%s)"
 
 # Colors for better display
@@ -177,11 +177,12 @@ show_menu() {
     echo -e "${BLUE}Deployment Options:${NC}"
     echo -e "  ${GREEN}0)${NC} ⚙️  Configure server settings"
     echo -e "  ${GREEN}1)${NC} 🔄 Deploy with Git & preserve data (Site & API update)"
-    echo -e "  ${GREEN}2)${NC} 🚀 Deploy only (skip git operations)"
-    echo -e "  ${GREEN}3)${NC} 🧹 Server cleanup & container fix"
-    echo -e "  ${GREEN}4)${NC} 📊 Check server status"
-    echo -e "  ${GREEN}5)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
-    echo -e "  ${GREEN}6)${NC} 🛠️  Deploy specific services"
+    echo -e "  ${GREEN}2)${NC} 🔄 Deploy ALL with Git & preserve data (Update all services)"
+    echo -e "  ${GREEN}3)${NC} 🚀 Deploy only (skip git operations)"
+    echo -e "  ${GREEN}4)${NC} 🧹 Server cleanup & container fix"
+    echo -e "  ${GREEN}5)${NC} 📊 Check server status"
+    echo -e "  ${GREEN}6)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
+    echo -e "  ${GREEN}7)${NC} 🛠️  Deploy specific services"
     echo -e "  ${RED}q)${NC} 👋 Quit"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
 }
@@ -357,29 +358,47 @@ git_commit_and_update_preserve_data() {
 
     progress "📤 Preparing project files for Site & API update..."
     # Show what will be excluded
-    info "Excluding: .git, node_modules, *.log, .env, *.md, *.sh"
+    info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
     
-    # Copy all project files to temp directory
-    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+    # Copy all project files to temp directory (excluding ALL env files)
+    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env*' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
     
     # Show transfer size
     size=$(du -sh "$TEMP_DIR" | cut -f1)
     info "Transfer size: $size"
 
-    progress "🌐 Transferring updated files to remote server..."
-    rsync -avz --progress "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    progress "🔐 Backing up existing environment file on server..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/ 2>/dev/null || exit 1
+        if [ -f .env ]; then
+            cp .env .env.backup
+            echo '✅ Environment file backed up as .env.backup'
+        else
+            echo '⚠️  No existing .env file found to backup'
+        fi
+    " || warning "Could not backup environment file"
+
+    progress "🌐 Transferring updated files to remote server (excluding env files)..."
+    # Use --exclude to prevent overwriting .env files during transfer
+    rsync -avz --progress --exclude='.env*' "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
     
-    progress "🔧 Preserving existing environment configuration..."
+    progress "🔧 Restoring preserved environment configuration..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        if [ -f .env.prod ]; then
-            cp .env.prod .env && echo 'Environment file configured from .env.prod'
-        elif [ -f .env ]; then
-            echo 'Keeping existing .env file'
+        if [ -f .env.backup ]; then
+            mv .env.backup .env
+            echo '✅ Original environment file restored and preserved'
+            echo 'Environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
         else
-            echo 'Warning: No environment file found'
+            echo '⚠️  No backup file found to restore'
+            if [ -f .env.prod ]; then
+                cp .env.prod .env
+                echo '📝 Using .env.prod as fallback environment'
+            else
+                echo '❌ No environment file available'
+            fi
         fi
-    " || warning "Could not configure environment file"
+    " || warning "Could not restore environment file"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
@@ -390,6 +409,13 @@ git_commit_and_update_preserve_data() {
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
         echo '📋 Current directory: \$(pwd)'
+        echo '🔍 Verifying environment preservation:'
+        if [ -f .env ]; then
+            echo '✅ Environment file exists and preserved'
+        else
+            echo '❌ Environment file missing!'
+            exit 1
+        fi
         
         if [ -f 'docker-compose.yml' ]; then
             echo '🛑 Stopping only Site & API containers...'
@@ -404,7 +430,7 @@ git_commit_and_update_preserve_data() {
             echo '📊 Data services status (should remain running):'
             docker compose ps postgres redis minio pgadmin 2>/dev/null || docker ps --filter name=\"$PROJECT_NAME\"
             
-            echo '🚀 Rebuilding and starting Site & API services...'
+            echo '🚀 Rebuilding and starting Site & API services with preserved environment...'
             docker compose up -d --build --force-recreate site api
             
             echo '⏳ Waiting for Site & API services to start...'
@@ -431,6 +457,9 @@ git_commit_and_update_preserve_data() {
             
             echo '✅ All services overview:'
             docker compose ps
+            
+            echo '🔐 Final environment verification:'
+            echo 'Environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
         else
             echo '❌ docker-compose.yml not found!'
             exit 1
@@ -438,8 +467,162 @@ git_commit_and_update_preserve_data() {
     " || error "Failed to update Site & API services"
 
     success "🎉 Git commit and Site & API update completed successfully!"
-    info "Site and API services have been updated while preserving all data services (PostgreSQL, Redis, MinIO, pgAdmin)"
-    warning "Database, cache, and file storage data remain unchanged"
+    info "✅ Site and API services updated with latest code"
+    info "✅ Environment file (.env) preserved unchanged"
+    info "✅ Data services (PostgreSQL, Redis, MinIO, pgAdmin) remain untouched"
+    warning "🔒 Original environment configuration maintained"
+}
+
+# NEW FUNCTION: Combined function: Git commit + Update ALL services while preserving data
+git_commit_and_update_all_preserve_data() {
+    # First, handle git operations
+    git_commit
+    
+    progress "🔄 Initializing ALL services update process with data preservation..."
+    
+    # Create temp directory
+    mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
+    success "Temporary directory created: $TEMP_DIR"
+
+    progress "📤 Preparing project files for ALL services update..."
+    # Show what will be excluded
+    info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
+    
+    # Copy all project files to temp directory (excluding ALL env files)
+    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env*' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+    
+    # Show transfer size
+    size=$(du -sh "$TEMP_DIR" | cut -f1)
+    info "Transfer size: $size"
+
+    progress "🔐 Backing up existing environment file and data volumes on server..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/ 2>/dev/null || exit 1
+        if [ -f .env ]; then
+            cp .env .env.backup
+            echo '✅ Environment file backed up as .env.backup'
+        else
+            echo '⚠️  No existing .env file found to backup'
+        fi
+        
+        # Create data backup info
+        echo '📋 Current data volumes:'
+        docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || true
+    " || warning "Could not backup environment file"
+
+    progress "🌐 Transferring updated files to remote server (excluding env files)..."
+    # Use --exclude to prevent overwriting .env files during transfer
+    rsync -avz --progress --exclude='.env*' "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    
+    progress "🔧 Restoring preserved environment configuration..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        if [ -f .env.backup ]; then
+            mv .env.backup .env
+            echo '✅ Original environment file restored and preserved'
+            echo 'Environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+        else
+            echo '⚠️  No backup file found to restore'
+            if [ -f .env.prod ]; then
+                cp .env.prod .env
+                echo '📝 Using .env.prod as fallback environment'
+            else
+                echo '❌ No environment file available'
+            fi
+        fi
+    " || warning "Could not restore environment file"
+    
+    # Cleanup temp directory
+    rm -rf "$TEMP_DIR"
+    success "Local cleanup completed"
+
+    progress "🔄 Updating ALL services while preserving data volumes..."
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        echo '📋 Current directory: \$(pwd)'
+        echo '🔍 Verifying environment preservation:'
+        if [ -f .env ]; then
+            echo '✅ Environment file exists and preserved'
+        else
+            echo '❌ Environment file missing!'
+            exit 1
+        fi
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo '📊 Current services status before update:'
+            docker compose ps
+            
+            echo '💾 Listing data volumes before update:'
+            docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || docker volume ls | grep $PROJECT_NAME || true
+            
+            echo '🛑 Stopping all services gracefully...'
+            docker compose down --remove-orphans
+            
+            echo '🔍 Verifying data volumes are preserved:'
+            docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || docker volume ls | grep $PROJECT_NAME || true
+            
+            echo '🚀 Starting ALL services with updated code and preserved data...'
+            docker compose up -d --build --force-recreate
+            
+            echo '⏳ Waiting for all services to start...'
+            sleep 20
+            
+            echo '📊 Updated services status:'
+            docker compose ps
+            
+            echo '🔍 Checking all services health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                docker compose ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}'
+                sleep 5
+            done
+            
+            echo '💾 Verifying data persistence:'
+            echo '--- Data volumes after update ---'
+            docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME 2>/dev/null || docker volume ls | grep $PROJECT_NAME || true
+            
+            echo '📋 Recent logs for all services:'
+            for service in api site postgres redis minio pgadmin; do
+                echo \"--- Logs for \$service ---\"
+                docker compose logs --tail=10 \$service 2>/dev/null || echo \"No logs available for \$service\"
+            done
+            
+            echo '✅ All services overview:'
+            docker compose ps
+            
+            echo '🔐 Final environment verification:'
+            echo 'Environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
+            
+            echo '🎯 Database connectivity test:'
+            # Test database connection if postgres service exists
+            if docker compose ps postgres | grep -q 'Up'; then
+                echo 'PostgreSQL service is running ✅'
+                # You can add more specific database connectivity tests here
+            else
+                echo 'PostgreSQL service status unknown'
+            fi
+            
+            echo '🎯 Redis connectivity test:'
+            if docker compose ps redis | grep -q 'Up'; then
+                echo 'Redis service is running ✅'
+            else
+                echo 'Redis service status unknown'
+            fi
+            
+        else
+            echo '❌ docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to update ALL services"
+
+    success "🎉 Git commit and ALL services update completed successfully!"
+    info "✅ ALL services updated with latest code"
+    info "✅ Environment file (.env) preserved unchanged"
+    info "✅ Data volumes preserved - no data loss"
+    info "✅ PostgreSQL, Redis, MinIO data maintained"
+    warning "🔒 Original environment configuration maintained"
+    warning "💾 All persistent data preserved across update"
 }
 
 # Combined server cleanup and container fix function
@@ -635,7 +818,7 @@ while true; do
             get_server_config
             ;;
         1)
-            log "Option 1 selected: Deploy with Git & preserve data"
+            log "Option 1 selected: Deploy with Git & preserve data (Site & API only)"
             warning "This will commit git changes and update only Site & API services, preserving all data services"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
@@ -649,15 +832,29 @@ while true; do
             read -n 1
             ;;
         2)
-            log "Option 2 selected: Deploy only"
+            log "Option 2 selected: Deploy ALL with Git & preserve data"
+            warning "This will commit git changes and update ALL services while preserving data volumes"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                git_commit_and_update_all_preserve_data
+            else
+                warning "Deployment cancelled"
+            fi
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        3)
+            log "Option 3 selected: Deploy only"
             warning "Skipping git operations..."
             deploy_to_server
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        3)
-            log "Option 3 selected: Server cleanup & container fix"
+        4)
+            log "Option 4 selected: Server cleanup & container fix"
             warning "This will perform comprehensive cleanup and fix container conflicts"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
@@ -670,15 +867,15 @@ while true; do
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        4)
-            log "Option 4 selected: Check server status"
+        5)
+            log "Option 5 selected: Check server status"
             check_server_status
             echo ""
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        5)
-            log "Option 5 selected: Fresh deploy with new environment"
+        6)
+            log "Option 6 selected: Fresh deploy with new environment"
             warning "This will remove all old .env files and use .env.prod as new environment"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
@@ -691,8 +888,8 @@ while true; do
             info "Press any key to return to menu..."
             read -n 1
             ;;
-        6)
-            log "Option 6 selected: Deploy specific services"
+        7)
+            log "Option 7 selected: Deploy specific services"
             deploy_selected_services
             echo ""
             info "Press any key to return to menu..."

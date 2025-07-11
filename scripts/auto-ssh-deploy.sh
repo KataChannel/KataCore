@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 KataCore Auto SSH Setup & Deploy Script
+# 🚀 TazaCore Auto SSH Setup & Deploy Script
 # Automatically generate SSH keys and deploy to server
 
 set -euo pipefail
@@ -8,7 +8,7 @@ set -euo pipefail
 # Default configuration
 SERVER_IP=""
 SSH_USER="root"
-SSH_KEY_NAME="katacore-deploy"
+SSH_KEY_NAME="tazacore-deploy"
 AUTO_DEPLOY=false
 FORCE_OVERWRITE=false
 
@@ -33,7 +33,7 @@ show_banner() {
     echo -e "${BLUE}"
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                   🚀 KataCore Auto SSH Setup & Deploy                       ║
+║                   🚀 TazaCore Auto SSH Setup & Deploy                       ║
 ║                                                                              ║
 ║    Automatically generate SSH keys and deploy to server                     ║
 ║    No more password prompts - complete automation                           ║
@@ -45,7 +45,7 @@ EOF
 # Show help
 show_help() {
     cat << 'EOF'
-🚀 KataCore Auto SSH Setup & Deploy Script
+🚀 TazaCore Auto SSH Setup & Deploy Script
 
 USAGE:
     ./auto-ssh-deploy.sh [OPTIONS] SERVER_IP
@@ -55,7 +55,7 @@ ARGUMENTS:
 
 OPTIONS:
     --user USER         SSH user (default: root)
-    --key-name NAME     SSH key name (default: katacore-deploy)
+    --key-name NAME     SSH key name (default: tazacore-deploy)
     --auto-deploy       Automatically deploy after key generation
     --force             Force overwrite existing keys
     --help              Show this help
@@ -77,7 +77,7 @@ WORKFLOW:
     1. Generate SSH key pair (ED25519)
     2. Copy public key to server (password required once)
     3. Test password-less SSH connection
-    4. Ready for KataCore deployment
+    4. Ready for TazaCore deployment
 
 EOF
 }
@@ -168,7 +168,7 @@ generate_ssh_key() {
         mkdir -p "$ssh_dir"
         chmod 700 "$ssh_dir"#!/bin/bash
         
-        # 🚀 KataCore Remote Deployment Helper
+        # 🚀 TazaCore Remote Deployment Helper
         # Quick deployment script for remote servers
         
         set -euo pipefail
@@ -181,7 +181,7 @@ generate_ssh_key() {
         DEPLOY_TYPE="full"
         FORCE_REGEN=false
         CLEANUP_MODE=false
-        PROJECT_NAME="katacore"
+        PROJECT_NAME="tazacore"
         DOCKER_COMPOSE_FILE="docker-compose.startkitv1.yml"
         
         # Color codes
@@ -204,7 +204,7 @@ generate_ssh_key() {
             echo -e "${BLUE}"
             cat << 'EOF'
         ╔══════════════════════════════════════════════════════════════════════════════╗
-        ║                        🚀 KataCore Remote Deploy                            ║
+        ║                        🚀 TazaCore Remote Deploy                            ║
         ║                                                                              ║
         ║    Deploy to any server with dynamic IP and domain configuration           ║
         ║    Supports both simple (IP only) and full (domain + SSL) deployments     ║
@@ -227,7 +227,7 @@ generate_ssh_key() {
         # Show help
         show_help() {
             cat << 'EOF'
-        🚀 KataCore Remote Deployment Script
+        🚀 TazaCore Remote Deployment Script
         
         USAGE:
             ./deploy-remote.sh [OPTIONS] IP DOMAIN
@@ -244,7 +244,7 @@ generate_ssh_key() {
             --compose FILE     Docker compose file (default: docker-compose.startkitv1.yml)
                                Available files:
                                - docker-compose.startkitv1.yml (full stack)
-            --project NAME     Project name (default: katacore)
+            --project NAME     Project name (default: tazacore)
             --cleanup          Cleanup deployment on remote server
             --help             Show this help
         
@@ -458,12 +458,12 @@ generate_ssh_key() {
             if [[ -f "$DOCKER_COMPOSE_FILE" ]]; then
                 # Check if api directory exists
                 if [[ ! -d "api" ]]; then
-                    error "API directory not found. Make sure you're in the KataCore root directory."
+                    error "API directory not found. Make sure you're in the TazaCore root directory."
                 fi
                 
                 # Check if site directory exists
                 if [[ ! -d "site" ]]; then
-                    error "Site directory not found. Make sure you're in the KataCore root directory."
+                    error "Site directory not found. Make sure you're in the TazaCore root directory."
                 fi
                 
                 # Check if Dockerfiles exist
@@ -590,7 +590,7 @@ generate_ssh_key() {
                     # Create .env file
                     cat > .env << 'ENVEOF'
         # Generated on \$(date)
-        # KataCore Production Environment Configuration
+        # TazaCore Production Environment Configuration
         
         # ===== Application Configuration =====
         NODE_ENV=production
@@ -1030,7 +1030,7 @@ generate_ssh_key() {
             ssh -i "$SSH_KEY_PATH" "$SSH_USER@$SERVER_IP" << EOF
                 set -e
                 
-                echo "🧹 Cleaning up KataCore deployment..."
+                echo "🧹 Cleaning up TazaCore deployment..."
                 
                 # Stop and remove Docker containers
                 if [[ -d "/opt/$PROJECT_NAME" ]]; then
@@ -1140,7 +1140,7 @@ generate_ssh_key() {
     fi
     
     # Generate ED25519 key (more secure and faster)
-    local comment="KataCore-${SERVER_IP}-$(date +%Y%m%d)-$(whoami)@$(hostname)"
+    local comment="TazaCore-${SERVER_IP}-$(date +%Y%m%d)-$(whoami)@$(hostname)"
     ssh-keygen -t ed25519 -f "$private_key" -N "" -C "$comment"
     
     # Set proper permissions
@@ -1190,8 +1190,8 @@ create_ssh_config() {
     
     local config_file="$HOME/.ssh/config"
     local config_entry="
-# KataCore Server - Auto-generated $(date)
-Host katacore-${SERVER_IP}
+# TazaCore Server - Auto-generated $(date)
+Host tazacore-${SERVER_IP}
     HostName ${SERVER_IP}
     User ${SSH_USER}
     IdentityFile $HOME/.ssh/$SSH_KEY_NAME
@@ -1208,17 +1208,17 @@ Host katacore-${SERVER_IP}
     fi
     
     # Check if entry already exists
-    if grep -q "Host katacore-${SERVER_IP}" "$config_file"; then
-        warning "SSH config entry already exists for katacore-${SERVER_IP}"
+    if grep -q "Host tazacore-${SERVER_IP}" "$config_file"; then
+        warning "SSH config entry already exists for tazacore-${SERVER_IP}"
     else
         echo "$config_entry" >> "$config_file"
-        success "SSH config entry created for katacore-${SERVER_IP}"
+        success "SSH config entry created for tazacore-${SERVER_IP}"
     fi
 }
 
 # Show deployment instructions
 show_deployment_instructions() {
-    echo -e "${PURPLE}🚀 Ready for KataCore Deployment!${NC}"
+    echo -e "${PURPLE}🚀 Ready for TazaCore Deployment!${NC}"
     echo
     echo -e "${CYAN}Quick Deploy Commands:${NC}"
     echo
@@ -1229,7 +1229,7 @@ show_deployment_instructions() {
     echo "   ./deploy-remote.sh --key ~/.ssh/$SSH_KEY_NAME --user $SSH_USER $SERVER_IP your-domain.com"
     echo
     echo -e "${YELLOW}3. Using SSH config alias:${NC}"
-    echo "   ssh katacore-${SERVER_IP}"
+    echo "   ssh tazacore-${SERVER_IP}"
     echo
     echo -e "${CYAN}Test SSH Connection:${NC}"
     echo "   ssh -i ~/.ssh/$SSH_KEY_NAME $SSH_USER@$SERVER_IP"

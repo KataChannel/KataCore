@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🔑 KataCore SSH Key Generation & Setup Script
+# 🔑 TazaCore SSH Key Generation & Setup Script
 # Automated SSH key generation and configuration for remote deployment
 
 set -euo pipefail
@@ -12,7 +12,7 @@ SSH_KEY_TYPE="ed25519"
 SSH_KEY_BITS="4096"
 DEFAULT_USER="root"
 DEFAULT_SERVER="116.118.85.23"
-DOMAIN="kataoffical.online"
+DOMAIN="tazaoffical.online"
 CONFIG_FILE="$HOME/.ssh/config"
 
 # Color codes
@@ -36,7 +36,7 @@ show_banner() {
     echo -e "${BLUE}"
     cat << 'EOF'
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                     🔑 KataCore SSH Key Setup                               ║
+║                     🔑 TazaCore SSH Key Setup                               ║
 ║                                                                              ║
 ║    Generate and configure SSH keys for secure remote deployment            ║
 ║    Supports ED25519 and RSA key types with automated configuration         ║
@@ -184,7 +184,7 @@ test_passwordless_ssh() {
 # Show help
 show_help() {
     cat << 'EOF'
-🔑 KataCore SSH Key Generation & Setup Script
+🔑 TazaCore SSH Key Generation & Setup Script
 
 USAGE:
     ./ssh-keygen-setup.sh [OPTIONS]
@@ -194,7 +194,7 @@ OPTIONS:
     --type TYPE           Key type: ed25519 or rsa (default: ed25519)
     --bits BITS           Key bits for RSA (default: 4096)
     --path PATH           SSH directory path (default: ~/.ssh)
-    --domain DOMAIN       Server domain (default: kataoffical.online)
+    --domain DOMAIN       Server domain (default: tazaoffical.online)
     --user USER           SSH user (default: root)
     --force               Force overwrite existing keys
     --no-config           Skip SSH config file creation
@@ -362,7 +362,7 @@ create_ssh_config() {
     log "📝 Creating SSH config entry..."
     
     local config_entry="
-# KataCore Deployment Server - Generated $(date)
+# TazaCore Deployment Server - Generated $(date)
 Host ${SSH_KEY_NAME}-${SERVER_IP}
     HostName ${SERVER_IP}
     User ${SSH_USER:-$DEFAULT_USER}
@@ -455,7 +455,7 @@ show_usage_instructions() {
     echo "   ssh ${SSH_KEY_NAME}-${SERVER_IP}"
     echo
     
-    echo -e "${YELLOW}Use with KataCore deployment:${NC}"
+    echo -e "${YELLOW}Use with TazaCore deployment:${NC}"
     echo "   ./deploy-remote.sh --key $private_key --user ${SSH_USER} ${SERVER_IP} ${DOMAIN}"
     echo
 }
@@ -467,7 +467,7 @@ create_deployment_helper() {
     cat > "$helper_script" << EOF
 #!/bin/bash
 
-# 🚀 KataCore Deployment Helper with Generated SSH Key
+# 🚀 TazaCore Deployment Helper with Generated SSH Key
 # Auto-generated helper script for deployment with key: $SSH_KEY_NAME
 
 SSH_KEY="$SSH_KEY_PATH/$SSH_KEY_NAME"
@@ -547,7 +547,7 @@ main() {
     show_usage_instructions
     
     success "🎉 SSH key setup completed successfully!"
-    info "Use the generated key for secure remote deployment with KataCore"
+    info "Use the generated key for secure remote deployment with TazaCore"
 }
 
 # Run main function
