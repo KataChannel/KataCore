@@ -9,7 +9,7 @@ export const siteConfig = {
         estimatedTime: "8/7/2025"
     },
     auth: {
-        loginRequired: false, // Yêu cầu đăng nhập để truy cập
+        loginRequired: true, // Yêu cầu đăng nhập để truy cập
         redirectAfterLogin: "/dashboard", // Trang chuyển hướng sau khi đăng nhập thành công
         redirectAfterLogout: "/login"
     },

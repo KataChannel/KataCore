@@ -1,45 +1,28 @@
-export interface SidebarItem {
-  id: string;
-  label: string;
-  icon?: string;
-  href?: string;
-  onClick?: () => void;
-  children?: SidebarItem[];
-  active?: boolean;
+// Common types - Consolidated and updated
+// This file re-exports from global types and adds specific common types
+
+export * from './global';
+import type { SidebarItem } from './global';
+
+// Legacy compatibility exports (will be deprecated)
+export type {
+  SidebarItem,
+  SidebarConfig,
+  DashboardStats,
+} from './global';
+
+// Additional common types specific to this application
+export interface MenuItem extends SidebarItem {
+  permissions?: string[];
+  external?: boolean;
 }
 
-export interface SidebarConfig {
-  width?: number;
-  collapsible?: boolean;
-  items: SidebarItem[];
-}
-
-export interface UserMenuItem {
-  label?: string;
-  href?: string;
-  onClick?: () => void;
-  divider?: boolean;
-}
-
-export interface HeaderConfig {
-  showSearch?: boolean;
-  showNotifications?: boolean;
-  showProfile?: boolean;
-  userMenu?: UserMenuItem[];
-}
-
-export interface DashboardConfig {
-  title: string;
-  logo?: string;
-  theme?: 'light' | 'dark';
-  sidebar?: SidebarConfig;
-  header?: HeaderConfig;
-}
-
-export interface DashboardStats {
-  title: string;
-  value: string | number;
-  change?: number;
-  trend?: 'up' | 'down' | 'neutral';
-  icon?: string;
+export interface AppConfig {
+  name: string;
+  version: string;
+  apiUrl: string;
+  theme: {
+    defaultMode: 'light' | 'dark';
+    supportedLanguages: string[];
+  };
 }

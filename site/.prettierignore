@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+dist
+build
+*.min.js
+*.min.css
+.env*
+public
+.git
+*.log
+coverage
+.nyc_output
+.cache
+.vercel
+.turbo
