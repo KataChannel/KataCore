@@ -98,7 +98,7 @@ stop_failed_services() {
     local failed_services=""
     local healthy_services=""
     
-    progress "🔍 Analyzing service health status..."
+    progress "🔍 Analyzing service health status..." >&2
     
     for service in $services_to_check; do
         local container_name="${PROJECT_NAME}-${service}"
@@ -108,20 +108,20 @@ stop_failed_services() {
             # Check if service is actually healthy
             if check_service_health "$service" >/dev/null 2>&1; then
                 healthy_services="$healthy_services $service"
-                success "✅ $service is healthy - keeping it running"
+                success "✅ $service is healthy - keeping it running" >&2
             else
                 failed_services="$failed_services $service"
-                warning "⚠️  $service has issues - will be restarted"
+                warning "⚠️  $service has issues - will be restarted" >&2
             fi
         else
             failed_services="$failed_services $service"
-            warning "⚠️  $service is not running - will be started"
+            warning "⚠️  $service is not running - will be started" >&2
         fi
     done
     
     # Only stop failed services
     if [ -n "$failed_services" ]; then
-        progress "🛑 Stopping only failed services: $failed_services"
+        progress "🛑 Stopping only failed services: $failed_services" >&2
         ssh "$SSH_USER@$SERVER_IP" "
             cd /opt/$PROJECT_NAME/
             for service in $failed_services; do
@@ -130,15 +130,16 @@ stop_failed_services() {
                 docker stop \"\$container_name\" 2>/dev/null || true
                 docker rm -f \"\$container_name\" 2>/dev/null || true
             done
-        "
+        " >&2
     else
-        success "🎉 All services are healthy - no services need to be stopped"
+        success "🎉 All services are healthy - no services need to be stopped" >&2
     fi
     
     if [ -n "$healthy_services" ]; then
-        info "🟢 Healthy services that will continue running: $healthy_services"
+        info "🟢 Healthy services that will continue running: $healthy_services" >&2
     fi
     
+    # Only output the failed services list to stdout (for capture by command substitution)
     echo "$failed_services"
 }
 
@@ -152,7 +153,7 @@ smart_deploy_services() {
     # Get list of failed services
     local failed_services
     if [ "$deployment_mode" = "selective" ]; then
-        failed_services=$(stop_failed_services "$services_to_deploy")
+        failed_services=$(stop_failed_services "$services_to_deploy" | tr -s ' ' | sed 's/^ *//;s/ *$//')
     else
         failed_services="$services_to_deploy"
     fi
