@@ -1,1 +1,1 @@
-docker ps -a --filter "name=web" --format "{{.Names}}\t{{.Image}}"
+docker ps -a --filter "name=tazacore" --format "{{.Names}} {{.Image}}"

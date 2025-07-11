@@ -738,6 +738,42 @@ git_commit_and_update_all_preserve_data() {
 project_cleanup_and_container_fix() {
     progress "🧹🚨 Starting STRICTLY PROJECT-SCOPED cleanup and container fix for $PROJECT_NAME..."
     
+    # Ask user if they want to overwrite project data from local
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${YELLOW}📋 Data Overwrite Options:${NC}"
+    echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
+    echo -e "  ${GREEN}1)${NC} 🧹 Cleanup only (preserve existing server data)"
+    echo -e "  ${GREEN}2)${NC} 🔄 Cleanup + overwrite project data from local"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${RED}⚠️  Option 2 will REPLACE ALL project files on server with local files${NC}"
+    echo -e "${RED}⚠️  This includes configuration files but excludes .env files${NC}"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    
+    echo -ne "${YELLOW}Select option (1 or 2): ${NC}"
+    read data_option
+    
+    local overwrite_data=false
+    case $data_option in
+        1)
+            info "Selected: Cleanup only (preserve existing server data)"
+            ;;
+        2)
+            warning "Selected: Cleanup + overwrite project data from local"
+            echo -e "${RED}⚠️  This will replace ALL project files on server with local files!${NC}"
+            echo -e "${YELLOW}Are you absolutely sure? (type 'YES' to confirm):${NC}"
+            read -p "❓ " confirm_overwrite
+            if [[ "$confirm_overwrite" == "YES" ]]; then
+                overwrite_data=true
+                success "Data overwrite confirmed"
+            else
+                warning "Data overwrite cancelled - proceeding with cleanup only"
+            fi
+            ;;
+        *)
+            warning "Invalid option - proceeding with cleanup only"
+            ;;
+    esac
+    
     ssh "$SSH_USER@$SERVER_IP" "
         echo '🔒 STRICTLY PROJECT-SCOPED: Emergency container cleanup and fix for $PROJECT_NAME ONLY...'
         cd /opt/$PROJECT_NAME/ 2>/dev/null || true
@@ -829,10 +865,96 @@ project_cleanup_and_container_fix() {
         fi
     " || error "Failed to cleanup project and fix containers"
 
+    # Handle data overwrite if selected
+    if [ "$overwrite_data" = true ]; then
+        progress "🔄 Starting PROJECT data overwrite from local to server..."
+        
+        # Create temp directory for file transfer
+        mkdir -p "$TEMP_DIR" || error "Failed to create temp directory for data overwrite"
+        success "Temporary directory created: $TEMP_DIR"
+
+        progress "📤 Preparing PROJECT files for overwrite transfer..."
+        # Show what will be excluded
+        info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
+        
+        # Copy all project files to temp directory (excluding sensitive files)
+        rsync -av \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='*.log' \
+            --exclude='.env*' \
+            --exclude='*.md' \
+            --exclude='*.sh' \
+            --exclude='tmp' \
+            --exclude='.cache' \
+            . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+        
+        # Show transfer size
+        size=$(du -sh "$TEMP_DIR" | cut -f1)
+        info "Transfer size: $size"
+
+        progress "🔐 Backing up existing PROJECT environment file on server..."
+        ssh "$SSH_USER@$SERVER_IP" "
+            cd /opt/$PROJECT_NAME/ 2>/dev/null || mkdir -p /opt/$PROJECT_NAME/
+            if [ -f .env ]; then
+                cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
+                echo '✅ PROJECT environment file backed up with timestamp'
+            else
+                echo '⚠️  No existing PROJECT .env file found to backup'
+            fi
+        " || warning "Could not backup PROJECT environment file"
+
+        progress "🌐 Overwriting PROJECT files on server (preserving .env files)..."
+        # Use rsync to overwrite files but preserve .env files
+        rsync -avz --progress \
+            --exclude='.env*' \
+            --delete-excluded \
+            "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to overwrite files on remote server"
+        
+        progress "🔧 Restoring PROJECT environment configuration..."
+        ssh "$SSH_USER@$SERVER_IP" "
+            cd /opt/$PROJECT_NAME/
+            # Restore the most recent backup if no .env exists
+            if [ ! -f .env ]; then
+                LATEST_BACKUP=\$(ls -t .env.backup.* 2>/dev/null | head -n1)
+                if [ -n \"\$LATEST_BACKUP\" ]; then
+                    cp \"\$LATEST_BACKUP\" .env
+                    echo '✅ PROJECT environment file restored from backup: '\$LATEST_BACKUP
+                elif [ -f .env.prod ]; then
+                    cp .env.prod .env
+                    echo '📝 Using .env.prod as fallback PROJECT environment'
+                else
+                    echo '❌ No PROJECT environment file available - you may need to create one'
+                fi
+            else
+                echo '✅ PROJECT environment file already exists and preserved'
+            fi
+            
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+            
+            echo '📋 PROJECT directory structure after overwrite:'
+            ls -la | head -20
+        " || warning "Could not restore PROJECT environment file"
+        
+        # Cleanup temp directory
+        rm -rf "$TEMP_DIR"
+        success "Local cleanup completed"
+        
+        success "🎉 PROJECT data overwrite completed successfully!"
+        info "✅ All PROJECT files updated from local to server"
+        info "✅ PROJECT environment files preserved/restored"
+        warning "🔒 PROJECT-SCOPED: Only $PROJECT_NAME files were overwritten"
+    fi
+
     success "STRICTLY PROJECT-SCOPED cleanup and container fix completed successfully for $PROJECT_NAME"
     warning "✅ ONLY $PROJECT_NAME containers were affected"
     warning "✅ ALL other server services remain completely untouched"
     warning "✅ Server isolation maintained throughout cleanup process"
+    
+    if [ "$overwrite_data" = true ]; then
+        warning "✅ PROJECT files successfully overwritten from local to server"
+        info "💡 You may want to deploy the application now to apply the updated files"
+    fi
 }
 
 # Enhanced deployment function (STRICTLY PROJECT-SCOPED)
