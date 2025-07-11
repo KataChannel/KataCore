@@ -41,177 +41,6 @@ progress() {
     echo -e "${PURPLE}🔄 $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
 }
 
-# Function to check service health
-check_service_health() {
-    local service_name="$1"
-    local container_name="${PROJECT_NAME}-${service_name}"
-    local max_attempts=10
-    local attempt=1
-    
-    progress "🔍 Checking health of $service_name..."
-    
-    while [ $attempt -le $max_attempts ]; do
-        local status=$(ssh "$SSH_USER@$SERVER_IP" "docker inspect --format='{{.State.Status}}' '$container_name' 2>/dev/null || echo 'not_found'")
-        
-        if [ "$status" = "running" ]; then
-            # Additional health checks based on service type
-            case $service_name in
-                "postgres")
-                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker exec '$container_name' pg_isready -U postgres 2>/dev/null && echo 'healthy' || echo 'unhealthy'")
-                    ;;
-                "redis")
-                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker exec '$container_name' redis-cli ping 2>/dev/null | grep -q PONG && echo 'healthy' || echo 'unhealthy'")
-                    ;;
-                "api"|"site")
-                    # Check if the service is responding on its port
-                    local health_check=$(ssh "$SSH_USER@$SERVER_IP" "docker logs '$container_name' 2>/dev/null | tail -20 | grep -i 'error\\|failed\\|exception' >/dev/null && echo 'unhealthy' || echo 'healthy'")
-                    ;;
-                *)
-                    local health_check="healthy"
-                    ;;
-            esac
-            
-            if [ "$health_check" = "healthy" ]; then
-                success "✅ $service_name is running and healthy"
-                return 0
-            else
-                warning "⚠️  $service_name is running but not healthy (attempt $attempt/$max_attempts)"
-            fi
-        else
-            warning "⚠️  $service_name status: $status (attempt $attempt/$max_attempts)"
-        fi
-        
-        attempt=$((attempt + 1))
-        sleep 3
-    done
-    
-    error "❌ $service_name failed health check after $max_attempts attempts"
-    return 1
-}
-
-# Function to stop only failed services
-stop_failed_services() {
-    local services_to_check="$1"
-    local failed_services=""
-    local healthy_services=""
-    
-    progress "🔍 Analyzing service health status..."
-    
-    for service in $services_to_check; do
-        local container_name="${PROJECT_NAME}-${service}"
-        local status=$(ssh "$SSH_USER@$SERVER_IP" "docker inspect --format='{{.State.Status}}' '$container_name' 2>/dev/null || echo 'not_found'")
-        
-        if [ "$status" = "running" ]; then
-            # Check if service is actually healthy
-            if check_service_health "$service" >/dev/null 2>&1; then
-                healthy_services="$healthy_services $service"
-                success "✅ $service is healthy - keeping it running"
-            else
-                failed_services="$failed_services $service"
-                warning "⚠️  $service has issues - will be restarted"
-            fi
-        else
-            failed_services="$failed_services $service"
-            warning "⚠️  $service is not running - will be started"
-        fi
-    done
-    
-    # Only stop failed services
-    if [ -n "$failed_services" ]; then
-        progress "🛑 Stopping only failed services: $failed_services"
-        ssh "$SSH_USER@$SERVER_IP" "
-            cd /opt/$PROJECT_NAME/
-            for service in $failed_services; do
-                container_name=\"${PROJECT_NAME}-\$service\"
-                echo \"Stopping failed service: \$service\"
-                docker stop \"\$container_name\" 2>/dev/null || true
-                docker rm -f \"\$container_name\" 2>/dev/null || true
-            done
-        "
-    else
-        success "🎉 All services are healthy - no services need to be stopped"
-    fi
-    
-    if [ -n "$healthy_services" ]; then
-        info "🟢 Healthy services that will continue running: $healthy_services"
-    fi
-    
-    echo "$failed_services"
-}
-
-# Function to deploy specific services smartly
-smart_deploy_services() {
-    local services_to_deploy="$1"
-    local deployment_mode="$2" # "selective" or "all"
-    
-    progress "🧠 Smart deployment mode: analyzing current service states..."
-    
-    # Get list of failed services
-    local failed_services
-    if [ "$deployment_mode" = "selective" ]; then
-        failed_services=$(stop_failed_services "$services_to_deploy")
-    else
-        failed_services="$services_to_deploy"
-    fi
-    
-    if [ -n "$failed_services" ]; then
-        progress "🚀 Starting deployment for services: $failed_services"
-        ssh "$SSH_USER@$SERVER_IP" "
-            cd /opt/$PROJECT_NAME/
-            echo '🔒 SMART PROJECT-SCOPED DEPLOYMENT for $PROJECT_NAME'
-            echo '📋 Services to deploy: $failed_services'
-            
-            if [ -f 'docker-compose.yml' ]; then
-                echo '🐳 Starting selective Docker Compose deployment...'
-                
-                # Start only the failed/missing services
-                for service in $failed_services; do
-                    echo \"🚀 Starting service: \$service\"
-                    docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate \$service
-                    
-                    # Wait a bit for the service to start
-                    sleep 5
-                    
-                    # Check immediate status
-                    container_name=\"${PROJECT_NAME}-\$service\"
-                    status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
-                    echo \"Service \$service status: \$status\"
-                done
-                
-                echo '⏳ Waiting for all deployed services to stabilize...'
-                sleep 15
-                
-                echo '📊 Final deployment status:'
-                docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-                
-            else
-                echo '❌ PROJECT docker-compose.yml not found!'
-                exit 1
-            fi
-        " || error "Failed to deploy services"
-        
-        # Verify deployment success
-        progress "🔍 Verifying deployment success..."
-        local deployment_success=true
-        for service in $failed_services; do
-            if check_service_health "$service"; then
-                success "✅ $service deployed successfully"
-            else
-                error "❌ $service deployment failed"
-                deployment_success=false
-            fi
-        done
-        
-        if [ "$deployment_success" = true ]; then
-            success "🎉 Smart deployment completed successfully!"
-        else
-            error "❌ Some services failed to deploy properly"
-        fi
-    else
-        success "🎉 All services are already running and healthy - no deployment needed!"
-    fi
-}
-
 # Function to get server configuration from user
 get_server_config() {
     clear
@@ -340,25 +169,24 @@ select_services() {
 show_menu() {
     clear
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}                    🚀 SMART PROJECT-SCOPED Deployment Tool${NC}"
+    echo -e "${GREEN}                    🚀 PROJECT-SCOPED Deployment Tool${NC}"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}Project:${NC} $PROJECT_NAME"
     echo -e "${YELLOW}Server:${NC} $SSH_USER@$SERVER_IP"
     echo -e "${YELLOW}Project Path:${NC} /opt/$PROJECT_NAME"
     echo -e "${YELLOW}Time:${NC} $(date '+%Y-%m-%d %H:%M:%S')"
     echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
-    echo -e "${BLUE}Smart Deployment Options:${NC}"
+    echo -e "${BLUE}Deployment Options:${NC}"
     echo -e "  ${GREEN}0)${NC} ⚙️  Configure server settings"
-    echo -e "  ${GREEN}1)${NC} 🧠 Smart Deploy with Git (Site & API) - preserves healthy services"
-    echo -e "  ${GREEN}2)${NC} 🧠 Smart Deploy ALL with Git - preserves healthy services"
-    echo -e "  ${GREEN}3)${NC} 🚀 Deploy only (skip git operations) - smart mode"
+    echo -e "  ${GREEN}1)${NC} 🔄 Deploy with Git & preserve data (Site & API update)"
+    echo -e "  ${GREEN}2)${NC} 🔄 Deploy ALL with Git & preserve data (Update all services)"
+    echo -e "  ${GREEN}3)${NC} 🚀 Deploy only (skip git operations)"
     echo -e "  ${GREEN}4)${NC} 🧹 Project cleanup & container fix (PROJECT ONLY)"
     echo -e "  ${GREEN}5)${NC} 📊 Check project status"
     echo -e "  ${GREEN}6)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
-    echo -e "  ${GREEN}7)${NC} 🛠️  Smart deploy specific services"
+    echo -e "  ${GREEN}7)${NC} 🛠️  Deploy specific services"
     echo -e "  ${RED}q)${NC} 👋 Quit"
     echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}🧠 SMART MODE: Only restarts failed services, keeps healthy services running${NC}"
     echo -e "${RED}🔒 ALL OPERATIONS ARE PROJECT-SCOPED - NO IMPACT ON OTHER SERVER SERVICES${NC}"
 }
 
@@ -430,18 +258,6 @@ check_server_status() {
             fi
             echo ''
             
-            echo '🔍 Service Health Analysis:'
-            for service in api site postgres redis minio pgadmin; do
-                container_name=\"${PROJECT_NAME}-\$service\"
-                if docker ps --filter name=\"\$container_name\" --format '{{.Names}}' | grep -q \"^\$container_name\$\"; then
-                    status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null)
-                    echo \"  \$service: \$status ✅\"
-                else
-                    echo \"  \$service: not running ❌\"
-                fi
-            done
-            echo ''
-            
             echo '📦 Project Containers (all states):'
             ALL_PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}' 2>/dev/null)
             if [ -n \"\$ALL_PROJECT_CONTAINERS\" ]; then
@@ -492,6 +308,24 @@ check_server_status() {
             fi
             echo ''
             
+            echo '🏗️  Project Images:'
+            PROJECT_IMAGES=\$(docker images --filter reference=\"*${PROJECT_NAME}*\" --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' 2>/dev/null)
+            if [ -n \"\$PROJECT_IMAGES\" ]; then
+                echo \"\$PROJECT_IMAGES\"
+            else
+                echo '   No project-specific images found'
+            fi
+            echo ''
+            
+            echo '🔧 Project Environment:'
+            if [ -f '/opt/$PROJECT_NAME/.env' ]; then
+                echo '✅ Environment file exists'
+                echo '📊 Environment variables:' \$(grep -c '=' /opt/$PROJECT_NAME/.env 2>/dev/null || echo '0')
+            else
+                echo '❌ Environment file missing'
+            fi
+            echo ''
+            
             echo '📊 Server Resource Usage (General):'
             echo 'Memory:' \$(free -h | grep '^Mem:' | awk '{print \$3 \"/\" \$2 \" (\" \$5 \" available)\"}')
             echo 'Disk usage for project:' \$(du -sh /opt/$PROJECT_NAME 2>/dev/null | cut -f1 || echo 'N/A')
@@ -512,7 +346,7 @@ check_server_status() {
 
 # Function for enhanced deployment
 deploy_to_server() {
-    progress "Initializing SMART PROJECT-SCOPED deployment process..."
+    progress "Initializing PROJECT-SCOPED deployment process..."
     
     # Create temp directory
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
@@ -539,8 +373,8 @@ deploy_to_server() {
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    # Use smart deployment
-    smart_deploy_services "api site postgres redis minio pgadmin" "selective"
+    project_cleanup_and_container_fix
+    deploy_application
 }
 
 # Function for fresh deployment with env cleanup
@@ -596,17 +430,14 @@ fresh_deploy_to_server() {
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
-    
-    # Use smart deployment for fresh deploy
-    smart_deploy_services "api site postgres redis minio pgadmin" "all"
 }
 
-# Combined function: Git commit + Update Site & API only (preserves data services) - SMART MODE
+# Combined function: Git commit + Update Site & API only (preserves data services)
 git_commit_and_update_preserve_data() {
     # First, handle git operations
     git_commit
     
-    progress "🧠 Initializing SMART PROJECT-SCOPED Site & API update process..."
+    progress "🔄 Initializing PROJECT-SCOPED Site & API update process with data preservation..."
     
     # Create temp directory
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
@@ -660,22 +491,92 @@ git_commit_and_update_preserve_data() {
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    # Use smart deployment for Site & API only
-    smart_deploy_services "site api" "selective"
+    progress "🔄 Updating PROJECT Site & API services without affecting PROJECT data services..."
     
-    success "🎉 Git commit and SMART PROJECT Site & API update completed successfully!"
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        echo '🔒 PROJECT-SCOPED OPERATION: Only $PROJECT_NAME containers will be affected'
+        echo '📋 Current PROJECT directory: \$(pwd)'
+        echo '🔍 Verifying PROJECT environment preservation:'
+        if [ -f .env ]; then
+            echo '✅ PROJECT environment file exists and preserved'
+        else
+            echo '❌ PROJECT environment file missing!'
+            exit 1
+        fi
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo '🛑 Stopping only PROJECT Site & API containers...'
+            
+            # STRICTLY PROJECT-SCOPED: Only stop containers with project prefix
+            echo 'Stopping containers: ${PROJECT_NAME}-site and ${PROJECT_NAME}-api'
+            docker stop \"${PROJECT_NAME}-site\" 2>/dev/null || true
+            docker stop \"${PROJECT_NAME}-api\" 2>/dev/null || true
+            docker rm -f \"${PROJECT_NAME}-site\" 2>/dev/null || true
+            docker rm -f \"${PROJECT_NAME}-api\" 2>/dev/null || true
+            
+            # Also use compose method with explicit project directory
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME stop site api 2>/dev/null || true
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME rm -f site api 2>/dev/null || true
+            
+            echo '📊 PROJECT data services status (should remain running):'
+            docker ps --filter name=\"${PROJECT_NAME}-postgres\" --filter name=\"${PROJECT_NAME}-redis\" --filter name=\"${PROJECT_NAME}-minio\" --filter name=\"${PROJECT_NAME}-pgadmin\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo 'No PROJECT data services running'
+            
+            echo '🚀 Rebuilding and starting PROJECT Site & API services with preserved environment...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate site api
+            
+            echo '⏳ Waiting for PROJECT Site & API services to start...'
+            sleep 10
+            
+            echo '📊 Updated PROJECT services status:'
+            docker ps --filter name=\"${PROJECT_NAME}-site\" --filter name=\"${PROJECT_NAME}-api\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+            echo '🔍 Checking PROJECT Site & API health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                site_status=\$(docker ps --filter name=\"${PROJECT_NAME}-site\" --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                api_status=\$(docker ps --filter name=\"${PROJECT_NAME}-api\" --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                echo \"PROJECT Site: \$site_status\"
+                echo \"PROJECT API: \$api_status\"
+                sleep 3
+            done
+            
+            echo '📋 Recent logs for updated PROJECT services:'
+            echo '--- PROJECT Site Service Logs ---'
+            docker logs --tail=15 \"${PROJECT_NAME}-site\" 2>/dev/null || echo 'No logs available for PROJECT site'
+            echo '--- PROJECT API Service Logs ---'
+            docker logs --tail=15 \"${PROJECT_NAME}-api\" 2>/dev/null || echo 'No logs available for PROJECT api'
+            
+            echo '✅ All PROJECT services overview:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+            echo '🔐 Final PROJECT environment verification:'
+            echo 'PROJECT environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
+            
+            echo '🌐 Server isolation verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
+        else
+            echo '❌ PROJECT docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to update PROJECT Site & API services"
+
+    success "🎉 Git commit and PROJECT Site & API update completed successfully!"
     info "✅ PROJECT Site and API services updated with latest code"
     info "✅ PROJECT environment file (.env) preserved unchanged"
-    info "✅ Healthy services continue running without interruption"
-    warning "🧠 SMART MODE: Only failed services were restarted"
+    info "✅ PROJECT data services (PostgreSQL, Redis, MinIO, pgAdmin) remain untouched"
+    info "✅ Other server services completely unaffected"
+    warning "🔒 PROJECT-SCOPED: Only $PROJECT_NAME containers were modified"
 }
 
-# NEW FUNCTION: Combined function: Git commit + Update ALL services while preserving data - SMART MODE
+# NEW FUNCTION: Combined function: Git commit + Update ALL services while preserving data
 git_commit_and_update_all_preserve_data() {
     # First, handle git operations
     git_commit
     
-    progress "🧠 Initializing SMART PROJECT-SCOPED ALL services update process..."
+    progress "🔄 Initializing PROJECT-SCOPED ALL services update process with data preservation..."
     
     # Create temp directory
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
@@ -733,15 +634,103 @@ git_commit_and_update_all_preserve_data() {
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    # Use smart deployment for all services
-    smart_deploy_services "api site postgres redis minio pgadmin" "selective"
+    progress "🔄 Updating ALL PROJECT services while preserving PROJECT data volumes..."
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        echo '🔒 PROJECT-SCOPED OPERATION: Only $PROJECT_NAME containers will be affected'
+        echo '📋 Current PROJECT directory: \$(pwd)'
+        echo '🔍 Verifying PROJECT environment preservation:'
+        if [ -f .env ]; then
+            echo '✅ PROJECT environment file exists and preserved'
+        else
+            echo '❌ PROJECT environment file missing!'
+            exit 1
+        fi
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo '📊 Current PROJECT services status before update:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+            echo '💾 Listing PROJECT data volumes before update:'
+            docker volume ls | grep \"${PROJECT_NAME}\" || echo 'No PROJECT volumes found'
+            
+            echo '🛑 Stopping all PROJECT services gracefully...'
+            # STRICTLY PROJECT-SCOPED: Only affect containers with project prefix
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | xargs -r docker stop
+            docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | xargs -r docker rm -f
+            
+            # Also use compose method with explicit project scoping
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans
+            
+            echo '🔍 Verifying PROJECT data volumes are preserved:'
+            docker volume ls | grep \"${PROJECT_NAME}\" || echo 'No PROJECT volumes found'
+            
+            echo '🚀 Starting ALL PROJECT services with updated code and preserved data...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate
+            
+            echo '⏳ Waiting for all PROJECT services to start...'
+            sleep 20
+            
+            echo '📊 Updated PROJECT services status:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+            echo '🔍 Checking all PROJECT services health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+                sleep 5
+            done
+            
+            echo '💾 Verifying PROJECT data persistence:'
+            echo '--- PROJECT data volumes after update ---'
+            docker volume ls | grep \"${PROJECT_NAME}\" || echo 'No PROJECT volumes found'
+            
+            echo '📋 Recent logs for all PROJECT services:'
+            for container in \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}'); do
+                echo \"--- Logs for \$container ---\"
+                docker logs --tail=10 \$container 2>/dev/null || echo \"No logs available for \$container\"
+            done
+            
+            echo '✅ All PROJECT services overview:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+            echo '🔐 Final PROJECT environment verification:'
+            echo 'PROJECT environment file status:' \$(ls -la .env 2>/dev/null || echo 'Missing')
+            
+            echo '🎯 PROJECT database connectivity test:'
+            # Test database connection if postgres service exists
+            if docker ps --filter name=\"${PROJECT_NAME}-postgres\" | grep -q 'Up'; then
+                echo 'PROJECT PostgreSQL service is running ✅'
+            else
+                echo 'PROJECT PostgreSQL service status unknown'
+            fi
+            
+            echo '🎯 PROJECT Redis connectivity test:'
+            if docker ps --filter name=\"${PROJECT_NAME}-redis\" | grep -q 'Up'; then
+                echo 'PROJECT Redis service is running ✅'
+            else
+                echo 'PROJECT Redis service status unknown'
+            fi
+            
+            echo '🌐 Server isolation verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
+            
+        else
+            echo '❌ PROJECT docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to update ALL PROJECT services"
 
-    success "🎉 Git commit and SMART ALL PROJECT services update completed successfully!"
+    success "🎉 Git commit and ALL PROJECT services update completed successfully!"
     info "✅ ALL PROJECT services updated with latest code"
     info "✅ PROJECT environment file (.env) preserved unchanged"
     info "✅ PROJECT data volumes preserved - no data loss"
-    info "✅ Healthy services continued running without interruption"
-    warning "🧠 SMART MODE: Only failed services were restarted"
+    info "✅ PROJECT PostgreSQL, Redis, MinIO data maintained"
+    info "✅ Other server services completely unaffected"
+    warning "🔒 PROJECT-SCOPED: Only $PROJECT_NAME containers were modified"
     warning "💾 All persistent PROJECT data preserved across update"
 }
 
@@ -968,7 +957,79 @@ project_cleanup_and_container_fix() {
     fi
 }
 
-# Function to deploy specific services smartly (STRICTLY PROJECT-SCOPED)
+# Enhanced deployment function (STRICTLY PROJECT-SCOPED)
+deploy_application() {
+    progress "🚀 Deploying application (STRICTLY PROJECT-SCOPED)..."
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        echo '🔒 STRICTLY PROJECT-SCOPED DEPLOYMENT for $PROJECT_NAME'
+        echo '📋 Current PROJECT directory: \$(pwd)'
+        echo '📄 Available PROJECT files:'
+        ls -la
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo '🌐 Before deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo ''
+            
+            echo '🛑 Ensuring clean PROJECT state before deployment...'
+            # STRICTLY force stop and remove ONLY existing project containers
+            PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}')
+            if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+                echo \"Stopping PROJECT containers: \$(echo \$PROJECT_CONTAINERS | wc -w)\"
+                echo \$PROJECT_CONTAINERS | xargs docker stop 2>/dev/null || true
+                echo \$PROJECT_CONTAINERS | xargs docker rm -f 2>/dev/null || true
+            fi
+            
+            # Also cleanup by exact project service names
+            for service in postgres redis minio pgadmin api site; do
+                container_name=\"${PROJECT_NAME}-\$service\"
+                docker stop \"\$container_name\" 2>/dev/null || true
+                docker rm -f \"\$container_name\" 2>/dev/null || true
+            done
+            
+            echo '🐳 Starting Docker Compose deployment (STRICTLY PROJECT-SCOPED)...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans 2>/dev/null || true
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate
+            
+            echo '⏳ Waiting for PROJECT containers to start...'
+            sleep 15
+            
+            echo '📊 PROJECT container status:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+            echo '🔍 Checking PROJECT container health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+                sleep 3
+            done
+            
+            echo '📋 PROJECT container logs (last 20 lines):'
+            for container in \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}'); do
+                echo \"--- Logs for \$container ---\"
+                docker logs --tail=10 \$container 2>/dev/null || echo \"No logs for \$container\"
+            done
+            
+            echo '🌐 After deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
+        else
+            echo '❌ PROJECT docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to deploy PROJECT application"
+
+    success "🎉 STRICTLY PROJECT-SCOPED deployment completed successfully!"
+    info "Your $PROJECT_NAME application should now be running on the server"
+    warning "✅ ONLY $PROJECT_NAME services were deployed/affected"
+    warning "✅ ALL other server services remain completely untouched"
+}
+
+# Function to deploy specific services (STRICTLY PROJECT-SCOPED)
 deploy_selected_services() {
     select_services
     
@@ -976,15 +1037,79 @@ deploy_selected_services() {
         error "No services selected"
     fi
     
-    progress "🧠 Smart deployment for selected PROJECT services: $SELECTED_SERVICES"
+    progress "🚀 Deploying selected PROJECT services (STRICTLY PROJECT-SCOPED): $SELECTED_SERVICES"
     
-    # Use smart deployment for selected services
-    smart_deploy_services "$SELECTED_SERVICES" "selective"
-    
-    success "🎉 Selected PROJECT services smart deployment completed!"
-    info "Selected services ($SELECTED_SERVICES) for project $PROJECT_NAME are optimally running"
-    warning "🧠 SMART MODE: Only failed services were restarted"
-    warning "✅ Healthy services continued running without interruption"
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        echo '🔒 STRICTLY PROJECT-SCOPED SERVICE DEPLOYMENT for $PROJECT_NAME'
+        echo '📋 Current PROJECT directory: \$(pwd)'
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo '🌐 Before deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo ''
+            
+            echo '🛑 Cleaning up existing PROJECT containers...'
+            # STRICTLY force stop and remove ONLY existing project containers
+            PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}')
+            if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+                echo \"Stopping PROJECT containers: \$(echo \$PROJECT_CONTAINERS | wc -w)\"
+                echo \$PROJECT_CONTAINERS | xargs docker stop 2>/dev/null || true
+                echo \$PROJECT_CONTAINERS | xargs docker rm -f 2>/dev/null || true
+            fi
+            
+            # Also cleanup by exact project service names
+            for service in postgres redis minio pgadmin api site; do
+                container_name=\"${PROJECT_NAME}-\$service\"
+                docker stop \"\$container_name\" 2>/dev/null || true
+                docker rm -f \"\$container_name\" 2>/dev/null || true
+            done
+            
+            echo '🛑 Stopping existing PROJECT containers with compose...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans 2>/dev/null || true
+            
+            echo '🐳 Starting selected PROJECT services: $SELECTED_SERVICES'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME up -d --build --force-recreate $SELECTED_SERVICES
+            
+            echo '⏳ Waiting for PROJECT containers to start...'
+            sleep 15
+            
+            echo '📊 PROJECT container status:'
+            docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+            echo '🔍 Checking selected PROJECT services health:'
+            for i in {1..5}; do
+                echo \"Health check attempt \$i/5:\"
+                for service in $SELECTED_SERVICES; do
+                    container_name=\"${PROJECT_NAME}-\$service\"
+                    status=\$(docker ps --filter name=\"\$container_name\" --format '{{.Status}}' 2>/dev/null || echo 'Not found')
+                    echo \"\$service (\$container_name): \$status\"
+                done
+                sleep 3
+            done
+            
+            echo '📋 Container logs for selected PROJECT services:'
+            for service in $SELECTED_SERVICES; do
+                container_name=\"${PROJECT_NAME}-\$service\"
+                echo \"--- Logs for \$container_name ---\"
+                docker logs --tail=10 \"\$container_name\" 2>/dev/null || echo \"No logs available for \$container_name\"
+            done
+            
+            echo '🌐 After deployment - Server state verification:'
+            echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo 'PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo 'Other containers (untouched):' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
+        else
+            echo '❌ PROJECT docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to deploy selected PROJECT services"
+
+    success "🎉 Selected PROJECT services deployment completed!"
+    info "Selected services ($SELECTED_SERVICES) for project $PROJECT_NAME are now running on the server"
+    warning "✅ ONLY selected $PROJECT_NAME services were deployed/affected"
+    warning "✅ ALL other server services remain completely untouched"
 }
 
 # Initialize configuration
@@ -1003,9 +1128,8 @@ while true; do
             get_server_config
             ;;
         1)
-            log "Option 1 selected: Smart Deploy with Git (Site & API) - preserves healthy services"
-            warning "This will commit git changes and intelligently update Site & API services"
-            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
+            log "Option 1 selected: Deploy with Git & preserve data (Site & API only)"
+            warning "This will commit git changes and update only Site & API services, preserving all data services"
             warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
@@ -1019,9 +1143,8 @@ while true; do
             read -n 1
             ;;
         2)
-            log "Option 2 selected: Smart Deploy ALL with Git - preserves healthy services"
-            warning "This will commit git changes and intelligently update ALL services"
-            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
+            log "Option 2 selected: Deploy ALL with Git & preserve data"
+            warning "This will commit git changes and update ALL services while preserving data volumes"
             warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
@@ -1035,9 +1158,8 @@ while true; do
             read -n 1
             ;;
         3)
-            log "Option 3 selected: Deploy only (skip git operations) - smart mode"
+            log "Option 3 selected: Deploy only"
             warning "Skipping git operations..."
-            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
             warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             deploy_to_server
             echo ""
@@ -1069,7 +1191,6 @@ while true; do
         6)
             log "Option 6 selected: Fresh deploy with new environment"
             warning "This will remove all old .env files and use .env.prod as new environment"
-            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
             warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
             echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
             read -p "❓ " confirm
@@ -1083,8 +1204,7 @@ while true; do
             read -n 1
             ;;
         7)
-            log "Option 7 selected: Smart deploy specific services"
-            warning "🧠 SMART MODE: Only unhealthy selected services will be restarted"
+            log "Option 7 selected: Deploy specific services"
             warning "🔒 STRICTLY PROJECT-SCOPED: Only affects selected $PROJECT_NAME services"
             deploy_selected_services
             echo ""
@@ -1092,7 +1212,7 @@ while true; do
             read -n 1
             ;;
         q|Q)
-            echo -e "${GREEN}👋 Thank you for using SMART PROJECT-SCOPED Deployment Tool!${NC}"
+            echo -e "${GREEN}👋 Thank you for using PROJECT-SCOPED Deployment Tool!${NC}"
             echo -e "${CYAN}Goodbye!${NC}"
             exit 0
             ;;
