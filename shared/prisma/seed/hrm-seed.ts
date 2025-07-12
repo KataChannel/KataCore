@@ -1,7 +1,6 @@
-import { PrismaClient, LeaveType, LeaveStatus, ContractType, EmployeeStatus, AttendanceStatus } from '@prisma/client';
+import { LeaveType, LeaveStatus, ContractType, EmployeeStatus, AttendanceStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../lib/prisma';
 
 async function seedHRMData() {
   try {
