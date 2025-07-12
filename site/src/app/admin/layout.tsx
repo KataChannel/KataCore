@@ -41,8 +41,10 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Sử dụng unified theme hook
+  // Remove toggleLanguage from destructuring
   const { actualMode, toggleMode, isLoading } = useUnifiedTheme();
+  // Remove translation hook
+  // const { t } = useTranslation('common');
 
   // Load user data from localStorage
   useEffect(() => {
@@ -54,63 +56,64 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     }
   }, []);
 
+  // Replace translation calls with static text
   const hrSubMenus = [
     {
-      name: 'Dashboard',
+      name: 'Tổng quan',
       nameVi: 'Tổng quan',
       href: '/admin/hr',
       icon: ChartBarIcon,
     },
     {
-      name: 'Employees',
+      name: 'Nhân viên',
       nameVi: 'Nhân viên',
       href: '/admin/hr/employees',
       icon: UsersIcon,
     },
     {
-      name: 'Departments',
+      name: 'Phòng ban',
       nameVi: 'Phòng ban',
       href: '/admin/hr/departments',
       icon: BuildingOfficeIcon,
     },
     {
-      name: 'Positions',
+      name: 'Vị trí',
       nameVi: 'Vị trí',
       href: '/admin/hr/positions',
       icon: BriefcaseIcon,
     },
     {
-      name: 'Attendance',
+      name: 'Chấm công',
       nameVi: 'Chấm công',
       href: '/admin/hr/attendance',
       icon: ClockIcon,
     },
     {
-      name: 'Leave Requests',
+      name: 'Yêu cầu nghỉ phép',
       nameVi: 'Yêu cầu nghỉ phép',
       href: '/admin/hr/leave-requests',
       icon: CalendarIcon,
     },
     {
-      name: 'Payroll',
+      name: 'Bảng lương',
       nameVi: 'Bảng lương',
       href: '/admin/hr/payroll',
       icon: CurrencyDollarIcon,
     },
     {
-      name: 'Performance',
+      name: 'Hiệu suất',
       nameVi: 'Hiệu suất',
       href: '/admin/hr/performance',
       icon: ChartBarIcon,
     },
     {
-      name: 'Reports',
+      name: 'Báo cáo',
       nameVi: 'Báo cáo',
       href: '/admin/hr/reports',
       icon: DocumentTextIcon,
     },
     {
-      name: 'Settings',
+      name: 'Cài đặt',
       nameVi: 'Cài đặt',
       href: '/admin/hr/settings',
       icon: CogIcon,
@@ -136,14 +139,40 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       href: '/admin/crm/callcenter',
       icon: BellIcon,
     },
+  ];
+  const socialSubMenus = [
+    {
+      name: 'Dashboard',
+      nameVi: 'Tổng quan',
+      href: '/admin/social',
+      icon: ChartBarIcon,
+    },
     {
       name: 'Facebook',
       nameVi: 'Facebook',
-      href: '/admin/crm/facebook',
+      href: '/admin/social/facebook',
       icon: ComputerDesktopIcon,
     },
+    {
+      name: 'Instagram',
+      nameVi: 'Instagram',
+      href: '/admin/social/instagram',
+      icon: UserIcon,
+    },
+    {
+      name: 'Twitter',
+      nameVi: 'Twitter',
+      href: '/admin/social/twitter',
+      icon: UserIcon,
+    },
+    {
+      name: 'LinkedIn',
+      nameVi: 'LinkedIn',
+      href: '/admin/social/linkedin',
+      icon: UserIcon,
+    },
   ];
-
+  // Replace translation calls with static text
   const menuItems = [
     {
       title: 'Dashboard',
@@ -152,7 +181,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       active: pathname === '/admin',
     },
     {
-      title: 'HR Management',
+      title: 'Quản lý Nhân sự',
       icon: UsersIcon,
       path: '/admin/hr',
       active: pathname.startsWith('/admin/hr'),
@@ -164,6 +193,13 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       path: '/admin/crm',
       active: pathname.startsWith('/admin/crm'),
       children: crmSubMenus,
+    },
+    {
+      title: 'Social',
+      icon: UserIcon,
+      path: '/admin/social',
+      active: pathname.startsWith('/admin/social'),
+      children: socialSubMenus,
     },
     {
       title: 'Website Management',
@@ -178,7 +214,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       active: pathname.startsWith('/admin/analytics'),
     },
     {
-      title: 'Settings',
+      title: 'Cài đặt',
       icon: CogIcon,
       path: '/admin/settings',
       active: pathname.startsWith('/admin/settings'),
@@ -208,7 +244,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     });
   }, [pathname]);
 
- const toggleTheme = () => {
+  const toggleTheme = () => {
     toggleMode();
   };
 
@@ -259,8 +295,8 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
             >
               {sidebarOpen && (
                 <>
-                  <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">K</span>
+                  <div className="w-8 h-8 bg-accent flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">T</span>
                   </div>
                   <span className="text-lg font-semibold text-primary">
                     TazaCore
@@ -277,7 +313,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
 
           {/* Sidebar Menu */}
-          <nav className="flex-1 px-4 py-4 space-y-2">
+          <nav className="flex-1 p-2 space-y-2">
             {menuItems.map(item => (
               <div key={item.path}>
                 <button
@@ -359,7 +395,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           <div className="flex items-center justify-between h-16 px-4 border-b border-border">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">K</span>
+                <span className="text-white font-bold text-sm">T</span>
               </div>
               <span className="text-lg font-semibold text-primary">
                 TazaCore
@@ -475,8 +511,8 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 className={`p-2 ${actualMode === 'dark'
                   ? 'text-white hover:bg-white/20'
                   : 'text-black hover:bg-black/20'
-                }`}
-                aria-label="Toggle theme"
+                } rounded-lg transition-colors`}
+                aria-label="Toggle dark mode"
               >
                 <div className="relative w-5 h-5 sm:w-6 sm:h-6">
                   <SunIcon

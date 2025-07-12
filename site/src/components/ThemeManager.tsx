@@ -355,7 +355,7 @@ export function ColorSchemeToggle({
   return (
     <button
       onClick={toggleColorScheme}
-      className={`px-4 py-2 rounded border border-border hover:bg-hover transition-colors ${className}`}
+      className={`p-3 rounded border border-border hover:bg-hover transition-colors ${className}`}
       aria-label={
         config.language === 'vi' ? 'Chuyển phong cách màu' : 'Toggle color scheme'
       }

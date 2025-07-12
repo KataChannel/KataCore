@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import JsSIP from 'jssip';
+import { useUnifiedTheme } from '@/hooks/useUnifiedTheme';
+import { useTranslation } from '@/hooks/useI18n';
 
 interface Call {
     id: string;
@@ -34,6 +36,10 @@ interface SIPConfig {
 }
 
 export default function CallCenterPage() {
+    // Sử dụng unified theme hook và translation
+    const { actualMode, isLoading: themeLoading, setLanguage, toggleLanguage } = useUnifiedTheme();
+    const { t } = useTranslation('callcenter');
+    
     const [calls, setCalls] = useState<Call[]>([]);
     const [selectedCall, setSelectedCall] = useState<Call | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -46,6 +52,8 @@ export default function CallCenterPage() {
         from: new Date().toISOString().split('T')[0],
         to: new Date().toISOString().split('T')[0]
     });
+    const [error, setError] = useState<string | null>(null);
+    const [mounted, setMounted] = useState(false);
     
     const userAgent = useRef<any>(null);
     const callTimer = useRef<NodeJS.Timeout | null>(null);
@@ -53,7 +61,7 @@ export default function CallCenterPage() {
 
     // SIP Configuration
     const sipConfig: SIPConfig = {
-        uri: 'sip:9999@pbx01.onepos.vn',
+        uri: 'sip:9999@tazaspa102019',
         password: 'NtRrcSl8Zp',
         ws_servers: 'wss://pbx01.onepos.vn:5000',
         display_name: 'Call Center Agent'
@@ -67,6 +75,7 @@ export default function CallCenterPage() {
     };
 
     useEffect(() => {
+        setMounted(true);
         initializeSIP();
         fetchCDRData();
 
@@ -82,34 +91,45 @@ export default function CallCenterPage() {
 
     const fetchCDRData = async () => {
         setIsLoading(true);
+        setError(null);
+        
         try {
             const fromDate = `${dateRange.from} 00:00:00`;
             const toDate = `${dateRange.to} 23:59:59`;
             
             const params = new URLSearchParams({
                 domain: apiConfig.domain,
-                limit: '10000',
+                limit: '10',
                 from: fromDate,
                 to: toDate,
                 caller_id_number: apiConfig.callerIdNumber,
                 offset: '0'
             });
 
-            const response = await fetch(`${apiConfig.baseUrl}/cdrs?${params}`, {
+            console.log('Calling API with params:', params.toString());
+
+            const response = await fetch(`/api/cdr?${params}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Add authentication headers if required
-                    // 'Authorization': 'Bearer your-token'
                 }
             });
 
+            console.log('Response status:', response.status);
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
             }
 
             const data = await response.json();
+            console.log('Received data:', data);
+            
             const cdrRecords: CDRRecord[] = data.data || data || [];
+
+            if (cdrRecords.length === 0) {
+                console.warn('No CDR records found for the specified date range');
+            }
 
             const transformedCalls: Call[] = cdrRecords.map((record, index) => ({
                 id: record.uuid || index.toString(),
@@ -123,10 +143,14 @@ export default function CallCenterPage() {
             }));
 
             setCalls(transformedCalls);
+            console.log('Transformed calls:', transformedCalls);
+            
         } catch (error) {
             console.error('Error fetching CDR data:', error);
-            // Fallback to mock data if API fails
-            setCalls([
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setError(`Failed to fetch call data: ${errorMessage}`);
+            
+            const mockCalls: Call[] = [
                 {
                     id: '1',
                     customerName: 'John Doe',
@@ -134,16 +158,33 @@ export default function CallCenterPage() {
                     status: 'pending',
                     timestamp: new Date(),
                     callDirection: 'inbound'
+                },
+                {
+                    id: '2',
+                    customerName: 'Jane Smith',
+                    phoneNumber: '+84123456789',
+                    status: 'completed',
+                    timestamp: new Date(Date.now() - 3600000),
+                    duration: 125,
+                    callDirection: 'outbound'
+                },
+                {
+                    id: '3',
+                    customerName: 'Bob Wilson',
+                    phoneNumber: '+84987654321',
+                    status: 'missed',
+                    timestamp: new Date(Date.now() - 7200000),
+                    callDirection: 'inbound'
                 }
-            ]);
+            ];
+            
+            setCalls(mockCalls);
         } finally {
             setIsLoading(false);
         }
     };
 
     const getCustomerName = (callerNumber: string, destinationNumber: string): string => {
-        // You can implement a customer lookup logic here
-        // For now, return a formatted name based on phone number
         const number = callerNumber !== apiConfig.callerIdNumber ? callerNumber : destinationNumber;
         return `Customer ${number}`;
     };
@@ -196,7 +237,6 @@ export default function CallCenterPage() {
                 setCallStatus('Ended');
                 setCurrentSession(null);
                 stopCallTimer();
-                // Refresh CDR data after call ends
                 setTimeout(fetchCDRData, 2000);
             });
 
@@ -268,6 +308,26 @@ export default function CallCenterPage() {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const updateCallNotes = (notes: string) => {
+        if (selectedCall) {
+            setSelectedCall({
+                ...selectedCall,
+                notes
+            });
+        }
+    };
+
+    const saveCallNotes = () => {
+        if (selectedCall) {
+            setCalls(prevCalls => 
+                prevCalls.map(call => 
+                    call.id === selectedCall.id ? selectedCall : call
+                )
+            );
+            alert(t('notesSaved'));
+        }
+    };
+
     const filteredCalls = calls.filter(call =>
         call.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         call.phoneNumber.includes(searchTerm)
@@ -275,29 +335,62 @@ export default function CallCenterPage() {
 
     const getStatusColor = (status: Call['status']) => {
         switch (status) {
-            case 'pending': return 'bg-yellow-100 text-yellow-800';
-            case 'in-progress': return 'bg-blue-100 text-blue-800';
-            case 'completed': return 'bg-green-100 text-green-800';
-            case 'missed': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
+            case 'pending': return 'badge badge-warning';
+            case 'in-progress': return 'badge badge-primary';
+            case 'completed': return 'badge badge-success';
+            case 'missed': return 'badge badge-error';
+            default: return 'badge badge-ghost';
         }
     };
 
+    const getStatusText = (status: Call['status']) => {
+        switch (status) {
+            case 'pending': return t('pending');
+            case 'in-progress': return t('inProgress');
+            case 'completed': return t('completed');
+            case 'missed': return t('missed');
+            default: return status;
+        }
+    };
+
+    // Prevent hydration mismatch
+    if (!mounted || themeLoading) {
+        return (
+            <div className="container mx-auto p-6">
+                <div className="flex items-center justify-center min-h-96">
+                    <span className="loading loading-spinner loading-lg"></span>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="p-6">
+        <div className="container mx-auto p-6 transition-colors duration-300">
             <audio ref={remoteAudio} autoPlay />
             
+            {/* Header */}
             <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Call Center</h1>
                 <div className="flex items-center justify-between">
-                    <p className="text-gray-600">Manage customer calls and interactions</p>
+                    <div>
+                        <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
+                        <p className="text-text-secondary mt-2">{t('dashboard')}</p>
+                    </div>
                     <div className="flex items-center space-x-4">
-                        <div className={`flex items-center space-x-2 ${isRegistered ? 'text-green-600' : 'text-red-600'}`}>
+                        {/* Language Toggle */}
+                        <button
+                            onClick={toggleLanguage}
+                            className="btn btn-outline btn-sm"
+                            title="Toggle Language"
+                        >
+                            🌐 VI/EN
+                        </button>
+                        
+                        <div className={`flex items-center space-x-2 ${isRegistered ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                             <div className={`w-2 h-2 rounded-full ${isRegistered ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                            <span className="text-sm">{isRegistered ? 'SIP Connected' : 'SIP Disconnected'}</span>
+                            <span className="text-sm font-medium">{isRegistered ? t('sipConnected') : t('sipDisconnected')}</span>
                         </div>
                         {currentSession && (
-                            <div className="text-blue-600 text-sm">
+                            <div className="text-blue-600 dark:text-blue-400 text-sm font-medium bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full">
                                 {callStatus} - {formatDuration(callDuration)}
                             </div>
                         )}
@@ -306,120 +399,157 @@ export default function CallCenterPage() {
             </div>
 
             {/* Date Range Filter */}
-            <div className="mb-4 flex items-center space-x-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">From Date</label>
-                    <input
-                        type="date"
-                        value={dateRange.from}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                        className="mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">To Date</label>
-                    <input
-                        type="date"
-                        value={dateRange.to}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                        className="mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
-                <div className="flex items-end">
-                    <button
-                        onClick={fetchCDRData}
-                        disabled={isLoading}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
-                    >
-                        {isLoading ? 'Loading...' : 'Refresh Data'}
-                    </button>
+            <div className="bg-white dark:bg-gray-800 shadow-lg mb-6 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className="p-6">
+                    <div className="flex flex-wrap items-end gap-4">
+                        <div className="flex flex-col">
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                {t('fromDate')}
+                            </label>
+                            <input
+                                type="date"
+                                value={dateRange.from}
+                                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                {t('toDate')}
+                            </label>
+                            <input
+                                type="date"
+                                value={dateRange.to}
+                                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                            />
+                        </div>
+                        <button
+                            onClick={fetchCDRData}
+                            disabled={isLoading}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-md transition-colors duration-200 flex items-center gap-2"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    {t('loading')}
+                                </>
+                            ) : (
+                                t('refreshData')
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="mb-4">
+            {/* Search */}
+            <div className="form-control mb-6">
                 <input
                     type="text"
-                    placeholder="Search by name or phone number..."
+                    placeholder={t('searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input input-bordered w-full bg-background text-primary border-border focus:border-accent"
                 />
             </div>
 
+            {/* Error Alert */}
+            {error && (
+                <div className="alert alert-error mb-6 bg-red-100 border-red-300 text-red-800">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{error}</span>
+                    </div>
+                    <div className="flex-none">
+                        <button 
+                            className="btn btn-sm btn-ghost"
+                            onClick={() => setError(null)}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Call Records Table */}
                 <div className="lg:col-span-2">
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-lg font-medium text-gray-900">
-                                Call Records ({filteredCalls.length})
-                                {isLoading && <span className="ml-2 text-blue-600">Loading...</span>}
+                    <div className="card bg-surface shadow-xl border border-border">
+                        <div className="card-header px-6 py-4 border-b border-border">
+                            <h2 className="card-title text-primary">
+                                {t('callRecords')} ({filteredCalls.length})
+                                {isLoading && <span className="loading loading-dots loading-sm text-accent"></span>}
                             </h2>
                         </div>
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Customer
+                            <table className="table w-full">
+                                <thead>
+                                    <tr className="border-b border-border">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                                            {t('customer')}
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Phone
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                                            {t('phoneNumber')}
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Direction
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                                            {t('direction')}
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                                            {t('status')}
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Duration
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                                            {t('duration')}
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Time
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                                            {t('time')}
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                                            {t('actions')}
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-surface divide-y divide-border">
                                     {filteredCalls.map((call) => (
-                                        <tr key={call.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <tr key={call.id} className="hover:bg-hover transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
                                                 {call.customerName}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                                                 {call.phoneNumber}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                                                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                                    call.callDirection === 'inbound' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                                                    call.callDirection === 'inbound' 
+                                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                                                        : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
                                                 }`}>
                                                     {call.callDirection === 'inbound' ? '📞 In' : '📱 Out'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(call.status)}`}>
-                                                    {call.status}
+                                                    {getStatusText(call.status)}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                                                 {call.duration ? formatDuration(call.duration) : '-'}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                                                 {call.timestamp.toLocaleString()}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary space-x-2">
                                                 <button
                                                     onClick={() => setSelectedCall(call)}
-                                                    className="text-blue-600 hover:text-blue-900"
+                                                    className="text-accent hover:text-accent/80 transition-colors"
                                                 >
-                                                    View Details
+                                                    {t('viewDetails')}
                                                 </button>
                                                 <button
                                                     onClick={() => makeCall(call.phoneNumber)}
                                                     disabled={!isRegistered || !!currentSession}
-                                                    className="text-green-600 hover:text-green-900 disabled:text-gray-400 ml-2"
+                                                    className="text-success hover:text-success/80 disabled:text-text-secondary/40 ml-2 transition-colors"
                                                 >
                                                     📞 Call
                                                 </button>
@@ -432,79 +562,87 @@ export default function CallCenterPage() {
                     </div>
                 </div>
 
+                {/* Sidebar */}
                 <div className="lg:col-span-1">
+                    {/* Active Call Section */}
                     {currentSession && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                            <h3 className="text-lg font-medium text-red-900 mb-2">Active Call</h3>
-                            <div className="space-y-2">
-                                <p className="text-sm text-red-700">Status: {callStatus}</p>
-                                <p className="text-sm text-red-700">Duration: {formatDuration(callDuration)}</p>
-                                <button
-                                    onClick={hangupCall}
-                                    className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
-                                >
-                                    🔴 Hang Up
-                                </button>
+                        <div className="alert alert-error mb-4 bg-red-100 border-red-300 text-red-800">
+                            <div>
+                                <h3 className="text-lg font-medium mb-2">{t('activeCall')}</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm">Status: {callStatus}</p>
+                                    <p className="text-sm">Duration: {formatDuration(callDuration)}</p>
+                                    <button
+                                        onClick={hangupCall}
+                                        className="btn btn-error w-full"
+                                    >
+                                        🔴 {t('hangUp')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">Call Details</h3>
-                        {selectedCall ? (
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Customer</label>
-                                    <p className="mt-1 text-sm text-gray-900">{selectedCall.customerName}</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Phone</label>
-                                    <div className="flex items-center space-x-2">
-                                        <p className="mt-1 text-sm text-gray-900">{selectedCall.phoneNumber}</p>
+                    {/* Call Details Section */}
+                    <div className="card bg-surface shadow-xl border border-border">
+                        <div className="card-body">
+                            <h3 className="card-title text-primary mb-4">{t('callDetails')}</h3>
+                            {selectedCall ? (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-secondary">{t('customer')}</label>
+                                        <p className="mt-1 text-sm text-primary">{selectedCall.customerName}</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-secondary">{t('phoneNumber')}</label>
+                                        <p className="mt-1 text-sm text-primary">{selectedCall.phoneNumber}</p>
                                         <button
                                             onClick={() => makeCall(selectedCall.phoneNumber)}
                                             disabled={!isRegistered || !!currentSession}
-                                            className="text-green-600 hover:text-green-900 disabled:text-gray-400"
-                                            title="Call this number"
+                                            className="btn btn-sm btn-success mt-2"
                                         >
-                                            📞
+                                            📞 {t('makeCall')}
                                         </button>
                                     </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Direction</label>
-                                    <p className="mt-1 text-sm text-gray-900">
-                                        {selectedCall.callDirection === 'inbound' ? 'Incoming Call' : 'Outgoing Call'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Status</label>
-                                    <span className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedCall.status)}`}>
-                                        {selectedCall.status}
-                                    </span>
-                                </div>
-                                {selectedCall.duration && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Duration</label>
-                                        <p className="mt-1 text-sm text-gray-900">{formatDuration(selectedCall.duration)}</p>
+                                        <label className="block text-sm font-medium text-text-secondary">{t('direction')}</label>
+                                        <p className="mt-1 text-sm text-primary">
+                                            {selectedCall.callDirection === 'inbound' ? t('incomingCall') : t('outgoingCall')}
+                                        </p>
                                     </div>
-                                )}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Notes</label>
-                                    <textarea
-                                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                        rows={4}
-                                        value={selectedCall.notes || ''}
-                                        placeholder="Add call notes..."
-                                    />
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-secondary">{t('status')}</label>
+                                        <span className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedCall.status)}`}>
+                                            {getStatusText(selectedCall.status)}
+                                        </span>
+                                    </div>
+                                    {selectedCall.duration && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-text-secondary">{t('duration')}</label>
+                                            <p className="mt-1 text-sm text-primary">{formatDuration(selectedCall.duration)}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-secondary">{t('notes')}</label>
+                                        <textarea
+                                            className="textarea textarea-bordered w-full mt-1 bg-background text-primary border-border focus:border-accent"
+                                            rows={4}
+                                            value={selectedCall.notes || ''}
+                                            onChange={(e) => updateCallNotes(e.target.value)}
+                                            placeholder={t('addNotes')}
+                                        />
+                                    </div>
+                                    <button 
+                                        onClick={saveCallNotes}
+                                        className="btn btn-primary w-full hover:bg-accent/90"
+                                    >
+                                        {t('saveNotes')}
+                                    </button>
                                 </div>
-                                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                                    Save Notes
-                                </button>
-                            </div>
-                        ) : (
-                            <p className="text-gray-500">Select a call to view details</p>
-                        )}
+                            ) : (
+                                <p className="text-text-secondary">{t('selectCall')}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

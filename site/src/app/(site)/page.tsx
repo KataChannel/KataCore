@@ -186,7 +186,7 @@ export default function HomePage() {
         
         <ColorSchemeToggle 
           showLabel={false}
-          className="hidden sm:flex items-center gap-2 p-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105" 
+          className="hidden sm:flex items-center gap-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105" 
         />
       </div>
 
@@ -202,7 +202,7 @@ export default function HomePage() {
                 ? 'bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent'
                 : 'bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent'
             }`}>
-              MODULE
+              Taza Group
             </h3>
             <div
               className={`w-12 sm:w-16 h-px mx-auto transition-all duration-700 ${
@@ -280,7 +280,7 @@ export default function HomePage() {
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
-            © 2024 TazaCore. All rights reserved.
+            © 2024 Taza Group. All rights reserved.
           </p>
         </div>
       </footer>

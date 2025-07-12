@@ -1,0 +1,19 @@
+{
+  "name": "@tazacore/shared",
+  "version": "1.0.0",
+  "description": "Shared Prisma configuration for TazaCore",
+  "main": "lib/prisma.ts",
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "prisma": "^6.11.1"
+  },
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio"
+  }
+}

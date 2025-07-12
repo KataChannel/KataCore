@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function NotFound() {
+  const router = useRouter();
   const [isDark, setIsDark] = useState(false);
-  const [language, setLanguage] = useState('vi');
+  const [language, setLanguage] = useState<'vi' | 'en'>('vi');
 
   useEffect(() => {
     // Check system preference
@@ -37,12 +39,14 @@ export default function NotFound() {
       description:
         'Trang bạn đang tìm kiếm không tồn tại hoặc đã được chuyển đến vị trí khác.',
       buttonText: 'Quay Về Trang Chủ',
+      backText: 'Quay Lại',
     },
     en: {
       title: 'Page Not Found',
       description:
         "The page you're looking for doesn't exist or has been moved to another location.",
       buttonText: 'Return Home',
+      backText: 'Go Back',
     },
   };
 
@@ -95,31 +99,61 @@ export default function NotFound() {
           </p>
         </div>
 
-        {/* CTA Button */}
-        <div className="pt-4">
-          <Link
-            href="/"
-            className={`group inline-flex items-center gap-3 px-8 py-4 border transition-all duration-300 font-light tracking-[0.1em] text-xs uppercase hover:scale-[1.02] ${
-              isDark
-                ? 'border-zinc-700 text-zinc-300 hover:border-white hover:bg-white hover:text-zinc-900'
-                : 'border-zinc-300 text-zinc-700 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white'
-            }`}
-          >
-            <svg
-              className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        {/* Action Buttons */}
+        <div className="pt-4 space-y-4">
+          {/* Back Button */}
+          <div>
+            <button
+              onClick={() => router.back()}
+              className={`group inline-flex items-center gap-3 px-8 py-4 border transition-all duration-300 font-light tracking-[0.1em] text-xs uppercase hover:scale-[1.02] ${
+                isDark
+                  ? 'border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800'
+                  : 'border-zinc-300 text-zinc-700 hover:border-zinc-500 hover:bg-zinc-100'
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            {content[language].buttonText}
-          </Link>
+              <svg
+                className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              {content[language].backText}
+            </button>
+          </div>
+
+          {/* Home Button */}
+          <div>
+            <Link
+              href="/"
+              className={`group inline-flex items-center gap-3 px-8 py-4 border transition-all duration-300 font-light tracking-[0.1em] text-xs uppercase hover:scale-[1.02] ${
+                isDark
+                  ? 'border-zinc-700 text-zinc-300 hover:border-white hover:bg-white hover:text-zinc-900'
+                  : 'border-zinc-300 text-zinc-700 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white'
+              }`}
+            >
+              <svg
+                className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              {content[language].buttonText}
+            </Link>
+          </div>
         </div>
 
         {/* Decorative Element */}
