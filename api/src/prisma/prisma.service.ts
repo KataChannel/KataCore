@@ -34,8 +34,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       for (const { tablename } of tablenames) {
         if (tablename !== '_prisma_migrations') {
           try {
-            // Use $executeRawUnsafe for dynamic table names in tests
-            await this.$executeRawUnsafe(`TRUNCATE TABLE "public"."${tablename}" CASCADE;`);
+            // Use $executeRaw with template literal for better type safety
+            await this.$executeRaw`TRUNCATE TABLE ${tablename} CASCADE`;
           } catch (error) {
             console.log(`Could not truncate ${tablename}:`, error);
           }
