@@ -1170,4 +1170,42 @@ Sau khi thiết lập xong:
 3. **Migration conflicts**: Chạy `npm run db:reset` và migrate lại
 4. **Symlink issues**: Recreate symlinks sau khi copy files
 
+### 🚨 Seed Script Issues (FIXED)
+
+**Problem**: `bun run prisma:seed` không chạy được
+
+**Root Cause**: Thiếu dependencies và configuration trong shared package
+
+**Solution**:
+```bash
+# 1. Cài đặt missing dependencies
+cd shared
+npm install bcrypt @types/bcrypt tsx
+
+# 2. Generate Prisma client
+npx prisma generate
+
+# 3. Chạy seed script
+npm run db:seed
+# hoặc
+npx tsx prisma/seed/hrm-seed.ts
+```
+
+**Fixed Files**:
+- `/shared/package.json` - Added bcrypt, @types/bcrypt, tsx dependencies
+- `/shared/package.json` - Updated db:seed script to use tsx
+- `/package.json` - Updated prisma:seed to use npm run
+
+**Verified Working Commands**:
+```bash
+npm run prisma:seed          # From root
+cd shared && npm run db:seed  # From shared
+```
+
+### 📋 Seed Results
+- 3 Roles, 7 Users, 3 Departments, 6 Positions
+- 7 Employees, ~120 Attendance records, 3 Leave requests
+- 7 Payroll records, 4 Performance reviews
+- Test login: hr.manager@company.com / hr123456
+
 Với setup này, bạn có thể dễ dàng phát triển và maintain cả Next.js API routes và NestJS với cùng một database schema!

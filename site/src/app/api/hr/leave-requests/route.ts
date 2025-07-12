@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../prisma/prisma';
+import { prisma } from '@/lib/prisma';
 
 // GET /api/hr/leave-requests - Lấy danh sách đơn nghỉ phép
 export async function GET(request: NextRequest) {

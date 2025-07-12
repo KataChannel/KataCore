@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../prisma/prisma';
+import { prisma } from '@/lib/prisma';
 
 // GET /api/hr/performance-reviews - Lấy danh sách đánh giá hiệu suất
 export async function GET(request: NextRequest) {

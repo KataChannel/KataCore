@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../prisma/prisma';
+import { prisma } from '@/lib/prisma';
 
 // GET /api/hr/payrolls - Lấy danh sách bảng lương
 export async function GET(request: NextRequest) {

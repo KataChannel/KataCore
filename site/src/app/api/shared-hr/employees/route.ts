@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../shared/lib/prisma';
-import { EmployeeFilters, ApiResponse, EmployeeWithRelations } from '../../../../../shared/types/database';
+import { prisma } from '@/lib/prisma';
+import { EmployeeFilters, ApiResponse, EmployeeWithRelations } from '../../../shared/types/database';
 
 // GET /api/hr/employees - Lấy danh sách nhân viên
 export async function GET(request: NextRequest) {

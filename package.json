@@ -36,12 +36,12 @@
     "docker:logs": "docker-compose -f configs/docker/docker-compose.yml logs -f",
     "docker:build": "docker-compose -f configs/docker/docker-compose.yml build",
     "docker:restart": "docker-compose -f configs/docker/docker-compose.yml restart",
-    "prisma:studio": "cd site && bun prisma studio",
-    "prisma:generate": "cd site && bun prisma generate",
-    "prisma:migrate": "cd site && bun prisma migrate dev",
-    "prisma:deploy": "cd site && bun prisma migrate deploy",
-    "prisma:reset": "cd site && bun prisma migrate reset",
-    "prisma:seed": "cd site && bun run prisma/seed.ts"
+    "prisma:studio": "cd shared && bun prisma studio",
+    "prisma:generate": "cd shared && bun prisma generate",
+    "prisma:migrate": "cd shared && bun prisma migrate dev",
+    "prisma:deploy": "cd shared && bun prisma migrate deploy",
+    "prisma:reset": "cd shared && bun prisma migrate reset",
+    "prisma:seed": "cd shared && npm run db:seed"
   },
   "keywords": [
     "tazacore",
@@ -78,7 +78,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "prisma": "^6.11.1"
+    "prisma": "^6.11.1",
+    "ts-node": "^10.9.2"
   },
   "engines": {
     "node": ">=18.0.0",

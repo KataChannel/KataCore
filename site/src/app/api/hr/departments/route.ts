@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../prisma/prisma';
+import { prisma } from '@/lib/prisma'; // Adjust the import path as necessary
 
 // GET /api/hr/departments - Lấy danh sách phòng ban
 export async function GET(request: NextRequest) {

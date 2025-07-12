@@ -20,7 +20,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   // Helper method for safe database operations
-  async $transaction<T>(fn: (prisma: PrismaService) => Promise<T>): Promise<T> {
+  async executeTransaction<T>(fn: (prisma: PrismaService) => Promise<T>): Promise<T> {
     return this.$transaction(fn);
   }
 

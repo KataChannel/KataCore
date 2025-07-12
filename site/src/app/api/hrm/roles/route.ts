@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../prisma/prisma';
+import { prisma } from '@/lib/prisma';
 import authService from '../../../../../lib/auth/authService';
 
 // Middleware to check authentication
