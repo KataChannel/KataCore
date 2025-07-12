@@ -1,7 +1,7 @@
 // Authentication service integration with unified theme system
 // Enhanced authentication service with theme-aware features
 
-import { prisma } from '../../../shared/lib/prisma';
+import { prisma } from '../../shared/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { UNIFIED_THEME_CONFIG, ThemeConfig } from '../config/unified-theme';
