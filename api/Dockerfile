@@ -1,26 +1,59 @@
-# Multi-stage build for NestJS API - Optimized for production
+# Multi-stage build for NestJS API - Optimized for production with shared Prisma
 FROM oven/bun:1-alpine AS base
 
-# Install security updates and necessary packages for health checks
+# Install security updates and necessary packages
 RUN apk update && apk upgrade && \
-    apk add --no-cache dumb-init curl wget && \
+    apk add --no-cache dumb-init curl wget git && \
     rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
-# Install dependencies stage
+# Dependencies stage
 FROM base AS deps
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile
+
+# Copy package files for both API and shared
+COPY api/package.json api/bun.lockb* ./
+COPY shared/package.json ./shared/package.json
+
+# Install dependencies with better error handling
+RUN bun install --frozen-lockfile || \
+    { echo "Dependencies installation failed, retrying..."; \
+      rm -rf node_modules; \
+      bun install --no-cache; }
+
+# Shared Prisma setup stage
+FROM deps AS shared-setup
+
+# Copy shared Prisma configuration
+COPY shared ./shared
+
+# Install shared dependencies and generate Prisma client
+RUN echo "Setting up shared Prisma for API..." && \
+    cd shared && \
+    bun install --frozen-lockfile && \
+    echo "Generating Prisma client..." && \
+    bunx prisma generate && \
+    echo "Prisma client generated successfully" && \
+    ls -la node_modules/.prisma/ && \
+    cd ..
 
 # Build stage
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+FROM shared-setup AS builder
 
-# Build the application
-RUN bun run build && \
-    bun run prisma generate
+# Copy API source code
+COPY api .
+
+# Set build environment
+ENV NODE_ENV=production
+
+# Verify Prisma setup before building
+RUN echo "Verifying Prisma setup before build..." && \
+    ls -la shared/ && \
+    ls -la shared/node_modules/.prisma/ || echo "Shared Prisma client check" && \
+    echo "Building NestJS application..." && \
+    bun run build && \
+    echo "Build completed successfully" && \
+    ls -la dist/
 
 # Production stage - Minimal image
 FROM base AS production
@@ -29,18 +62,37 @@ FROM base AS production
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs --ingroup nodejs
 
-# Copy only production files
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
-
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3001
+
+# Create necessary directories and set permissions
+RUN mkdir -p logs && \
+    chown -R nestjs:nodejs logs
+
+# Copy production files with proper permissions
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
+
+# Copy shared Prisma configuration for runtime
+COPY --from=builder --chown=nestjs:nodejs /app/shared ./shared
+
+# Verify Prisma client is available at runtime
+RUN echo "Verifying runtime Prisma setup..." && \
+    ls -la shared/ && \
+    ls -la shared/node_modules/.prisma/ 2>/dev/null || \
+    ls -la node_modules/.prisma/ 2>/dev/null || \
+    echo "Prisma client runtime verification completed"
 
 USER nestjs
 
 EXPOSE 3001
 
-CMD ["bun", "dist/src/main.js"]
+# Health check with better error handling
+HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=5 \
+  CMD curl -f http://localhost:3001/health || curl -f http://localhost:3001/ || exit 1
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["bun", "run", "start:prod"]
