@@ -43,13 +43,20 @@ FROM shared-setup AS builder
 # Copy API source code
 COPY api .
 
+# Create symlink to shared prisma for API
+RUN ln -sf ../shared/prisma ./prisma
+
 # Set build environment
 ENV NODE_ENV=production
 
-# Verify Prisma setup before building
+# Verify Prisma setup and ensure client is accessible
 RUN echo "Verifying Prisma setup before build..." && \
     ls -la shared/ && \
     ls -la shared/node_modules/.prisma/ || echo "Shared Prisma client check" && \
+    echo "Copying Prisma client to API node_modules..." && \
+    mkdir -p node_modules/@prisma && \
+    cp -r shared/node_modules/@prisma/client node_modules/@prisma/ && \
+    ls -la node_modules/@prisma/ && \
     echo "Building NestJS application..." && \
     bun run build && \
     echo "Build completed successfully" && \
@@ -78,11 +85,15 @@ COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 # Copy shared Prisma configuration for runtime
 COPY --from=builder --chown=nestjs:nodejs /app/shared ./shared
 
+# Create prisma symlink for runtime
+RUN ln -sf ../shared/prisma ./prisma
+
 # Verify Prisma client is available at runtime
 RUN echo "Verifying runtime Prisma setup..." && \
     ls -la shared/ && \
     ls -la shared/node_modules/.prisma/ 2>/dev/null || \
     ls -la node_modules/.prisma/ 2>/dev/null || \
+    ls -la node_modules/@prisma/ 2>/dev/null || \
     echo "Prisma client runtime verification completed"
 
 USER nestjs
