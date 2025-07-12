@@ -1,21 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../shared/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// Initialize Prisma client for server-side usage
-let prisma: PrismaClient;
-
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  const globalWithPrisma = globalThis as typeof globalThis & {
-    prisma: PrismaClient;
-  };
-  if (!globalWithPrisma.prisma) {
-    globalWithPrisma.prisma = new PrismaClient();
-  }
-  prisma = globalWithPrisma.prisma;
-}
+// Use shared Prisma client
 
 export interface AuthUser {
   id: string;

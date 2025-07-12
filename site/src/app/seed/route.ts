@@ -1,11 +1,9 @@
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../lib/prisma';
 
 // Mark this route as dynamic to prevent static generation
 export const dynamic = 'force-dynamic';
-
-const prisma = new PrismaClient();
 
 async function seedRoles() {
   const adminRole = await prisma.role.create({
