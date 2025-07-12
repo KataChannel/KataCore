@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../../shared/node_modules/.prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -34,11 +34,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       for (const { tablename } of tablenames) {
         if (tablename !== '_prisma_migrations') {
           try {
-            // Use Prisma.sql for safe raw queries with dynamic table names
-            const { Prisma } = await import('@prisma/client');
-            await this.$executeRaw(
-              Prisma.sql`TRUNCATE TABLE ${Prisma.raw(`"public"."${tablename}"`)} CASCADE`
-            );
+            // Use $executeRawUnsafe for dynamic table names in tests
+            await this.$executeRawUnsafe(`TRUNCATE TABLE "public"."${tablename}" CASCADE;`);
           } catch (error) {
             console.log(`Could not truncate ${tablename}:`, error);
           }

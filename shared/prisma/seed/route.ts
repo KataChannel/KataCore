@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import postgres from 'postgres';
+// import postgres from 'postgres'; // Commented out as it's not available in the Docker environment
 import { PrismaClient } from '@prisma/client';
 
 // Mark this route as dynamic to prevent static generation
@@ -12,7 +12,7 @@ async function seedRoles() {
     data: {
       name: 'ADMIN',
       description: 'Quản trị viên hệ thống',
-      permissions: ['READ', 'WRITE', 'DELETE', 'MANAGE_USERS'],
+      permissions: JSON.stringify(['READ', 'WRITE', 'DELETE', 'MANAGE_USERS']),
     },
   });
 
@@ -20,7 +20,7 @@ async function seedRoles() {
     data: {
       name: 'MODERATOR',
       description: 'Điều hành viên',
-      permissions: ['READ', 'WRITE', 'MODERATE'],
+      permissions: JSON.stringify(['READ', 'WRITE', 'MODERATE']),
     },
   });
 
@@ -28,7 +28,7 @@ async function seedRoles() {
     data: {
       name: 'USER',
       description: 'Người dùng thông thường',
-      permissions: ['READ', 'WRITE'],
+      permissions: JSON.stringify(['READ', 'WRITE']),
     },
   });
 
@@ -36,7 +36,7 @@ async function seedRoles() {
     data: {
       name: 'GUEST',
       description: 'Khách',
-      permissions: ['READ'],
+      permissions: JSON.stringify(['READ']),
     },
   });
 
