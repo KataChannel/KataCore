@@ -60,6 +60,14 @@ export async function POST(request: NextRequest) {
       maxAge: 15 * 60, // 15 minutes (same as JWT expiry)
     });
 
+    // Also set accessToken cookie for compatibility
+    response.cookies.set('accessToken', result.tokens.accessToken, {
+      httpOnly: false, // Allow client-side access
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15 minutes (same as JWT expiry)
+    });
+
     return response;
   } catch (error: any) {
     return NextResponse.json(

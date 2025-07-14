@@ -1,7 +1,7 @@
 // System Initialization API - For first-time setup only
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { SYSTEM_ROLES, MODULES_PERMISSIONS } from '@/lib/auth/modules-permissions';
+import { SYSTEM_ROLES, ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permissions';
 import bcrypt from 'bcryptjs';
 
 // POST - Initialize system with Super Admin and default roles
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       data: result
     });
 
-  } catch (error) {
+  } catch (error:any) {
     console.error('System initialization error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to initialize system' },
@@ -166,17 +166,17 @@ async function createSystemRoles(tx: any) {
     { action: 'admin', resource: 'roles' },
     
     // All module permissions
-    ...Object.keys(MODULES_PERMISSIONS).flatMap(module => [
-      { action: 'create', resource: module },
-      { action: 'read', resource: module },
-      { action: 'update', resource: module },
-      { action: 'delete', resource: module },
-      { action: 'manage', resource: module },
-      { action: 'admin', resource: module },
-      { action: 'export', resource: module },
-      { action: 'import', resource: module },
-      { action: 'approve', resource: module },
-      { action: 'reject', resource: module }
+    ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+      { action: 'create', resource: permission.resource },
+      { action: 'read', resource: permission.resource },
+      { action: 'update', resource: permission.resource },
+      { action: 'delete', resource: permission.resource },
+      { action: 'manage', resource: permission.resource },
+      { action: 'admin', resource: permission.resource },
+      { action: 'export', resource: permission.resource },
+      { action: 'import', resource: permission.resource },
+      { action: 'approve', resource: permission.resource },
+      { action: 'reject', resource: permission.resource }
     ]),
     
     // Global permissions
@@ -217,12 +217,12 @@ async function createSystemRoles(tx: any) {
         { action: 'read', resource: 'users' },
         { action: 'update', resource: 'users' },
         { action: 'manage', resource: 'users' },
-        ...Object.keys(MODULES_PERMISSIONS).flatMap(module => [
-          { action: 'read', resource: module },
-          { action: 'create', resource: module },
-          { action: 'update', resource: module },
-          { action: 'delete', resource: module },
-          { action: 'manage', resource: module }
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+          { action: 'read', resource: permission.resource },
+          { action: 'create', resource: permission.resource },
+          { action: 'update', resource: permission.resource },
+          { action: 'delete', resource: permission.resource },
+          { action: 'manage', resource: permission.resource }
         ])
       ]),
       isSystemRole: true,
@@ -237,12 +237,12 @@ async function createSystemRoles(tx: any) {
         { action: 'read', resource: 'users' },
         { action: 'update', resource: 'users' },
         { action: 'manage', resource: 'users' },
-        ...Object.keys(MODULES_PERMISSIONS).flatMap(module => [
-          { action: 'read', resource: module },
-          { action: 'create', resource: module },
-          { action: 'update', resource: module },
-          { action: 'delete', resource: module },
-          { action: 'manage', resource: module }
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+          { action: 'read', resource: permission.resource },
+          { action: 'create', resource: permission.resource },
+          { action: 'update', resource: permission.resource },
+          { action: 'delete', resource: permission.resource },
+          { action: 'manage', resource: permission.resource }
         ])
       ]),
       isSystemRole: true,
@@ -257,11 +257,11 @@ async function createSystemRoles(tx: any) {
       description: 'Department Manager with supervisory permissions',
       permissions: JSON.stringify([
         { action: 'read', resource: 'users' },
-        ...Object.keys(MODULES_PERMISSIONS).flatMap(module => [
-          { action: 'read', resource: module },
-          { action: 'create', resource: module },
-          { action: 'update', resource: module },
-          { action: 'delete', resource: module }
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+          { action: 'read', resource: permission.resource },
+          { action: 'create', resource: permission.resource },
+          { action: 'update', resource: permission.resource },
+          { action: 'delete', resource: permission.resource }
         ])
       ]),
       isSystemRole: true,
@@ -273,11 +273,11 @@ async function createSystemRoles(tx: any) {
       description: 'Department Manager with supervisory permissions',
       permissions: JSON.stringify([
         { action: 'read', resource: 'users' },
-        ...Object.keys(MODULES_PERMISSIONS).flatMap(module => [
-          { action: 'read', resource: module },
-          { action: 'create', resource: module },
-          { action: 'update', resource: module },
-          { action: 'delete', resource: module }
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+          { action: 'read', resource: permission.resource },
+          { action: 'create', resource: permission.resource },
+          { action: 'update', resource: permission.resource },
+          { action: 'delete', resource: permission.resource }
         ])
       ]),
       isSystemRole: true,
@@ -291,10 +291,10 @@ async function createSystemRoles(tx: any) {
     update: {
       description: 'Standard Employee with basic access',
       permissions: JSON.stringify([
-        ...Object.keys(MODULES_PERMISSIONS).flatMap(module => [
-          { action: 'read', resource: module },
-          { action: 'create', resource: module },
-          { action: 'update', resource: module }
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+          { action: 'read', resource: permission.resource },
+          { action: 'create', resource: permission.resource },
+          { action: 'update', resource: permission.resource }
         ])
       ]),
       isSystemRole: true,
@@ -305,10 +305,10 @@ async function createSystemRoles(tx: any) {
       name: 'Employee',
       description: 'Standard Employee with basic access',
       permissions: JSON.stringify([
-        ...Object.keys(MODULES_PERMISSIONS).flatMap(module => [
-          { action: 'read', resource: module },
-          { action: 'create', resource: module },
-          { action: 'update', resource: module }
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+          { action: 'read', resource: permission.resource },
+          { action: 'create', resource: permission.resource },
+          { action: 'update', resource: permission.resource }
         ])
       ]),
       isSystemRole: true,
@@ -322,7 +322,7 @@ async function createSystemRoles(tx: any) {
     update: {
       description: 'Read-only access to system',
       permissions: JSON.stringify([
-        ...Object.keys(MODULES_PERMISSIONS).map(module => ({ action: 'read', resource: module }))
+        ...Object.values(ALL_MODULE_PERMISSIONS).map(permission => ({ action: 'read', resource: permission.resource }))
       ]),
       isSystemRole: true,
       level: 2
@@ -332,7 +332,7 @@ async function createSystemRoles(tx: any) {
       name: 'Viewer',
       description: 'Read-only access to system',
       permissions: JSON.stringify([
-        ...Object.keys(MODULES_PERMISSIONS).map(module => ({ action: 'read', resource: module }))
+        ...Object.values(ALL_MODULE_PERMISSIONS).map(permission => ({ action: 'read', resource: permission.resource }))
       ]),
       isSystemRole: true,
       level: 2

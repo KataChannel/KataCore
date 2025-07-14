@@ -58,6 +58,9 @@ const SuperAdminDashboard: React.FC = () => {
 
   useEffect(() => {
     checkInitialization();
+  }, []);
+
+  useEffect(() => {
     if (isInitialized) {
       loadSuperAdminData();
     }
@@ -72,7 +75,7 @@ const SuperAdminDashboard: React.FC = () => {
       if (!data.initialized) {
         setShowInitModal(true);
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error checking initialization:', error);
       setError('Failed to check system status');
     }
@@ -81,22 +84,63 @@ const SuperAdminDashboard: React.FC = () => {
   const loadSuperAdminData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
+      
+      console.log('Loading Super Admin data with token:', token ? 'Token exists' : 'No token');
+      
+      // If no token and system is initialized, redirect to login immediately
+      if (!token && isInitialized) {
+        console.log('No token found, redirecting to login...');
+        window.location.href = '/login';
+        return;
+      }
+      
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       
       const response = await fetch('/api/admin/super-admin', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to load Super Admin data');
+        // If unauthorized, redirect to login with a helpful message
+        if (response.status === 403 || response.status === 401) {
+          try {
+            const errorData = await response.json();
+            
+            // Check if it's a redirect request
+            if (errorData.redirectTo) {
+              window.location.href = errorData.redirectTo;
+              return;
+            }
+            
+            // Show a more user-friendly message
+            alert('Super Admin access required. Please login as a Super Administrator.\n\nDefault credentials:\nEmail: admin@taza.com\nPassword: TazaAdmin@2024!');
+            
+            // Redirect to login page
+            window.location.href = '/login';
+            return;
+          } catch (jsonError) {
+            // If response is not JSON, just redirect
+            window.location.href = '/login';
+            return;
+          }
+        }
+        
+        const errorText = await response.text();
+        console.log('Error response:', errorText);
+        throw new Error(`Failed to load Super Admin data: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Received data:', data);
       setSuperAdmins(data.data.superAdmins);
       setSystemStats(data.data.systemStats);
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error loading Super Admin data:', error);
       setError(error.message);
     } finally {
@@ -130,10 +174,13 @@ const SuperAdminDashboard: React.FC = () => {
       const result = await response.json();
       setIsInitialized(true);
       setShowInitModal(false);
-      await loadSuperAdminData();
       
-      alert(`System initialized successfully!\nEmail: ${result.data.credentials.email}\nPassword: ${result.data.credentials.password}\n\nPlease change the password after first login!`);
-    } catch (error) {
+      alert(`System initialized successfully!\nEmail: ${result.data.credentials.email}\nPassword: ${result.data.credentials.password}\n\nPlease login to continue.`);
+      
+      // Redirect to login page instead of loading data immediately
+      window.location.href = '/login';
+      
+    } catch (error:any) {
       console.error('Error initializing system:', error);
       alert(`Error: ${error.message}`);
     }
@@ -141,7 +188,7 @@ const SuperAdminDashboard: React.FC = () => {
 
   const handleCreateSuperAdmin = async (formData: any) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
       
       const response = await fetch('/api/admin/super-admin', {
         method: 'POST',
@@ -163,7 +210,7 @@ const SuperAdminDashboard: React.FC = () => {
       setShowCreateModal(false);
       await loadSuperAdminData();
       alert('Super Administrator created successfully!');
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error creating Super Admin:', error);
       alert(`Error: ${error.message}`);
     }
@@ -175,7 +222,7 @@ const SuperAdminDashboard: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
       
       const response = await fetch('/api/admin/super-admin', {
         method: 'POST',
@@ -196,7 +243,7 @@ const SuperAdminDashboard: React.FC = () => {
 
       await loadSuperAdminData();
       alert('Super Administrator role granted successfully!');
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error granting Super Admin role:', error);
       alert(`Error: ${error.message}`);
     }
@@ -208,7 +255,7 @@ const SuperAdminDashboard: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
       
       const response = await fetch('/api/admin/super-admin', {
         method: 'POST',
@@ -229,7 +276,7 @@ const SuperAdminDashboard: React.FC = () => {
 
       await loadSuperAdminData();
       alert('Super Administrator role revoked successfully!');
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error revoking Super Admin role:', error);
       alert(`Error: ${error.message}`);
     }
@@ -237,6 +284,35 @@ const SuperAdminDashboard: React.FC = () => {
 
   if (!isInitialized) {
     return <SystemInitializationModal onInitialize={handleInitializeSystem} />;
+  }
+
+  // Add authentication check
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
+  if (!token && isInitialized) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+          <div className="text-center">
+            <Shield className="h-16 w-16 text-red-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+            <p className="text-gray-600 mb-6">
+              You need to be logged in as a Super Administrator to access this dashboard.
+            </p>
+            <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+              <h3 className="font-semibold text-gray-900 mb-2">Default Login Credentials:</h3>
+              <p className="text-sm text-gray-700">Email: admin@taza.com</p>
+              <p className="text-sm text-gray-700">Password: TazaAdmin@2024!</p>
+            </div>
+            <button
+              onClick={() => window.location.href = '/login'}
+              className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 font-medium"
+            >
+              Go to Login Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

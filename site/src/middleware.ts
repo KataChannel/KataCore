@@ -205,6 +205,7 @@ export async function middleware(request: NextRequest) {
 
   // Get token from cookie or header
   const token = request.cookies.get('token')?.value || 
+                request.cookies.get('accessToken')?.value ||
                 request.headers.get('Authorization')?.replace('Bearer ', '');
   
   console.log('Token from cookie/header:', token ? '***' + token.slice(-10) : 'null');
