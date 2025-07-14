@@ -2,954 +2,340 @@
 
 <div align="center">
 
-![TazaCore Logo](https://via.placeholder.com/200x80/4A90E2/FFFFFF?text=TazaCore)
+![TazaCore Logo](https://img.shields.io/badge/TazaCore-Production%20Ready-blue?style=for-the-badge&logo=docker)
 
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/your-org/TazaCore)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://docker.com)
-[![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+**Enterprise-grade Full-Stack Platform with Smart Deployment**
 
-**Nền tảng phát triển full-stack hiện đại với Next.js, NestJS, và Docker**
+[![Next.js](https://img.shields.io/badge/Next.js-14+-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-10+-red?style=flat-square&logo=nestjs)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)](https://www.docker.com/)
+[![Bun](https://img.shields.io/badge/Bun-1.0+-orange?style=flat-square&logo=bun)](https://bun.sh/)
 
-[🚀 Quick Start](#quick-start) •
-[📖 Documentation](#documentation) •
-[🛠️ Development](#development) •
-[🚢 Deployment](#deployment) •
-[🤝 Contributing](#contributing)
+[🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [🎯 Demo](#-demo) • [💻 Development](#-development) • [🚢 Deployment](#-deployment)
 
 </div>
+
+---
 
 ## ✨ Tính năng nổi bật
 
-- 🎯 **Full-Stack TypeScript**: Next.js + NestJS + Prisma
-- 🐳 **Docker Ready**: Production-ready containerization
-- 🚀 **Auto Deployment**: Automated deployment scripts với SSL
-- 📱 **Responsive Design**: Mobile-first responsive UI
-- 🔐 **Authentication**: JWT-based auth với role management
-- 🗄️ **Database**: PostgreSQL với Prisma ORM
-- 📊 **Monitoring**: Built-in health checks và logging
-- 🔄 **CI/CD**: Automated Git workflow
-- 🌐 **Multi-Environment**: Dev, Staging, Production configs
+### 🏗️ **Architecture & Technology**
+- **Next.js 14+** - Modern React framework với App Router
+- **NestJS** - Scalable Node.js backend framework
+- **TypeScript** - Type-safe development
+- **PostgreSQL** - Robust relational database
+- **Redis** - High-performance caching
+- **MinIO** - S3-compatible object storage
+- **Docker** - Containerized deployment
 
-## 🏗️ Kiến trúc hệ thống
+### 🛠️ **Smart Deployment System**
+- **🧠 Intelligent Service Management** - Chỉ restart các service có vấn đề
+- **🔒 Project-Scoped Operations** - Cô lập hoàn toàn, không ảnh hưởng server khác
+- **⚡ Zero-Downtime Updates** - Healthy services tiếp tục chạy
+- **🔄 Git Integration** - Tự động commit và deploy
+- **📋 Health Monitoring** - Real-time service status checking
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend       │    │   Database      │
-│   (Next.js)     │◄──►│   (NestJS)      │◄──►│   (PostgreSQL)  │
-│   Port: 3000    │    │   Port: 3001    │    │   Port: 5432    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-         ┌─────────────────┐    ┌─────────────────┐
-         │   Redis Cache   │    │   MinIO S3      │
-         │   Port: 6379    │    │   Port: 9000    │
-         └─────────────────┘    └─────────────────┘
-```
-
-## 🚀 Quick Start Scripts
-
-TazaCore includes powerful automation scripts to streamline your development and deployment workflow.
-
-### 🔧 Main Deployment Script (`deploy-remote.sh`)
-
-Deploy your application to any server with a single command:
-
-```bash
-# Interactive deployment (recommended for beginners)
-chmod +x deploy-remote.sh
-./deploy-remote.sh --interactive
-
-# Quick full deployment with SSL
-./deploy-remote.sh 116.118.49.243 yourdomain.com
-
-# Simple deployment (no SSL, IP only)
-./deploy-remote.sh --simple 192.168.1.100
-
-# Production deployment with all services
-./deploy-production.sh 116.118.49.243 yourdomain.com
-```
-
-**Features:**
-- ✅ **One-click deployment** to any Linux server
-- ✅ **Automatic SSL** with Let's Encrypt certificates
-- ✅ **Dynamic service configuration** (API, Database, Redis, MinIO, etc.)
-- ✅ **Health checks** and monitoring
-- ✅ **Interactive mode** for beginners
-- ✅ **Cleanup and rollback** capabilities
-
-### 🔄 Git Automation Script (`autopush.sh`)
-
-Automate your Git workflow with smart commit messages and branch management:
-
-```bash
-# Auto-commit and push with smart messages
-chmod +x autopush.sh
-./autopush.sh
-
-# Merge current branch to main with auto-detection
-./autopush.sh --merge
-
-# Custom commit message
-./autopush.sh "feat: add user authentication system"
-
-# Merge to specific branch
-./autopush.sh --main-branch develop --merge "release: v2.1.0"
-```
-
-**Features:**
-- ✅ **Smart commit messages** based on file changes
-- ✅ **Dynamic main branch detection** (main/master/develop/dev)
-- ✅ **Automatic merging** with conflict handling
-- ✅ **Branch cleanup** after merge
-- ✅ **Change analysis** and file type detection
-
-### 📖 Complete Documentation
-
-| Document | Description |
-|----------|-------------|
-| **[🚀 Deployment Guide](DEPLOYMENT-README.md)** | Complete deployment instructions, configurations, and troubleshooting |
-| **[🔄 AutoPush Guide](AUTOPUSH-README.md)** | Git automation documentation with examples |
-| **[📚 Full Documentation](docs/)** | Comprehensive project documentation and API references |
-| **[🏗️ Architecture Guide](docs/guides/ARCHITECTURE.md)** | System architecture and design patterns |
-| **[⚙️ Development Guide](docs/guides/DEVELOPMENT.md)** | Local development setup and guidelines |
-
-## 🛠️ Prerequisites
-
-Before using the deployment scripts, ensure you have:
-
-- **Server Access**: SSH access to a Linux server (Ubuntu 20.04+ recommended)
-- **Domain Name**: For SSL deployment (optional for simple deployment)
-- **SSH Keys**: Properly configured SSH key authentication
-- **Git Repository**: Your code should be in a Git repository
-
-## 🌟 Key Features at a Glance
-
-| Feature | Description | Script |
-|---------|-------------|--------|
-| **One-Click Deploy** | Deploy entire stack to any server | `deploy-remote.sh` |
-| **Auto SSL** | Automatic Let's Encrypt certificates | `deploy-remote.sh --full` |
-| **Smart Commits** | AI-powered commit message generation | `autopush.sh` |
-| **Branch Management** | Automatic merge and cleanup | `autopush.sh --merge` |
-| **Health Monitoring** | Built-in service health checks | All deployment scripts |
-| **Multi-Environment** | Support for dev/staging/production | `deploy-production.sh` |
-| **Interactive Mode** | Guided setup for beginners | `--interactive` flag |
-| **Cleanup Tools** | Safe removal and rollback | `--cleanup` flag |
-
-## 📋 Overview
-
-**TazaCore** là nền tảng phát triển full-stack hiện đại được thiết kế để đơn giản hóa quy trình phát triển và triển khai ứng dụng web. Với hai script tự động hóa chính `deploy-remote.sh` và `autopush.sh`, TazaCore giúp developers tập trung vào việc phát triển tính năng thay vì lo lắng về infrastructure.
-
-### 🎯 What Makes TazaCore Special
-
-- **🏢 Complete HRM System** - Full-featured Human Resource Management with employee lifecycle, departments, and role-based access
-- **🚀 One-Command Deployment** - Deploy to any server with automated SSL, Docker orchestration, and environment setup  
-- **⚡ Ultra-Fast Development** - Bun.js runtime with Turbopack for lightning-fast builds and hot reloading
-- **🔒 Enterprise Security** - JWT authentication, role-based permissions, and automated security configurations
-- **🐳 Cloud-Ready Architecture** - Containerized services with PostgreSQL, Redis, MinIO, and monitoring
-
-### ⚡ Quick Deploy Example
-
-Deploy your full-stack application in under 5 minutes:
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/TazaChannel/TazaCore.git
-cd TazaCore
-
-# 2. Deploy to your server (replace with your details)
-chmod +x deploy-remote.sh
-./deploy-remote.sh 116.118.49.243 myapp.com
-
-# 3. Your application is now live! 🎉
-```
-
-**What you get instantly:**
-- 🌐 **Frontend**: `https://myapp.com` - Next.js application
-- 🚀 **API**: `https://api.myapp.com` - NestJS backend  
-- 📊 **Database Admin**: `https://pgadmin.myapp.com` - pgAdmin interface
-- 📦 **Storage**: `https://minio.myapp.com` - Object storage
-- 🔒 **SSL Certificates** - Automatic Let's Encrypt setup
-- 🛡️ **Security** - Firewall, authentication, and secure configurations
-
-All services are automatically configured, secured, and monitored!
+### 🎯 **Business Features**
+- **👥 HRM System** - Comprehensive human resource management
+- **🔐 Authentication & Authorization** - JWT-based security
+- **📊 Analytics Dashboard** - Real-time business insights
+- **📱 Responsive Design** - Mobile-first approach
+- **🌐 Multi-language Support** - i18n ready
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Clone & Setup
-
-```bash
-# Clone repository
-git clone https://github.com/your-org/TazaCore.git
-cd TazaCore
-
-# Cấp quyền thực thi cho scripts
-chmod +x deploy-remote.sh autopush.sh
-
-# Copy environment file
-cp .env.example .env
-```
-
-### 2. Local Development
-
-```bash
-# Start với Docker Compose
-docker compose up -d
-
-# Hoặc development mode
-cd site && npm run dev    # Frontend: http://localhost:3000
-cd api && npm run dev     # Backend: http://localhost:3001
-```
-
-### 3. Production Deployment
-
-```bash
-# Interactive deployment (khuyến nghị cho lần đầu)
-./deploy-remote.sh --interactive
-
-# Quick deployment
-./deploy-remote.sh YOUR_SERVER_IP YOUR_DOMAIN.COM
-
-# Simple deployment (no SSL)
-./deploy-remote.sh --simple YOUR_SERVER_IP
-```
-
-## 🛠️ Development
-
-### Tech Stack
-
-#### Frontend (site/)
-- **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Custom component library
-- **State Management**: React Context + Hooks
-- **Auth**: NextAuth.js
-
-#### Backend (api/)
-- **Framework**: NestJS
-- **Language**: TypeScript  
-- **ORM**: Prisma
-- **Database**: PostgreSQL
-- **Cache**: Redis
-- **Auth**: JWT + Passport
-- **Validation**: Class Validator
-
-#### Infrastructure
-- **Containerization**: Docker + Docker Compose
-- **Web Server**: Nginx (production)
-- **SSL**: Let's Encrypt (automatic)
-- **Storage**: MinIO (S3-compatible)
-- **Monitoring**: Built-in health checks
-
----
-
-## 🏗️ Technology Stack
-
-<table>
-<tr>
-<td><strong>Frontend</strong></td>
-<td>Next.js 15, React 19, TypeScript, Tailwind CSS 4, Material-UI</td>
-</tr>
----
-
-## 🚀 Quick Start
-
 ### Prerequisites
-- **Bun.js** >= 1.0.0 ([Install Bun](https://bun.sh/docs/installation))
-- **Docker** & **Docker Compose** ([Install Docker](https://docs.docker.com/get-docker/))
-- **Node.js** >= 18.0.0 (for compatibility)
-
-### Project Structure
-
-```
-TazaCore/
-├── 📁 api/                 # NestJS backend
-│   ├── src/
-│   ├── prisma/
-│   ├── Dockerfile
-│   └── package.json
-├── 📁 site/                # Next.js frontend  
-│   ├── src/
-│   ├── public/
-│   ├── Dockerfile
-│   └── package.json
-├── 📁 configs/             # Configuration files
-├── 📁 docs/                # Documentation
-├── 📁 scripts/             # Utility scripts
-├── 🚀 deploy-remote.sh     # Production deployment
-├── 📝 autopush.sh          # Git automation
-└── 🐳 docker-compose.yml   # Docker orchestration
-```
-
-### Development Workflow
-
-#### 1. Feature Development
-```bash
-# Tạo feature branch
-git checkout -b feature/new-feature
-
-# Development...
-# Code, test, commit
-
-# Auto push với autopush.sh
-./autopush.sh "feat: implement new feature"
-```
-
-#### 2. Merge to Main
-```bash
-# Auto merge với dynamic main branch detection
-./autopush.sh --merge "feat: add new feature"
-
-# Hoặc merge vào branch cụ thể
-./autopush.sh --main-branch develop --merge
-```
-
-#### 3. Deployment
-```bash
-# Deploy to staging
-./deploy-remote.sh STAGING_IP staging.domain.com
-
-# Deploy to production  
-./deploy-remote.sh PROD_IP domain.com
-```
-
-## 🚢 Deployment
-
-### Deployment Options
-
-#### 1. Interactive Mode (Khuyến nghị)
-```bash
-./deploy-remote.sh --interactive
-```
-Hướng dẫn từng bước qua CLI wizard.
-
-#### 2. Simple Deployment (IP only)
-```bash
-./deploy-remote.sh --simple 116.118.49.243
-```
-- Không cần domain
-- Truy cập qua IP:PORT
-- HTTP only (no SSL)
-
-#### 3. Full Deployment (Domain + SSL)
-```bash
-./deploy-remote.sh 116.118.49.243 tazaoffical.online
-```
-- Auto SSL với Let's Encrypt
-- Nginx reverse proxy
-- Subdomains support
-
-#### 4. Custom Services
-```bash
-./deploy-remote.sh \
-  --install-api \
-  --install-postgres \
-  --install-redis \
-  --install-minio \
-  --nginxapi \
-  116.118.49.243 domain.com
-```
-
-### Scripts & Automation
-
-#### autopush.sh - Git Automation
-Automated Git workflow với smart features:
-
-```bash
-# Basic usage
-./autopush.sh                           # Auto commit + push
-./autopush.sh "feat: new feature"       # Custom message
-
-# Merge workflow  
-./autopush.sh --merge                   # Merge to main
-./autopush.sh --merge "release v2.0"    # Custom merge message
-./autopush.sh --main-branch dev --merge # Target specific branch
-```
-
-**Features:**
-- ✅ Dynamic main branch detection (main/master/develop/dev)
-- ✅ Smart commit message generation
-- ✅ Safe merge with conflict detection
-- ✅ Branch cleanup options
-- ✅ Git repository validation
-
-#### deploy-remote.sh - Production Deployment
-One-command production deployment:
-
-```bash
-# Interactive mode
-./deploy-remote.sh -i
-
-# Quick modes
-./deploy-remote.sh --simple IP           # HTTP only
-./deploy-remote.sh IP DOMAIN             # HTTPS + SSL
-
-# Advanced options
-./deploy-remote.sh \
-  --user ubuntu \
-  --key ~/.ssh/custom.pem \
-  --install-api \
-  --install-postgres \
-  --nginxapi \
-  IP DOMAIN
-```
-
-**Features:**
-- ✅ Automated server preparation
-- ✅ Docker & Docker Compose installation
-- ✅ SSL certificates với Let's Encrypt
-- ✅ Nginx reverse proxy setup
-- ✅ Firewall configuration
-- ✅ Health checks
-- ✅ Service monitoring
-
-## 📖 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [🚀 DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Hướng dẫn deploy chi tiết |
-| [⚡ QUICK-START.md](QUICK-START.md) | Hướng dẫn bắt đầu nhanh |
-| [🏗️ DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) | Hướng dẫn development |
-| [🔧 API Documentation](docs/api/) | API reference và examples |
-| [🐛 TROUBLESHOOTING.md](docs/troubleshooting/TROUBLESHOOTING.md) | Xử lý sự cố |
-
----
-
-## 📖 Documentation
-
-### 📚 Core Guides
-- [**🚀 Quick Start Guide**](docs/guides/QUICK-START.md) - Get up and running in 5 minutes
-- [**🏗️ Architecture Overview**](docs/guides/ARCHITECTURE.md) - System design and components
-- [**🔧 Development Guide**](docs/guides/DEVELOPMENT.md) - Development workflow and best practices
-- [**📦 Deployment Guide**](docs/guides/DEPLOYMENT-GUIDE.md) - Complete deployment instructions
-
-### 📋 API References
-- [**🏢 HRM API**](docs/api/HRM-API.md) - Employee and department management endpoints
-- [**🔐 Authentication API**](docs/api/AUTH-API.md) - JWT authentication and authorization
-- [**🔧 System API**](docs/api/SYSTEM-API.md) - Health checks and system information
-
-### 🛠️ Advanced Topics
-- [**🔒 Security Configuration**](docs/security/SECURITY.md) - Security best practices and hardening
-- [**📊 Monitoring Setup**](docs/monitoring/MONITORING.md) - Grafana, Prometheus, and logging
-- [**🐳 Docker Configuration**](docs/docker/DOCKER.md) - Container orchestration and customization
-- [**🚀 CI/CD Pipeline**](docs/cicd/PIPELINE.md) - Automated testing and deployment
-
----
-
-## 🎯 Live Demo
-
-### 🌐 Production Instance
-- **Main App**: [http://116.118.49.243:3000](http://116.118.49.243:3000)
-- **API Endpoint**: [http://116.118.49.243:3001](http://116.118.49.243:3001)
-- **Database Admin**: [http://116.118.49.243:5050](http://116.118.49.243:5050)
-- **File Storage**: [http://116.118.49.243:9000](http://116.118.49.243:9000)
-
-### 🔑 Demo Credentials
-```
-Admin User:
-- Email: admin@tazacore.com
-- Password: Admin123!
-
-Manager User:
-- Email: manager@tazacore.com
-- Password: Manager123!
-
-Employee User:
-- Email: employee@tazacore.com
-- Password: Employee123!
-```
-
-## 🔧 Management Commands
-
-### Kiểm tra trạng thái deployment
-
-```bash
-# Kiểm tra containers đang chạy
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose ps'
-
-# Xem logs
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose logs'
-
-# Kiểm tra resource usage
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'docker stats --no-stream'
-```
-
-### Restart services
-
-```bash
-# Restart tất cả services
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose restart'
-
-# Restart service cụ thể
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose restart api'
-```
-
-### Update deployment
-
-```bash
-# Re-deploy với code mới
-./deploy-remote.sh --force-regen SERVER_IP DOMAIN
-
-# Update chỉ API
-ssh -i ~/.ssh/id_rsa root@SERVER_IP 'cd /opt/tazacore && docker compose build api && docker compose up -d api'
-```
-
-## 🔐 Security
-
-### Security Features
-- 🔒 JWT authentication
-- 🛡️ Rate limiting
-- 🔐 Input validation
-- 🌐 CORS protection
-- 🔑 Environment variable encryption
-- 🚫 SQL injection prevention
-
-### Production Security
-- ✅ SSL/TLS encryption
-- ✅ Firewall configuration
-- ✅ Secure password generation
-- ✅ Container isolation
-- ✅ Regular security updates
-
-## 🤝 Contributing
-
-### Development Setup
-1. Fork repository
-2. Create feature branch
-3. Implement changes
-4. Write tests
-5. Submit pull request
-
-### Commit Convention
-```bash
-feat: add new feature
-fix: resolve bug
-docs: update documentation  
-style: formatting changes
-refactor: code restructuring
-test: add tests
-chore: maintenance tasks
-```
-
-## 📞 Support & Community
-
-### Getting Help
-- 📖 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/your-org/TazaCore/issues)
-- 💬 [Discussions](https://github.com/your-org/TazaCore/discussions)
-- 📧 Email: support@tazacore.com
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Next.js team for the amazing framework
-- NestJS team for the powerful backend framework  
-- Docker team for containerization technology
-- Open source community
-
----
-
-<div align="center">
-
-**Made with ❤️ by the TazaCore Team**
-
-[⬆ Back to top](#-tazacore---advanced-full-stack-development-platform)
-
-</div>
-│   ├── scripts/              # Automation scripts
-│   ├── configs/              # Server configurations
-│   └── templates/            # Config templates
-├── 📁 docs/                  # Documentation
-│   ├── guides/               # User guides
-│   ├── api/                  # API documentation
-│   └── examples/             # Code examples
-└── 📁 scripts/               # Development scripts
-    ├── setup/                # Initial setup
-    ├── deployment/           # Deployment helpers
-    └── maintenance/          # Maintenance tasks
-```
-
-### Prerequisites
-- **Bun.js** v1.0+ ([Install Bun](https://bun.sh))
-- **Docker** & **Docker Compose** (for deployment)
+- **Bun.js** v1.0+ ([Install Guide](https://bun.sh/docs/installation))
+- **Docker** & **Docker Compose** 
 - **Git** for version control
 - **Linux/macOS** (Windows with WSL2)
 
 ### 1. 📥 Clone & Setup
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/chikiet/TazaCore.git
 cd TazaCore
 
-# Install all dependencies (frontend + backend)
+# Install dependencies
 bun run install:all
 
-# Generate environment files
-cp .env.example .env
+# Setup environment
+cp .env.example .env.prod
+# Edit .env.prod with your configuration
 ```
 
 ### 2. 🏃 Local Development
 ```bash
-# Start both frontend and backend
+# Start development mode
 bun run dev
 
-# Or start individually
-bun run dev:site    # Frontend: http://localhost:3000
-bun run dev:api     # Backend: http://localhost:3001
+# Or start specific services
+bun run dev:api    # Backend only
+bun run dev:site   # Frontend only
 ```
 
-**Development URLs:**
-- 🌐 **Frontend**: http://localhost:3000
-- 🔌 **API**: http://localhost:3001
-- ❤️ **Health Check**: http://localhost:3001/health
-- 🏢 **HRM System**: http://localhost:3000/hr
-
-### 3. 🎯 HRM System Setup
+### 3. 🚀 Production Deployment
 ```bash
-# Seed database with test data
-curl -X POST http://localhost:3001/api/seed/hrm
+# Make deployment script executable
+chmod +x sh/3pushauto.sh
 
-# Login with test credentials
-# HR Manager: hr.manager@company.com / hr123456
-# IT Manager: it.manager@company.com / it123456
-# Sales Manager: sales.manager@company.com / sales123456
+# Run smart deployment
+./sh/3pushauto.sh
 ```
 
-### 4. 🚀 Production Deployment
+---
 
-#### Option 1: Quick Deploy (Recommended)
+## 🧠 Smart Deployment Features
+
+### 🎯 **Deployment Options**
+
+| Option | Description | Use Case |
+|--------|-------------|----------|
+| **Smart Deploy (Site & API)** | Updates frontend & backend only | Code updates, bug fixes |
+| **Smart Deploy ALL** | Updates all services intelligently | Major updates, new features |
+| **Deploy Only** | Skips git operations | Testing existing code |
+| **Fresh Deploy** | Clean deployment with new env | Environment changes |
+| **Selective Deploy** | Choose specific services | Targeted updates |
+
+### 🔧 **Smart Features**
 ```bash
-# Deploy to any server with one command
-./quick-deploy-enhanced.sh
+# Health Check System
+✅ PostgreSQL: pg_isready validation
+✅ Redis: PING response check  
+✅ API/Site: Error log analysis
+✅ MinIO: Health endpoint verification
 
-# Follow interactive prompts for:
-# - Server IP configuration
-# - Domain and SSL setup
-# - Service selection
-# - Environment configuration
+# Intelligent Restart Logic
+🧠 Only restart failed/unhealthy services
+🟢 Keep healthy services running
+⚡ Zero-downtime for stable services
 ```
+
+---
+
+## 💻 Development
+
+### 📁 **Project Structure**
+```
+TazaCore/
+├── 📂 api/                    # NestJS Backend
+│   ├── src/
+│   │   ├── auth/             # Authentication module
+│   │   ├── hrm/              # HR Management module
+│   │   ├── common/           # Shared utilities
+│   │   └── main.ts           # Application entry
+│   ├── Dockerfile
+│   └── package.json
+├── 📂 site/                   # Next.js Frontend
+│   ├── src/
+│   │   ├── app/              # App Router pages
+│   │   ├── components/       # Reusable components
+│   │   ├── lib/              # Utilities & configs
+│   │   └── styles/           # Global styles
+│   ├── Dockerfile
+│   └── package.json
+├── 📂 sh/                     # Deployment Scripts
+│   ├── 3pushauto.sh          # Smart deployment tool
+│   └── 2envauto.sh           # Environment setup
+├── 📂 docs/                   # Documentation
+└── docker-compose.yml        # Service orchestration
+```
+
+### 🛠️ **Available Scripts**
+```bash
+# Development
+bun run dev              # Start all services
+bun run dev:api          # Backend only
+bun run dev:site         # Frontend only
+
+# Building
+bun run build            # Build all
+bun run build:api        # Build backend
+bun run build:site       # Build frontend
+
+# Testing
+bun run test             # Run all tests
+bun run test:api         # Backend tests
+bun run test:site        # Frontend tests
+
+# Deployment
+./sh/3pushauto.sh        # Smart deployment
+./sh/2envauto.sh         # Environment setup
+```
+
+---
+
+## 🚢 Deployment Guide
+
+### 🌐 **Server Requirements**
+- **OS**: Ubuntu 20.04+ / CentOS 8+
+- **RAM**: 4GB minimum, 8GB recommended
+- **Storage**: 50GB+ SSD
+- **Docker**: 24.0+
+- **Docker Compose**: 2.0+
+
+### 🔧 **Smart Deployment Workflow**
+
+#### Step 1: Initial Setup
+```bash
+# Clone project on server
+git clone https://github.com/chikiet/TazaCore.git
+cd TazaCore
+
+# Run environment setup
+./sh/2envauto.sh
+```
+
+#### Step 2: Smart Deployment
+```bash
+# Run smart deployment tool
+./sh/3pushauto.sh
+
+# Choose deployment option:
+# 1. Smart Deploy (Site & API) - Most common
+# 2. Smart Deploy ALL - Full update
+# 3. Deploy only - Skip git operations
+# 4. Project cleanup - Fix issues
+# 5. Check status - Monitor health
+# 6. Fresh deploy - Clean environment
+# 7. Selective deploy - Custom services
+```
+
+#### Step 3: Verification
+```bash
+# Check service health
+docker ps --filter name="tazacore-"
+
+# View logs
+docker logs tazacore-api
+docker logs tazacore-site
+
+# Monitor resources
+docker stats --filter name="tazacore-"
+```
+
+### 🔒 **Security Features**
+- **Project-Scoped Operations** - Zero impact on other server services
+- **Environment Isolation** - Separated configurations
+- **Health Monitoring** - Continuous service validation
+- **Rollback Support** - Environment backup & restore
+
+---
 
 ## 📖 Documentation
 
-### 🏢 HRM System Features
+### 📚 **Core Guides**
+| Document | Description |
+|----------|-------------|
+| [🚀 Getting Started](docs/GETTING-STARTED.md) | Complete setup guide |
+| [🏗️ Architecture](docs/guides/ARCHITECTURE.md) | System design & patterns |
+| [💻 Development](docs/guides/DEVELOPMENT.md) | Local development setup |
+| [🚢 Deployment](DEPLOYMENT-README.md) | Production deployment |
 
-#### 👥 Employee Management
-- **Complete CRUD Operations** - Create, read, update, and delete employee records
-- **Status Tracking** - Active, Inactive, Terminated, On Leave, Probation
-- **Contract Types** - Full-time, Part-time, Contract, Internship, Freelance
-- **Personal & Professional Info** - Contact details, emergency contacts, job history
-- **Salary & Compensation** - Salary tracking with history and adjustments
+### 📋 **API References**
+| API | Description |
+|-----|-------------|
+| [🔐 Auth API](docs/api/AUTH-API.md) | Authentication endpoints |
+| [👥 HRM API](docs/api/HRM-API.md) | HR management endpoints |
+| [⚙️ System API](docs/api/SYSTEM-API.md) | System operations |
 
-#### 🏛️ Organizational Structure
-- **Department Hierarchies** - Multi-level departments with parent-child relationships
-- **Position Management** - Job roles with levels, responsibilities, and requirements
-- **Manager Assignments** - Clear reporting structure and team management
-- **Budget Tracking** - Department budgets and resource allocation
-
-#### 🔑 Security & Permissions
-- **Role-Based Access Control** - Granular permissions for different user types
-- **JWT Authentication** - Secure token-based authentication with refresh tokens
-- **Password Security** - bcrypt hashing with configurable salt rounds
-- **Session Management** - Automatic token expiration and renewal
-
-### 🚀 Deployment Options
-
-#### 🎯 Development Mode
-- **Local Environment** - SQLite database with hot reloading
-- **Test Data** - Automated seeding with realistic employee data
-- **Development Tools** - Prisma Studio, API testing, and debugging
-
-#### 🌐 Production Deployment
-- **Automated Setup** - One-command deployment with environment generation
-- **SSL Certificates** - Automatic Let's Encrypt certificates with renewal
-- **Docker Orchestration** - Multi-container setup with health monitoring
-- **Security Hardening** - Production-ready configurations and secrets
-
-#### 🔧 Infrastructure Services
-- **PostgreSQL** - Primary database with backup and replication
-- **Redis** - Caching and session storage
-- **MinIO** - S3-compatible object storage for file uploads
-- **pgAdmin** - Web-based database administration
-- **Nginx** - Reverse proxy with SSL termination
+### 🛠️ **Advanced Topics**
+| Topic | Description |
+|-------|-------------|
+| [🧹 Troubleshooting](docs/troubleshooting/TROUBLESHOOTING.md) | Common issues & solutions |
+| [🔧 Configuration](docs/guides/CONFIGURATION.md) | Advanced configurations |
+| [📊 Monitoring](docs/guides/MONITORING.md) | Performance monitoring |
 
 ---
 
-## 📋 Available Scripts
+## 🎯 Live Demo
 
-### 🛠️ Development
-```bash
-bun run dev          # Start both frontend and backend
-bun run dev:site     # Frontend only (Next.js)
-bun run dev:api      # Backend only (NestJS)
-bun run build        # Build for production
-bun run test         # Run test suite
-bun run lint         # Code quality checks
+### 🌐 **Demo Environments**
+- **Production**: `https://tazacore.example.com`
+- **Staging**: `https://staging.tazacore.example.com`
+- **API Docs**: `https://api.tazacore.example.com/docs`
+
+### 📋 **Test Credentials**
 ```
+Admin User:
+Email: admin@tazacore.com
+Password: admin123
 
-### 🚀 Deployment
-```bash
-# Interactive deployment
-./quick-deploy-enhanced.sh          # Enhanced quick deploy
-./deploy-wizard.sh                  # Step-by-step wizard
-./deploy-production.sh              # Enterprise deployment
-
-# Direct deployment
-./deploy-remote-fixed.sh --simple SERVER_IP          # Simple mode
-./deploy-remote-fixed.sh SERVER_IP DOMAIN            # Full mode with SSL
-```
-
-### 🗄️ Database Management
-```bash
-cd api && bun run prisma:generate   # Generate Prisma client
-cd api && bun run prisma:migrate    # Run migrations
-cd api && bun run prisma:studio     # Open database admin
-cd api && bun run prisma:seed       # Seed with test data
-```
-
-### 🐳 Docker Operations
-```bash
-bun run docker:up      # Start local Docker stack
-bun run docker:down    # Stop Docker services
-bun run docker:logs    # View service logs
+Demo User:
+Email: demo@tazacore.com  
+Password: demo123
 ```
 
 ---
 
-## 🎯 API Reference
+## 🔧 Management Commands
 
-### 🔐 Authentication
+### 📊 **Monitoring Commands**
 ```bash
-POST /api/auth/login     # User login with JWT tokens
-POST /api/auth/logout    # Logout and token invalidation
-POST /api/auth/refresh   # Token refresh for extended sessions
+# Service status
+docker ps --filter name="tazacore-"
+
+# Service logs
+docker logs tazacore-api --tail 100
+docker logs tazacore-site --tail 100
+
+# Resource usage
+docker stats --filter name="tazacore-"
+
+# Health checks
+curl -f http://localhost:3000/health
+curl -f http://localhost:8080/api/health
 ```
 
-### 👥 Employee Management
+### 🛠️ **Maintenance Commands**
 ```bash
-GET    /api/hrm/employees        # List employees (paginated)
-POST   /api/hrm/employees        # Create new employee
-GET    /api/hrm/employees/:id    # Get employee details
-PUT    /api/hrm/employees/:id    # Update employee
-DELETE /api/hrm/employees/:id    # Delete employee
-```
+# Backup database
+docker exec tazacore-postgres pg_dump -U postgres tazacore > backup.sql
 
-### 🏛️ Department Management
-```bash
-GET    /api/hrm/departments      # List all departments
-POST   /api/hrm/departments      # Create department
-PUT    /api/hrm/departments/:id  # Update department
-DELETE /api/hrm/departments/:id  # Delete department
-```
+# Restore database  
+cat backup.sql | docker exec -i tazacore-postgres psql -U postgres tazacore
 
-### 🔑 Role & Permissions
-```bash
-GET    /api/hrm/roles           # List roles with permissions
-POST   /api/hrm/roles           # Create new role
-PUT    /api/hrm/roles/:id       # Update role permissions
-DELETE /api/hrm/roles/:id       # Delete role
-```
+# Update SSL certificates
+./sh/update-ssl.sh
 
-### 📊 Data Seeding
-```bash
-POST /api/seed/hrm              # Seed database with test data
+# System cleanup
+./sh/3pushauto.sh # Choose option 4 (Project cleanup)
 ```
 
 ---
 
-## 🔧 Configuration
+## 🔐 Security
 
-### 🌍 Environment Variables
-TazaCore automatically generates secure environment variables during deployment:
+### 🛡️ **Security Features**
+- **JWT Authentication** with refresh tokens
+- **Role-based Access Control** (RBAC)
+- **SQL Injection Protection** via TypeORM
+- **XSS Protection** with CSP headers
+- **Rate Limiting** on API endpoints
+- **Environment Isolation** in deployment
 
-```bash
-# Application Configuration
-NODE_ENV=production
-API_VERSION=latest
-SITE_VERSION=latest
-
-# Database Configuration  
-DATABASE_URL=postgresql://user:pass@postgres:5432/tazacore
-POSTGRES_DB=tazacore
-POSTGRES_USER=tazacore
-POSTGRES_PASSWORD=<auto-generated>
-
-# Authentication & Security
-JWT_SECRET=<auto-generated-64-char>
-ENCRYPTION_KEY=<auto-generated-32-char>
-
-# Redis Cache
-REDIS_URL=redis://:password@redis:6379
-REDIS_PASSWORD=<auto-generated>
-
-# MinIO Object Storage
-MINIO_ROOT_USER=admin
-MINIO_ROOT_PASSWORD=<auto-generated>
-MINIO_ENDPOINT=minio
-MINIO_PORT=9000
-
-# Application URLs
-NEXT_PUBLIC_API_URL=https://yourdomain.com/api
-NEXT_PUBLIC_APP_URL=https://yourdomain.com
-CORS_ORIGIN=https://yourdomain.com
-```
-
-### 🔐 Security Configuration
-- **Automated Password Generation** - Cryptographically secure random passwords
-- **SSL Certificate Management** - Automatic Let's Encrypt integration
-- **CORS Configuration** - Proper cross-origin resource sharing setup
-- **Security Headers** - Production-ready security headers and configurations
-
----
-
-## 📊 Monitoring & Maintenance
-
-### 🔍 Health Monitoring
-```bash
-# Check service status
-docker compose ps
-
-# View real-time logs
-docker compose logs -f
-
-# Monitor resource usage
-docker stats
-
-# Check API health
-curl https://yourdomain.com/api/health
-```
-
-### 🔄 Updates & Maintenance
-```bash
-# Update application
-git pull
-./deploy-remote-fixed.sh SERVER_IP DOMAIN
-
-# Force environment regeneration
-./deploy-remote-fixed.sh --force-regen SERVER_IP DOMAIN
-
-# Clean deployment (removes old data)
-./deploy-remote-fixed.sh --cleanup SERVER_IP
-```
-
-### 💾 Backup & Recovery
-```bash
-# Database backup
-docker compose exec postgres pg_dump -U tazacore tazacore > backup.sql
-
-# Restore from backup
-docker compose exec -T postgres psql -U tazacore -d tazacore < backup.sql
-
-# Full system backup
-tar -czf tazacore-backup-$(date +%Y%m%d).tar.gz /opt/tazacore/
-```
-
----
-
-## 🚨 Troubleshooting
-
-### 🔧 Common Development Issues
-
-#### Dependencies Installation
-```bash
-# Clear and reinstall dependencies
-bun run clean
-bun run install:all
-```
-
-#### Port Conflicts
-```bash
-# Check port usage
-lsof -i :3000  # Frontend
-lsof -i :3001  # Backend
-
-# Kill processes if needed
-sudo kill -9 <PID>
-```
-
-#### Database Issues
-```bash
-# Reset Prisma client
-cd api && bun run prisma:generate
-
-# Reset database (development only)
-cd api && bun run prisma:reset
-```
-
-### 🚀 Common Deployment Issues
-
-#### SSH Connection Problems
-```bash
-# Test SSH connection
-ssh -i ~/.ssh/default root@SERVER_IP
-
-# Fix SSH permissions
-chmod 600 ~/.ssh/default
-chmod 644 ~/.ssh/default.pub
-```
-
-#### Service Startup Issues
-```bash
-# Check container logs
-docker compose logs service_name
-
-# Restart specific service
-docker compose restart service_name
-
-# Full restart
-docker compose down && docker compose up -d
-```
-
-#### SSL Certificate Issues
-```bash
-# Check certificate status
-openssl s_client -connect yourdomain.com:443
-
-# Force certificate renewal
-certbot renew --force-renewal
-```
-
----
-
-## 🌍 Cloud Provider Support
-
-TazaCore is tested and supported on:
-
-- **✅ DigitalOcean** - Droplets and Kubernetes
-- **✅ AWS** - EC2, ECS, and Lambda
-- **✅ Google Cloud** - Compute Engine and Cloud Run
-- **✅ Azure** - Virtual Machines and Container Instances
-- **✅ Linode** - Compute Instances
-- **✅ Vultr** - Cloud Compute
-- **✅ Hetzner** - Cloud Servers
-
-### 📋 Minimum Requirements
-- **CPU**: 2 cores
-- **RAM**: 4GB
-- **Storage**: 20GB SSD
-- **Network**: 1Gbps
-- **OS**: Ubuntu 20.04+ / CentOS 8+ / Debian 11+
+### 🔒 **Best Practices**
+- Regular security updates via smart deployment
+- Encrypted data transmission (HTTPS/TLS)
+- Secure session management
+- Input validation & sanitization
+- Audit logging for compliance
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
-
-### 🔧 Development Setup
+### 🔧 **Development Setup**
 ```bash
 # Fork and clone
 git clone https://github.com/yourusername/TazaCore.git
 cd TazaCore
 
 # Install dependencies
-bun run install:all
+bun install
 
 # Create feature branch
 git checkout -b feature/amazing-feature
@@ -958,27 +344,43 @@ git checkout -b feature/amazing-feature
 bun run dev
 ```
 
-### 📝 Contribution Guidelines
-- **Code Style**: Follow TypeScript best practices and ESLint rules
-- **Testing**: Add tests for new features and API endpoints
-- **Documentation**: Update documentation for new features
+### 📝 **Contribution Guidelines**
+- **Code Style**: Follow TypeScript best practices
+- **Testing**: Add tests for new features
+- **Documentation**: Update docs for new features  
 - **Commits**: Use conventional commit messages
-- **Reviews**: All PRs require review and passing tests
+- **Reviews**: All PRs require review
 
-### 🧪 Testing
+### 🧪 **Testing**
 ```bash
 # Run all tests
 bun run test
 
 # Run with coverage
-cd api && bun run test:cov
+bun run test:cov
 
-# Test deployment
-./test-deployment.sh
+# E2E testing
+bun run test:e2e
 
 # Lint code
 bun run lint
 ```
+
+---
+
+## 📞 Support & Community
+
+### 💬 **Get Help**
+- **Issues**: [GitHub Issues](https://github.com/chikiet/TazaCore/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/chikiet/TazaCore/discussions)
+- **Email**: support@tazacore.com
+- **Discord**: [TazaCore Community](https://discord.gg/tazacore)
+
+### 📚 **Resources**
+- **Documentation**: [docs.tazacore.com](https://docs.tazacore.com)
+- **API Reference**: [api.tazacore.com](https://api.tazacore.com)
+- **Blog**: [blog.tazacore.com](https://blog.tazacore.com)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
@@ -988,57 +390,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support & Community
+## 🙏 Acknowledgments
 
-<div align="center">
-
-### 🆘 Getting Help
-
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red.svg)](https://github.com/chikiet/TazaCore/issues)
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue.svg)](https://github.com/chikiet/TazaCore/discussions)
-[![Documentation](https://img.shields.io/badge/Docs-Available-green.svg)](https://docs.tazacore.com)
-
-**📧 Email**: support@tazacore.com  
-**💬 Community**: [Join our Discord](https://discord.gg/tazacore)  
-**📚 Documentation**: [docs.tazacore.com](https://docs.tazacore.com)
-
-</div>
-
-### 🎯 Quick Help Commands
-```bash
-./deploy-remote-fixed.sh --help     # Deployment help
-./test-deployment.sh                # Validate configuration
-bun run dev                         # Start development
-curl http://localhost:3001/health   # Test API
-```
+- **Next.js Team** - For the amazing React framework
+- **NestJS Team** - For the powerful backend framework  
+- **Docker Team** - For containerization technology
+- **Bun Team** - For the fast JavaScript runtime
+- **Open Source Community** - For endless inspiration
 
 ---
 
 <div align="center">
-
-### 🚀 Ready to Deploy?
-
-**Quick Start**: `./quick-deploy-enhanced.sh`
-
-**Full Deploy**: `./deploy-production.sh SERVER_IP DOMAIN.COM`
-
----
-
-**⭐ Star us on GitHub** • **🐛 Report Issues** • **💡 Request Features**
 
 **Made with ❤️ by the TazaCore Team**
 
-*Deploy once, scale everywhere!*
+[![GitHub stars](https://img.shields.io/github/stars/chikiet/TazaCore?style=social)](https://github.com/chikiet/TazaCore/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/chikiet/TazaCore?style=social)](https://github.com/chikiet/TazaCore/network/members)
+[![GitHub watchers](https://img.shields.io/github/watchers/chikiet/TazaCore?style=social)](https://github.com/chikiet/TazaCore/watchers)
+
+[⬆ Back to top](#-tazacore---advanced-full-stack-development-platform)
 
 </div>
-
-
-
-
-Phong cách Website monochrome IU darkmode,reponsive
-dark mode, light mode, reponsive,minimalist black and white design, modern Next-Gen, monochrome UI
-
-sudo ln -s /etc/nginx/sites-available/hrm.tazagroup.vn  /etc/nginx/sites-enabled/
-sudo certbot --nginx -d hrm.tazagroup.vn
-sudo tail -f /var/log/nginx/error.log
-
