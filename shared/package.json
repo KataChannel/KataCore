@@ -5,49 +5,15 @@
   "main": "lib/prisma.ts",
   "dependencies": {
     "@prisma/client": "^6.11.1",
-    "prisma": "^6.11.1",
-    "bcrypt": "^5.1.1"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "tsx": "^4.0.0"
+    "prisma": "^6.11.1"
   },
   "scripts": {
-    "// ========== DATABASE GENERATION ==========": "",
     "db:generate": "prisma generate",
-    "db:generate:watch": "prisma generate --watch",
-    
-    "// ========== DATABASE MIGRATION ==========": "",
+    "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:reset": "prisma migrate reset --force",
-    "db:migrate:status": "prisma migrate status",
-    "db:migrate:resolve": "prisma migrate resolve",
-    "db:migrate:diff": "prisma migrate diff",
-    
-    "// ========== DATABASE OPERATIONS ==========": "",
-    "db:push": "prisma db push",
-    "db:pull": "prisma db pull",
-    "db:seed": "tsx prisma/seed/hrm-seed.ts",
-    "db:seed:dev": "tsx prisma/seed/hrm-seed.ts --env development",
-    "db:seed:test": "tsx prisma/seed/hrm-seed.ts --env test",
-    "db:studio": "prisma studio",
-    "db:format": "prisma format",
-    "db:validate": "prisma validate",
-    
-    "// ========== DATABASE UTILITIES ==========": "",
-    "db:backup": "pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql",
-    "db:restore": "psql $DATABASE_URL < backup.sql",
-    "db:reset:full": "prisma migrate reset --force && npm run db:seed",
-    
-    "// ========== DEVELOPMENT ==========": "",
-    "dev": "prisma studio",
-    "build": "prisma generate",
-    "clean": "rm -rf node_modules .prisma",
-    
-    "// ========== WORKFLOW ==========": "",
-    "prepare": "prisma generate",
-    "postinstall": "prisma generate",
-    "fresh": "npm run clean && npm install && npm run db:generate"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio"
   }
 }

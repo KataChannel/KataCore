@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
       <div className="text-center space-y-8">
@@ -22,8 +27,28 @@ export default function NotFound() {
           </p>
         </div>
 
-        {/* Action Button */}
-        <div className="pt-4">
+        {/* Action Buttons */}
+        <div className="pt-4 space-y-4">
+          <button
+            onClick={() => router.back()}
+            className="group inline-flex items-center gap-3 px-8 py-4 border border-zinc-300 text-zinc-700 hover:border-zinc-900 hover:bg-zinc-50 transition-all duration-300 font-light tracking-[0.1em] text-xs uppercase hover:scale-[1.02]"
+          >
+            <svg
+              className="w-3 h-3 transition-transform duration-300 group-hover:-translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Quay Lại
+          </button>
+          
           <Link
             href="/"
             className="group inline-flex items-center gap-3 px-8 py-4 border border-zinc-300 text-zinc-700 hover:border-zinc-900 hover:bg-zinc-50 transition-all duration-300 font-light tracking-[0.1em] text-xs uppercase hover:scale-[1.02]"
@@ -38,7 +63,7 @@ export default function NotFound() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
               />
             </svg>
             Quay Về Trang Chủ

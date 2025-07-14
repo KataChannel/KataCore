@@ -16,32 +16,27 @@
     "dev:setup": "bun run install:all && bun run db:generate && bun run db:migrate && bun run db:seed:master && bun run dev",
     "dev:debug": "concurrently \"bun run dev:site\" \"cd api && bun run start:debug\" --names \"SITE,API\" --prefix-colors \"blue,red\"",
     "dev:reset": "bun run db:migrate:reset && bun run db:seed:master && bun run dev",
-    
     "// ========== BUILD & START ==========": "",
     "build": "bun run clean:build && bun run db:generate && bun run build:api && bun run build:site",
     "build:site": "cd site && bun run build",
     "build:api": "cd api && bun run build",
     "build:check": "bun run type-check && bun run lint && bun run build",
     "build:analyze": "cd site && ANALYZE=true bun run build",
-    
     "start": "concurrently \"bun run start:site\" \"bun run start:api\" --names \"SITE,API\" --prefix-colors \"blue,green\"",
     "start:site": "cd site && bun run start",
     "start:api": "cd api && bun run start:prod",
     "start:production": "NODE_ENV=production bun run start",
-    
     "// ========== PACKAGE MANAGEMENT ==========": "",
     "install:all": "bun install && cd site && bun install && cd ../api && bun install && cd ../shared && bun install",
     "update:all": "bun update && cd site && bun update && cd ../api && bun update && cd ../shared && bun update",
     "audit": "bun audit && cd site && bun audit && cd ../api && bun audit",
     "audit:fix": "bun audit --fix && cd site && bun audit --fix && cd ../api && bun audit --fix",
-    
     "// ========== CLEANING ==========": "",
     "clean": "bun run clean:deps && bun run clean:build && bun run clean:cache",
     "clean:deps": "rm -rf node_modules site/node_modules api/node_modules shared/node_modules",
     "clean:build": "rm -rf site/.next api/dist site/tsconfig.tsbuildinfo",
     "clean:cache": "rm -rf .turbo site/.turbo api/.turbo",
     "clean:all": "bun run clean && rm -rf bun.lockb site/bun.lockb api/bun.lockb shared/bun.lockb",
-    
     "// ========== TESTING ==========": "",
     "test": "bun run test:api && bun run test:site",
     "test:api": "cd api && bun run test",
@@ -51,7 +46,6 @@
     "test:api:coverage": "cd api && bun run test:cov",
     "test:site:coverage": "cd site && bun run test:coverage",
     "test:e2e": "cd api && bun run test:e2e",
-    
     "// ========== LINTING & FORMATTING ==========": "",
     "lint": "bun run lint:api && bun run lint:site",
     "lint:api": "cd api && bun run lint",
@@ -59,33 +53,29 @@
     "lint:fix": "bun run lint:fix:api && bun run lint:fix:site",
     "lint:fix:api": "cd api && bun run lint --fix",
     "lint:fix:site": "cd site && bun run lint:fix",
-    
     "format": "bun run format:api && bun run format:site",
     "format:api": "cd api && bun run format",
     "format:site": "cd site && bun run format",
     "format:check": "cd site && bun run format:check",
-    
     "type-check": "bun run type-check:api && bun run type-check:site",
     "type-check:api": "cd api && tsc --noEmit",
     "type-check:site": "cd site && bun run type-check",
-    
     "// ========== DATABASE (PRISMA) ==========": "",
-    "db:generate": "cd shared && bun prisma generate",
-    "db:migrate": "cd shared && bun prisma migrate dev",
+    "db:generate": "cd shared && bun run db:generate",
+    "db:migrate": "cd shared && bun run db:migrate",
     "db:migrate:deploy": "cd shared && bun prisma migrate deploy",
     "db:migrate:reset": "cd shared && bun prisma migrate reset --force",
     "db:migrate:status": "cd shared && bun prisma migrate status",
-    "db:seed": "cd shared && bun run prisma/seed/master-seed.ts",
+    "db:seed": "cd shared && bun run db:seed",
     "db:seed:hrm": "cd shared && bun run prisma/seed/hrm-seed.ts",
     "db:seed:chat": "cd shared && bun run prisma/seed/route.ts",
     "db:seed:master": "cd shared && bun run prisma/seed/master-seed.ts",
     "db:seed:test": "./scripts/test-seed.sh",
-    "db:studio": "cd shared && bun prisma studio",
+    "db:studio": "cd shared && bun run db:studio",
     "db:push": "cd shared && bun prisma db push",
     "db:pull": "cd shared && bun prisma db pull",
     "db:backup": "pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql",
     "db:restore": "psql $DATABASE_URL < backup.sql",
-    
     "// ========== DOCKER ==========": "",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
@@ -95,7 +85,6 @@
     "docker:restart": "docker-compose restart",
     "docker:clean": "docker system prune -af && docker volume prune -f",
     "docker:reset": "bun run docker:down && bun run docker:clean && bun run docker:up",
-    
     "// ========== DEPLOYMENT ==========": "",
     "deploy": "./scripts/deploy-production.sh",
     "deploy:staging": "./run_deploy.sh staging",
@@ -103,18 +92,15 @@
     "deploy:wizard": "./scripts/deploy-remote-fixed.sh wizard",
     "deploy:cleanup": "./scripts/deploy-remote-fixed.sh cleanup",
     "deploy:rollback": "./scripts/deploy-production.sh rollback",
-    
     "// ========== SECURITY & MONITORING ==========": "",
     "security:generate": "./scripts/generate-security.sh",
     "security:scan": "bun audit && cd site && bun audit && cd ../api && bun audit",
     "security:update": "bun run audit:fix",
-    
     "// ========== ADMIN TOOLS ==========": "",
     "admin:create": "cd site && bun run scripts/create-admin-user.ts",
     "admin:super": "cd site && bun run scripts/create-super-admin.ts",
     "admin:cli": "cd site && node scripts/super-admin-cli.js",
     "admin:quick": "cd site && bun run scripts/quick-create-admin.ts",
-    
     "// ========== UTILITIES ==========": "",
     "health": "curl -f http://localhost:3000/api/health && curl -f http://localhost:3001/api/health",
     "logs": "tail -f site/logs/*.log api/logs/*.log 2>/dev/null || echo 'No log files found'",
@@ -124,7 +110,6 @@
     "db:reset:hard": "bun run docker:down && docker volume prune -f && bun run docker:up && sleep 10 && bun run db:migrate && bun run db:seed:master",
     "dev:inspect": "concurrently \"bun run dev\" \"bun run db:studio\"",
     "dev:fresh": "bun run fresh:seed",
-    
     "// ========== WORKFLOW ==========": "",
     "fresh": "bun run clean:all && bun run install:all && bun run db:generate && bun run dev",
     "fresh:seed": "bun run clean:all && bun run install:all && bun run db:generate && bun run db:migrate && bun run db:seed:master && bun run dev",
@@ -133,7 +118,8 @@
     "ci": "bun run install:all && bun run lint && bun run type-check && bun run test && bun run build",
     "precommit": "bun run lint:fix && bun run format && bun run type-check",
     "postinstall": "bun run db:generate",
-    "prepare": "bun run db:generate"
+    "prepare": "bun run db:generate",
+    "db:reset": "cd shared && bun run db:reset"
   },
   "keywords": [
     "tazacore",
@@ -170,12 +156,12 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "prisma": "^6.11.1",
-    "ts-node": "^10.9.2",
     "cross-env": "^7.0.3",
     "nodemon": "^3.0.2",
     "npm-run-all": "^4.1.5",
+    "prisma": "^6.11.1",
     "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2",
     "wait-on": "^7.2.0"
   },
   "engines": {

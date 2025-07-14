@@ -1,5 +1,12 @@
 // API Route for Super Administrator Management
 import { NextRequest, NextResponse } from 'next/server';
+import { config } from 'dotenv';
+import { join } from 'path';
+
+// Load environment variables explicitly
+config({ path: join(process.cwd(), '.env') });
+config({ path: join(process.cwd(), '../shared/.env') });
+
 import { prisma } from '@/lib/prisma';
 import { authService } from '@/lib/auth/unified-auth.service';
 import { SYSTEM_ROLES, ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permissions';
@@ -8,17 +15,39 @@ import bcrypt from 'bcryptjs';
 // Middleware to check if user is Super Admin
 async function authenticateSuperAdmin(request: NextRequest) {
   try {
+    console.log('[AUTH] Starting super admin authentication...');
+    console.log('[AUTH] Environment check - JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.log('[AUTH] Environment check - DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    
     const authHeader = request.headers.get('Authorization');
+    console.log('[AUTH] Auth header:', authHeader ? `${authHeader.substring(0, 20)}...` : 'Not found');
+    
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
+      console.log('[AUTH] No token found');
       throw new Error('Token not found');
     }
 
-    const decoded = authService.verifyToken(token);
+    console.log('[AUTH] Token extracted, length:', token.length);
+    console.log('[AUTH] Attempting to verify token...');
+    
+    let decoded: any;
+    try {
+      decoded = await authService.verifyToken(token);
+      console.log('[AUTH] Token verified successfully, userId:', decoded.userId);
+    } catch (verifyError: any) {
+      console.log('[AUTH] Token verification failed:', verifyError.message);
+      console.log('[AUTH] Full verification error:', verifyError);
+      throw verifyError;
+    }
+    
+    console.log('[AUTH] Getting user by ID...');
     const user = await authService.getUserById(decoded.userId);
+    console.log('[AUTH] User found:', user ? `${user.email} (${user.role?.name})` : 'Not found');
 
     if (!user || !user.role) {
+      console.log('[AUTH] User or role not found');
       throw new Error('User not found');
     }
 
@@ -32,6 +61,7 @@ async function authenticateSuperAdmin(request: NextRequest) {
 
     return user;
   } catch (error: any) {
+    console.log('[AUTH] Authentication failed with error:', error.message);
     throw new Error(`Authentication failed: ${error?.message || 'Unknown error'}`);
   }
 }

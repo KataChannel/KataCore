@@ -9,19 +9,16 @@
     "dev:debug": "NODE_OPTIONS='--inspect' next dev",
     "dev:https": "next dev --experimental-https",
     "dev:port": "next dev -p",
-    
     "// ========== BUILD & START ==========": "",
     "build": "next build",
     "build:standalone": "next build && next export",
     "build:analyze": "ANALYZE=true next build",
     "build:production": "NODE_ENV=production next build",
     "build:check": "npm run type-check && npm run lint && npm run build",
-    
     "start": "next start",
     "start:prod": "NODE_ENV=production next start",
     "start:standalone": "node .next/standalone/server.js",
     "start:port": "next start -p",
-    
     "// ========== TESTING ==========": "",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -33,20 +30,16 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:ci": "jest --ci --coverage --watchAll=false",
-    
     "// ========== LINTING & FORMATTING ==========": "",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "lint:strict": "next lint --max-warnings 0",
     "lint:report": "next lint --format html --output-file eslint-report.html",
-    
     "format": "prettier --write .",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
     "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
-    
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
-    
     "// ========== DATABASE ==========": "",
     "db:generate": "cd ../shared && prisma generate",
     "db:migrate": "cd ../shared && prisma migrate dev",
@@ -54,7 +47,6 @@
     "db:seed": "cd ../shared && tsx prisma/seed/hrm-seed.ts",
     "db:studio": "cd ../shared && prisma studio",
     "db:reset": "cd ../shared && prisma migrate reset --force",
-    
     "// ========== ADMIN TOOLS ==========": "",
     "admin:create": "tsx scripts/quick-create-admin.ts",
     "admin:create-interactive": "tsx scripts/create-admin-user.ts",
@@ -62,28 +54,22 @@
     "admin:cli": "node scripts/super-admin-cli.js",
     "admin:list": "node scripts/super-admin-cli.js list",
     "admin:check": "node scripts/super-admin-cli.js check",
-    
     "// ========== UTILITIES ==========": "",
     "clean": "rm -rf .next node_modules/.cache",
     "clean:all": "rm -rf .next node_modules .turbo tsconfig.tsbuildinfo",
     "clean:cache": "rm -rf .next/cache node_modules/.cache",
-    
     "analyze": "ANALYZE=true npm run build",
     "bundle-analyzer": "ANALYZE=true npm run build",
-    
     "// ========== SECURITY & MONITORING ==========": "",
     "audit": "npm audit",
     "audit:fix": "npm audit fix",
     "security:scan": "npm audit --audit-level moderate",
-    
     "health": "curl -f http://localhost:3000/api/health || echo 'Site not healthy'",
     "sitemap": "next-sitemap",
-    
     "// ========== DEPLOYMENT ==========": "",
     "export": "next export",
     "deploy:vercel": "vercel --prod",
     "deploy:netlify": "netlify deploy --prod",
-    
     "// ========== WORKFLOW ==========": "",
     "precommit": "npm run lint:fix && npm run format && npm run type-check",
     "prebuild": "npm run db:generate",
@@ -132,6 +118,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/lodash": "^4.17.18",
     "@types/node": "^22.16.3",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "sharp": "^0.34.2",

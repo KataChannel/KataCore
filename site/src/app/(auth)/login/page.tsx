@@ -71,7 +71,8 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-
+      console.log('Login response:', data);
+      
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
@@ -108,8 +109,8 @@ export default function LoginPage() {
 
   const fillSuperAdminCredentials = () => {
     setFormData({
-      email: 'admin@taza.com',
-      password: 'TazaAdmin@2024!',
+      email: 'superadmin@tazacore.com',
+      password: 'SuperAdmin@2024',
     });
     setError(null);
     setMessage('Super Admin credentials filled');
@@ -136,10 +137,10 @@ export default function LoginPage() {
             <h3 className="text-sm font-medium text-blue-800">Default Super Admin Account</h3>
             <div className="mt-2 text-sm text-blue-700">
               <p>
-                <strong>Email:</strong> admin@taza.com
+                <strong>Email:</strong> superadmin@tazacore.com
               </p>
               <p>
-                <strong>Password:</strong> TazaAdmin@2024!
+                <strong>Password:</strong> SuperAdmin@2024
               </p>
             </div>
             <div className="mt-3">

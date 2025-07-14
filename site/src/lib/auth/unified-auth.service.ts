@@ -7,6 +7,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
+import { prisma } from '../prisma';
 
 // ============================================================================
 // INTERFACES & TYPES
@@ -215,8 +216,16 @@ export class UnifiedAuthService {
     // Validate input
     const validatedCredentials = LoginSchema.parse(credentials);
 
+    // Create filtered credentials object
+    const filteredCredentials: Partial<LoginCredentials> = {};
+    if (validatedCredentials.email) filteredCredentials.email = validatedCredentials.email;
+    if (validatedCredentials.phone) filteredCredentials.phone = validatedCredentials.phone;
+    if (validatedCredentials.username) filteredCredentials.username = validatedCredentials.username;
+    if (validatedCredentials.password) filteredCredentials.password = validatedCredentials.password;
+    if (validatedCredentials.provider) filteredCredentials.provider = validatedCredentials.provider;
+
     // Find user in database
-    const user = await this.findUser(validatedCredentials);
+    const user = await this.findUser(filteredCredentials);
     if (!user) {
       throw new Error('Invalid credentials');
     }
@@ -261,12 +270,14 @@ export class UnifiedAuthService {
     // Validate input
     const validatedData = RegisterSchema.parse(data);
 
+    // Create filtered credentials for checking existing user
+    const existingUserCheck: Partial<LoginCredentials> = {};
+    if (validatedData.email) existingUserCheck.email = validatedData.email;
+    if (validatedData.phone) existingUserCheck.phone = validatedData.phone;
+    if (validatedData.username) existingUserCheck.username = validatedData.username;
+
     // Check if user already exists
-    const existingUser = await this.findUser({
-      email: validatedData.email,
-      phone: validatedData.phone,
-      username: validatedData.username,
-    });
+    const existingUser = await this.findUser(existingUserCheck);
 
     if (existingUser) {
       throw new Error('User already exists');
@@ -278,11 +289,22 @@ export class UnifiedAuthService {
       hashedPassword = await this.hashPassword(validatedData.password);
     }
 
-    // Create user
-    const newUser = await this.createUser({
-      ...validatedData,
+    // Create filtered data for user creation
+    const createUserData: Partial<RegisterData & { password?: string; isVerified?: boolean }> = {
+      displayName: validatedData.displayName,
+      provider: validatedData.provider,
       password: hashedPassword,
-    });
+    };
+
+    if (validatedData.email) createUserData.email = validatedData.email;
+    if (validatedData.phone) createUserData.phone = validatedData.phone;
+    if (validatedData.username) createUserData.username = validatedData.username;
+    if (validatedData.googleId) createUserData.googleId = validatedData.googleId;
+    if (validatedData.facebookId) createUserData.facebookId = validatedData.facebookId;
+    if (validatedData.appleId) createUserData.appleId = validatedData.appleId;
+
+    // Create user
+    const newUser = await this.createUser(createUserData);
 
     // Generate tokens
     const tokens = await this.generateTokens(newUser);
@@ -393,20 +415,62 @@ export class UnifiedAuthService {
    * Gets user by ID
    */
   async getUserById(userId: string): Promise<User | null> {
-    // Implement database query
-    // This is a placeholder - replace with your actual database implementation
-    console.log(`Getting user by ID: ${userId}`);
-    return null;
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          role: true,
+        },
+      });
+
+      if (!user) return null;
+
+      return this.transformPrismaUser(user);
+    } catch (error) {
+      console.error('Error getting user by ID:', error);
+      return null;
+    }
   }
 
   /**
    * Finds user by credentials
    */
   private async findUser(credentials: Partial<LoginCredentials>): Promise<User | null> {
-    // Implement database query
-    // This is a placeholder - replace with your actual database implementation
-    console.log('Finding user with credentials:', credentials);
-    return null;
+    try {
+      console.log('Finding user with credentials:', credentials);
+      
+      const where: any = {};
+      
+      if (credentials.email) {
+        where.email = credentials.email;
+      } else if (credentials.phone) {
+        where.phone = credentials.phone;
+      } else if (credentials.username) {
+        where.username = credentials.username;
+      }
+
+      if (Object.keys(where).length === 0) {
+        return null;
+      }
+
+      const user = await prisma.user.findFirst({
+        where,
+        include: {
+          role: true,
+        },
+      });
+
+      if (!user) {
+        console.log('User not found in database');
+        return null;
+      }
+
+      console.log('User found:', { id: user.id, email: user.email, role: user.role?.name });
+      return this.transformPrismaUser(user);
+    } catch (error) {
+      console.error('Error finding user:', error);
+      return null;
+    }
   }
 
   /**
@@ -415,40 +479,76 @@ export class UnifiedAuthService {
   private async createUser(
     data: Partial<RegisterData & { password?: string; isVerified?: boolean }>
   ): Promise<User> {
-    // Implement database creation
-    // This is a placeholder - replace with your actual database implementation
-    console.log('Creating user:', data);
+    try {
+      console.log('Creating user:', data);
 
-    // Return mock user for now
-    return {
-      id: 'mock-user-id',
-      email: data.email,
-      phone: data.phone,
-      username: data.username,
-      displayName: data.displayName || 'New User',
-      roleId: 'employee', // Default role
-      isActive: true,
-      isVerified: data.isVerified ?? data.provider === 'phone', // Phone users are verified via OTP
-      provider: data.provider || 'email',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+      // Get default role (employee)
+      const defaultRole = await prisma.role.findFirst({
+        where: { name: 'Employee' },
+      });
+
+      if (!defaultRole) {
+        throw new Error('Default role not found');
+      }
+
+      const userData: any = {
+        displayName: data.displayName!,
+        isVerified: data.isVerified ?? (data.provider === 'phone'),
+        isActive: true,
+        roleId: defaultRole.id,
+      };
+
+      // Only set fields if they have values
+      if (data.email) userData.email = data.email;
+      if (data.phone) userData.phone = data.phone;
+      if (data.username) userData.username = data.username;
+      if (data.password) userData.password = data.password;
+      if (data.googleId) userData.googleId = data.googleId;
+      if (data.facebookId) userData.facebookId = data.facebookId;
+      if (data.appleId) userData.appleId = data.appleId;
+
+      const newUser = await prisma.user.create({
+        data: userData,
+        include: {
+          role: true,
+        },
+      });
+
+      return this.transformPrismaUser(newUser);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw new Error('Failed to create user');
+    }
   }
 
   /**
    * Updates user's last login timestamp
    */
   private async updateLastLogin(userId: string): Promise<void> {
-    // Implement database update
-    console.log(`Updating last login for user: ${userId}`);
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { lastSeen: new Date() },
+      });
+      console.log(`Updated last login for user: ${userId}`);
+    } catch (error) {
+      console.error('Error updating last login:', error);
+    }
   }
 
   /**
    * Invalidates all tokens for a user
    */
   private async invalidateUserTokens(userId: string): Promise<void> {
-    // Implement token invalidation
-    console.log(`Invalidating tokens for user: ${userId}`);
+    try {
+      // Delete all sessions for the user
+      await prisma.session.deleteMany({
+        where: { userId },
+      });
+      console.log(`Invalidated tokens for user: ${userId}`);
+    } catch (error) {
+      console.error('Error invalidating tokens:', error);
+    }
   }
 
   /**
@@ -457,6 +557,52 @@ export class UnifiedAuthService {
   private sanitizeUser(user: User): User {
     const { password, ...sanitizedUser } = user;
     return sanitizedUser as User;
+  }
+
+  /**
+   * Transform Prisma user to internal User interface
+   */
+  private transformPrismaUser(prismaUser: any): User {
+    let permissions: string[] = [];
+    let role = undefined;
+
+    if (prismaUser.role) {
+      try {
+        // Parse permissions from JSON string
+        permissions = typeof prismaUser.role.permissions === 'string' 
+          ? JSON.parse(prismaUser.role.permissions) 
+          : (prismaUser.role.permissions || []);
+      } catch (error) {
+        console.error('Error parsing role permissions:', error);
+        permissions = [];
+      }
+
+      role = {
+        id: prismaUser.role.id,
+        name: prismaUser.role.name,
+        permissions,
+        level: 0, // Default level, TODO: add to schema if needed
+      };
+    }
+
+    return {
+      id: prismaUser.id,
+      email: prismaUser.email,
+      phone: prismaUser.phone,
+      username: prismaUser.username,
+      displayName: prismaUser.displayName,
+      avatar: prismaUser.avatar,
+      password: prismaUser.password,
+      roleId: prismaUser.roleId,
+      role,
+      modules: [], // TODO: Implement modules based on role
+      permissions,
+      isActive: prismaUser.isActive,
+      isVerified: prismaUser.isVerified,
+      provider: 'email', // Default provider, TODO: add to database schema
+      createdAt: prismaUser.createdAt,
+      updatedAt: prismaUser.updatedAt,
+    };
   }
 
   // ==========================================================================
