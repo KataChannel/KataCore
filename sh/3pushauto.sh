@@ -168,33 +168,23 @@ smart_deploy_services() {
             if [ -f 'docker-compose.yml' ]; then
                 echo 'Starting selective Docker Compose deployment...'
                 
-                # Build images first for services that need building
-                echo 'Building updated images for services: $failed_services'
-                for service in $failed_services; do
-                    echo \"Building service: \$service\"
-                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose build --no-cache \$service 2>/dev/null || echo \"Note: \$service may not need building\"
-                done
-                
                 # Start only the failed/missing services
-                echo 'Starting services: $failed_services'
-                COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --force-recreate $failed_services
-                
-                # Wait for services to stabilize
-                echo 'Waiting for services to stabilize...'
-                sleep 20
-                
-                # Check each service status
                 for service in $failed_services; do
+                    echo \"Starting service: \$service\"
+                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --build --force-recreate \$service
+                    
+                    # Wait a bit for the service to start
+                    sleep 5
+                    
+                    # Check immediate status
                     container_name=\"\${PROJECT_NAME}-\$service\"
                     status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
-                    if [ \"\$status\" = \"running\" ]; then
-                        echo \"✅ Service \$service: \$status\"
-                    else
-                        echo \"❌ Service \$service: \$status\"
-                    fi
+                    echo \"Service \$service status: \$status\"
                 done
                 
-                echo ''
+                echo 'Waiting for all deployed services to stabilize...'
+                sleep 15
+                
                 echo 'Final deployment status:'
                 docker ps --filter name=\"\${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
                 
@@ -297,354 +287,6 @@ get_server_config() {
     success "Server configuration completed"
 }
 
-# Function to show enhanced menu
-show_menu() {
-    clear
-    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}                    🚀 SMART PROJECT-SCOPED Deployment Tool${NC}"
-    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}Project:${NC} $PROJECT_NAME"
-    echo -e "${YELLOW}Server:${NC} $SSH_USER@$SERVER_IP"
-    echo -e "${YELLOW}Project Path:${NC} /opt/$PROJECT_NAME"
-    echo -e "${YELLOW}Time:${NC} $(date '+%Y-%m-%d %H:%M:%S')"
-    echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
-    echo -e "${BLUE}Smart Deployment Options:${NC}"
-    echo -e "  ${GREEN}0)${NC} ⚙️  Configure server settings"
-    echo -e "  ${GREEN}1)${NC} 🧠 Smart Deploy with Git (Site & API) - preserves healthy services"
-    echo -e "  ${GREEN}2)${NC} 🧠 Smart Deploy ALL with Git - preserves healthy services"
-    echo -e "  ${GREEN}3)${NC} 🚀 Deploy only (skip git operations) - smart mode"
-    echo -e "  ${GREEN}4)${NC} 🧹 Project cleanup & container fix (PROJECT ONLY)"
-    echo -e "  ${GREEN}5)${NC} 📊 Check project status"
-    echo -e "  ${GREEN}6)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
-    echo -e "  ${GREEN}7)${NC} 🛠️  Smart deploy specific services"
-    echo -e "  ${GREEN}8)${NC} 🔍 Debug deployment status"
-    echo -e "  ${RED}q)${NC} 👋 Quit"
-    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}🧠 SMART MODE: Only restarts failed services, keeps healthy services running${NC}"
-    echo -e "${RED}🔒 ALL OPERATIONS ARE PROJECT-SCOPED - NO IMPACT ON OTHER SERVER SERVICES${NC}"
-}
-
-# Enhanced git commit and update function with improved error handling
-git_commit_and_update_preserve_data() {
-    progress "🔍 Checking git repository status..."
-    
-    # Check if we're in a git repository
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        error "Not in a git repository. Please initialize git first."
-    fi
-    
-    # Check current branch
-    current_branch=$(git branch --show-current)
-    progress "Current branch: $current_branch"
-    
-    # Check for uncommitted changes
-    if git diff --quiet && git diff --cached --quiet; then
-        warning "No changes detected in git repository"
-        echo -e "${YELLOW}Continue with deployment anyway? (y/N):${NC}"
-        read -p "❓ " continue_anyway
-        if [[ ! $continue_anyway =~ ^[Yy]$ ]]; then
-            info "Deployment cancelled - no git changes to deploy"
-            return 0
-        fi
-    else
-        progress "📝 Staging all changes..."
-        git add . || error "Failed to stage changes"
-        
-        # Show what's being committed
-        echo -e "${BLUE}Files to be committed:${NC}"
-        git diff --cached --name-only | head -20
-        
-        echo -e "${YELLOW}Enter commit message (or press Enter for auto-generated):${NC}"
-        read -p "💬 " commit_message
-        
-        if [ -z "$commit_message" ]; then
-            commit_message="Auto-update $(date '+%Y-%m-%d %H:%M:%S')"
-        fi
-        
-        progress "Committing with message: '$commit_message'"
-        git commit -m "$commit_message" || error "Failed to commit changes"
-        
-        progress "Pushing to remote repository..."
-        if ! git push; then
-            warning "Failed to push to remote. Trying to set upstream..."
-            git push --set-upstream origin "$current_branch" || error "Failed to push to git repository"
-        fi
-        
-        success "Git operations completed successfully"
-    fi
-    
-    progress "🧠 Initializing SMART PROJECT-SCOPED Site & API update process..."
-    
-    # Create temp directory
-    mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
-    success "Temporary directory created: $TEMP_DIR"
-
-    progress "📤 Preparing PROJECT files for Site & API update..."
-    # More selective exclusion - keep important config files
-    info "Excluding: .git, node_modules, *.log, .env.local, .env.development, README.md, *.sh"
-    
-    # Copy project files with better exclusion pattern
-    if command -v rsync >/dev/null 2>&1; then
-        rsync -av \
-            --exclude='.git/' \
-            --exclude='node_modules/' \
-            --exclude='*.log' \
-            --exclude='.env.local' \
-            --exclude='.env.development' \
-            --exclude='README.md' \
-            --exclude='*.sh' \
-            --exclude='tmp/' \
-            --exclude='.cache/' \
-            --exclude='coverage/' \
-            --exclude='.next/' \
-            --exclude='dist/' \
-            --exclude='build/' \
-            . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
-    else
-        # Fallback to find/cp
-        find . -type f \
-            ! -path './.git/*' \
-            ! -path './node_modules/*' \
-            ! -name '*.log' \
-            ! -name '.env.local' \
-            ! -name '.env.development' \
-            ! -name 'README.md' \
-            ! -name '*.sh' \
-            ! -path './tmp/*' \
-            ! -path './.cache/*' \
-            ! -path './coverage/*' \
-            ! -path './.next/*' \
-            ! -path './dist/*' \
-            ! -path './build/*' \
-            -exec cp --parents {} "$TEMP_DIR/" \; || error "Failed to copy files to temp directory"
-    fi
-    
-    # Show what's actually being transferred
-    echo -e "${BLUE}Files being transferred:${NC}"
-    find "$TEMP_DIR" -type f | head -20
-    
-    # Show transfer size
-    size=$(du -sh "$TEMP_DIR" | cut -f1)
-    info "Transfer size: $size"
-
-    progress "🔐 Backing up existing PROJECT environment file on server..."
-    ssh "$SSH_USER@$SERVER_IP" "
-        cd /opt/$PROJECT_NAME/ 2>/dev/null || exit 1
-        if [ -f .env ]; then
-            cp .env .env.backup.\$(date +%Y%m%d_%H%M%S)
-            echo '✅ PROJECT environment file backed up with timestamp'
-        else
-            echo '⚠️  No existing PROJECT .env file found to backup'
-        fi
-    " || warning "Could not backup PROJECT environment file"
-
-    progress "🌐 Transferring updated files to PROJECT directory..."
-    # Use rsync WITHOUT delete to avoid removing important files
-    if command -v rsync >/dev/null 2>&1; then
-        rsync -avz --progress \
-            --exclude='.env' \
-            --exclude='.env.*' \
-            "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
-    else
-        # Fallback - copy new files without deleting existing ones
-        scp -r "$TEMP_DIR/"* "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
-    fi
-    
-    progress "🔧 Restoring preserved PROJECT environment configuration..."
-    ssh "$SSH_USER@$SERVER_IP" "
-        cd /opt/$PROJECT_NAME/
-        
-        # Restore from timestamped backup first
-        LATEST_BACKUP=\$(ls -t .env.backup.* 2>/dev/null | head -n1)
-        if [ -n \"\$LATEST_BACKUP\" ] && [ ! -f .env ]; then
-            cp \"\$LATEST_BACKUP\" .env
-            echo '✅ PROJECT environment file restored from backup: '\$LATEST_BACKUP
-        elif [ -f .env.temp.backup ]; then
-            cp .env.temp.backup .env
-            rm .env.temp.backup
-            echo '✅ PROJECT environment file restored from temp backup'
-        elif [ -f .env.prod ]; then
-            cp .env.prod .env
-            echo '📝 Using .env.prod as fallback PROJECT environment'
-        else
-            echo '❌ No PROJECT environment file available'
-        fi
-        
-        # Verify environment file
-        if [ -f .env ]; then
-            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
-            echo '✅ Environment file verified'
-        else
-            echo '❌ No environment file found after restoration'
-        fi
-        
-        # Show updated files
-        echo '📋 Updated PROJECT files:'
-        ls -la | grep -E '\.(js|ts|json|yml|yaml)$' | head -10
-    " || warning "Could not restore PROJECT environment file"
-    
-    # Verify file transfer
-    verify_file_transfer
-    
-    # Cleanup temp directory
-    rm -rf "$TEMP_DIR"
-    success "Local cleanup completed"
-
-    # Force rebuild and deploy Site & API with new code
-    progress "🔥 Force rebuilding Site & API services to ensure new code is deployed..."
-    force_rebuild_and_deploy "site api"
-    
-    success "🎉 Git commit and SMART PROJECT Site & API update completed successfully!"
-    info "✅ PROJECT Site and API services FORCE REBUILT with latest code"
-    info "✅ PROJECT environment file (.env) preserved unchanged"
-    info "✅ Database and other services continue running without interruption"
-    warning "🔥 FORCE REBUILD: New code is guaranteed to be deployed"
-}
-
-# Debug function to check what's actually happening
-debug_deployment_status() {
-    progress "🔍 Debugging deployment status..."
-    
-    echo -e "${BLUE}Local git status:${NC}"
-    git status --short | head -10
-    
-    echo -e "${BLUE}Local files in current directory:${NC}"
-    ls -la | head -10
-    
-    echo -e "${BLUE}Remote server status:${NC}"
-    ssh "$SSH_USER@$SERVER_IP" "
-        cd /opt/$PROJECT_NAME/ 2>/dev/null || echo 'Directory not found'
-        echo 'Files in project directory:'
-        ls -la | head -10
-        echo ''
-        echo 'Environment file status:'
-        if [ -f .env ]; then
-            echo 'Environment file exists with' \$(wc -l < .env) 'lines'
-            echo 'Sample env vars:'
-            head -5 .env | grep -v 'PASSWORD\|SECRET\|KEY' || echo 'No safe env vars to show'
-        else
-            echo 'No environment file found'
-        fi
-        echo ''
-        echo 'Docker compose file:'
-        if [ -f docker-compose.yml ]; then
-            echo 'docker-compose.yml exists'
-        else
-            echo 'docker-compose.yml missing'
-        fi
-        echo ''
-        echo 'Container status:'
-        docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-    "
-}
-
-# Initialize configuration
-get_server_config
-
-# Main script with enhanced menu handling
-while true; do
-    show_menu
-    echo -ne "${YELLOW}Enter your choice: ${NC}"
-    read choice
-    echo ""
-    
-    case $choice in
-        0)
-            log "Option 0 selected: Configure server settings"
-            get_server_config
-            ;;
-        1)
-            log "Option 1 selected: Smart Deploy with Git (Site & API)"
-            warning "🧠 SMART MODE: Only unhealthy Site & API services will be restarted"
-            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME Site & API"
-            git_commit_and_update_preserve_data
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        2)
-            log "Option 2 selected: Smart Deploy ALL with Git"
-            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
-            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME services"
-            git_commit_and_update_all_preserve_data
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        3)
-            log "Option 3 selected: Deploy only (skip git operations)"
-            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
-            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME services"
-            deploy_to_server
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        4)
-            log "Option 4 selected: Project cleanup & container fix"
-            warning "🧹 CLEANUP MODE: Will clean up PROJECT containers and resources only"
-            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
-            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
-            read -p "❓ " confirm
-            if [[ $confirm =~ ^[Yy]$ ]]; then
-                project_cleanup_and_container_fix
-            else
-                warning "Cleanup cancelled"
-            fi
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;     
-        5)
-            log "Option 5 selected: Check project status"
-            check_server_status
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        6)
-            log "Option 6 selected: Fresh deploy"
-            warning "🔧 FRESH DEPLOY: Will replace environment file with local .env.prod"
-            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
-            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
-            read -p "❓ " confirm
-            if [[ $confirm =~ ^[Yy]$ ]]; then
-                fresh_deploy_to_server
-            else
-                warning "Fresh deployment cancelled"
-            fi
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        7)
-            log "Option 7 selected: Smart deploy specific services"
-            warning "🧠 SMART MODE: Only unhealthy selected services will be restarted"
-            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects selected $PROJECT_NAME services"
-            deploy_selected_services
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        8)
-            log "Option 8 selected: Debug deployment status"
-            debug_deployment_status
-            echo ""
-            info "Press any key to return to menu..."
-            read -n 1
-            ;;
-        q|Q)
-            echo -e "${GREEN}👋 Thank you for using SMART PROJECT-SCOPED Deployment Tool!${NC}"
-            echo -e "${CYAN}Goodbye!${NC}"
-            exit 0
-            ;;
-        *)
-            error "Invalid option. Please try again."
-            sleep 2
-            ;;
-    esac
-done
-
 # Function to select services
 select_services() {
     clear
@@ -696,6 +338,32 @@ select_services() {
     
     success "Selected services: $SELECTED_SERVICES"
     return 0
+}
+
+# Function to show enhanced menu
+show_menu() {
+    clear
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}                    🚀 SMART PROJECT-SCOPED Deployment Tool${NC}"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${YELLOW}Project:${NC} $PROJECT_NAME"
+    echo -e "${YELLOW}Server:${NC} $SSH_USER@$SERVER_IP"
+    echo -e "${YELLOW}Project Path:${NC} /opt/$PROJECT_NAME"
+    echo -e "${YELLOW}Time:${NC} $(date '+%Y-%m-%d %H:%M:%S')"
+    echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
+    echo -e "${BLUE}Smart Deployment Options:${NC}"
+    echo -e "  ${GREEN}0)${NC} ⚙️  Configure server settings"
+    echo -e "  ${GREEN}1)${NC} 🧠 Smart Deploy with Git (Site & API) - preserves healthy services"
+    echo -e "  ${GREEN}2)${NC} 🧠 Smart Deploy ALL with Git - preserves healthy services"
+    echo -e "  ${GREEN}3)${NC} 🚀 Deploy only (skip git operations) - smart mode"
+    echo -e "  ${GREEN}4)${NC} 🧹 Project cleanup & container fix (PROJECT ONLY)"
+    echo -e "  ${GREEN}5)${NC} 📊 Check project status"
+    echo -e "  ${GREEN}6)${NC} 🔧 Fresh deploy (clean env + copy env.local)"
+    echo -e "  ${GREEN}7)${NC} 🛠️  Smart deploy specific services"
+    echo -e "  ${RED}q)${NC} 👋 Quit"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}🧠 SMART MODE: Only restarts failed services, keeps healthy services running${NC}"
+    echo -e "${RED}🔒 ALL OPERATIONS ARE PROJECT-SCOPED - NO IMPACT ON OTHER SERVER SERVICES${NC}"
 }
 
 # Function for enhanced git operations
@@ -785,6 +453,67 @@ check_server_status() {
             done
             echo ''
             
+            echo '📦 Project Containers (all states):'
+            ALL_PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}' 2>/dev/null)
+            if [ -n \"\$ALL_PROJECT_CONTAINERS\" ]; then
+                echo \"\$ALL_PROJECT_CONTAINERS\"
+            else
+                echo '   No project containers found'
+            fi
+            echo ''
+            
+            echo '🎛️  Project Docker Compose Status:'
+            if [ -f '/opt/$PROJECT_NAME/docker-compose.yml' ]; then
+                echo '✅ docker-compose.yml exists'
+                cd /opt/$PROJECT_NAME
+                COMPOSE_STATUS=\$(docker compose ps 2>/dev/null || echo 'Compose not available')
+                echo \"\$COMPOSE_STATUS\"
+            else
+                echo '❌ docker-compose.yml not found'
+            fi
+            echo ''
+            
+            echo '💾 Project Data Volumes:'
+            PROJECT_VOLUMES=\$(docker volume ls --filter label=com.docker.compose.project=$PROJECT_NAME --format 'table {{.Name}}\t{{.Driver}}\t{{.Scope}}' 2>/dev/null)
+            if [ -n \"\$PROJECT_VOLUMES\" ]; then
+                echo \"\$PROJECT_VOLUMES\"
+            else
+                # Try alternative method
+                ALT_VOLUMES=\$(docker volume ls | grep \"${PROJECT_NAME}\" 2>/dev/null)
+                if [ -n \"\$ALT_VOLUMES\" ]; then
+                    echo \"\$ALT_VOLUMES\"
+                else
+                    echo '   No project volumes found'
+                fi
+            fi
+            echo ''
+            
+            echo '🌐 Project Networks:'
+            PROJECT_NETWORKS=\$(docker network ls --filter label=com.docker.compose.project=$PROJECT_NAME --format 'table {{.Name}}\t{{.Driver}}\t{{.Scope}}' 2>/dev/null)
+            if [ -n \"\$PROJECT_NETWORKS\" ]; then
+                echo \"\$PROJECT_NETWORKS\"
+            else
+                # Try alternative method
+                ALT_NETWORKS=\$(docker network ls | grep \"${PROJECT_NAME}\" 2>/dev/null)
+                if [ -n \"\$ALT_NETWORKS\" ]; then
+                    echo \"\$ALT_NETWORKS\"
+                else
+                    echo '   No project networks found'
+                fi
+            fi
+            echo ''
+            
+            echo '📊 Server Resource Usage (General):'
+            echo 'Memory:' \$(free -h | grep '^Mem:' | awk '{print \$3 \"/\" \$2 \" (\" \$5 \" available)\"}')
+            echo 'Disk usage for project:' \$(du -sh /opt/$PROJECT_NAME 2>/dev/null | cut -f1 || echo 'N/A')
+            echo ''
+            
+            echo '🔒════════════════════════════════════════════════🔒'
+            echo '🔒         SERVER ISOLATION VERIFICATION        🔒'
+            echo '🔒════════════════════════════════════════════════🔒'
+            echo '🔍 Total Docker containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+            echo '🎯 PROJECT containers:' \$(docker ps --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+            echo '🌐 Other containers remain untouched:' \$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | wc -l)
             echo '✅ PROJECT-SCOPED operations ensure server isolation'
         "
     else
@@ -845,7 +574,7 @@ deploy_to_server() {
 fresh_deploy_to_server() {
     progress "Initializing PROJECT-SCOPED fresh deployment process..."
     
-    # Check if env.prod exists locally
+    # Check if env.local exists locally
     if [ ! -f ".env.prod" ]; then
         error ".env.prod file not found in current directory"
     fi
@@ -861,7 +590,7 @@ fresh_deploy_to_server() {
     # Copy all project files to temp directory (excluding all env files)
     rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env*' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
     
-    # Copy env.prod to temp directory as .env
+    # Copy env.local to temp directory as .env
     cp .env.prod "$TEMP_DIR/.env" || error "Failed to copy .env.prod file"
     success "PROJECT environment file prepared from .env.prod"
     
@@ -897,6 +626,75 @@ fresh_deploy_to_server() {
     
     # Use smart deployment for fresh deploy
     smart_deploy_services "api site postgres redis minio pgadmin" "all"
+}
+
+# Combined function: Git commit + Update Site & API only (preserves data services) - SMART MODE
+git_commit_and_update_preserve_data() {
+    # First, handle git operations
+    git_commit
+    
+    progress "🧠 Initializing SMART PROJECT-SCOPED Site & API update process..."
+    
+    # Create temp directory
+    mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
+    success "Temporary directory created: $TEMP_DIR"
+
+    progress "📤 Preparing PROJECT files for Site & API update..."
+    # Show what will be excluded
+    info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
+    
+    # Copy all project files to temp directory (excluding ALL env files)
+    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env*' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+    
+    # Show transfer size
+    size=$(du -sh "$TEMP_DIR" | cut -f1)
+    info "Transfer size: $size"
+
+    progress "🔐 Backing up existing PROJECT environment file on server..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/ 2>/dev/null || exit 1
+        if [ -f .env ]; then
+            cp .env .env.backup
+            echo '✅ PROJECT environment file backed up as .env.backup'
+        else
+            echo '⚠️  No existing PROJECT .env file found to backup'
+        fi
+    " || warning "Could not backup PROJECT environment file"
+
+    progress "🌐 Transferring updated files to PROJECT directory (excluding env files)..."
+    # Use --exclude to prevent overwriting .env files during transfer
+    rsync -avz --progress --exclude='.env*' "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    
+    progress "🔧 Restoring preserved PROJECT environment configuration..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        if [ -f .env.backup ]; then
+            mv .env.backup .env
+            echo '✅ Original PROJECT environment file restored and preserved'
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+        else
+            echo '⚠️  No backup file found to restore'
+            if [ -f .env.prod ]; then
+                cp .env.prod .env
+                echo '📝 Using .env.prod as fallback PROJECT environment'
+            else
+                echo '❌ No PROJECT environment file available'
+            fi
+        fi
+    " || warning "Could not restore PROJECT environment file"
+    
+    # Cleanup temp directory
+    rm -rf "$TEMP_DIR"
+    success "Local cleanup completed"
+
+    # Use smart deployment for Site & API only
+    smart_deploy_services "site api" "selective"
+    
+    success "🎉 Git commit and SMART PROJECT Site & API update completed successfully!"
+    info "✅ PROJECT Site and API services updated with latest code"
+    info "✅ PROJECT environment file (.env) preserved unchanged"
+    info "✅ Healthy services continue running without interruption"
+    warning "🧠 SMART MODE: Only failed services were restarted"
 }
 
 # NEW FUNCTION: Combined function: Git commit + Update ALL services while preserving data - SMART MODE
@@ -943,202 +741,258 @@ git_commit_and_update_all_preserve_data() {
     progress "🔧 Restoring preserved PROJECT environment configuration..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        
-        # Restore from timestamped backup first
-        LATEST_BACKUP=\$(ls -t .env.backup.* 2>/dev/null | head -n1)
-        if [ -n \"\$LATEST_BACKUP\" ] && [ ! -f .env ]; then
-            cp \"\$LATEST_BACKUP\" .env
-            echo '✅ PROJECT environment file restored from backup: '\$LATEST_BACKUP
-        elif [ -f .env.temp.backup ]; then
-            cp .env.temp.backup .env
-            rm .env.temp.backup
-            echo '✅ PROJECT environment file restored from temp backup'
-        elif [ -f .env.prod ]; then
-            cp .env.prod .env
-            echo '📝 Using .env.prod as fallback PROJECT environment'
-        else
-            echo '❌ No PROJECT environment file available'
-        fi
-        
-        # Verify environment file
-        if [ -f .env ]; then
+        if [ -f .env.backup ]; then
+            mv .env.backup .env
+            echo '✅ Original PROJECT environment file restored and preserved'
             echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
-            echo '✅ Environment file verified'
         else
-            echo '❌ No environment file found after restoration'
+            echo '⚠️  No backup file found to restore'
+            if [ -f .env.prod ]; then
+                cp .env.prod .env
+                echo '📝 Using .env.prod as fallback PROJECT environment'
+            else
+                echo '❌ No PROJECT environment file available'
+            fi
         fi
-        
-        # Show updated files
-        echo '📋 Updated PROJECT files:'
-        ls -la | grep -E '\.(js|ts|json|yml|yaml)$' | head -10
     " || warning "Could not restore PROJECT environment file"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    # Force rebuild and deploy ALL services with new code
-    progress "🔥 Force rebuilding ALL services to ensure new code is deployed..."
-    force_rebuild_and_deploy "api site postgres redis minio pgadmin"
-    
-    success "🎉 Git commit and SMART PROJECT ALL services update completed successfully!"
-    info "✅ PROJECT services FORCE REBUILT with latest code"
+    # Use smart deployment for all services
+    smart_deploy_services "api site postgres redis minio pgadmin" "selective"
+
+    success "🎉 Git commit and SMART ALL PROJECT services update completed successfully!"
+    info "✅ ALL PROJECT services updated with latest code"
     info "✅ PROJECT environment file (.env) preserved unchanged"
-    info "✅ Database and other services continue running without interruption"
-    warning "🔥 FORCE REBUILD: New code is guaranteed to be deployed"
+    info "✅ PROJECT data volumes preserved - no data loss"
+    info "✅ Healthy services continued running without interruption"
+    warning "🧠 SMART MODE: Only failed services were restarted"
+    warning "💾 All persistent PROJECT data preserved across update"
 }
 
-# Function to verify file transfer and important files
-verify_file_transfer() {
-    progress "🔍 Verifying file transfer and important files..."
+# STRICTLY PROJECT-SCOPED server cleanup and container fix function
+project_cleanup_and_container_fix() {
+    progress "🧹🚨 Starting STRICTLY PROJECT-SCOPED cleanup and container fix for $PROJECT_NAME..."
     
-    ssh "$SSH_USER@$SERVER_IP" "
-        cd /opt/$PROJECT_NAME/
-        
-        echo '📋 Checking for important project files:'
-        
-        # Check for package.json files
-        if [ -f 'site/package.json' ]; then
-            echo '✅ site/package.json found'
-        else
-            echo '❌ site/package.json missing'
-        fi
-        
-        if [ -f 'api/package.json' ]; then
-            echo '✅ api/package.json found'
-        else
-            echo '❌ api/package.json missing'
-        fi
-        
-        # Check for docker-compose file
-        if [ -f 'docker-compose.yml' ]; then
-            echo '✅ docker-compose.yml found'
-        else
-            echo '❌ docker-compose.yml missing'
-        fi
-        
-        # Check for Dockerfiles
-        if [ -f 'site/Dockerfile' ]; then
-            echo '✅ site/Dockerfile found'
-        else
-            echo '⚠️  site/Dockerfile missing'
-        fi
-        
-        if [ -f 'api/Dockerfile' ]; then
-            echo '✅ api/Dockerfile found'
-        else
-            echo '⚠️  api/Dockerfile missing'
-        fi
-        
-        # Show recent file modification times to verify update
-        echo ''
-        echo '📅 Recent file modifications (to verify update):'
-        find . -maxdepth 2 -name '*.json' -o -name '*.js' -o -name '*.ts' -o -name 'Dockerfile' 2>/dev/null | head -10 | xargs ls -la 2>/dev/null | head -5
-        
-        echo ''
-        echo '📊 Project directory size:'
-        du -sh . 2>/dev/null || echo 'Cannot calculate size'
-    " || warning "Could not verify file transfer"
-}
-
-# Function to test option 1 deployment
-test_option1_deployment() {
-    progress "🧪 Testing Option 1 - Smart Deploy with Git (Site & API)..."
+    # Ask user if they want to overwrite project data from local
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${YELLOW}📋 Data Overwrite Options:${NC}"
+    echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
+    echo -e "  ${GREEN}1)${NC} 🧹 Cleanup only (preserve existing server data)"
+    echo -e "  ${GREEN}2)${NC} 🔄 Cleanup + overwrite project data from local"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${RED}⚠️  Option 2 will REPLACE ALL project files on server with local files${NC}"
+    echo -e "${RED}⚠️  This includes configuration files but excludes .env files${NC}"
+    echo -e "${CYAN}══════════════════════════════════════════════════════════════${NC}"
     
-    echo -e "${YELLOW}This will test the full deployment process. Continue? (y/N):${NC}"
-    read -p "❓ " confirm
-    if [[ ! $confirm =~ ^[Yy]$ ]]; then
-        info "Test cancelled"
-        return 0
-    fi
+    echo -ne "${YELLOW}Select option (1 or 2): ${NC}"
+    read data_option
     
-    # Show what will happen
-    info "📋 Test Process:"
-    info "1. Check git status and commit changes"
-    info "2. Prepare and transfer files"
-    info "3. Verify file transfer"
-    info "4. Force rebuild Docker images"
-    info "5. Deploy services"
-    info "6. Verify deployment"
-    
-    echo -e "${YELLOW}Proceed with test? (y/N):${NC}"
-    read -p "❓ " final_confirm
-    if [[ ! $final_confirm =~ ^[Yy]$ ]]; then
-        info "Test cancelled"
-        return 0
-    fi
-    
-    # Execute option 1
-    git_commit_and_update_preserve_data
-    
-    success "🧪 Test completed! Check the results above."
-}
-Add these missing functions after the existing functions (around line 1100)
-
-# Force rebuild and deploy function to ensure new code is deployed
-force_rebuild_and_deploy() {
-    local services_to_rebuild="$1"
-    
-    progress "🔥 Force rebuilding and deploying services: $services_to_rebuild"
-    
-    ssh "$SSH_USER@$SERVER_IP" "
-        cd /opt/$PROJECT_NAME/
-        
-        echo 'FORCE REBUILD - Clearing Docker cache and rebuilding images...'
-        
-        # Stop services first
-        for service in $services_to_rebuild; do
-            echo \"Stopping service: \$service\"
-            COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose stop \$service 2>/dev/null || true
-            COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose rm -f \$service 2>/dev/null || true
-        done
-        
-        # Remove existing images to force rebuild
-        for service in $services_to_rebuild; do
-            echo \"Removing existing image for: \$service\"
-            docker rmi \"${PROJECT_NAME}-\$service\" 2>/dev/null || true
-            docker rmi \"${PROJECT_NAME}_\$service\" 2>/dev/null || true
-        done
-        
-        # Clear build cache
-        echo 'Clearing Docker build cache...'
-        docker builder prune -f 2>/dev/null || true
-        
-        # Force rebuild with no cache
-        for service in $services_to_rebuild; do
-            echo \"Force rebuilding service: \$service\"
-            COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose build --no-cache --pull \$service || echo \"Note: \$service may not need building\"
-        done
-        
-        # Start services with force recreate
-        echo 'Starting rebuilt services...'
-        COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --force-recreate $services_to_rebuild
-        
-        # Wait for services to stabilize
-        echo 'Waiting for services to stabilize...'
-        sleep 30
-        
-        # Check service status
-        echo 'Checking service status after rebuild:'
-        for service in $services_to_rebuild; do
-            container_name=\"\${PROJECT_NAME}-\$service\"
-            status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
-            if [ \"\$status\" = \"running\" ]; then
-                echo \"✅ \$service: \$status\"
+    local overwrite_data=false
+    case $data_option in
+        1)
+            info "Selected: Cleanup only (preserve existing server data)"
+            ;;
+        2)
+            warning "Selected: Cleanup + overwrite project data from local"
+            echo -e "${RED}⚠️  This will replace ALL project files on server with local files!${NC}"
+            echo -e "${YELLOW}Are you absolutely sure? (type 'YES' to confirm):${NC}"
+            read -p "❓ " confirm_overwrite
+            if [[ "$confirm_overwrite" == "YES" ]]; then
+                overwrite_data=true
+                success "Data overwrite confirmed"
             else
-                echo \"❌ \$service: \$status\"
-                # Show logs for failed services
-                echo \"Logs for \$service:\"
-                docker logs \"\$container_name\" --tail 20 2>/dev/null || echo \"No logs available\"
+                warning "Data overwrite cancelled - proceeding with cleanup only"
+            fi
+            ;;
+        *)
+            warning "Invalid option - proceeding with cleanup only"
+            ;;
+    esac
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        echo '🔒 STRICTLY PROJECT-SCOPED: Emergency container cleanup and fix for $PROJECT_NAME ONLY...'
+        cd /opt/$PROJECT_NAME/ 2>/dev/null || true
+        
+        echo '🌐 Before cleanup - Server state verification:'
+        echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+        echo 'Total images on server:' \$(docker images --format '{{.Repository}}:{{.Tag}}' | wc -l)
+        echo 'Total volumes on server:' \$(docker volume ls --format '{{.Name}}' | wc -l)
+        echo 'Total networks on server:' \$(docker network ls --format '{{.Name}}' | wc -l)
+        echo ''
+        
+        # STRICTLY force stop and remove ONLY containers with project prefix
+        echo '🛑 Force stopping ONLY containers with $PROJECT_NAME prefix...'
+        PROJECT_CONTAINERS=\$(docker ps -aq --filter name=\"${PROJECT_NAME}-\")
+        if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+            echo \"Found PROJECT containers: \$(echo \$PROJECT_CONTAINERS | wc -w)\"
+            echo \$PROJECT_CONTAINERS | xargs docker stop 2>/dev/null || true
+            echo \$PROJECT_CONTAINERS | xargs docker rm -f 2>/dev/null || true
+        else
+            echo 'No PROJECT containers found to stop'
+        fi
+        
+        # Also try specific project service cleanup with exact naming
+        echo '🧹 Cleaning up specific PROJECT services...'
+        for service in postgres redis minio pgadmin api site; do
+            container_name=\"${PROJECT_NAME}-\$service\"
+            if docker ps -a --filter name=\"\$container_name\" --format '{{.Names}}' | grep -q \"^\$container_name\$\"; then
+                echo \"Removing \$container_name\"
+                docker stop \"\$container_name\" 2>/dev/null || true
+                docker rm -f \"\$container_name\" 2>/dev/null || true
             fi
         done
         
+        # Use docker compose down ONLY for this project if docker-compose.yml exists
+        if [ -f docker-compose.yml ]; then
+            echo '🐳 Running docker compose down for PROJECT ONLY...'
+            docker compose --project-directory /opt/$PROJECT_NAME --project-name $PROJECT_NAME down --remove-orphans 2>/dev/null || true
+        fi
+        
+        echo '🗑️  Cleaning PROJECT-SPECIFIC Docker resources ONLY...'
+        echo 'Before PROJECT-specific cleanup:'
+        echo 'PROJECT containers:' \$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+        echo 'PROJECT images:' \$(docker images | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT volumes:' \$(docker volume ls | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT networks:' \$(docker network ls | grep \"${PROJECT_NAME}\" | wc -l)
+        
+        # Clean up PROJECT-SPECIFIC dangling resources ONLY
+        echo '🧹 Cleaning PROJECT-SPECIFIC dangling containers...'
+        docker container ls -a --filter name=\"${PROJECT_NAME}-\" --filter status=exited -q | xargs -r docker rm 2>/dev/null || true
+        
+        echo '🧹 Cleaning PROJECT-SPECIFIC unused images...'
+        # Only remove images that specifically contain the project name
+        docker images | grep \"${PROJECT_NAME}\" | awk '{print \$3}' | xargs -r docker rmi -f 2>/dev/null || true
+        
+        echo '🧹 Cleaning PROJECT-SPECIFIC unused networks...'
+        # Only remove networks that specifically contain the project name
+        docker network ls | grep \"${PROJECT_NAME}\" | awk '{print \$1}' | xargs -r docker network rm 2>/dev/null || true
+        
+        # NOTE: We STRICTLY do NOT clean volumes as they contain data and could affect other projects
+        echo '⚠️  PROJECT DATA VOLUMES PRESERVED - No volume cleanup performed for safety'
+        
+        echo 'After PROJECT-specific cleanup:'
+        echo 'PROJECT containers:' \$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' | wc -l)
+        echo 'PROJECT images:' \$(docker images | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT volumes:' \$(docker volume ls | grep \"${PROJECT_NAME}\" | wc -l)
+        echo 'PROJECT networks:' \$(docker network ls | grep \"${PROJECT_NAME}\" | wc -l)
+        
+        echo '🗂️  Cleaning PROJECT temporary files only...'
+        rm -rf /opt/$PROJECT_NAME/tmp/* 2>/dev/null || true
+        rm -rf /opt/$PROJECT_NAME/.cache/* 2>/dev/null || true
+        
+        echo '🌐 After cleanup - Server state verification:'
+        echo 'Total containers on server:' \$(docker ps --format '{{.Names}}' | wc -l)
+        echo 'Total images on server:' \$(docker images --format '{{.Repository}}:{{.Tag}}' | wc -l)
+        echo 'Total volumes on server:' \$(docker volume ls --format '{{.Name}}' | wc -l)
+        echo 'Total networks on server:' \$(docker network ls --format '{{.Name}}' | wc -l)
         echo ''
-        echo 'Final status after force rebuild:'
-        docker ps --filter name=\"\${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-    " || error "Failed to force rebuild and deploy services"
+        
+        echo '✅ STRICTLY PROJECT-SCOPED cleanup and container fix completed for $PROJECT_NAME'
+        echo 'Current PROJECT containers:'
+        docker ps --filter name=\"${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo 'No PROJECT containers running'
+        
+        echo '🌐 Other server containers remain COMPLETELY UNTOUCHED:'
+        OTHER_CONTAINERS=\$(docker ps --format '{{.Names}}' | grep -v \"${PROJECT_NAME}-\" | head -5)
+        if [ -n \"\$OTHER_CONTAINERS\" ]; then
+            echo \"\$OTHER_CONTAINERS\"
+        else
+            echo 'No other containers visible or all containers are PROJECT-scoped'
+        fi
+    " || error "Failed to cleanup project and fix containers"
+
+    # Handle data overwrite if selected
+    if [ "$overwrite_data" = true ]; then
+        progress "🔄 Starting PROJECT data overwrite from local to server..."
+        
+        # Create temp directory for file transfer
+        mkdir -p "$TEMP_DIR" || error "Failed to create temp directory for data overwrite"
+        success "Temporary directory created: $TEMP_DIR"
+
+        progress "📤 Preparing PROJECT files for overwrite transfer..."
+        # Show what will be excluded
+        info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
+        
+        # Copy all project files to temp directory (excluding sensitive files)
+        rsync -av \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='*.log' \
+            --exclude='.env*' \
+            --exclude='*.md' \
+            --exclude='*.sh' \
+            --exclude='tmp' \
+            --exclude='.cache' \
+            . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+        
+        # Show transfer size
+        size=$(du -sh "$TEMP_DIR" | cut -f1)
+        info "Transfer size: $size"
+
+        progress "🔐 Backing up existing PROJECT environment file on server..."
+        ssh "$SSH_USER@$SERVER_IP" "
+            cd /opt/$PROJECT_NAME/ 2>/dev/null || mkdir -p /opt/$PROJECT_NAME/
+            if [ -f .env ]; then
+                cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
+                echo '✅ PROJECT environment file backed up with timestamp'
+            else
+                echo '⚠️  No existing PROJECT .env file found to backup'
+            fi
+        " || warning "Could not backup PROJECT environment file"
+
+        progress "🌐 Overwriting PROJECT files on server (preserving .env files)..."
+        # Use rsync to overwrite files but preserve .env files
+        rsync -avz --progress \
+            --exclude='.env*' \
+            --delete-excluded \
+            "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to overwrite files on remote server"
+        
+        progress "🔧 Restoring PROJECT environment configuration..."
+        ssh "$SSH_USER@$SERVER_IP" "
+            cd /opt/$PROJECT_NAME/
+            # Restore the most recent backup if no .env exists
+            if [ ! -f .env ]; then
+                LATEST_BACKUP=\$(ls -t .env.backup.* 2>/dev/null | head -n1)
+                if [ -n \"\$LATEST_BACKUP\" ]; then
+                    cp \"\$LATEST_BACKUP\" .env
+                    echo '✅ PROJECT environment file restored from backup: '\$LATEST_BACKUP
+                elif [ -f .env.prod ]; then
+                    cp .env.prod .env
+                    echo '📝 Using .env.prod as fallback PROJECT environment'
+                else
+                    echo '❌ No PROJECT environment file available - you may need to create one'
+                fi
+            else
+                echo '✅ PROJECT environment file already exists and preserved'
+            fi
+            
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+            
+            echo '📋 PROJECT directory structure after overwrite:'
+            ls -la | head -20
+        " || warning "Could not restore PROJECT environment file"
+        
+        # Cleanup temp directory
+        rm -rf "$TEMP_DIR"
+        success "Local cleanup completed"
+        
+        success "🎉 PROJECT data overwrite completed successfully!"
+        info "✅ All PROJECT files updated from local to server"
+        info "✅ PROJECT environment files preserved/restored"
+        warning "🔒 PROJECT-SCOPED: Only $PROJECT_NAME files were overwritten"
+    fi
+
+    success "STRICTLY PROJECT-SCOPED cleanup and container fix completed successfully for $PROJECT_NAME"
+    warning "✅ ONLY $PROJECT_NAME containers were affected"
+    warning "✅ ALL other server services remain completely untouched"
+    warning "✅ Server isolation maintained throughout cleanup process"
     
-    success "🔥 Force rebuild and deployment completed"
+    if [ "$overwrite_data" = true ]; then
+        warning "✅ PROJECT files successfully overwritten from local to server"
+        info "💡 You may want to deploy the application now to apply the updated files"
+    fi
 }
 
 # Function to deploy specific services smartly (STRICTLY PROJECT-SCOPED)
@@ -1160,89 +1014,118 @@ deploy_selected_services() {
     warning "✅ Healthy services continued running without interruption"
 }
 
-# Function for project cleanup and container fix (STRICTLY PROJECT-SCOPED)
-project_cleanup_and_container_fix() {
-    progress "🧹 Starting PROJECT-SCOPED cleanup and container fix..."
-    warning "🔒 This operation is STRICTLY PROJECT-SCOPED and will only affect $PROJECT_NAME containers"
+# Initialize configuration
+get_server_config
+
+# Main script with enhanced menu handling
+while true; do
+    show_menu
+    echo -ne "${YELLOW}Enter your choice: ${NC}"
+    read choice
+    echo ""
     
-    ssh "$SSH_USER@$SERVER_IP" "
-        echo '🔒════════════════════════════════════════════════🔒'
-        echo '🔒          PROJECT-SCOPED CLEANUP               🔒'
-        echo '🔒                PROJECT: $PROJECT_NAME          🔒'
-        echo '🔒════════════════════════════════════════════════🔒'
-        echo ''
-        
-        cd /opt/$PROJECT_NAME/ 2>/dev/null || {
-            echo '❌ Project directory not found: /opt/$PROJECT_NAME'
-            echo 'Creating project directory...'
-            mkdir -p /opt/$PROJECT_NAME
-            echo '✅ Project directory created'
-            exit 0
-        }
-        
-        echo '🛑 Stopping PROJECT containers...'
-        # Stop only project-specific containers
-        PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' 2>/dev/null)
-        if [ -n \"\$PROJECT_CONTAINERS\" ]; then
-            echo \"Found PROJECT containers: \$PROJECT_CONTAINERS\"
-            docker stop \$PROJECT_CONTAINERS 2>/dev/null || true
-            docker rm -f \$PROJECT_CONTAINERS 2>/dev/null || true
-            echo '✅ PROJECT containers stopped and removed'
-        else
-            echo 'ℹ️  No PROJECT containers found to stop'
-        fi
-        
-        echo ''
-        echo '🗑️ Cleaning PROJECT Docker resources...'
-        # Remove project-specific images
-        PROJECT_IMAGES=\$(docker images --filter reference=\"${PROJECT_NAME}*\" --format '{{.Repository}}:{{.Tag}}' 2>/dev/null)
-        if [ -n \"\$PROJECT_IMAGES\" ]; then
-            echo \"Found PROJECT images: \$PROJECT_IMAGES\"
-            docker rmi \$PROJECT_IMAGES 2>/dev/null || true
-            echo '✅ PROJECT images removed'
-        else
-            echo 'ℹ️  No PROJECT images found to remove'
-        fi
-        
-        # Clean project-specific volumes (with caution)
-        echo ''
-        echo '📦 PROJECT volumes status:'
-        PROJECT_VOLUMES=\$(docker volume ls --filter name=\"${PROJECT_NAME}\" --format '{{.Name}}' 2>/dev/null)
-        if [ -n \"\$PROJECT_VOLUMES\" ]; then
-            echo \"Found PROJECT volumes: \$PROJECT_VOLUMES\"
-            echo '⚠️  Volumes contain data - keeping them for safety'
-            echo 'To remove volumes manually: docker volume rm \$PROJECT_VOLUMES'
-        else
-            echo 'ℹ️  No PROJECT volumes found'
-        fi
-        
-        echo ''
-        echo '🔧 Checking PROJECT directory...'
-        if [ -f docker-compose.yml ]; then
-            echo '✅ docker-compose.yml exists'
-        else
-            echo '❌ docker-compose.yml missing'
-        fi
-        
-        if [ -f .env ]; then
-            echo '✅ .env file exists'
-        else
-            echo '❌ .env file missing'
-            if [ -f .env.prod ]; then
-                echo '📝 Found .env.prod - you can copy it to .env'
+    case $choice in
+        0)
+            log "Option 0 selected: Configure server settings"
+            get_server_config
+            ;;
+        1)
+            log "Option 1 selected: Smart Deploy with Git (Site & API) - preserves healthy services"
+            warning "This will commit git changes and intelligently update Site & API services"
+            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                git_commit_and_update_preserve_data
+            else
+                warning "Deployment cancelled"
             fi
-        fi
-        
-        echo ''
-        echo '✅ PROJECT cleanup completed successfully'
-        echo '🔒 Only $PROJECT_NAME resources were affected'
-        echo ''
-        echo 'Next steps:'
-        echo '1. Verify .env file exists'
-        echo '2. Run deployment option to restart services'
-    " || error "Failed to cleanup PROJECT containers"
-    
-    success "🎉 PROJECT-SCOPED cleanup and fix completed!"
-    info "Only $PROJECT_NAME containers and resources were affected"
-    warning "🔒 Server isolation maintained - no other services affected"
-}
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        2)
+            log "Option 2 selected: Smart Deploy ALL with Git - preserves healthy services"
+            warning "This will commit git changes and intelligently update ALL services"
+            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                git_commit_and_update_all_preserve_data
+            else
+                warning "Deployment cancelled"
+            fi
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        3)
+            log "Option 3 selected: Deploy only (skip git operations) - smart mode"
+            warning "Skipping git operations..."
+            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
+            deploy_to_server
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        4)
+            log "Option 4 selected: Project cleanup & container fix (PROJECT ONLY)"
+            warning "This will perform STRICTLY PROJECT-SCOPED cleanup and fix container conflicts"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers and resources"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                project_cleanup_and_container_fix
+            else
+                warning "Cleanup cancelled"
+            fi
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        5)
+            log "Option 5 selected: Check project status"
+            check_server_status
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        6)
+            log "Option 6 selected: Fresh deploy with new environment"
+            warning "This will remove all old .env files and use .env.prod as new environment"
+            warning "🧠 SMART MODE: Only unhealthy services will be restarted"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                fresh_deploy_to_server
+            else
+                warning "Fresh deployment cancelled"
+            fi
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        7)
+            log "Option 7 selected: Smart deploy specific services"
+            warning "🧠 SMART MODE: Only unhealthy selected services will be restarted"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects selected $PROJECT_NAME services"
+            deploy_selected_services
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;
+        q|Q)
+            echo -e "${GREEN}👋 Thank you for using SMART PROJECT-SCOPED Deployment Tool!${NC}"
+            echo -e "${CYAN}Goodbye!${NC}"
+            exit 0
+            ;;
+        *)
+            error "Invalid option. Please try again."
+            sleep 2
+            ;;
+    esac
+done
