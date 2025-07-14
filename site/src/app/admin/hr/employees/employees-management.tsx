@@ -20,6 +20,7 @@ import {
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
+import useUnifiedTheme from '@/hooks/useUnifiedTheme';
 
 interface Employee {
   id: string;
@@ -60,14 +61,14 @@ interface Position {
 
 const EmployeeManagement: React.FC = () => {
   const { user } = useAuth();
+  const { config, colors, actualMode } = useUnifiedTheme();
+  
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-    null
-  );
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -91,27 +92,37 @@ const EmployeeManagement: React.FC = () => {
     {
       value: 'ACTIVE',
       label: 'Đang làm việc',
-      color: 'bg-green-100 text-green-800',
+      color: config.colorScheme === 'colorful' 
+        ? 'bg-colorful-success text-colorful-success-foreground' 
+        : 'bg-green-100 text-green-800',
     },
     {
       value: 'INACTIVE',
-      label: 'Nghỉ việc',
-      color: 'bg-gray-100 text-gray-800',
+      label: 'Không hoạt động',
+      color: config.colorScheme === 'colorful'
+        ? 'bg-colorful-muted text-colorful-muted-foreground'
+        : 'bg-gray-100 text-gray-800',
     },
     {
       value: 'TERMINATED',
-      label: 'Bị sa thải',
-      color: 'bg-red-100 text-red-800',
+      label: 'Đã nghỉ việc',
+      color: config.colorScheme === 'colorful'
+        ? 'bg-colorful-error text-colorful-error-foreground'
+        : 'bg-red-100 text-red-800',
     },
     {
       value: 'ON_LEAVE',
-      label: 'Nghỉ phép',
-      color: 'bg-yellow-100 text-yellow-800',
+      label: 'Đang nghỉ phép',
+      color: config.colorScheme === 'colorful'
+        ? 'bg-colorful-warning text-colorful-warning-foreground'
+        : 'bg-yellow-100 text-yellow-800',
     },
     {
       value: 'PROBATION',
       label: 'Thử việc',
-      color: 'bg-blue-100 text-blue-800',
+      color: config.colorScheme === 'colorful'
+        ? 'bg-colorful-primary text-colorful-primary-foreground'
+        : 'bg-blue-100 text-blue-800',
     },
   ];
 
@@ -145,7 +156,7 @@ const EmployeeManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching employees:', error);
-      setError('Lỗi kết nối đến server');
+      setError('Lỗi kết nối');
     } finally {
       setLoading(false);
     }
@@ -206,11 +217,11 @@ const EmployeeManagement: React.FC = () => {
         setError('');
       } else {
         const data = await response.json();
-        setError(data.error || 'Có lỗi xảy ra');
+        setError(data.error || 'Lỗi khi lưu thông tin');
       }
     } catch (error) {
       console.error('Error saving employee:', error);
-      setError('Lỗi kết nối đến server');
+      setError('Lỗi kết nối');
     }
   };
 
@@ -242,11 +253,11 @@ const EmployeeManagement: React.FC = () => {
           setError('');
         } else {
           const data = await response.json();
-          setError(data.error || 'Không thể xóa nhân viên');
+          setError(data.error || 'Lỗi khi xóa nhân viên');
         }
       } catch (error) {
         console.error('Error deleting employee:', error);
-        setError('Lỗi kết nối đến server');
+        setError('Lỗi kết nối');
       }
     }
   };
@@ -338,7 +349,11 @@ const EmployeeManagement: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className={`animate-spin rounded-full h-32 w-32 border-b-2 ${
+          config.colorScheme === 'colorful' 
+            ? 'border-colorful-primary' 
+            : 'border-accent'
+        }`}></div>
       </div>
     );
   }
@@ -348,16 +363,27 @@ const EmployeeManagement: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className={`text-2xl font-semibold ${
+            config.colorScheme === 'colorful' 
+              ? 'text-colorful-foreground' 
+              : 'text-text'
+          }`}>
             Quản lý nhân viên
           </h1>
-          <p className="text-gray-600">
-            Quản lý thông tin và dữ liệu nhân viên
+          <p className={config.colorScheme === 'colorful' 
+            ? 'text-colorful-muted-foreground' 
+            : 'text-text-secondary'
+          }>
+            Quản lý thông tin nhân viên trong công ty
           </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+            config.colorScheme === 'colorful'
+              ? 'bg-colorful-primary text-colorful-primary-foreground hover:bg-colorful-primary/90'
+              : 'bg-accent text-white hover:opacity-90'
+          }`}
         >
           <PlusIcon className="h-5 w-5" />
           Thêm nhân viên
@@ -366,85 +392,187 @@ const EmployeeManagement: React.FC = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2">
-          <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
-          <span className="text-red-700">{error}</span>
+        <div className={`border rounded-lg p-4 flex items-center gap-2 ${
+          config.colorScheme === 'colorful'
+            ? 'bg-colorful-error/10 border-colorful-error text-colorful-error-foreground'
+            : 'bg-red-50 border-red-200 text-red-700'
+        }`}>
+          <ExclamationTriangleIcon className="h-5 w-5" />
+          <span>{error}</span>
         </div>
       )}
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className={`rounded-lg shadow-sm p-6 ${
+          config.colorScheme === 'colorful' 
+            ? 'bg-colorful-card border border-colorful-border' 
+            : 'bg-surface border border-border'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
-                Tổng nhân viên
+              <p className={`text-sm font-medium ${
+                config.colorScheme === 'colorful' 
+                  ? 'text-colorful-muted-foreground' 
+                  : 'text-text-secondary'
+              }`}>
+                Tổng số nhân viên
               </p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className={`text-2xl font-semibold ${
+                config.colorScheme === 'colorful' 
+                  ? 'text-colorful-foreground' 
+                  : 'text-text'
+              }`}>
                 {employees.length}
               </p>
             </div>
-            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <UserIcon className="h-6 w-6 text-blue-600" />
+            <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+              config.colorScheme === 'colorful'
+                ? 'bg-colorful-primary/10'
+                : 'bg-blue-100'
+            }`}>
+              <UserIcon className={`h-6 w-6 ${
+                config.colorScheme === 'colorful'
+                  ? 'text-colorful-primary'
+                  : 'text-blue-600'
+              }`} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className={`rounded-lg shadow-sm p-6 ${
+          config.colorScheme === 'colorful' 
+            ? 'bg-colorful-card border border-colorful-border' 
+            : 'bg-surface border border-border'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Đang làm việc</p>
-              <p className="text-2xl font-semibold text-green-600">
+              <p className={`text-sm font-medium ${
+                config.colorScheme === 'colorful' 
+                  ? 'text-colorful-muted-foreground' 
+                  : 'text-text-secondary'
+              }`}>
+                Đang làm việc
+              </p>
+              <p className={`text-2xl font-semibold ${
+                config.colorScheme === 'colorful'
+                  ? 'text-colorful-success'
+                  : 'text-green-600'
+              }`}>
                 {employees.filter(emp => emp.status === 'ACTIVE').length}
               </p>
             </div>
-            <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <UserIcon className="h-6 w-6 text-green-600" />
+            <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+              config.colorScheme === 'colorful'
+                ? 'bg-colorful-success/10'
+                : 'bg-green-100'
+            }`}>
+              <UserIcon className={`h-6 w-6 ${
+                config.colorScheme === 'colorful'
+                  ? 'text-colorful-success'
+                  : 'text-green-600'
+              }`} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className={`rounded-lg shadow-sm p-6 ${
+          config.colorScheme === 'colorful' 
+            ? 'bg-colorful-card border border-colorful-border' 
+            : 'bg-surface border border-border'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Thử việc</p>
-              <p className="text-2xl font-semibold text-yellow-600">
+              <p className={`text-sm font-medium ${
+                config.colorScheme === 'colorful' 
+                  ? 'text-colorful-muted-foreground' 
+                  : 'text-text-secondary'
+              }`}>
+                Đang thử việc
+              </p>
+              <p className={`text-2xl font-semibold ${
+                config.colorScheme === 'colorful'
+                  ? 'text-colorful-warning'
+                  : 'text-yellow-600'
+              }`}>
                 {employees.filter(emp => emp.status === 'PROBATION').length}
               </p>
             </div>
-            <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <UserIcon className="h-6 w-6 text-yellow-600" />
+            <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+              config.colorScheme === 'colorful'
+                ? 'bg-colorful-warning/10'
+                : 'bg-yellow-100'
+            }`}>
+              <UserIcon className={`h-6 w-6 ${
+                config.colorScheme === 'colorful'
+                  ? 'text-colorful-warning'
+                  : 'text-yellow-600'
+              }`} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className={`rounded-lg shadow-sm p-6 ${
+          config.colorScheme === 'colorful' 
+            ? 'bg-colorful-card border border-colorful-border' 
+            : 'bg-surface border border-border'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Phòng ban</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className={`text-sm font-medium ${
+                config.colorScheme === 'colorful' 
+                  ? 'text-colorful-muted-foreground' 
+                  : 'text-text-secondary'
+              }`}>
+                Phòng ban
+              </p>
+              <p className={`text-2xl font-semibold ${
+                config.colorScheme === 'colorful' 
+                  ? 'text-colorful-foreground' 
+                  : 'text-text'
+              }`}>
                 {departments.length}
               </p>
             </div>
-            <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <BuildingOfficeIcon className="h-6 w-6 text-purple-600" />
+            <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+              config.colorScheme === 'colorful'
+                ? 'bg-colorful-secondary/10'
+                : 'bg-purple-100'
+            }`}>
+              <BuildingOfficeIcon className={`h-6 w-6 ${
+                config.colorScheme === 'colorful'
+                  ? 'text-colorful-secondary'
+                  : 'text-purple-600'
+              }`} />
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className={`rounded-lg shadow-sm p-6 ${
+        config.colorScheme === 'colorful' 
+          ? 'bg-colorful-card border border-colorful-border' 
+          : 'bg-surface border border-border'
+      }`}>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${
+                config.colorScheme === 'colorful' 
+                  ? 'text-colorful-muted-foreground' 
+                  : 'text-text-secondary'
+              }`} />
               <input
                 type="text"
-                placeholder="Tìm kiếm theo tên, mã nhân viên hoặc email..."
+                placeholder="Tìm kiếm nhân viên..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                  config.colorScheme === 'colorful'
+                    ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                    : 'border-border bg-background text-text focus:ring-accent'
+                }`}
               />
             </div>
           </div>
@@ -452,7 +580,11 @@ const EmployeeManagement: React.FC = () => {
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                config.colorScheme === 'colorful'
+                  ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                  : 'border-border bg-background text-text focus:ring-accent'
+              }`}
             >
               <option value="all">Tất cả trạng thái</option>
               {statusOptions.map(status => (
@@ -464,7 +596,11 @@ const EmployeeManagement: React.FC = () => {
             <select
               value={departmentFilter}
               onChange={e => setDepartmentFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                config.colorScheme === 'colorful'
+                  ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                  : 'border-border bg-background text-text focus:ring-accent'
+              }`}
             >
               <option value="all">Tất cả phòng ban</option>
               {departments.map(dept => (
@@ -478,13 +614,24 @@ const EmployeeManagement: React.FC = () => {
       </div>
 
       {/* Employee Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className={`rounded-lg shadow-sm overflow-hidden ${
+        config.colorScheme === 'colorful' 
+          ? 'bg-colorful-card border border-colorful-border' 
+          : 'bg-surface border border-border'
+      }`}>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className={config.colorScheme === 'colorful' 
+              ? 'bg-colorful-muted' 
+              : 'bg-gray-50'
+            }>
               <tr>
                 <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer transition-colors ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-muted-foreground hover:bg-colorful-muted/80'
+                      : 'text-text-secondary hover:bg-gray-100'
+                  }`}
                   onClick={() => handleSort('fullName')}
                 >
                   <div className="flex items-center">
@@ -498,7 +645,11 @@ const EmployeeManagement: React.FC = () => {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer transition-colors ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-muted-foreground hover:bg-colorful-muted/80'
+                      : 'text-text-secondary hover:bg-gray-100'
+                  }`}
                   onClick={() => handleSort('department')}
                 >
                   <div className="flex items-center">
@@ -512,7 +663,11 @@ const EmployeeManagement: React.FC = () => {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer transition-colors ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-muted-foreground hover:bg-colorful-muted/80'
+                      : 'text-text-secondary hover:bg-gray-100'
+                  }`}
                   onClick={() => handleSort('position')}
                 >
                   <div className="flex items-center">
@@ -526,7 +681,11 @@ const EmployeeManagement: React.FC = () => {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer transition-colors ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-muted-foreground hover:bg-colorful-muted/80'
+                      : 'text-text-secondary hover:bg-gray-100'
+                  }`}
                   onClick={() => handleSort('hireDate')}
                 >
                   <div className="flex items-center">
@@ -539,11 +698,19 @@ const EmployeeManagement: React.FC = () => {
                       ))}
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  config.colorScheme === 'colorful'
+                    ? 'text-colorful-muted-foreground'
+                    : 'text-text-secondary'
+                }`}>
                   Lương
                 </th>
                 <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer transition-colors ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-muted-foreground hover:bg-colorful-muted/80'
+                      : 'text-text-secondary hover:bg-gray-100'
+                  }`}
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center">
@@ -556,19 +723,35 @@ const EmployeeManagement: React.FC = () => {
                       ))}
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  config.colorScheme === 'colorful'
+                    ? 'text-colorful-muted-foreground'
+                    : 'text-text-secondary'
+                }`}>
                   Thao tác
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className={`divide-y ${
+              config.colorScheme === 'colorful' 
+                ? 'bg-colorful-card divide-colorful-border' 
+                : 'bg-surface divide-border'
+            }`}>
               {filteredAndSortedEmployees.map(employee => {
                 const statusConfig = getStatusConfig(employee.status);
                 return (
-                  <tr key={employee.id} className="hover:bg-gray-50">
+                  <tr key={employee.id} className={`transition-colors ${
+                    config.colorScheme === 'colorful'
+                      ? 'hover:bg-colorful-muted/50'
+                      : 'hover:bg-gray-50'
+                  }`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                          config.colorScheme === 'colorful'
+                            ? 'bg-colorful-muted'
+                            : 'bg-gray-100'
+                        }`}>
                           {employee.user?.avatar ? (
                             <img
                               src={employee.user.avatar}
@@ -576,26 +759,46 @@ const EmployeeManagement: React.FC = () => {
                               className="h-10 w-10 rounded-full object-cover"
                             />
                           ) : (
-                            <span className="text-sm font-medium text-gray-600">
+                            <span className={`text-sm font-medium ${
+                              config.colorScheme === 'colorful'
+                                ? 'text-colorful-muted-foreground'
+                                : 'text-text-secondary'
+                            }`}>
                               {employee.fullName.charAt(0)}
                             </span>
                           )}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className={`text-sm font-medium ${
+                            config.colorScheme === 'colorful'
+                              ? 'text-colorful-foreground'
+                              : 'text-text'
+                          }`}>
                             {employee.fullName}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className={`text-sm ${
+                            config.colorScheme === 'colorful'
+                              ? 'text-colorful-muted-foreground'
+                              : 'text-text-secondary'
+                          }`}>
                             {employee.employeeId}
                           </div>
                           {employee.email && (
-                            <div className="text-sm text-gray-500 flex items-center">
+                            <div className={`text-sm flex items-center ${
+                              config.colorScheme === 'colorful'
+                                ? 'text-colorful-muted-foreground'
+                                : 'text-text-secondary'
+                            }`}>
                               <EnvelopeIcon className="h-3 w-3 mr-1" />
                               {employee.email}
                             </div>
                           )}
                           {employee.phone && (
-                            <div className="text-sm text-gray-500 flex items-center">
+                            <div className={`text-sm flex items-center ${
+                              config.colorScheme === 'colorful'
+                                ? 'text-colorful-muted-foreground'
+                                : 'text-text-secondary'
+                            }`}>
                               <PhoneIcon className="h-3 w-3 mr-1" />
                               {employee.phone}
                             </div>
@@ -604,29 +807,47 @@ const EmployeeManagement: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className={`text-sm ${
+                        config.colorScheme === 'colorful'
+                          ? 'text-colorful-foreground'
+                          : 'text-text'
+                      }`}>
                         {employee.position.department.name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className={`text-sm ${
+                        config.colorScheme === 'colorful'
+                          ? 'text-colorful-foreground'
+                          : 'text-text'
+                      }`}>
                         {employee.position.title}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(employee.hireDate).toLocaleDateString(
-                          'vi-VN'
-                        )}
+                      <div className={`text-sm ${
+                        config.colorScheme === 'colorful'
+                          ? 'text-colorful-foreground'
+                          : 'text-text'
+                      }`}>
+                        {new Date(employee.hireDate).toLocaleDateString('vi-VN')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className={`text-sm ${
+                        config.colorScheme === 'colorful'
+                          ? 'text-colorful-foreground'
+                          : 'text-text'
+                      }`}>
                         {employee.salary
                           ? formatCurrency(employee.salary)
                           : 'Chưa cập nhật'}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className={`text-sm ${
+                        config.colorScheme === 'colorful'
+                          ? 'text-colorful-muted-foreground'
+                          : 'text-text-secondary'
+                      }`}>
                         {getContractTypeLabel(employee.contractType)}
                       </div>
                     </td>
@@ -641,13 +862,21 @@ const EmployeeManagement: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEdit(employee)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className={`transition-colors ${
+                            config.colorScheme === 'colorful'
+                              ? 'text-colorful-primary hover:text-colorful-primary/80'
+                              : 'text-blue-600 hover:text-blue-900'
+                          }`}
                         >
                           <PencilIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(employee)}
-                          className="text-red-600 hover:text-red-900"
+                          className={`transition-colors ${
+                            config.colorScheme === 'colorful'
+                              ? 'text-colorful-error hover:text-colorful-error/80'
+                              : 'text-red-600 hover:text-red-900'
+                          }`}
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>
@@ -664,19 +893,29 @@ const EmployeeManagement: React.FC = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className={`rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
+            config.colorScheme === 'colorful'
+              ? 'bg-colorful-card border border-colorful-border'
+              : 'bg-surface border border-border'
+          }`}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">
-                {selectedEmployee
-                  ? 'Chỉnh sửa nhân viên'
-                  : 'Thêm nhân viên mới'}
+              <h3 className={`text-lg font-semibold ${
+                config.colorScheme === 'colorful'
+                  ? 'text-colorful-foreground'
+                  : 'text-text'
+              }`}>
+                {selectedEmployee ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
               </h3>
               <button
                 onClick={() => {
                   setShowModal(false);
                   resetForm();
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className={`transition-colors ${
+                  config.colorScheme === 'colorful'
+                    ? 'text-colorful-muted-foreground hover:text-colorful-foreground'
+                    : 'text-text-secondary hover:text-text'
+                }`}
               >
                 <XCircleIcon className="h-6 w-6" />
               </button>
@@ -685,7 +924,11 @@ const EmployeeManagement: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
                     Họ *
                   </label>
                   <input
@@ -695,11 +938,19 @@ const EmployeeManagement: React.FC = () => {
                       setFormData({ ...formData, firstName: e.target.value })
                     }
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
                     Tên *
                   </label>
                   <input
@@ -709,14 +960,22 @@ const EmployeeManagement: React.FC = () => {
                       setFormData({ ...formData, lastName: e.target.value })
                     }
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
                     Email
                   </label>
                   <input
@@ -725,11 +984,19 @@ const EmployeeManagement: React.FC = () => {
                     onChange={e =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
                     Số điện thoại
                   </label>
                   <input
@@ -738,13 +1005,21 @@ const EmployeeManagement: React.FC = () => {
                     onChange={e =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${
+                  config.colorScheme === 'colorful'
+                    ? 'text-colorful-foreground'
+                    : 'text-text'
+                }`}>
                   Chức vụ *
                 </label>
                 <select
@@ -753,7 +1028,11 @@ const EmployeeManagement: React.FC = () => {
                     setFormData({ ...formData, positionId: e.target.value })
                   }
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                    config.colorScheme === 'colorful'
+                      ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                      : 'border-border bg-background text-text focus:ring-accent'
+                  }`}
                 >
                   <option value="">Chọn chức vụ</option>
                   {positions.map(position => (
@@ -770,7 +1049,11 @@ const EmployeeManagement: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
                     Lương (VND)
                   </label>
                   <input
@@ -781,11 +1064,19 @@ const EmployeeManagement: React.FC = () => {
                     }
                     min="0"
                     step="100000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
                     Ngày vào làm *
                   </label>
                   <input
@@ -795,14 +1086,22 @@ const EmployeeManagement: React.FC = () => {
                       setFormData({ ...formData, hireDate: e.target.value })
                     }
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
                     Trạng thái
                   </label>
                   <select
@@ -810,7 +1109,11 @@ const EmployeeManagement: React.FC = () => {
                     onChange={e =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   >
                     {statusOptions.map(status => (
                       <option key={status.value} value={status.value}>
@@ -820,15 +1123,23 @@ const EmployeeManagement: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Loại hợp đồng
+                  <label className={`block text-sm font-medium mb-1 ${
+                    config.colorScheme === 'colorful'
+                      ? 'text-colorful-foreground'
+                      : 'text-text'
+                  }`}>
+                    Hình thức hợp đồng
                   </label>
                   <select
                     value={formData.contractType}
                     onChange={e =>
                       setFormData({ ...formData, contractType: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      config.colorScheme === 'colorful'
+                        ? 'border-colorful-border bg-colorful-background text-colorful-foreground focus:ring-colorful-primary'
+                        : 'border-border bg-background text-text focus:ring-accent'
+                    }`}
                   >
                     {contractTypes.map(type => (
                       <option key={type.value} value={type.value}>
@@ -842,7 +1153,11 @@ const EmployeeManagement: React.FC = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 ${
+                    config.colorScheme === 'colorful'
+                      ? 'bg-colorful-primary text-colorful-primary-foreground hover:bg-colorful-primary/90 focus:ring-colorful-primary'
+                      : 'bg-accent text-white hover:opacity-90 focus:ring-accent'
+                  }`}
                 >
                   {selectedEmployee ? 'Cập nhật' : 'Thêm mới'}
                 </button>
@@ -852,7 +1167,11 @@ const EmployeeManagement: React.FC = () => {
                     setShowModal(false);
                     resetForm();
                   }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 ${
+                    config.colorScheme === 'colorful'
+                      ? 'bg-colorful-muted text-colorful-muted-foreground hover:bg-colorful-muted/80 focus:ring-colorful-muted'
+                      : 'bg-gray-300 text-gray-700 hover:bg-gray-400 focus:ring-gray-500'
+                  }`}
                 >
                   Hủy
                 </button>

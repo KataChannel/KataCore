@@ -1,5 +1,19 @@
-// Re-export shared Prisma client for Next.js app
-export { prisma as default, prisma } from '../../shared/lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: ['query'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+export default prisma;
 
 // Export all types
-export type * from '../../shared/lib/prisma';
+export * from '@prisma/client';
+export type * from '../../../shared/lib/prisma';

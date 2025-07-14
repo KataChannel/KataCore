@@ -545,7 +545,7 @@ body {
 }
 
 /* Border Radius Classes */
-.border-radius-none * {
+/* .border-radius-none * {
   border-radius: 0 !important;
 }
 .border-radius-sm * {
@@ -559,7 +559,7 @@ body {
 }
 .border-radius-xl * {
   border-radius: 1rem !important;
-}
+} */
 
 /* ============================================================================
    ACCESSIBILITY ENHANCEMENTS

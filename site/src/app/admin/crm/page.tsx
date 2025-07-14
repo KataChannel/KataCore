@@ -1,22 +1,20 @@
 'use client';
+import ResizableTable from '@/components/ui/shared/Table';
+
 import { useState } from 'react';
 
 export default function CRMPage() {
   const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${
-        isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'
-      }`}
+      className={`min-h-screen transition-colors duration-300`}
     >
       Xin Chào
+
+      <ResizableTable data={customers} columns={[]} />
+
     </div>
   );
 }
