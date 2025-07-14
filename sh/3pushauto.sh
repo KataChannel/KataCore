@@ -644,7 +644,7 @@ git_commit_and_update_preserve_data() {
     info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
     
     # Copy all project files to temp directory (excluding ALL env files)
-    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env*' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
+    rsync -av --exclude='.git' --exclude='node_modules' --exclude='*.log' --exclude='.env' --exclude='*.md' --exclude='*.sh' . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
     
     # Show transfer size
     size=$(du -sh "$TEMP_DIR" | cut -f1)
