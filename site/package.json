@@ -17,6 +17,8 @@
     "db:migrate": "cd ../shared && prisma db push",
     "db:seed": "cd ../shared && tsx prisma/seed/hrm-seed.ts",
     "db:studio": "cd ../shared && prisma studio",
+    "create-admin": "tsx scripts/quick-create-admin.ts",
+    "create-admin-interactive": "tsx scripts/create-admin-user.ts",
     "format": "prettier --write .",
     "clean": "rm -rf .next"
   },
@@ -59,10 +61,12 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/lodash": "^4.17.18",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.16.3",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "sharp": "^0.34.2",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.11",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3"
   }
 }
