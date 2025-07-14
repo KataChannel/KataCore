@@ -691,9 +691,9 @@ git_commit_and_update_preserve_data() {
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    # Use smart deployment for Site & API only
+    # Use smart deployment for Site & API only with NO CACHE
     # Stop and prune site and api services before deployment
-    progress "🛑 Stopping and pruning Site & API services..."
+    progress "🛑 Stopping and pruning Site & API services (NO CACHE MODE)..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
         
@@ -707,28 +707,83 @@ git_commit_and_update_preserve_data() {
             fi
         done
         
+        # Prune build cache and unused images for fresh build
+        echo '🧹 Clearing Docker build cache...'
+        docker builder prune -af 2>/dev/null || true
+        
         # Prune unused images related to site and api
-        echo 'Pruning unused images...'
+        echo '🧹 Pruning unused images...'
         docker image prune -f 2>/dev/null || true
         
-        # Remove any dangling site/api images
+        # Remove any existing site/api images to force rebuild
         SITE_API_IMAGES=\$(docker images | grep -E \"(${PROJECT_NAME}.*site|${PROJECT_NAME}.*api)\" | awk '{print \$3}')
         if [ -n \"\$SITE_API_IMAGES\" ]; then
-            echo \"Removing old site/api images...\"
+            echo \"🗑️ Removing old site/api images for fresh build...\"
             echo \"\$SITE_API_IMAGES\" | xargs docker rmi -f 2>/dev/null || true
         fi
         
-        echo 'Site & API services stopped and pruned successfully'
+        echo '✅ Site & API services stopped and cache cleared for fresh deployment'
     "
 
+    # Deploy with NO CACHE using modified smart deployment
+    progress "🚀 Starting NO CACHE deployment for Site & API services..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        echo 'SMART PROJECT-SCOPED NO CACHE DEPLOYMENT for $PROJECT_NAME'
+        echo 'Services to deploy: site api'
+        
+        if [ -f 'docker-compose.yml' ]; then
+            echo 'Starting NO CACHE Docker Compose deployment...'
+            
+            # Build and start site and api services with NO CACHE
+            for service in site api; do
+                echo \"🔄 Building and starting \$service with NO CACHE...\"
+                COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose build --no-cache \$service
+                COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --force-recreate \$service
+                
+                # Wait for the service to start
+                sleep 5
+                
+                # Check immediate status
+                container_name=\"\${PROJECT_NAME}-\$service\"
+                status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
+                echo \"Service \$service status: \$status\"
+            done
+            
+            echo 'Waiting for all deployed services to stabilize...'
+            sleep 15
+            
+            echo 'Final deployment status:'
+            docker ps --filter name=\"\${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+            
+        else
+            echo 'PROJECT docker-compose.yml not found!'
+            exit 1
+        fi
+    " || error "Failed to deploy services with NO CACHE"
 
-    smart_deploy_services "site api" "selective"
+    # Verify deployment success
+    progress "🔍 Verifying NO CACHE deployment success..."
+    local deployment_success=true
+    for service in site api; do
+        if check_service_health "$service"; then
+            success "✅ $service deployed successfully (NO CACHE)"
+        else
+            error "❌ $service deployment failed"
+            deployment_success=false
+        fi
+    done
     
-    success "🎉 Git commit and SMART PROJECT Site & API update completed successfully!"
-    info "✅ PROJECT Site and API services updated with latest code"
-    info "✅ PROJECT environment file (.env) preserved unchanged"
-    info "✅ Healthy services continue running without interruption"
-    warning "🧠 SMART MODE: Only failed services were restarted"
+    if [ "$deployment_success" = true ]; then
+        success "🎉 Git commit and SMART NO CACHE PROJECT Site & API update completed successfully!"
+        info "✅ PROJECT Site and API services updated with latest code (NO CACHE)"
+        info "✅ PROJECT environment file (.env) preserved unchanged"
+        info "✅ Fresh build without cache ensures latest code deployment"
+        warning "🧠 SMART MODE: Only failed services were restarted"
+        warning "🚀 NO CACHE MODE: Complete fresh build performed"
+    else
+        error "❌ Some services failed to deploy properly"
+    fi
 }
 
 # NEW FUNCTION: Combined function: Git commit + Update ALL services while preserving data - SMART MODE
