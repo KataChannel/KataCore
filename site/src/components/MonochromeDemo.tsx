@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTheme } from '../hooks/useTheme';
-import { useLanguage } from '../hooks/useTheme';
+import { useSafeThemeMode, useSafeLanguage } from '../hooks/useUnifiedTheme';
 import { useTranslation } from '../lib/config/i18n';
 import {
   SunIcon,
@@ -15,9 +14,9 @@ import {
 } from '@heroicons/react/24/outline';
 
 export function MonochromeDemo() {
-  const { mode, toggleMode } = useTheme();
-  const { language, toggleLanguage } = useLanguage();
-  const { t } = useTranslation(language);
+  const { mode, toggleMode } = useSafeThemeMode();
+  const { language, toggleLanguage } = useSafeLanguage();
+  const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (

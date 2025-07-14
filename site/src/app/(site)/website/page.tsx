@@ -8,14 +8,18 @@ export default function Page() {
   // Function to scroll to a section
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
   // Handle scroll to detect when navigation should be fixed
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleScroll = () => {
       const logoSearchHeight = document.getElementById('logo-search')?.offsetHeight || 0;
       setIsScrolled(window.scrollY > logoSearchHeight);

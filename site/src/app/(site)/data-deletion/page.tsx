@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { ClientOnly } from '@/components/ClientOnly';
 
 export default function HomePage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -9,14 +10,16 @@ export default function HomePage() {
   // Load theme from localStorage on component mount
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+    }
   }, []);
 
   // Save theme to localStorage when it changes
   useEffect(() => {
-    if (mounted) {
+    if (mounted && typeof window !== 'undefined') {
       localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
       document.documentElement.classList.toggle('dark', isDarkMode);
     }
@@ -26,12 +29,13 @@ export default function HomePage() {
     setIsDarkMode(!isDarkMode);
   };
 
-  if (!mounted) {
-    return null; // Prevent hydration mismatch
-  }
-
   return (
-    <div
+    <ClientOnly fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <div
       className={`font-mono min-h-screen transition-all duration-500 ease-in-out ${
         isDarkMode ? 'bg-black text-white' : 'bg-white text-black'
       }`}
@@ -232,5 +236,6 @@ export default function HomePage() {
         </section>
       </div>
     </div>
+    </ClientOnly>
   );
 }

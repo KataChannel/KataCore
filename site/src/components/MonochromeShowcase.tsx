@@ -11,14 +11,14 @@ import {
   SparklesIcon,
   EyeIcon,
 } from '@heroicons/react/24/outline';
-import { useMonochrome } from '../hooks/useMonochromeTheme';
+import { useSafeThemeMode, useSafeLanguage } from '../hooks/useUnifiedTheme';
 import { useTranslation } from '../lib/config/i18n';
 
 const MonochromeShowcase: React.FC = () => {
-  const { mode, actualMode, toggleMode, setMode, language, toggleLanguage, isLoading } =
-    useMonochrome();
+  const { mode, actualMode, toggleMode, setMode } = useSafeThemeMode();
+  const { language, toggleLanguage } = useSafeLanguage();
 
-  const { t } = useTranslation(language);
+  const { t } = useTranslation();
 
   const getModeIcon = () => {
     switch (mode) {
@@ -33,16 +33,29 @@ const MonochromeShowcase: React.FC = () => {
     }
   };
 
+  const getModeLabel = () => {
+    switch (mode) {
+      case 'light':
+        return t('lightMode');
+      case 'dark':
+        return t('darkMode');
+      case 'auto':
+        return t('autoMode');
+      default:
+        return t('lightMode');
+    }
+  };
+
   const getModeText = () => {
     switch (mode) {
       case 'light':
-        return t('lightMode', 'Light Mode');
+        return t('lightMode');
       case 'dark':
-        return t('darkMode', 'Dark Mode');
+        return t('darkMode');
       case 'auto':
-        return t('autoMode', 'Auto Mode');
+        return t('autoMode');
       default:
-        return t('lightMode', 'Light Mode');
+        return t('lightMode');
     }
   };
 
@@ -97,13 +110,7 @@ const MonochromeShowcase: React.FC = () => {
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="mono-loading w-32 h-32 bg-surface rounded-lg"></div>
-      </div>
-    );
-  }
+  // Loading state removed - using safe hooks instead
 
   return (
     <div className="min-h-screen bg-background mono-transition">

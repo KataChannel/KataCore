@@ -8,9 +8,11 @@ export default function TestAuthPage() {
   const [sessionStorageToken, setSessionStorageToken] = useState('');
 
   useEffect(() => {
-    setCookies(document.cookie);
-    setLocalStorageToken(window.localStorage.getItem('token') || 'null');
-    setSessionStorageToken(window.sessionStorage.getItem('token') || 'null');
+    if (typeof window !== 'undefined') {
+      setCookies(document.cookie);
+      setLocalStorageToken(window.localStorage.getItem('token') || 'null');
+      setSessionStorageToken(window.sessionStorage.getItem('token') || 'null');
+    }
   }, []);
 
   return (

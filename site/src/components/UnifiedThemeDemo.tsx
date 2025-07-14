@@ -1,19 +1,17 @@
 // Example component demonstrating the unified theme system
 // This shows how to use the new unified theme in a real component
 'use client';
-import { useIsDarkMode } from '@/hooks/useMonochromeTheme';
-import { useLanguage } from '@/hooks/useTheme';
-import useUnifiedTheme, { useThemeMode } from '@/hooks/useUnifiedTheme';
 import React, { useState } from 'react';
 import { ThemeModeToggle, LanguageToggle, ThemeControlPanel } from './ThemeManager';
+import { useUnifiedTheme, useSafeThemeMode, useSafeLanguage } from '@/hooks/useUnifiedTheme';
+
 export function UnifiedThemeDemo() {
   const [activeTab, setActiveTab] = useState<'overview' | 'controls' | 'examples'>('overview');
 
   // Different ways to access theme data
   const theme = useUnifiedTheme();
-  const { mode, actualMode, toggleMode } = useThemeMode();
-  const { language, toggleLanguage } = useLanguage();
-  const isDark = useIsDarkMode();
+  const { mode, actualMode } = useSafeThemeMode();
+  const { language } = useSafeLanguage();
 
   const getText = (en: string, vi: string) => {
     return language === 'en' ? en : vi;

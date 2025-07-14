@@ -78,13 +78,14 @@ export function UnifiedThemeProvider({
   enablePersistence = true,
   enableSystemListener = true,
 }: UnifiedThemeProviderProps) {
-  // State
+  // State with SSR-safe initialization
   const [config, setConfigState] = useState<ThemeConfig>(() => {
-    const defaults = { ...UNIFIED_THEME_CONFIG.defaults, ...defaultConfig };
-    return enablePersistence ? loadThemeConfig() : defaults;
+    // Use defaults during SSR, load from storage on client
+    return { ...UNIFIED_THEME_CONFIG.defaults, ...defaultConfig };
   });
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const [actualMode, setActualMode] = useState<'light' | 'dark'>('light');
   const [colors, setColors] = useState<ColorPalette>(getThemeColors('light'));
 
@@ -92,8 +93,16 @@ export function UnifiedThemeProvider({
   const isSystemMode = config.mode === 'auto';
   const classes = getThemeClasses(config);
 
-  // Initialize theme on mount
+  // Initialize theme on mount (client-side only)
   useEffect(() => {
+    setIsMounted(true);
+    
+    // Load persisted config on client side
+    if (enablePersistence) {
+      const loadedConfig = loadThemeConfig();
+      setConfigState({ ...config, ...loadedConfig });
+    }
+    
     const applied = applyThemeMode(config.mode);
     setActualMode(applied);
     setColors(getThemeColors(applied));
@@ -103,21 +112,21 @@ export function UnifiedThemeProvider({
 
   // Handle config changes
   useEffect(() => {
-    if (!isLoading) {
-      const applied = applyThemeMode(config.mode);
-      setActualMode(applied);
-      setColors(getThemeColors(applied));
-      applyCSSVariables(config);
+    if (!isMounted || isLoading) return;
+    
+    const applied = applyThemeMode(config.mode);
+    setActualMode(applied);
+    setColors(getThemeColors(applied));
+    applyCSSVariables(config);
 
-      if (enablePersistence) {
-        saveThemeConfig(config);
-      }
+    if (enablePersistence) {
+      saveThemeConfig(config);
     }
-  }, [config, isLoading, enablePersistence]);
+  }, [config, isLoading, isMounted, enablePersistence]);
 
   // System theme listener
   useEffect(() => {
-    if (!enableSystemListener || config.mode !== 'auto') return;
+    if (!isMounted || !enableSystemListener || config.mode !== 'auto') return;
 
     const cleanup = createSystemThemeListener((isDark: boolean) => {
       const newMode = isDark ? 'dark' : 'light';
@@ -127,7 +136,12 @@ export function UnifiedThemeProvider({
     });
 
     return cleanup;
-  }, [config.mode, enableSystemListener]);
+  }, [config.mode, enableSystemListener, isMounted]);
+
+  // Internal config update function
+  const updateConfigInternal = useCallback((updates: Partial<ThemeConfig>) => {
+    setConfigState((prev: ThemeConfig) => ({ ...prev, ...updates }));
+  }, []);
 
   // Accessibility: Listen for reduced motion preference
   useEffect(() => {
@@ -148,12 +162,7 @@ export function UnifiedThemeProvider({
     }
 
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [config.reducedMotion]);
-
-  // Internal config update function
-  const updateConfigInternal = useCallback((updates: Partial<ThemeConfig>) => {
-    setConfigState((prev: ThemeConfig) => ({ ...prev, ...updates }));
-  }, []);
+  }, [config.reducedMotion, updateConfigInternal]);
 
   // ============================================================================
   // ACTION FUNCTIONS
@@ -311,10 +320,30 @@ export function useUnifiedTheme(): UnifiedThemeContextType {
 }
 
 /**
- * Hook for theme mode only
+ * Safe hook that returns default values if provider is not available
  */
-export function useThemeMode() {
-  const { config, actualMode, setMode, toggleMode, isSystemMode } = useUnifiedTheme();
+export function useSafeUnifiedTheme(): UnifiedThemeContextType | null {
+  const context = useContext(UnifiedThemeContext);
+  return context || null;
+}
+
+/**
+ * Hook for theme mode with fallback
+ */
+export function useSafeThemeMode() {
+  const context = useSafeUnifiedTheme();
+  
+  if (!context) {
+    return {
+      mode: 'light' as ThemeMode,
+      actualMode: 'light' as const,
+      setMode: () => {},
+      toggleMode: () => {},
+      isSystemMode: false,
+    };
+  }
+
+  const { config, actualMode, setMode, toggleMode, isSystemMode } = context;
   return {
     mode: config.mode,
     actualMode,
@@ -325,10 +354,20 @@ export function useThemeMode() {
 }
 
 /**
- * Hook for language only
+ * Hook for language with fallback
  */
-export function useLanguage() {
-  const { config, setLanguage, toggleLanguage } = useUnifiedTheme();
+export function useSafeLanguage() {
+  const context = useSafeUnifiedTheme();
+  
+  if (!context) {
+    return {
+      language: 'vi' as Language,
+      setLanguage: () => {},
+      toggleLanguage: () => {},
+    };
+  }
+
+  const { config, setLanguage, toggleLanguage } = context;
   return {
     language: config.language,
     setLanguage,
@@ -371,6 +410,32 @@ export function useAccessibility() {
     reducedMotion: config.reducedMotion,
     enableHighContrast,
     enableReducedMotion,
+  };
+}
+
+/**
+ * Hook for theme mode (alternative to useSafeThemeMode for backward compatibility)
+ */
+export function useThemeMode() {
+  const { config, actualMode, setMode, toggleMode, isSystemMode } = useUnifiedTheme();
+  return {
+    mode: config.mode,
+    actualMode,
+    setMode,
+    toggleMode,
+    isSystemMode,
+  };
+}
+
+/**
+ * Hook for language (alternative to useSafeLanguage for backward compatibility)
+ */
+export function useLanguage() {
+  const { config, setLanguage, toggleLanguage } = useUnifiedTheme();
+  return {
+    language: config.language,
+    setLanguage,
+    toggleLanguage,
   };
 }
 

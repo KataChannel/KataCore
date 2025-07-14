@@ -18,7 +18,10 @@ export default function DashboardPage() {
     const checkAuth = async () => {
       try {
         // Check token from localStorage/sessionStorage first
-        let token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        let token = null;
+        if (typeof window !== 'undefined') {
+          token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        }
         console.log(
           'Dashboard: checking token from storage:',
           token ? '***' + token.slice(-10) : 'null'

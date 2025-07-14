@@ -18,9 +18,9 @@ export const NotificationSystem = ({
 
   useEffect(() => {
     if (notifications.length > 0) {
-      const newNotifications = notifications.map((notification) => ({
+      const newNotifications = notifications.map((notification, index) => ({
         ...notification,
-        id: `${notification.timestamp}-${Math.random()}`,
+        id: `${notification.timestamp}-${index}`,
       }));
 
       setVisibleNotifications((prev) => [...prev, ...newNotifications]);

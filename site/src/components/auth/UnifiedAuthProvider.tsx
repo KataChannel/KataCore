@@ -9,27 +9,26 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { UnifiedPermissionService } from '@/lib/auth/unified-permission.service';
-import { authService } from '@/lib/auth/unified-auth.service';
 
 // ============================================================================
 // INTERFACES & TYPES
 // ============================================================================
 interface User {
   id: string;
-  email?: string;
-  phone?: string;
-  username?: string;
+  email?: string | undefined;
+  phone?: string | undefined;
+  username?: string | undefined;
   displayName: string;
-  avatar?: string;
+  avatar?: string | undefined;
   roleId: string;
   role?: {
-    id: string;
-    name: string;
-    permissions: string[];
-    level: number;
-  };
-  modules?: string[];
-  permissions?: string[];
+  id: string;
+  name: string;
+  permissions: string[];
+  level: number;
+} | undefined;
+  modules?: string[] | undefined;
+  permissions?: string[] | undefined;
   isActive: boolean;
   isVerified: boolean;
   provider: string;
@@ -81,40 +80,51 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [permissionService, setPermissionService] = useState<UnifiedPermissionService | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
+
+  // Add error state
+  const [error, setError] = useState<string | null>(null);
 
   // ==========================================================================
   // INITIALIZATION
   // ==========================================================================
 
   useEffect(() => {
+    setIsMounted(true);
     loadUserFromToken();
   }, []);
 
   useEffect(() => {
     if (user) {
-      const service = new UnifiedPermissionService({
-        id: user.id,
-        email: user.email || '',
-        name: user.displayName,
-        roleId: user.roleId,
-        role: user.role
-          ? {
-              id: user.role.id,
-              name: user.role.name,
-              description: '',
-              level: user.role.level,
-              permissions: user.role.permissions.map((p) => ({
-                action: p.split(':')[0] as any,
-                resource: p.split(':')[1] || p,
-              })),
-              modules: user.modules || [],
-            }
-          : undefined,
-        isActive: user.isActive,
-      });
+      try {
+        const service = new UnifiedPermissionService({
+          id: user.id,
+          email: user.email || '',
+          name: user.displayName,
+          roleId: user.roleId,
+          role: user.role ? {
+            id: user.role.id,
+            name: user.role.name,
+            description: '',
+            level: user.role.level,
+            permissions: user.role.permissions.map((p) => {
+              const parts = p.split(':');
+              return {
+                action: parts[0] as any,
+                resource: parts[1] || parts[0],
+              };
+            }),
+            modules: user.modules || [],
+          } as any : undefined,
+          isActive: user.isActive,
+        });
 
-      setPermissionService(service);
+        setPermissionService(service);
+      } catch (error) {
+        console.error('[AUTH] Failed to initialize permission service:', error);
+        setPermissionService(null);
+      }
     } else {
       setPermissionService(null);
     }
@@ -125,13 +135,17 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
   // ==========================================================================
 
   const loadUserFromToken = useCallback(async () => {
+    if (!isMounted) return;
+    
     try {
-      const token =
-        localStorage.getItem('accessToken') ||
-        document.cookie
-          .split('; ')
-          .find((row) => row.startsWith('accessToken='))
-          ?.split('=')[1];
+      let token = null;
+      if (typeof window !== 'undefined') {
+        token = localStorage.getItem('accessToken') ||
+          document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('accessToken='))
+            ?.split('=')[1];
+      }
 
       if (!token) {
         setLoading(false);
@@ -147,7 +161,34 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
 
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        // Fix: Ensure userData structure matches our User interface
+        if (userData && userData.id) {
+          const transformedUser: User = {
+            id: userData.id,
+            email: userData.email,
+            phone: userData.phone,
+            username: userData.username,
+            displayName: userData.displayName,
+            avatar: userData.avatar,
+            roleId: userData.role?.id || userData.roleId,
+            role: userData.role ? {
+              id: userData.role.id,
+              name: userData.role.name,
+              permissions: userData.role.permissions || [],
+              level: userData.role.level || 1,
+            } : undefined,
+            modules: userData.modules || [],
+            permissions: userData.permissions || [],
+            isActive: userData.isActive ?? true,
+            isVerified: userData.isVerified ?? false,
+            provider: userData.provider || 'email',
+          };
+          setUser(transformedUser);
+        } else {
+          console.warn('[AUTH] Invalid user data received');
+          localStorage.removeItem('accessToken');
+          clearAuthCookies();
+        }
       } else {
         // Token is invalid, clear it
         localStorage.removeItem('accessToken');
@@ -160,11 +201,12 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isMounted]);
 
   const login = useCallback(
     async (credentials: LoginCredentials) => {
       setLoading(true);
+      setError(null); // Clear previous errors
 
       try {
         const response = await fetch('/api/auth/login', {
@@ -175,18 +217,38 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
           body: JSON.stringify(credentials),
         });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Login failed');
-        }
-
         const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
 
         // Store access token
         localStorage.setItem('accessToken', data.accessToken);
 
-        // Set user data
-        setUser(data.user);
+        // Transform and set user data to match our interface
+        const transformedUser: User = {
+          id: data.user.id,
+          email: data.user.email,
+          phone: data.user.phone,
+          username: data.user.username,
+          displayName: data.user.displayName,
+          avatar: data.user.avatar,
+          roleId: data.user.role?.id || data.user.roleId,
+          role: data.user.role ? {
+            id: data.user.role.id,
+            name: data.user.role.name,
+            permissions: data.user.role.permissions || [],
+            level: data.user.role.level || 1,
+          } : undefined,
+          modules: data.user.modules || [],
+          permissions: data.user.permissions || [],
+          isActive: data.user.isActive ?? true,
+          isVerified: data.user.isVerified ?? false,
+          provider: data.user.provider || credentials.provider || 'email',
+        };
+
+        setUser(transformedUser);
 
         // Redirect to dashboard or intended page
         const redirectTo =
@@ -194,6 +256,7 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
         router.push(redirectTo);
       } catch (error) {
         console.error('[AUTH] Login error:', error);
+        setError(error instanceof Error ? error.message : 'Login failed');
         throw error;
       } finally {
         setLoading(false);
@@ -202,20 +265,62 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
     [router]
   );
 
-  const logout = useCallback(() => {
-    // Clear local storage
-    localStorage.removeItem('accessToken');
+  const logout = useCallback(async () => {
+    try {
+      // Call logout API if user is authenticated
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+    } catch (error) {
+      console.error('[AUTH] Logout API error:', error);
+      // Continue with local cleanup even if API fails
+    } finally {
+      // Clear local storage
+      localStorage.removeItem('accessToken');
 
-    // Clear auth cookies
-    clearAuthCookies();
+      // Clear auth cookies
+      clearAuthCookies();
 
-    // Reset state
-    setUser(null);
-    setPermissionService(null);
+      // Reset state
+      setUser(null);
+      setPermissionService(null);
+      setError(null);
 
-    // Redirect to login
-    router.push('/login');
+      // Redirect to login
+      router.push('/login');
+    }
   }, [router]);
+
+  // Add token refresh functionality
+  const refreshToken = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include', // Include cookies for refresh token
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('accessToken', data.accessToken);
+        return data.accessToken;
+      } else {
+        // Refresh failed, logout user
+        logout();
+        return null;
+      }
+    } catch (error) {
+      console.error('[AUTH] Token refresh failed:', error);
+      logout();
+      return null;
+    }
+  }, [logout]);
 
   const refreshAuth = useCallback(async () => {
     await loadUserFromToken();
@@ -227,26 +332,41 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
 
   const hasPermission = useCallback(
     (action: string, resource: string, scope: string = 'all'): boolean => {
-      if (!permissionService) return false;
-      return permissionService.hasPermission(action, resource, scope as any);
+      if (!permissionService || !user) return false;
+      try {
+        return permissionService.hasPermission(action, resource, scope as any);
+      } catch (error) {
+        console.error('[AUTH] Permission check error:', error);
+        return false;
+      }
     },
-    [permissionService]
+    [permissionService, user]
   );
 
   const hasModuleAccess = useCallback(
     (module: string): boolean => {
-      if (!permissionService) return false;
-      return permissionService.hasModuleAccess(module);
+      if (!permissionService || !user) return false;
+      try {
+        return permissionService.hasModuleAccess(module);
+      } catch (error) {
+        console.error('[AUTH] Module access check error:', error);
+        return false;
+      }
     },
-    [permissionService]
+    [permissionService, user]
   );
 
   const canAccessRoute = useCallback(
     (route: string): boolean => {
-      if (!permissionService) return false;
-      return permissionService.canAccessRoute(route);
+      if (!permissionService || !user) return false;
+      try {
+        return permissionService.canAccessRoute(route);
+      } catch (error) {
+        console.error('[AUTH] Route access check error:', error);
+        return false;
+      }
     },
-    [permissionService]
+    [permissionService, user]
   );
 
   // ==========================================================================
@@ -285,15 +405,34 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
   );
 
   // ==========================================================================
-  // UTILITY FUNCTIONS
+  // AUTO TOKEN REFRESH
   // ==========================================================================
 
-  const clearAuthCookies = () => {
+  useEffect(() => {
+    if (!user) return;
+
+    // Set up automatic token refresh every 14 minutes (assuming 15 min expiry)
+    const refreshInterval = setInterval(async () => {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        await refreshToken();
+      }
+    }, 14 * 60 * 1000); // 14 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [user, refreshToken]);
+
+  // ==========================================================================
+  // IMPROVED UTILITY FUNCTIONS
+  // ==========================================================================
+
+  const clearAuthCookies = useCallback(() => {
     const cookies = ['accessToken', 'refreshToken', 'token'];
     cookies.forEach((cookie) => {
+      document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
       document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     });
-  };
+  }, []);
 
   // ==========================================================================
   // CONTEXT VALUE
@@ -324,6 +463,27 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
     hasRole,
     hasMinimumRoleLevel,
   };
+
+  // Show error state if needed
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center unified-card max-w-md">
+          <h1 className="text-2xl font-bold text-error mb-4">Authentication Error</h1>
+          <p className="text-text-secondary mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              refreshAuth();
+            }}
+            className="unified-button accent"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
@@ -383,6 +543,16 @@ interface WithAuthOptions {
   requireMinLevel?: number;
   redirectTo?: string;
   fallback?: React.ComponentType;
+}
+
+interface PermissionGateProps {
+  children: React.ReactNode;
+  action?: string;
+  resource?: string;
+  module?: string;
+  role?: string;
+  minLevel?: number;
+  fallback?: React.ReactNode;
 }
 
 /**
@@ -447,7 +617,7 @@ export function withAuth<P extends object>(
     // Show loading state
     if (loading) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       );
@@ -470,10 +640,10 @@ export function withAuth<P extends object>(
       return Fallback ? (
         <Fallback />
       ) : (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600">You don't have permission to access this page.</p>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center unified-card max-w-md">
+            <h1 className="text-2xl font-bold text-primary mb-4">Access Denied</h1>
+            <p className="text-text-secondary">You don't have permission to access this page.</p>
           </div>
         </div>
       );
@@ -483,23 +653,7 @@ export function withAuth<P extends object>(
   };
 }
 
-// ============================================================================
-// UTILITY COMPONENTS
-// ============================================================================
-
-/**
- * Component for conditional rendering based on permissions
- */
-interface PermissionGateProps {
-  children: React.ReactNode;
-  action?: string;
-  resource?: string;
-  module?: string;
-  role?: string;
-  minLevel?: number;
-  fallback?: React.ReactNode;
-}
-
+// Fix PermissionGate to use CSS classes
 export function PermissionGate({
   children,
   action,
@@ -509,7 +663,17 @@ export function PermissionGate({
   minLevel,
   fallback = null,
 }: PermissionGateProps) {
-  const { hasPermission, hasModuleAccess, hasRole, hasMinimumRoleLevel } = useUnifiedAuth();
+  const { hasPermission, hasModuleAccess, hasRole, hasMinimumRoleLevel, user, loading } = useUnifiedAuth();
+
+  // Show loading state while auth is being determined
+  if (loading) {
+    return <div className="animate-pulse bg-surface rounded h-4 w-full"></div>;
+  }
+
+  // If no user and any permission is required, deny access
+  if (!user && (action || resource || module || role || minLevel)) {
+    return <>{fallback}</>;
+  }
 
   // Check all conditions
   const hasAccess =
@@ -531,7 +695,25 @@ interface AccessBadgeProps {
 }
 
 export function AccessBadge({ module, permission, className = '' }: AccessBadgeProps) {
-  const { hasModuleAccess, hasPermission } = useUnifiedAuth();
+  const { hasModuleAccess, hasPermission, user, loading } = useUnifiedAuth();
+
+  // Show loading state
+  if (loading) {
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 ${className}`}>
+        Loading...
+      </span>
+    );
+  }
+
+  // No user means no access
+  if (!user) {
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 ${className}`}>
+        No Access
+      </span>
+    );
+  }
 
   let hasAccess = true;
   let badgeText = 'Full Access';
@@ -539,14 +721,31 @@ export function AccessBadge({ module, permission, className = '' }: AccessBadgeP
 
   if (module) {
     hasAccess = hasModuleAccess(module);
-    badgeText = hasAccess ? 'Module Access' : 'No Access';
+    badgeText = hasAccess ? 'Module Access' : 'No Module Access';
     badgeColor = hasAccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   }
 
-  if (permission && hasAccess) {
-    hasAccess = hasPermission(permission.action, permission.resource);
-    badgeText = hasAccess ? 'Permission Granted' : 'Limited Access';
-    badgeColor = hasAccess ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+  if (permission) {
+    const permissionAccess = hasPermission(permission.action, permission.resource);
+    if (module) {
+      // If both module and permission are specified, both must be true
+      hasAccess = hasAccess && permissionAccess;
+      badgeText = hasAccess 
+        ? 'Full Access' 
+        : hasModuleAccess(module) 
+        ? 'Limited Access' 
+        : 'No Access';
+      badgeColor = hasAccess 
+        ? 'bg-green-100 text-green-800' 
+        : hasModuleAccess(module) 
+        ? 'bg-yellow-100 text-yellow-800' 
+        : 'bg-red-100 text-red-800';
+    } else {
+      // If only permission is specified
+      hasAccess = permissionAccess;
+      badgeText = hasAccess ? 'Permission Granted' : 'Permission Denied';
+      badgeColor = hasAccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    }
   }
 
   return (
@@ -661,13 +860,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 // ============================================================================
 export {
   UnifiedAuthProvider as AuthProvider,
-  useUnifiedAuth as useAuth,
-  useUnifiedPermissions as usePermissions,
-  useUnifiedRoles as useRoles,
-  withAuth,
-  PermissionGate,
-  AccessBadge,
-  LoginModal,
+  useUnifiedAuth,
+  useUnifiedPermissions,
+  useUnifiedRoles,
 };
 
 export type {

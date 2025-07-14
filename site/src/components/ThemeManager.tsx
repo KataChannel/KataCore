@@ -76,12 +76,14 @@ function ThemeManagerInternal({
     documentElement.lang = config.language;
 
     // Update meta theme-color for mobile browsers
-    const themeColorMeta =
-      document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
-    themeColorMeta.setAttribute('name', 'theme-color');
-    themeColorMeta.setAttribute('content', actualMode === 'dark' ? '#0d1117' : '#ffffff');
-    if (!document.querySelector('meta[name="theme-color"]')) {
-      document.head.appendChild(themeColorMeta);
+    if (typeof document !== 'undefined') {
+      const themeColorMeta =
+        document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
+      themeColorMeta.setAttribute('name', 'theme-color');
+      themeColorMeta.setAttribute('content', actualMode === 'dark' ? '#0d1117' : '#ffffff');
+      if (!document.querySelector('meta[name="theme-color"]')) {
+        document.head.appendChild(themeColorMeta);
+      }
     }
 
     // Update color-scheme meta for browser UI
@@ -134,7 +136,7 @@ export function ThemeManager({
 }: ThemeManagerProps) {
   return (
     <UnifiedThemeProvider
-      defaultConfig={defaultConfig}
+      defaultConfig={defaultConfig || {}}
       enablePersistence={enablePersistence}
       enableSystemListener={enableSystemListener}
     >
@@ -229,7 +231,7 @@ export function ThemeProvider({
   children: ReactNode;
   defaultConfig?: Partial<ThemeConfig>;
 }) {
-  return <UnifiedThemeProvider defaultConfig={defaultConfig}>{children}</UnifiedThemeProvider>;
+  return <UnifiedThemeProvider defaultConfig={defaultConfig || {}}>{children}</UnifiedThemeProvider>;
 }
 
 // ============================================================================

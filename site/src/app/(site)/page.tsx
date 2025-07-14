@@ -23,10 +23,11 @@ import {
 import ThemeManager, { ColorSchemeToggle } from '@/components/ThemeManager';
 import {
   AuthProvider,
-  useAuth,
+  useUnifiedAuth as useAuth,
   LoginModal,
   AccessBadge,
 } from '@/components/auth/UnifiedAuthProvider';
+import { ClientOnly } from '@/components/ClientOnly';
 
 function HomePageContent() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -37,15 +38,17 @@ function HomePageContent() {
   // Load theme from localStorage on component mount
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+    }
     console.log(user);
-  }, []);
+  }, [user]);
 
   // Save theme to localStorage when it changes
   useEffect(() => {
-    if (mounted) {
+    if (mounted && typeof window !== 'undefined') {
       localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
       document.documentElement.classList.toggle('dark', isDarkMode);
     }
@@ -229,10 +232,12 @@ function HomePageContent() {
           </div>
         </button>
 
-        <ColorSchemeToggle
-          showLabel={false}
-          className="hidden sm:flex items-center gap-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105"
-        />
+        <ClientOnly>
+          <ColorSchemeToggle
+            showLabel={false}
+            className="hidden sm:flex items-center gap-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105"
+          />
+        </ClientOnly>
 
         {/* User Auth Status */}
         {user ? (

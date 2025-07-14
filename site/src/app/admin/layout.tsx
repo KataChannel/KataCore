@@ -49,10 +49,11 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   // Load user data from localStorage
   useEffect(() => {
     setMounted(true);
-
-    const savedUserData = localStorage.getItem('admin-user-data');
-    if (savedUserData) {
-      setUserData(JSON.parse(savedUserData));
+    if (typeof window !== 'undefined') {
+      const savedUserData = localStorage.getItem('admin-user-data');
+      if (savedUserData) {
+        setUserData(JSON.parse(savedUserData));
+      }
     }
   }, []);
 
@@ -274,8 +275,20 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   // Prevent hydration mismatch
-  if (!mounted || isLoading) {
-    return null;
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (

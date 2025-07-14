@@ -22,24 +22,26 @@ export default function LoginPage() {
 
   // Check if user is already logged in
   useEffect(() => {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-    if (token) {
-      // Verify token is still valid
-      fetch('/api/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            router.push('/admin');
-          }
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
+      if (token) {
+        // Verify token is still valid
+        fetch('/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
-        .catch(() => {
-          // Token invalid, clear it
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('authToken');
-        });
+          .then((response) => {
+            if (response.ok) {
+              router.push('/admin');
+            }
+          })
+          .catch(() => {
+            // Token invalid, clear it
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('authToken');
+          });
+      }
     }
   }, [router]);
 

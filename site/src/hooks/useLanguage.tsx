@@ -4,8 +4,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import {
   Language,
-  saveLanguagePreference,
-  loadLanguagePreference,
   i18nConfig,
 } from '@/lib/config/i18n';
 import { useUnifiedTheme } from './useUnifiedTheme';
@@ -43,34 +41,24 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  // Sync with unified theme if available
-  const unifiedTheme = useUnifiedTheme();
-
   // Initialize language on mount
   useEffect(() => {
-    const loadedLanguage = loadLanguagePreference();
-    setLanguageState(loadedLanguage);
-
-    // Sync with unified theme
-    if (unifiedTheme?.setLanguage && loadedLanguage !== unifiedTheme.config.language) {
-      unifiedTheme.setLanguage(loadedLanguage);
+    if (typeof window !== 'undefined') {
+      const loadedLanguage = localStorage.getItem('language') as Language || i18nConfig.defaultLocale;
+      setLanguageState(loadedLanguage);
     }
-
     setIsLoading(false);
-  }, [unifiedTheme]);
+  }, []);
 
   // Handle language changes
   const setLanguage = useCallback(
     (newLanguage: Language) => {
       setLanguageState(newLanguage);
-      saveLanguagePreference(newLanguage);
-
-      // Sync with unified theme
-      if (unifiedTheme?.setLanguage) {
-        unifiedTheme.setLanguage(newLanguage);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('language', newLanguage);
       }
     },
-    [unifiedTheme]
+    []
   );
 
   // Toggle between languages
@@ -129,7 +117,7 @@ export function useLanguage() {
 // ============================================================================
 
 export function useTranslationStandalone(language?: Language) {
-  const currentLanguage = language || loadLanguagePreference();
+  const currentLanguage = language || (typeof window !== 'undefined' ? (localStorage.getItem('language') as Language) : null) || i18nConfig.defaultLocale;
 
   const t = useCallback(
     (key: string, module: keyof typeof i18nConfig = 'common') => {
