@@ -29,6 +29,10 @@ error() {
     exit 1
 }
 
+error_msg() {
+    echo -e "${RED}❌ $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
+}
+
 warning() {
     echo -e "${YELLOW}⚠️  $(date '+%Y-%m-%d %H:%M:%S') - $1${NC}"
 }
@@ -1154,7 +1158,7 @@ while true; do
             exit 0
             ;;
         *)
-            error "Invalid option. Please try again."
+            error_msg "Invalid option. Please try again."
             sleep 2
             ;;
     esac
