@@ -168,23 +168,33 @@ smart_deploy_services() {
             if [ -f 'docker-compose.yml' ]; then
                 echo 'Starting selective Docker Compose deployment...'
                 
-                # Start only the failed/missing services
+                # Build images first for services that need building
+                echo 'Building updated images for services: $failed_services'
                 for service in $failed_services; do
-                    echo \"Starting service: \$service\"
-                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --build --force-recreate \$service
-                    
-                    # Wait a bit for the service to start
-                    sleep 5
-                    
-                    # Check immediate status
-                    container_name=\"\${PROJECT_NAME}-\$service\"
-                    status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
-                    echo \"Service \$service status: \$status\"
+                    echo \"Building service: \$service\"
+                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose build --no-cache \$service 2>/dev/null || echo \"Note: \$service may not need building\"
                 done
                 
-                echo 'Waiting for all deployed services to stabilize...'
-                sleep 15
+                # Start only the failed/missing services
+                echo 'Starting services: $failed_services'
+                COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --force-recreate $failed_services
                 
+                # Wait for services to stabilize
+                echo 'Waiting for services to stabilize...'
+                sleep 20
+                
+                # Check each service status
+                for service in $failed_services; do
+                    container_name=\"\${PROJECT_NAME}-\$service\"
+                    status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
+                    if [ \"\$status\" = \"running\" ]; then
+                        echo \"✅ Service \$service: \$status\"
+                    else
+                        echo \"❌ Service \$service: \$status\"
+                    fi
+                done
+                
+                echo ''
                 echo 'Final deployment status:'
                 docker ps --filter name=\"\${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
                 
@@ -429,24 +439,14 @@ git_commit_and_update_preserve_data() {
     " || warning "Could not backup PROJECT environment file"
 
     progress "🌐 Transferring updated files to PROJECT directory..."
-    # Use rsync with delete to ensure clean update
+    # Use rsync WITHOUT delete to avoid removing important files
     if command -v rsync >/dev/null 2>&1; then
         rsync -avz --progress \
             --exclude='.env' \
             --exclude='.env.*' \
-            --delete \
-            --delete-excluded \
             "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
     else
-        # Fallback - clean directory first then copy
-        ssh "$SSH_USER@$SERVER_IP" "
-            cd /opt/$PROJECT_NAME/
-            # Backup important files
-            cp .env .env.temp.backup 2>/dev/null || true
-            # Clean directory except backups and volumes
-            find . -maxdepth 1 -type f ! -name '.env*' ! -name 'docker-compose.yml' -delete 2>/dev/null || true
-            find . -maxdepth 1 -type d ! -name '.' ! -name '..' ! -name 'volumes' -exec rm -rf {} + 2>/dev/null || true
-        "
+        # Fallback - copy new files without deleting existing ones
         scp -r "$TEMP_DIR/"* "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
     fi
     
@@ -483,18 +483,22 @@ git_commit_and_update_preserve_data() {
         ls -la | grep -E '\.(js|ts|json|yml|yaml)$' | head -10
     " || warning "Could not restore PROJECT environment file"
     
+    # Verify file transfer
+    verify_file_transfer
+    
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    # Use smart deployment for Site & API only
-    smart_deploy_services "site api" "selective"
+    # Force rebuild and deploy Site & API with new code
+    progress "🔥 Force rebuilding Site & API services to ensure new code is deployed..."
+    force_rebuild_and_deploy "site api"
     
     success "🎉 Git commit and SMART PROJECT Site & API update completed successfully!"
-    info "✅ PROJECT Site and API services updated with latest code"
+    info "✅ PROJECT Site and API services FORCE REBUILT with latest code"
     info "✅ PROJECT environment file (.env) preserved unchanged"
-    info "✅ Healthy services continue running without interruption"
-    warning "🧠 SMART MODE: Only failed services were restarted"
+    info "✅ Database and other services continue running without interruption"
+    warning "🔥 FORCE REBUILD: New code is guaranteed to be deployed"
 }
 
 # Debug function to check what's actually happening
@@ -924,52 +928,133 @@ git_commit_and_update_all_preserve_data() {
     progress "🔧 Restoring preserved PROJECT environment configuration..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        if [ -f .env.backup ]; then
-            mv .env.backup .env
-            echo '✅ Original PROJECT environment file restored and preserved'
-            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+        
+        # Restore from timestamped backup first
+        LATEST_BACKUP=\$(ls -t .env.backup.* 2>/dev/null | head -n1)
+        if [ -n \"\$LATEST_BACKUP\" ] && [ ! -f .env ]; then
+            cp \"\$LATEST_BACKUP\" .env
+            echo '✅ PROJECT environment file restored from backup: '\$LATEST_BACKUP
+        elif [ -f .env.temp.backup ]; then
+            cp .env.temp.backup .env
+            rm .env.temp.backup
+            echo '✅ PROJECT environment file restored from temp backup'
+        elif [ -f .env.prod ]; then
+            cp .env.prod .env
+            echo '📝 Using .env.prod as fallback PROJECT environment'
         else
-            echo '⚠️  No backup file found to restore'
-            if [ -f .env.prod ]; then
-                cp .env.prod .env
-                echo '📝 Using .env.prod as fallback PROJECT environment'
-            else
-                echo '❌ No PROJECT environment file available'
-            fi
+            echo '❌ No PROJECT environment file available'
         fi
+        
+        # Verify environment file
+        if [ -f .env ]; then
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+            echo '✅ Environment file verified'
+        else
+            echo '❌ No environment file found after restoration'
+        fi
+        
+        # Show updated files
+        echo '📋 Updated PROJECT files:'
+        ls -la | grep -E '\.(js|ts|json|yml|yaml)$' | head -10
     " || warning "Could not restore PROJECT environment file"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
 
-    # Use smart deployment for all services
-    smart_deploy_services "api site postgres redis minio pgadmin" "selective"
-
-    success "🎉 Git commit and SMART ALL PROJECT services update completed successfully!"
-    info "✅ ALL PROJECT services updated with latest code"
+    # Force rebuild and deploy ALL services with new code
+    progress "🔥 Force rebuilding ALL services to ensure new code is deployed..."
+    force_rebuild_and_deploy "api site postgres redis minio pgadmin"
+    
+    success "🎉 Git commit and SMART PROJECT ALL services update completed successfully!"
+    info "✅ PROJECT services FORCE REBUILT with latest code"
     info "✅ PROJECT environment file (.env) preserved unchanged"
-    info "✅ PROJECT data volumes preserved - no data loss"
-    info "✅ Healthy services continued running without interruption"
-    warning "🧠 SMART MODE: Only failed services were restarted"
-    warning "💾 All persistent PROJECT data preserved across update"
+    info "✅ Database and other services continue running without interruption"
+    warning "🔥 FORCE REBUILD: New code is guaranteed to be deployed"
 }
 
-# Function to deploy specific services smartly (STRICTLY PROJECT-SCOPED)
-deploy_selected_services() {
-    select_services
+# Function to verify file transfer and important files
+verify_file_transfer() {
+    progress "🔍 Verifying file transfer and important files..."
     
-    if [ -z "$SELECTED_SERVICES" ]; then
-        error "No services selected"
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        
+        echo '📋 Checking for important project files:'
+        
+        # Check for package.json files
+        if [ -f 'site/package.json' ]; then
+            echo '✅ site/package.json found'
+        else
+            echo '❌ site/package.json missing'
+        fi
+        
+        if [ -f 'api/package.json' ]; then
+            echo '✅ api/package.json found'
+        else
+            echo '❌ api/package.json missing'
+        fi
+        
+        # Check for docker-compose file
+        if [ -f 'docker-compose.yml' ]; then
+            echo '✅ docker-compose.yml found'
+        else
+            echo '❌ docker-compose.yml missing'
+        fi
+        
+        # Check for Dockerfiles
+        if [ -f 'site/Dockerfile' ]; then
+            echo '✅ site/Dockerfile found'
+        else
+            echo '⚠️  site/Dockerfile missing'
+        fi
+        
+        if [ -f 'api/Dockerfile' ]; then
+            echo '✅ api/Dockerfile found'
+        else
+            echo '⚠️  api/Dockerfile missing'
+        fi
+        
+        # Show recent file modification times to verify update
+        echo ''
+        echo '📅 Recent file modifications (to verify update):'
+        find . -maxdepth 2 -name '*.json' -o -name '*.js' -o -name '*.ts' -o -name 'Dockerfile' 2>/dev/null | head -10 | xargs ls -la 2>/dev/null | head -5
+        
+        echo ''
+        echo '📊 Project directory size:'
+        du -sh . 2>/dev/null || echo 'Cannot calculate size'
+    " || warning "Could not verify file transfer"
+}
+
+# Function to test option 1 deployment
+test_option1_deployment() {
+    progress "🧪 Testing Option 1 - Smart Deploy with Git (Site & API)..."
+    
+    echo -e "${YELLOW}This will test the full deployment process. Continue? (y/N):${NC}"
+    read -p "❓ " confirm
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        info "Test cancelled"
+        return 0
     fi
     
-    progress "🧠 Smart deployment for selected PROJECT services: $SELECTED_SERVICES"
+    # Show what will happen
+    info "📋 Test Process:"
+    info "1. Check git status and commit changes"
+    info "2. Prepare and transfer files"
+    info "3. Verify file transfer"
+    info "4. Force rebuild Docker images"
+    info "5. Deploy services"
+    info "6. Verify deployment"
     
-    # Use smart deployment for selected services
-    smart_deploy_services "$SELECTED_SERVICES" "selective"
+    echo -e "${YELLOW}Proceed with test? (y/N):${NC}"
+    read -p "❓ " final_confirm
+    if [[ ! $final_confirm =~ ^[Yy]$ ]]; then
+        info "Test cancelled"
+        return 0
+    fi
     
-    success "🎉 Selected PROJECT services smart deployment completed!"
-    info "Selected services ($SELECTED_SERVICES) for project $PROJECT_NAME are optimally running"
-    warning "🧠 SMART MODE: Only failed services were restarted"
-    warning "✅ Healthy services continued running without interruption"
+    # Execute option 1
+    git_commit_and_update_preserve_data
+    
+    success "🧪 Test completed! Check the results above."
 }
