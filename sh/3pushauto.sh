@@ -580,6 +580,21 @@ while true; do
             info "Press any key to return to menu..."
             read -n 1
             ;;
+        4)
+            log "Option 4 selected: Project cleanup & container fix"
+            warning "🧹 CLEANUP MODE: Will clean up PROJECT containers and resources only"
+            warning "🔒 STRICTLY PROJECT-SCOPED: Only affects $PROJECT_NAME containers"
+            echo -e "${YELLOW}Are you sure you want to proceed? (y/N):${NC}"
+            read -p "❓ " confirm
+            if [[ $confirm =~ ^[Yy]$ ]]; then
+                project_cleanup_and_container_fix
+            else
+                warning "Cleanup cancelled"
+            fi
+            echo ""
+            info "Press any key to return to menu..."
+            read -n 1
+            ;;     
         5)
             log "Option 5 selected: Check project status"
             check_server_status
@@ -1057,4 +1072,177 @@ test_option1_deployment() {
     git_commit_and_update_preserve_data
     
     success "🧪 Test completed! Check the results above."
+}
+Add these missing functions after the existing functions (around line 1100)
+
+# Force rebuild and deploy function to ensure new code is deployed
+force_rebuild_and_deploy() {
+    local services_to_rebuild="$1"
+    
+    progress "🔥 Force rebuilding and deploying services: $services_to_rebuild"
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        
+        echo 'FORCE REBUILD - Clearing Docker cache and rebuilding images...'
+        
+        # Stop services first
+        for service in $services_to_rebuild; do
+            echo \"Stopping service: \$service\"
+            COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose stop \$service 2>/dev/null || true
+            COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose rm -f \$service 2>/dev/null || true
+        done
+        
+        # Remove existing images to force rebuild
+        for service in $services_to_rebuild; do
+            echo \"Removing existing image for: \$service\"
+            docker rmi \"${PROJECT_NAME}-\$service\" 2>/dev/null || true
+            docker rmi \"${PROJECT_NAME}_\$service\" 2>/dev/null || true
+        done
+        
+        # Clear build cache
+        echo 'Clearing Docker build cache...'
+        docker builder prune -f 2>/dev/null || true
+        
+        # Force rebuild with no cache
+        for service in $services_to_rebuild; do
+            echo \"Force rebuilding service: \$service\"
+            COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose build --no-cache --pull \$service || echo \"Note: \$service may not need building\"
+        done
+        
+        # Start services with force recreate
+        echo 'Starting rebuilt services...'
+        COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --force-recreate $services_to_rebuild
+        
+        # Wait for services to stabilize
+        echo 'Waiting for services to stabilize...'
+        sleep 30
+        
+        # Check service status
+        echo 'Checking service status after rebuild:'
+        for service in $services_to_rebuild; do
+            container_name=\"\${PROJECT_NAME}-\$service\"
+            status=\$(docker inspect --format='{{.State.Status}}' \"\$container_name\" 2>/dev/null || echo 'not_found')
+            if [ \"\$status\" = \"running\" ]; then
+                echo \"✅ \$service: \$status\"
+            else
+                echo \"❌ \$service: \$status\"
+                # Show logs for failed services
+                echo \"Logs for \$service:\"
+                docker logs \"\$container_name\" --tail 20 2>/dev/null || echo \"No logs available\"
+            fi
+        done
+        
+        echo ''
+        echo 'Final status after force rebuild:'
+        docker ps --filter name=\"\${PROJECT_NAME}-\" --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+    " || error "Failed to force rebuild and deploy services"
+    
+    success "🔥 Force rebuild and deployment completed"
+}
+
+# Function to deploy specific services smartly (STRICTLY PROJECT-SCOPED)
+deploy_selected_services() {
+    select_services
+    
+    if [ -z "$SELECTED_SERVICES" ]; then
+        error "No services selected"
+    fi
+    
+    progress "🧠 Smart deployment for selected PROJECT services: $SELECTED_SERVICES"
+    
+    # Use smart deployment for selected services
+    smart_deploy_services "$SELECTED_SERVICES" "selective"
+    
+    success "🎉 Selected PROJECT services smart deployment completed!"
+    info "Selected services ($SELECTED_SERVICES) for project $PROJECT_NAME are optimally running"
+    warning "🧠 SMART MODE: Only failed services were restarted"
+    warning "✅ Healthy services continued running without interruption"
+}
+
+# Function for project cleanup and container fix (STRICTLY PROJECT-SCOPED)
+project_cleanup_and_container_fix() {
+    progress "🧹 Starting PROJECT-SCOPED cleanup and container fix..."
+    warning "🔒 This operation is STRICTLY PROJECT-SCOPED and will only affect $PROJECT_NAME containers"
+    
+    ssh "$SSH_USER@$SERVER_IP" "
+        echo '🔒════════════════════════════════════════════════🔒'
+        echo '🔒          PROJECT-SCOPED CLEANUP               🔒'
+        echo '🔒                PROJECT: $PROJECT_NAME          🔒'
+        echo '🔒════════════════════════════════════════════════🔒'
+        echo ''
+        
+        cd /opt/$PROJECT_NAME/ 2>/dev/null || {
+            echo '❌ Project directory not found: /opt/$PROJECT_NAME'
+            echo 'Creating project directory...'
+            mkdir -p /opt/$PROJECT_NAME
+            echo '✅ Project directory created'
+            exit 0
+        }
+        
+        echo '🛑 Stopping PROJECT containers...'
+        # Stop only project-specific containers
+        PROJECT_CONTAINERS=\$(docker ps -a --filter name=\"${PROJECT_NAME}-\" --format '{{.Names}}' 2>/dev/null)
+        if [ -n \"\$PROJECT_CONTAINERS\" ]; then
+            echo \"Found PROJECT containers: \$PROJECT_CONTAINERS\"
+            docker stop \$PROJECT_CONTAINERS 2>/dev/null || true
+            docker rm -f \$PROJECT_CONTAINERS 2>/dev/null || true
+            echo '✅ PROJECT containers stopped and removed'
+        else
+            echo 'ℹ️  No PROJECT containers found to stop'
+        fi
+        
+        echo ''
+        echo '🗑️ Cleaning PROJECT Docker resources...'
+        # Remove project-specific images
+        PROJECT_IMAGES=\$(docker images --filter reference=\"${PROJECT_NAME}*\" --format '{{.Repository}}:{{.Tag}}' 2>/dev/null)
+        if [ -n \"\$PROJECT_IMAGES\" ]; then
+            echo \"Found PROJECT images: \$PROJECT_IMAGES\"
+            docker rmi \$PROJECT_IMAGES 2>/dev/null || true
+            echo '✅ PROJECT images removed'
+        else
+            echo 'ℹ️  No PROJECT images found to remove'
+        fi
+        
+        # Clean project-specific volumes (with caution)
+        echo ''
+        echo '📦 PROJECT volumes status:'
+        PROJECT_VOLUMES=\$(docker volume ls --filter name=\"${PROJECT_NAME}\" --format '{{.Name}}' 2>/dev/null)
+        if [ -n \"\$PROJECT_VOLUMES\" ]; then
+            echo \"Found PROJECT volumes: \$PROJECT_VOLUMES\"
+            echo '⚠️  Volumes contain data - keeping them for safety'
+            echo 'To remove volumes manually: docker volume rm \$PROJECT_VOLUMES'
+        else
+            echo 'ℹ️  No PROJECT volumes found'
+        fi
+        
+        echo ''
+        echo '🔧 Checking PROJECT directory...'
+        if [ -f docker-compose.yml ]; then
+            echo '✅ docker-compose.yml exists'
+        else
+            echo '❌ docker-compose.yml missing'
+        fi
+        
+        if [ -f .env ]; then
+            echo '✅ .env file exists'
+        else
+            echo '❌ .env file missing'
+            if [ -f .env.prod ]; then
+                echo '📝 Found .env.prod - you can copy it to .env'
+            fi
+        fi
+        
+        echo ''
+        echo '✅ PROJECT cleanup completed successfully'
+        echo '🔒 Only $PROJECT_NAME resources were affected'
+        echo ''
+        echo 'Next steps:'
+        echo '1. Verify .env file exists'
+        echo '2. Run deployment option to restart services'
+    " || error "Failed to cleanup PROJECT containers"
+    
+    success "🎉 PROJECT-SCOPED cleanup and fix completed!"
+    info "Only $PROJECT_NAME containers and resources were affected"
+    warning "🔒 Server isolation maintained - no other services affected"
 }
