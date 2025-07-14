@@ -688,6 +688,36 @@ git_commit_and_update_preserve_data() {
     success "Local cleanup completed"
 
     # Use smart deployment for Site & API only
+    # Stop and prune site and api services before deployment
+    progress "🛑 Stopping and pruning Site & API services..."
+    ssh "$SSH_USER@$SERVER_IP" "
+        cd /opt/$PROJECT_NAME/
+        
+        # Stop site and api containers
+        for service in site api; do
+            container_name=\"\${PROJECT_NAME}-\$service\"
+            if docker ps --filter name=\"\$container_name\" --format '{{.Names}}' | grep -q \"^\$container_name\$\"; then
+                echo \"Stopping \$service service...\"
+                docker stop \"\$container_name\" 2>/dev/null || true
+                docker rm -f \"\$container_name\" 2>/dev/null || true
+            fi
+        done
+        
+        # Prune unused images related to site and api
+        echo 'Pruning unused images...'
+        docker image prune -f 2>/dev/null || true
+        
+        # Remove any dangling site/api images
+        SITE_API_IMAGES=\$(docker images | grep -E \"(${PROJECT_NAME}.*site|${PROJECT_NAME}.*api)\" | awk '{print \$3}')
+        if [ -n \"\$SITE_API_IMAGES\" ]; then
+            echo \"Removing old site/api images...\"
+            echo \"\$SITE_API_IMAGES\" | xargs docker rmi -f 2>/dev/null || true
+        fi
+        
+        echo 'Site & API services stopped and pruned successfully'
+    "
+
+
     smart_deploy_services "site api" "selective"
     
     success "🎉 Git commit and SMART PROJECT Site & API update completed successfully!"
