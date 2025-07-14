@@ -29,7 +29,16 @@ COPY shared ./shared
 RUN cd shared && \
     bun install --frozen-lockfile && \
     bunx prisma generate && \
-    cd ..
+    cd .. && \
+    # Also generate in the main app directory for Next.js build
+    echo "Setting up Prisma for Next.js..." && \
+    mkdir -p prisma && \
+    cp shared/prisma/schema.prisma prisma/schema.prisma && \
+    bunx prisma generate && \
+    echo "Verifying Prisma client generation:" && \
+    ls -la node_modules/@prisma/ && \
+    ls -la node_modules/@prisma/client/ && \
+    echo "Prisma client setup completed in shared-setup stage"
 
 # Build stage
 FROM shared-setup AS builder
@@ -53,6 +62,19 @@ ENV NEXT_PUBLIC_MINIO_ENDPOINT=${NEXT_PUBLIC_MINIO_ENDPOINT}
 
 # Provide a fallback DATABASE_URL for build-time Prisma operations
 ENV DATABASE_URL="file:./dev.db"
+
+# Ensure Prisma client is available and regenerate if needed
+RUN echo "Setting up Prisma client for Next.js build..." && \
+    echo "Current working directory: $(pwd)" && \
+    echo "Copying Prisma schema to site directory..." && \
+    cp shared/prisma/schema.prisma prisma/schema.prisma 2>/dev/null || \
+    (mkdir -p prisma && cp shared/prisma/schema.prisma prisma/schema.prisma) && \
+    echo "Generating Prisma client directly in site..." && \
+    bunx prisma generate && \
+    echo "Verifying Prisma client generation:" && \
+    ls -la node_modules/@prisma/ && \
+    ls -la node_modules/@prisma/client/ && \
+    echo "Prisma client setup completed"
 
 # Build the application
 RUN bun run build 2>&1 | tee /tmp/build.log || \
@@ -100,6 +122,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 # Copy shared Prisma configuration for runtime
 COPY --from=builder --chown=nextjs:nodejs /app/shared ./shared
+
+# Ensure Prisma client is available in production
+RUN echo "Setting up Prisma client for production..." && \
+    mkdir -p node_modules/@prisma && \
+    cp -r shared/node_modules/@prisma/client node_modules/@prisma/ 2>/dev/null || \
+    echo "Prisma client will be available from shared directory"
 
 USER nextjs
 

@@ -16,4 +16,3 @@ export default prisma;
 
 // Export all types
 export * from '@prisma/client';
-export type * from '../../../shared/lib/prisma';
