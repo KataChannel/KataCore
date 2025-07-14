@@ -384,22 +384,36 @@ async function createSuperAdmin() {
 
     // 3. Tạo employee record nếu có bảng Employee
     try {
-      const employeeData = {
+      const employeeCreateData = {
+        employeeId: `EMP-${Date.now()}`,
         userId: superAdmin.id,
         firstName: 'System',
         lastName: 'Administrator',
+        fullName: 'System Administrator',
         email: superAdmin.email,
+        hireDate: new Date(),
+        isActive: true,
+      };
+
+      const employeeUpdateData = {
+        employeeId: `EMP-${Date.now()}`,
+        firstName: 'System',
+        lastName: 'Administrator',
+        fullName: 'System Administrator',
+        email: superAdmin.email,
+        hireDate: new Date(),
         isActive: true,
       };
 
       await prisma.employee.upsert({
         where: { userId: superAdmin.id },
-        update: employeeData,
-        create: employeeData,
+        update: employeeUpdateData,
+        create: employeeCreateData,
       });
+
       console.log('✅ Employee record đã được tạo/cập nhật');
     } catch (error) {
-      console.log('ℹ️ Bảng Employee không tồn tại hoặc có lỗi:', error.message);
+      console.log('ℹ️ Bảng Employee không tồn tại hoặc có lỗi:', error instanceof Error ? error.message : String(error));
     }
 
     // 4. Tạo các role khác nếu chưa có
