@@ -56,13 +56,9 @@ const ResourceItem: React.FC<ResourceItemProps> = ({
       {/* Số lượng và thống kê */}
       <div className="text-right">
         <div className="flex items-center space-x-2">
-          <span className="text-white font-bold text-lg">
-            {formatNumber(amount)}
-          </span>
+          <span className="text-white font-bold text-lg">{formatNumber(amount)}</span>
           {resource.maxCapacity && (
-            <span className="text-gray-400 text-sm">
-              / {formatNumber(resource.maxCapacity)}
-            </span>
+            <span className="text-gray-400 text-sm">/ {formatNumber(resource.maxCapacity)}</span>
           )}
         </div>
 

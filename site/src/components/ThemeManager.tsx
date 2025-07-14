@@ -4,10 +4,7 @@
 'use client';
 
 import React, { useEffect, ReactNode } from 'react';
-import {
-  UnifiedThemeProvider,
-  useUnifiedTheme,
-} from '../hooks/useUnifiedTheme';
+import { UnifiedThemeProvider, useUnifiedTheme } from '../hooks/useUnifiedTheme';
 import { UNIFIED_THEME_CONFIG, ThemeConfig } from '../lib/config/unified-theme';
 
 // ============================================================================
@@ -42,10 +39,7 @@ function ThemeManagerInternal({
 
     // Remove existing theme classes
     documentElement.classList.remove('light', 'dark', 'auto');
-    documentElement.classList.remove(
-      'color-scheme-monochrome',
-      'color-scheme-colorful'
-    );
+    documentElement.classList.remove('color-scheme-monochrome', 'color-scheme-colorful');
     documentElement.classList.remove(
       'animation-none',
       'animation-reduced',
@@ -83,26 +77,18 @@ function ThemeManagerInternal({
 
     // Update meta theme-color for mobile browsers
     const themeColorMeta =
-      document.querySelector('meta[name="theme-color"]') ||
-      document.createElement('meta');
+      document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
     themeColorMeta.setAttribute('name', 'theme-color');
-    themeColorMeta.setAttribute(
-      'content',
-      actualMode === 'dark' ? '#0d1117' : '#ffffff'
-    );
+    themeColorMeta.setAttribute('content', actualMode === 'dark' ? '#0d1117' : '#ffffff');
     if (!document.querySelector('meta[name="theme-color"]')) {
       document.head.appendChild(themeColorMeta);
     }
 
     // Update color-scheme meta for browser UI
     const colorSchemeMeta =
-      document.querySelector('meta[name="color-scheme"]') ||
-      document.createElement('meta');
+      document.querySelector('meta[name="color-scheme"]') || document.createElement('meta');
     colorSchemeMeta.setAttribute('name', 'color-scheme');
-    colorSchemeMeta.setAttribute(
-      'content',
-      actualMode === 'dark' ? 'dark' : 'light'
-    );
+    colorSchemeMeta.setAttribute('content', actualMode === 'dark' ? 'dark' : 'light');
     if (!document.querySelector('meta[name="color-scheme"]')) {
       document.head.appendChild(colorSchemeMeta);
     }
@@ -152,9 +138,7 @@ export function ThemeManager({
       enablePersistence={enablePersistence}
       enableSystemListener={enableSystemListener}
     >
-      <ThemeManagerInternal enableDebugMode={enableDebugMode}>
-        {children}
-      </ThemeManagerInternal>
+      <ThemeManagerInternal enableDebugMode={enableDebugMode}>{children}</ThemeManagerInternal>
     </UnifiedThemeProvider>
   );
 }
@@ -228,12 +212,7 @@ export const ThemeInitScript = () => {
     })();
   `;
 
-  return (
-    <script
-      dangerouslySetInnerHTML={{ __html: script }}
-      suppressHydrationWarning
-    />
-  );
+  return <script dangerouslySetInnerHTML={{ __html: script }} suppressHydrationWarning />;
 };
 
 // ============================================================================
@@ -250,11 +229,7 @@ export function ThemeProvider({
   children: ReactNode;
   defaultConfig?: Partial<ThemeConfig>;
 }) {
-  return (
-    <UnifiedThemeProvider defaultConfig={defaultConfig}>
-      {children}
-    </UnifiedThemeProvider>
-  );
+  return <UnifiedThemeProvider defaultConfig={defaultConfig}>{children}</UnifiedThemeProvider>;
 }
 
 // ============================================================================
@@ -303,9 +278,7 @@ export function ThemeModeToggle({
     <button
       onClick={toggleMode}
       className={`px-4 py-2 rounded border border-border hover:bg-hover transition-colors ${className}`}
-      aria-label={
-        config.language === 'vi' ? 'Chuyển chế độ theme' : 'Toggle theme mode'
-      }
+      aria-label={config.language === 'vi' ? 'Chuyển chế độ theme' : 'Toggle theme mode'}
       title={`${config.language === 'vi' ? 'Chế độ hiện tại' : 'Current mode'}: ${getModeLabel()}`}
     >
       <span className="text-lg">{getModeIcon()}</span>
@@ -356,9 +329,7 @@ export function ColorSchemeToggle({
     <button
       onClick={toggleColorScheme}
       className={`p-3 rounded border border-border hover:bg-hover transition-colors ${className}`}
-      aria-label={
-        config.language === 'vi' ? 'Chuyển phong cách màu' : 'Toggle color scheme'
-      }
+      aria-label={config.language === 'vi' ? 'Chuyển phong cách màu' : 'Toggle color scheme'}
       title={`${config.language === 'vi' ? 'Phong cách hiện tại' : 'Current scheme'}: ${getSchemeLabel()}`}
     >
       <span className="text-lg">{getSchemeIcon()}</span>
@@ -383,14 +354,10 @@ export function LanguageToggle({
     <button
       onClick={toggleLanguage}
       className={`px-4 py-2 rounded border border-border hover:bg-hover transition-colors ${className}`}
-      aria-label={
-        config.language === 'vi' ? 'Chuyển ngôn ngữ' : 'Toggle language'
-      }
+      aria-label={config.language === 'vi' ? 'Chuyển ngôn ngữ' : 'Toggle language'}
     >
       <span className="text-lg">{config.language === 'vi' ? '🇻🇳' : '🇺🇸'}</span>
-      {showLabel && (
-        <span>{config.language === 'vi' ? 'Tiếng Việt' : 'English'}</span>
-      )}
+      {showLabel && <span>{config.language === 'vi' ? 'Tiếng Việt' : 'English'}</span>}
     </button>
   );
 }
@@ -409,9 +376,7 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
   } = useUnifiedTheme();
 
   return (
-    <div
-      className={`bg-surface border border-border rounded-lg p-6 shadow-md ${className}`}
-    >
+    <div className={`bg-surface border border-border rounded-lg p-6 shadow-md ${className}`}>
       <h3 className="text-lg font-semibold mb-4 text-primary">
         {config.language === 'vi' ? 'Cài đặt giao diện' : 'Theme Settings'}
       </h3>
@@ -422,7 +387,7 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
           {config.language === 'vi' ? 'Chế độ màu' : 'Color Mode'}
         </label>
         <div className="flex gap-2">
-          {(['light', 'dark', 'auto'] as const).map(mode => (
+          {(['light', 'dark', 'auto'] as const).map((mode) => (
             <button
               key={mode}
               onClick={() => setMode(mode)}
@@ -432,11 +397,9 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
                   : 'border border-border hover:bg-hover'
               }`}
             >
-              {mode === 'light' &&
-                (config.language === 'vi' ? 'Sáng' : 'Light')}
+              {mode === 'light' && (config.language === 'vi' ? 'Sáng' : 'Light')}
               {mode === 'dark' && (config.language === 'vi' ? 'Tối' : 'Dark')}
-              {mode === 'auto' &&
-                (config.language === 'vi' ? 'Tự động' : 'Auto')}
+              {mode === 'auto' && (config.language === 'vi' ? 'Tự động' : 'Auto')}
             </button>
           ))}
         </div>
@@ -448,7 +411,7 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
           {config.language === 'vi' ? 'Phong cách màu' : 'Color Scheme'}
         </label>
         <div className="flex gap-2">
-          {(['monochrome', 'colorful'] as const).map(scheme => (
+          {(['monochrome', 'colorful'] as const).map((scheme) => (
             <button
               key={scheme}
               onClick={() => setColorScheme(scheme)}
@@ -458,10 +421,8 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
                   : 'border border-border hover:bg-hover'
               }`}
             >
-              {scheme === 'monochrome' &&
-                (config.language === 'vi' ? 'Đơn sắc' : 'Monochrome')}
-              {scheme === 'colorful' &&
-                (config.language === 'vi' ? 'Nhiều màu' : 'Colorful')}
+              {scheme === 'monochrome' && (config.language === 'vi' ? 'Đơn sắc' : 'Monochrome')}
+              {scheme === 'colorful' && (config.language === 'vi' ? 'Nhiều màu' : 'Colorful')}
             </button>
           ))}
         </div>
@@ -473,7 +434,7 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
           {config.language === 'vi' ? 'Mức độ hoạt ảnh' : 'Animation Level'}
         </label>
         <div className="flex gap-2">
-          {(['none', 'reduced', 'normal', 'enhanced'] as const).map(level => (
+          {(['none', 'reduced', 'normal', 'enhanced'] as const).map((level) => (
             <button
               key={level}
               onClick={() => setAnimationLevel(level)}
@@ -483,14 +444,10 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
                   : 'border border-border hover:bg-hover'
               }`}
             >
-              {level === 'none' &&
-                (config.language === 'vi' ? 'Không' : 'None')}
-              {level === 'reduced' &&
-                (config.language === 'vi' ? 'Giảm' : 'Reduced')}
-              {level === 'normal' &&
-                (config.language === 'vi' ? 'Bình thường' : 'Normal')}
-              {level === 'enhanced' &&
-                (config.language === 'vi' ? 'Nâng cao' : 'Enhanced')}
+              {level === 'none' && (config.language === 'vi' ? 'Không' : 'None')}
+              {level === 'reduced' && (config.language === 'vi' ? 'Giảm' : 'Reduced')}
+              {level === 'normal' && (config.language === 'vi' ? 'Bình thường' : 'Normal')}
+              {level === 'enhanced' && (config.language === 'vi' ? 'Nâng cao' : 'Enhanced')}
             </button>
           ))}
         </div>
@@ -507,7 +464,7 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
             <input
               type="checkbox"
               checked={config.highContrast}
-              onChange={e => enableHighContrast(e.target.checked)}
+              onChange={(e) => enableHighContrast(e.target.checked)}
               className="rounded border-border"
             />
             <span className="text-sm">
@@ -519,7 +476,7 @@ export function ThemeControlPanel({ className = '' }: { className?: string }) {
             <input
               type="checkbox"
               checked={config.reducedMotion}
-              onChange={e => enableReducedMotion(e.target.checked)}
+              onChange={(e) => enableReducedMotion(e.target.checked)}
               className="rounded border-border"
             />
             <span className="text-sm">

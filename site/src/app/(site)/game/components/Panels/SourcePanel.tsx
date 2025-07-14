@@ -13,9 +13,7 @@ export const SourcePanel = ({
   unlockedTier2Upgrades,
   onHarvestSource,
 }: SourcePanelProps) => {
-  const activeSources = Object.entries(sources).filter(
-    ([_, source]) => source.isActive
-  );
+  const activeSources = Object.entries(sources).filter(([_, source]) => source.isActive);
 
   return (
     <div className="space-y-3">

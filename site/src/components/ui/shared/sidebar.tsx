@@ -18,9 +18,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ config, collapsed }) => {
 
     const content = (
       <>
-        {item.icon && (
-          <span className={`${collapsed ? '' : 'mr-3'}`}>{item.icon}</span>
-        )}
+        {item.icon && <span className={`${collapsed ? '' : 'mr-3'}`}>{item.icon}</span>}
         {!collapsed && <span>{item.label}</span>}
       </>
     );
@@ -67,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ config, collapsed }) => {
         )}
         {item.children && !collapsed && (
           <ul className="ml-4 mt-1">
-            {item.children.map(child => renderSidebarItem(child, level + 1))}
+            {item.children.map((child) => renderSidebarItem(child, level + 1))}
           </ul>
         )}
       </li>
@@ -83,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ config, collapsed }) => {
     >
       <div className="p-4">
         <nav>
-          <ul>{config.items.map(item => renderSidebarItem(item))}</ul>
+          <ul>{config.items.map((item) => renderSidebarItem(item))}</ul>
         </nav>
       </div>
     </aside>

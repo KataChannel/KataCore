@@ -230,12 +230,12 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   // Auto-expand menus when submenu is active
   useEffect(() => {
     const activeParentMenus = menuItems
-      .filter(item => item.children && item.active)
-      .map(item => item.path);
+      .filter((item) => item.children && item.active)
+      .map((item) => item.path);
 
-    setExpandedMenus(prev => {
+    setExpandedMenus((prev) => {
       const newExpanded = [...prev];
-      activeParentMenus.forEach(path => {
+      activeParentMenus.forEach((path) => {
         if (!newExpanded.includes(path)) {
           newExpanded.push(path);
         }
@@ -263,8 +263,8 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   const toggleMenuExpansion = (path: string) => {
-    setExpandedMenus(prev =>
-      prev.includes(path) ? prev.filter(p => p !== path) : [...prev, path]
+    setExpandedMenus((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
     );
   };
 
@@ -290,17 +290,13 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
         >
           {/* Sidebar Header */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-            <div
-              className={`flex items-center ${sidebarOpen ? 'space-x-3' : 'justify-center'}`}
-            >
+            <div className={`flex items-center ${sidebarOpen ? 'space-x-3' : 'justify-center'}`}>
               {sidebarOpen && (
                 <>
                   <div className="w-8 h-8 bg-accent flex items-center justify-center">
                     <span className="text-white font-bold text-sm">T</span>
                   </div>
-                  <span className="text-lg font-semibold text-primary">
-                    TazaCore
-                  </span>
+                  <span className="text-lg font-semibold text-primary">TazaCore</span>
                 </>
               )}
             </div>
@@ -314,7 +310,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
           {/* Sidebar Menu */}
           <nav className="flex-1 p-2 space-y-2">
-            {menuItems.map(item => (
+            {menuItems.map((item) => (
               <div key={item.path}>
                 <button
                   onClick={() => {
@@ -335,9 +331,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 >
                   <div className="flex items-center space-x-3">
                     <item.icon className="h-5 w-5" />
-                    {sidebarOpen && (
-                      <span className="font-medium">{item.title}</span>
-                    )}
+                    {sidebarOpen && <span className="font-medium">{item.title}</span>}
                   </div>
                   {sidebarOpen && item.children && (
                     <ChevronDownIcon
@@ -351,7 +345,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 {/* Submenu */}
                 {sidebarOpen && item.children && shouldExpand(item) && (
                   <div className="ml-6 mt-2 space-y-1">
-                    {item.children.map(subItem => (
+                    {item.children.map((subItem) => (
                       <button
                         key={subItem.href}
                         onClick={() => router.push(subItem.href)}
@@ -377,10 +371,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
         {/* Mobile Sidebar Overlay */}
         {mobileMenuOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={toggleMobileMenu}
-          />
+          <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={toggleMobileMenu} />
         )}
 
         {/* Mobile Sidebar */}
@@ -397,9 +388,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">T</span>
               </div>
-              <span className="text-lg font-semibold text-primary">
-                TazaCore
-              </span>
+              <span className="text-lg font-semibold text-primary">TazaCore</span>
             </div>
             <button
               onClick={toggleMobileMenu}
@@ -411,7 +400,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
           {/* Mobile Menu */}
           <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-            {menuItems.map(item => (
+            {menuItems.map((item) => (
               <div key={item.path}>
                 <button
                   onClick={() => {
@@ -447,7 +436,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 {/* Mobile Submenu */}
                 {item.children && shouldExpand(item) && (
                   <div className="ml-6 mt-2 space-y-1">
-                    {item.children.map(subItem => (
+                    {item.children.map((subItem) => (
                       <button
                         key={subItem.href}
                         onClick={() => {
@@ -496,8 +485,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                     const segments = pathname.split('/');
                     const lastSegment = segments[segments.length - 1];
                     return lastSegment
-                      ? lastSegment.charAt(0).toUpperCase() +
-                          lastSegment.slice(1)
+                      ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1)
                       : 'Dashboard';
                   })()}
                 </span>
@@ -508,9 +496,10 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className={`p-2 ${actualMode === 'dark'
-                  ? 'text-white hover:bg-white/20'
-                  : 'text-black hover:bg-black/20'
+                className={`p-2 ${
+                  actualMode === 'dark'
+                    ? 'text-white hover:bg-white/20'
+                    : 'text-black hover:bg-black/20'
                 } rounded-lg transition-colors`}
                 aria-label="Toggle dark mode"
               >
@@ -580,11 +569,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 // Component chính với ThemeManager wrapper
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
-    <ThemeManager 
-      enablePersistence={true}
-      enableSystemListener={true}
-      enableDebugMode={false}
-    >
+    <ThemeManager enablePersistence={true} enableSystemListener={true} enableDebugMode={false}>
       <AdminLayoutContent>{children}</AdminLayoutContent>
     </ThemeManager>
   );

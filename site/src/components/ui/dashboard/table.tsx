@@ -66,9 +66,7 @@ export default function DataGridDemo() {
       const updatedRow = await response.json();
 
       // Cập nhật state local
-      setRows(prevRows =>
-        prevRows.map(row => (row.id === newRow.id ? updatedRow : row))
-      );
+      setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedRow : row)));
 
       return updatedRow;
     } catch (error) {
@@ -94,7 +92,7 @@ export default function DataGridDemo() {
         checkboxSelection
         disableRowSelectionOnClick
         processRowUpdate={processRowUpdate}
-        onProcessRowUpdateError={error => {
+        onProcessRowUpdateError={(error) => {
           console.error('Row update error:', error);
         }}
       />

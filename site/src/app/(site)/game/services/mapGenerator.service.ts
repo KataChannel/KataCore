@@ -1,9 +1,4 @@
-import type {
-  GameMap,
-  GameTile,
-  GameSource,
-  SpiritBeast,
-} from '../types/game.types';
+import type { GameMap, GameTile, GameSource, SpiritBeast } from '../types/game.types';
 import { GAME_CONFIG, NGU_HANH_RELATIONS } from '../constants/game.constants';
 import { getRandomInt } from '../utils/game.utils';
 
@@ -47,7 +42,7 @@ export class MapGeneratorService {
       'spirit_earth',
     ];
 
-    typesToPlace.forEach(type => {
+    typesToPlace.forEach((type) => {
       if (availablePositions.length === 0) return;
 
       const randomIndex = getRandomInt(0, availablePositions.length - 1);
@@ -85,11 +80,7 @@ export class MapGeneratorService {
     );
   }
 
-  private static createSource(
-    type: string,
-    row: number,
-    col: number
-  ): GameSource {
+  private static createSource(type: string, row: number, col: number): GameSource {
     return {
       type,
       level: 1,
@@ -102,11 +93,7 @@ export class MapGeneratorService {
     };
   }
 
-  private static createSpiritBeast(
-    type: string,
-    row: number,
-    col: number
-  ): SpiritBeast {
+  private static createSpiritBeast(type: string, row: number, col: number): SpiritBeast {
     return {
       type,
       level: 1,

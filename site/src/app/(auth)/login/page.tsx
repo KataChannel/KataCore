@@ -12,7 +12,7 @@ interface LoginForm {
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginForm>({
     email: '',
-    password: ''
+    password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,19 +27,19 @@ export default function LoginPage() {
       // Verify token is still valid
       fetch('/api/auth/me', {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .then(response => {
-        if (response.ok) {
-          router.push('/admin');
-        }
-      })
-      .catch(() => {
-        // Token invalid, clear it
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('authToken');
-      });
+        .then((response) => {
+          if (response.ok) {
+            router.push('/admin');
+          }
+        })
+        .catch(() => {
+          // Token invalid, clear it
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('authToken');
+        });
     }
   }, [router]);
 
@@ -59,13 +59,13 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
-          provider: 'email'
-        })
+          provider: 'email',
+        }),
       });
 
       const data = await response.json();
@@ -81,14 +81,13 @@ export default function LoginPage() {
       }
 
       setMessage('Login successful! Redirecting...');
-      
+
       // Check if user is Super Admin
       if (data.user?.role?.name === 'Super Administrator') {
         setTimeout(() => router.push('/admin/super-admin'), 1000);
       } else {
         setTimeout(() => router.push('/admin'), 1000);
       }
-
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'An error occurred during login');
@@ -99,16 +98,16 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const fillSuperAdminCredentials = () => {
     setFormData({
       email: 'admin@taza.com',
-      password: 'TazaAdmin@2024!'
+      password: 'TazaAdmin@2024!',
     });
     setError(null);
     setMessage('Super Admin credentials filled');
@@ -132,12 +131,14 @@ export default function LoginPage() {
             <CheckCircle className="h-5 w-5 text-blue-600" />
           </div>
           <div className="ml-3 flex-1">
-            <h3 className="text-sm font-medium text-blue-800">
-              Default Super Admin Account
-            </h3>
+            <h3 className="text-sm font-medium text-blue-800">Default Super Admin Account</h3>
             <div className="mt-2 text-sm text-blue-700">
-              <p><strong>Email:</strong> admin@taza.com</p>
-              <p><strong>Password:</strong> TazaAdmin@2024!</p>
+              <p>
+                <strong>Email:</strong> admin@taza.com
+              </p>
+              <p>
+                <strong>Password:</strong> TazaAdmin@2024!
+              </p>
             </div>
             <div className="mt-3">
               <button
@@ -236,9 +237,7 @@ export default function LoginPage() {
       {/* Footer */}
       <div className="mt-8 text-center">
         <div className="text-sm text-gray-500">
-          <p>
-            Need help? Contact your system administrator
-          </p>
+          <p>Need help? Contact your system administrator</p>
         </div>
         <div className="mt-4 pt-4 border-t border-gray-200">
           <button

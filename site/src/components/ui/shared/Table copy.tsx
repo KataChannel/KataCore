@@ -163,8 +163,7 @@ const ResizableTable: React.FC = () => {
   const [filterCriteria, setFilterCriteria] = useState<FilterCriterion[]>([]);
   // State for the new filter being added
   const [newFilterColumn, setNewFilterColumn] = useState<string>('name');
-  const [newFilterOperator, setNewFilterOperator] =
-    useState<string>('contains');
+  const [newFilterOperator, setNewFilterOperator] = useState<string>('contains');
   const [newFilterValue, setNewFilterValue] = useState<string>('');
 
   // State for sorting configuration
@@ -221,7 +220,7 @@ const ResizableTable: React.FC = () => {
       const diff = e.clientX - startX;
       const newWidth = Math.max(80, startWidth + diff); // Minimum column width of 80px
 
-      setColumnWidths(prev => ({
+      setColumnWidths((prev) => ({
         ...prev,
         [isResizing]: newWidth,
       }));
@@ -273,8 +272,8 @@ const ResizableTable: React.FC = () => {
   // Function to submit edited cell value
   const handleEditSubmit = () => {
     if (editingCell) {
-      setData(prev =>
-        prev.map(row =>
+      setData((prev) =>
+        prev.map((row) =>
           row.id === editingCell.rowId
             ? { ...row, [editingCell.column]: editValue } // Update the specific cell
             : row
@@ -301,13 +300,8 @@ const ResizableTable: React.FC = () => {
   };
 
   // Function to handle status change for a specific row
-  const handleStatusChange = (
-    rowId: number,
-    newStatus: 'Active' | 'Inactive'
-  ) => {
-    setData(prev =>
-      prev.map(row => (row.id === rowId ? { ...row, status: newStatus } : row))
-    );
+  const handleStatusChange = (rowId: number, newStatus: 'Active' | 'Inactive') => {
+    setData((prev) => prev.map((row) => (row.id === rowId ? { ...row, status: newStatus } : row)));
   };
 
   // Function to handle single row selection
@@ -330,7 +324,7 @@ const ResizableTable: React.FC = () => {
       setSelectAll(false);
       setShowBulkActions(false);
     } else {
-      const currentPageIds = paginatedData.map(row => row.id);
+      const currentPageIds = paginatedData.map((row) => row.id);
       setSelectedRows(new Set(currentPageIds));
       setSelectAll(true);
       setShowBulkActions(true);
@@ -340,17 +334,13 @@ const ResizableTable: React.FC = () => {
   // Function to handle bulk delete action
   const handleBulkDelete = () => {
     // Using window.confirm as a placeholder for a custom modal
-    if (
-      window.confirm(`Bạn có chắc muốn xóa ${selectedRows.size} mục đã chọn?`)
-    ) {
-      setData(prev => prev.filter(row => !selectedRows.has(row.id)));
+    if (window.confirm(`Bạn có chắc muốn xóa ${selectedRows.size} mục đã chọn?`)) {
+      setData((prev) => prev.filter((row) => !selectedRows.has(row.id)));
       setSelectedRows(new Set());
       setSelectAll(false);
       setShowBulkActions(false);
       // Reset to first page if current page becomes empty after deletion
-      const newTotalPages = Math.ceil(
-        (data.length - selectedRows.size) / itemsPerPage
-      );
+      const newTotalPages = Math.ceil((data.length - selectedRows.size) / itemsPerPage);
       if (currentPage > newTotalPages && newTotalPages > 0) {
         setCurrentPage(1);
       }
@@ -359,10 +349,8 @@ const ResizableTable: React.FC = () => {
 
   // Function to handle bulk status update
   const handleBulkStatusUpdate = (newStatus: 'Active' | 'Inactive') => {
-    setData(prev =>
-      prev.map(row =>
-        selectedRows.has(row.id) ? { ...row, status: newStatus } : row
-      )
+    setData((prev) =>
+      prev.map((row) => (selectedRows.has(row.id) ? { ...row, status: newStatus } : row))
     );
     setSelectedRows(new Set());
     setSelectAll(false);
@@ -455,7 +443,7 @@ const ResizableTable: React.FC = () => {
         width: columnWidths.role,
         filterable: true,
         dataType: 'select' as const,
-        options: Array.from(new Set(data.map(item => item.role))),
+        options: Array.from(new Set(data.map((item) => item.role))),
       },
       {
         key: 'status',
@@ -471,13 +459,13 @@ const ResizableTable: React.FC = () => {
 
   // Memoized list of unique roles for role filter dropdown (kept for initial data mapping)
   const uniqueRoles = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.role)));
+    return Array.from(new Set(initialData.map((item) => item.role)));
   }, []);
 
   // Handler for adding a new filter criterion
   const handleAddFilter = () => {
     if (newFilterColumn && newFilterOperator && newFilterValue) {
-      setFilterCriteria(prev => [
+      setFilterCriteria((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
@@ -493,19 +481,19 @@ const ResizableTable: React.FC = () => {
 
   // Handler for removing a filter criterion
   const handleRemoveFilter = (id: string) => {
-    setFilterCriteria(prev => prev.filter(criteria => criteria.id !== id));
+    setFilterCriteria((prev) => prev.filter((criteria) => criteria.id !== id));
     setCurrentPage(1); // Reset to first page
   };
 
   // Get available operators for the currently selected new filter column
   const availableOperators = useMemo(() => {
-    const selectedCol = columns.find(col => col.key === newFilterColumn);
+    const selectedCol = columns.find((col) => col.key === newFilterColumn);
     return selectedCol ? operators[selectedCol.dataType] : [];
   }, [newFilterColumn, columns]);
 
   // Update operator when column changes, reset to default 'contains' or 'equals'
   React.useEffect(() => {
-    const selectedCol: any = columns.find(col => col.key === newFilterColumn);
+    const selectedCol: any = columns.find((col) => col.key === newFilterColumn);
     if (selectedCol) {
       if (selectedCol.dataType === 'string') {
         setNewFilterOperator('contains');
@@ -519,7 +507,7 @@ const ResizableTable: React.FC = () => {
 
   // Memoized filtered and sorted data to optimize performance
   const filteredAndSortedData = useMemo(() => {
-    let filtered = data.filter(item => {
+    let filtered = data.filter((item) => {
       // General search across name, email, role
       const matchesSearch =
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -527,15 +515,13 @@ const ResizableTable: React.FC = () => {
         item.role.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Apply dynamic filter criteria
-      const matchesFilterCriteria = filterCriteria.every(criterion => {
-        const columnDefinition = columns.find(
-          col => col.key === criterion.columnKey
-        );
+      const matchesFilterCriteria = filterCriteria.every((criterion) => {
+        const columnDefinition = columns.find((col) => col.key === criterion.columnKey);
         if (!columnDefinition) return false;
 
         const itemValue = (item as any)[criterion.columnKey];
         const operatorDefinition = operators[columnDefinition.dataType].find(
-          op => op.value === criterion.operator
+          (op) => op.value === criterion.operator
         );
 
         if (!operatorDefinition) return false;
@@ -568,10 +554,7 @@ const ResizableTable: React.FC = () => {
   // Pagination logic
   const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredAndSortedData.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const paginatedData = filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
 
   // Pagination info object
   const paginationInfo: PaginationInfo = {
@@ -628,30 +611,15 @@ const ResizableTable: React.FC = () => {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 15l7-7 7 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
         </svg>
       );
     }
 
     // Descending sort icon
     return (
-      <svg
-        className="w-4 h-4 text-blue-500"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 9l-7 7-7-7"
-        />
+      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
       </svg>
     );
   };
@@ -696,12 +664,8 @@ const ResizableTable: React.FC = () => {
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Tiêu đề bảng */}
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Bảng Dữ liệu Nâng cao
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Quản lý dữ liệu với đầy đủ tính năng
-          </p>
+          <h2 className="text-xl font-semibold text-gray-800">Bảng Dữ liệu Nâng cao</h2>
+          <p className="text-sm text-gray-600 mt-1">Quản lý dữ liệu với đầy đủ tính năng</p>
         </div>
 
         {/* Các điều khiển: Tìm kiếm và Bộ lọc động */}
@@ -729,7 +693,7 @@ const ResizableTable: React.FC = () => {
                     placeholder="Tìm kiếm tổng quát..."
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
@@ -749,17 +713,15 @@ const ResizableTable: React.FC = () => {
 
             {/* Thêm bộ lọc mới */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">
-                Thêm Bộ Lọc:
-              </span>
+              <span className="text-sm font-medium text-gray-700">Thêm Bộ Lọc:</span>
               <select
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={newFilterColumn}
-                onChange={e => setNewFilterColumn(e.target.value)}
+                onChange={(e) => setNewFilterColumn(e.target.value)}
               >
                 {columns
-                  .filter(col => col.filterable)
-                  .map(col => (
+                  .filter((col) => col.filterable)
+                  .map((col) => (
                     <option key={col.key} value={col.key}>
                       {col.label}
                     </option>
@@ -769,9 +731,9 @@ const ResizableTable: React.FC = () => {
               <select
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={newFilterOperator}
-                onChange={e => setNewFilterOperator(e.target.value)}
+                onChange={(e) => setNewFilterOperator(e.target.value)}
               >
-                {availableOperators.map(op => (
+                {availableOperators.map((op) => (
                   <option key={op.value} value={op.value}>
                     {op.label}
                   </option>
@@ -783,8 +745,8 @@ const ResizableTable: React.FC = () => {
                 placeholder="Giá trị lọc"
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1 min-w-[120px]"
                 value={newFilterValue}
-                onChange={e => setNewFilterValue(e.target.value)}
-                onKeyDown={e => {
+                onChange={(e) => setNewFilterValue(e.target.value)}
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') handleAddFilter();
                 }}
               />
@@ -799,14 +761,13 @@ const ResizableTable: React.FC = () => {
             {/* Hiển thị các bộ lọc đang hoạt động */}
             {filterCriteria.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {filterCriteria.map(criterion => {
+                {filterCriteria.map((criterion) => {
                   const columnLabel =
-                    columns.find(col => col.key === criterion.columnKey)
-                      ?.label || criterion.columnKey;
+                    columns.find((col) => col.key === criterion.columnKey)?.label ||
+                    criterion.columnKey;
                   const operatorLabel =
-                    availableOperators.find(
-                      op => op.value === criterion.operator
-                    )?.label || criterion.operator;
+                    availableOperators.find((op) => op.value === criterion.operator)?.label ||
+                    criterion.operator;
                   return (
                     <span
                       key={criterion.id}
@@ -878,17 +839,13 @@ const ResizableTable: React.FC = () => {
                   <th
                     key={column.key}
                     className={`relative px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 last:border-r-0 ${
-                      column.key !== 'select'
-                        ? 'cursor-pointer hover:bg-gray-100'
-                        : ''
+                      column.key !== 'select' ? 'cursor-pointer hover:bg-gray-100' : ''
                     }`}
                     style={{
                       width: `${column.width}px`,
                       minWidth: `${column.width}px`,
                     }}
-                    onClick={() =>
-                      column.key !== 'select' && handleSort(column.key)
-                    }
+                    onClick={() => column.key !== 'select' && handleSort(column.key)}
                   >
                     <div className="flex items-center justify-between">
                       {column.key === 'select' ? (
@@ -910,8 +867,8 @@ const ResizableTable: React.FC = () => {
                     {index < columns.length - 1 && (
                       <div
                         className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors duration-150 group z-10"
-                        onMouseDown={e => handleMouseDown(e, column.key)}
-                        onClick={e => e.stopPropagation()} // Prevent sort when clicking resize handle
+                        onMouseDown={(e) => handleMouseDown(e, column.key)}
+                        onClick={(e) => e.stopPropagation()} // Prevent sort when clicking resize handle
                       >
                         <div className="w-full h-full bg-transparent group-hover:bg-blue-500"></div>
                       </div>
@@ -922,7 +879,7 @@ const ResizableTable: React.FC = () => {
             </thead>
 
             <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map(row => (
+              {paginatedData.map((row) => (
                 <tr
                   key={row.id}
                   className={`hover:bg-gray-50 transition-colors duration-150 ${
@@ -951,21 +908,18 @@ const ResizableTable: React.FC = () => {
                     }}
                     onClick={() => handleCellClick(row.id, 'name', row.name)}
                   >
-                    {editingCell?.rowId === row.id &&
-                    editingCell?.column === 'name' ? (
+                    {editingCell?.rowId === row.id && editingCell?.column === 'name' ? (
                       <input
                         type="text"
                         value={editValue}
-                        onChange={e => setEditValue(e.target.value)}
+                        onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
                         onKeyDown={handleKeyDown}
                         className="w-full px-2 py-1 border border-blue-500 rounded focus:outline-none"
                         autoFocus
                       />
                     ) : (
-                      <div className="truncate hover:bg-blue-50 px-2 py-1 rounded">
-                        {row.name}
-                      </div>
+                      <div className="truncate hover:bg-blue-50 px-2 py-1 rounded">{row.name}</div>
                     )}
                   </td>
                   <td
@@ -976,21 +930,18 @@ const ResizableTable: React.FC = () => {
                     }}
                     onClick={() => handleCellClick(row.id, 'email', row.email)}
                   >
-                    {editingCell?.rowId === row.id &&
-                    editingCell?.column === 'email' ? (
+                    {editingCell?.rowId === row.id && editingCell?.column === 'email' ? (
                       <input
                         type="email"
                         value={editValue}
-                        onChange={e => setEditValue(e.target.value)}
+                        onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
                         onKeyDown={handleKeyDown}
                         className="w-full px-2 py-1 border border-blue-500 rounded focus:outline-none"
                         autoFocus
                       />
                     ) : (
-                      <div className="truncate hover:bg-blue-50 px-2 py-1 rounded">
-                        {row.email}
-                      </div>
+                      <div className="truncate hover:bg-blue-50 px-2 py-1 rounded">{row.email}</div>
                     )}
                   </td>
                   <td
@@ -1001,26 +952,23 @@ const ResizableTable: React.FC = () => {
                     }}
                     onClick={() => handleCellClick(row.id, 'role', row.role)}
                   >
-                    {editingCell?.rowId === row.id &&
-                    editingCell?.column === 'role' ? (
+                    {editingCell?.rowId === row.id && editingCell?.column === 'role' ? (
                       <select
                         value={editValue}
-                        onChange={e => setEditValue(e.target.value)}
+                        onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleEditSubmit}
                         onKeyDown={handleKeyDown}
                         className="w-full px-2 py-1 border border-blue-500 rounded focus:outline-none"
                         autoFocus
                       >
-                        {uniqueRoles.map(role => (
+                        {uniqueRoles.map((role) => (
                           <option key={role} value={role}>
                             {role}
                           </option>
                         ))}
                       </select>
                     ) : (
-                      <div className="truncate hover:bg-blue-50 px-2 py-1 rounded">
-                        {row.role}
-                      </div>
+                      <div className="truncate hover:bg-blue-50 px-2 py-1 rounded">{row.role}</div>
                     )}
                   </td>
                   <td
@@ -1032,11 +980,8 @@ const ResizableTable: React.FC = () => {
                   >
                     <select
                       value={row.status}
-                      onChange={e =>
-                        handleStatusChange(
-                          row.id,
-                          e.target.value as 'Active' | 'Inactive'
-                        )
+                      onChange={(e) =>
+                        handleStatusChange(row.id, e.target.value as 'Active' | 'Inactive')
                       }
                       className={`text-xs font-semibold rounded-full px-2 py-1 border-0 cursor-pointer ${
                         row.status === 'Active'
@@ -1059,12 +1004,10 @@ const ResizableTable: React.FC = () => {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="text-sm text-gray-600">
               Hiển thị {startIndex + 1}-
-              {Math.min(startIndex + itemsPerPage, paginationInfo.totalItems)}{' '}
-              trong số {paginationInfo.totalItems} mục
+              {Math.min(startIndex + itemsPerPage, paginationInfo.totalItems)} trong số{' '}
+              {paginationInfo.totalItems} mục
               {(searchTerm || filterCriteria.length > 0) && (
-                <span className="ml-1 text-blue-600">
-                  (đã lọc từ {data.length} mục)
-                </span>
+                <span className="ml-1 text-blue-600">(đã lọc từ {data.length} mục)</span>
               )}
             </div>
 
@@ -1082,9 +1025,7 @@ const ResizableTable: React.FC = () => {
                   {getPaginationNumbers().map((page, index) => (
                     <React.Fragment key={index}>
                       {page === '...' ? (
-                        <span className="px-3 py-1 text-sm text-gray-500">
-                          ...
-                        </span>
+                        <span className="px-3 py-1 text-sm text-gray-500">...</span>
                       ) : (
                         <button
                           onClick={() => handlePageChange(page as number)}
@@ -1114,7 +1055,7 @@ const ResizableTable: React.FC = () => {
               <select
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={itemsPerPage}
-                onChange={e => handleItemsPerPageChange(Number(e.target.value))}
+                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
               >
                 <option value={5}>5 / trang</option>
                 <option value={10}>10 / trang</option>

@@ -6,7 +6,7 @@ export type Language = 'vi' | 'en';
 export const i18nConfig = {
   defaultLocale: 'vi' as Language,
   locales: ['vi', 'en'] as Language[],
-  
+
   // Storage key (sync with unified theme)
   storageKey: 'taza-language',
 
@@ -24,7 +24,7 @@ export const i18nConfig = {
       dashboard: 'Bảng điều khiển',
       settings: 'Cài đặt',
       profile: 'Hồ sơ',
-      
+
       // CRUD Operations
       save: 'Lưu',
       cancel: 'Hủy',
@@ -36,7 +36,7 @@ export const i18nConfig = {
       remove: 'Gỡ bỏ',
       copy: 'Sao chép',
       duplicate: 'Nhân bản',
-      
+
       // Data Operations
       search: 'Tìm kiếm',
       filter: 'Lọc',
@@ -49,7 +49,7 @@ export const i18nConfig = {
       refresh: 'Làm mới',
       reset: 'Đặt lại',
       clear: 'Xóa',
-      
+
       // Status & States
       loading: 'Đang tải...',
       saving: 'Đang lưu...',
@@ -63,7 +63,7 @@ export const i18nConfig = {
       draft: 'Bản nháp',
       published: 'Đã xuất bản',
       archived: 'Đã lưu trữ',
-      
+
       // Theme & Appearance
       darkMode: 'Chế độ tối',
       lightMode: 'Chế độ sáng',
@@ -72,7 +72,7 @@ export const i18nConfig = {
       language: 'Ngôn ngữ',
       toggleDarkMode: 'Chuyển chế độ tối',
       toggleLanguage: 'Chuyển ngôn ngữ',
-      
+
       // Navigation & Actions
       close: 'Đóng',
       open: 'Mở',
@@ -86,7 +86,7 @@ export const i18nConfig = {
       finish: 'Hoàn thành',
       submit: 'Gửi',
       apply: 'Áp dụng',
-      
+
       // Data Display
       view: 'Xem',
       details: 'Chi tiết',
@@ -95,7 +95,7 @@ export const i18nConfig = {
       grid: 'Lưới',
       table: 'Bảng',
       card: 'Thẻ',
-      
+
       // Time & Date
       today: 'Hôm nay',
       yesterday: 'Hôm qua',
@@ -105,7 +105,7 @@ export const i18nConfig = {
       thisYear: 'Năm này',
       date: 'Ngày',
       time: 'Thời gian',
-      
+
       // Form Fields
       name: 'Tên',
       title: 'Tiêu đề',
@@ -115,7 +115,7 @@ export const i18nConfig = {
       type: 'Loại',
       status: 'Trạng thái',
       priority: 'Mức độ ưu tiên',
-      
+
       // Common Messages
       noData: 'Không có dữ liệu',
       noResults: 'Không có kết quả',
@@ -123,7 +123,7 @@ export const i18nConfig = {
       accessDenied: 'Không có quyền truy cập',
       sessionExpired: 'Phiên làm việc đã hết hạn',
       connectionError: 'Lỗi kết nối',
-      
+
       // Validation Messages
       required: 'Trường này là bắt buộc',
       invalid: 'Dữ liệu không hợp lệ',
@@ -132,7 +132,7 @@ export const i18nConfig = {
       invalidEmail: 'Email không hợp lệ',
       invalidPhone: 'Số điện thoại không hợp lệ',
       passwordMismatch: 'Mật khẩu không khớp',
-      
+
       // Confirmation Messages
       confirmDelete: 'Bạn có chắc chắn muốn xóa?',
       confirmSave: 'Bạn có muốn lưu thay đổi?',
@@ -152,7 +152,7 @@ export const i18nConfig = {
       dashboard: 'Dashboard',
       settings: 'Settings',
       profile: 'Profile',
-      
+
       // CRUD Operations
       save: 'Save',
       cancel: 'Cancel',
@@ -164,7 +164,7 @@ export const i18nConfig = {
       remove: 'Remove',
       copy: 'Copy',
       duplicate: 'Duplicate',
-      
+
       // Data Operations
       search: 'Search',
       filter: 'Filter',
@@ -177,7 +177,7 @@ export const i18nConfig = {
       refresh: 'Refresh',
       reset: 'Reset',
       clear: 'Clear',
-      
+
       // Status & States
       loading: 'Loading...',
       saving: 'Saving...',
@@ -191,7 +191,7 @@ export const i18nConfig = {
       draft: 'Draft',
       published: 'Published',
       archived: 'Archived',
-      
+
       // Theme & Appearance
       darkMode: 'Dark Mode',
       lightMode: 'Light Mode',
@@ -200,7 +200,7 @@ export const i18nConfig = {
       language: 'Language',
       toggleDarkMode: 'Toggle Dark Mode',
       toggleLanguage: 'Toggle Language',
-      
+
       // Navigation & Actions
       close: 'Close',
       open: 'Open',
@@ -214,7 +214,7 @@ export const i18nConfig = {
       finish: 'Finish',
       submit: 'Submit',
       apply: 'Apply',
-      
+
       // Data Display
       view: 'View',
       details: 'Details',
@@ -223,7 +223,7 @@ export const i18nConfig = {
       grid: 'Grid',
       table: 'Table',
       card: 'Card',
-      
+
       // Time & Date
       today: 'Today',
       yesterday: 'Yesterday',
@@ -233,7 +233,7 @@ export const i18nConfig = {
       thisYear: 'This Year',
       date: 'Date',
       time: 'Time',
-      
+
       // Form Fields
       name: 'Name',
       title: 'Title',
@@ -243,7 +243,7 @@ export const i18nConfig = {
       type: 'Type',
       status: 'Status',
       priority: 'Priority',
-      
+
       // Common Messages
       noData: 'No data available',
       noResults: 'No results found',
@@ -251,7 +251,7 @@ export const i18nConfig = {
       accessDenied: 'Access denied',
       sessionExpired: 'Session expired',
       connectionError: 'Connection error',
-      
+
       // Validation Messages
       required: 'This field is required',
       invalid: 'Invalid data',
@@ -260,7 +260,7 @@ export const i18nConfig = {
       invalidEmail: 'Invalid email address',
       invalidPhone: 'Invalid phone number',
       passwordMismatch: 'Passwords do not match',
-      
+
       // Confirmation Messages
       confirmDelete: 'Are you sure you want to delete?',
       confirmSave: 'Do you want to save changes?',
@@ -288,7 +288,7 @@ export const i18nConfig = {
       activeEmployees: 'Nhân viên hoạt động',
       onLeave: 'Đang nghỉ phép',
       newHires: 'Nhân viên mới',
-      
+
       // Employee management
       employeeId: 'Mã nhân viên',
       fullName: 'Họ và tên',
@@ -309,7 +309,7 @@ export const i18nConfig = {
       nationality: 'Quốc tịch',
       idNumber: 'Số CMND/CCCD',
       emergencyContact: 'Liên hệ khẩn cấp',
-      
+
       // Employment details
       hireDate: 'Ngày bắt đầu làm việc',
       endDate: 'Ngày kết thúc',
@@ -327,7 +327,7 @@ export const i18nConfig = {
       baseSalary: 'Lương cơ bản',
       bonus: 'Thưởng',
       allowance: 'Phụ cấp',
-      
+
       // Department management
       departmentName: 'Tên phòng ban',
       departmentCode: 'Mã phòng ban',
@@ -338,7 +338,7 @@ export const i18nConfig = {
       addDepartment: 'Thêm phòng ban',
       editDepartment: 'Sửa phòng ban',
       deleteDepartment: 'Xóa phòng ban',
-      
+
       // Position management
       positionTitle: 'Chức danh',
       positionCode: 'Mã vị trí',
@@ -350,7 +350,7 @@ export const i18nConfig = {
       addPosition: 'Thêm vị trí',
       editPosition: 'Sửa vị trí',
       deletePosition: 'Xóa vị trí',
-      
+
       // Attendance
       checkIn: 'Giờ vào',
       checkOut: 'Giờ ra',
@@ -362,7 +362,7 @@ export const i18nConfig = {
       present: 'Có mặt',
       attendanceReport: 'Báo cáo chấm công',
       workingDays: 'Ngày làm việc',
-      
+
       // Leave management
       leaveType: 'Loại nghỉ phép',
       annualLeave: 'Nghỉ phép năm',
@@ -378,7 +378,7 @@ export const i18nConfig = {
       pending: 'Chờ duyệt',
       rejected: 'Từ chối',
       remainingLeave: 'Phép còn lại',
-      
+
       // Payroll
       payrollPeriod: 'Kỳ lương',
       grossSalary: 'Lương gốp',
@@ -391,7 +391,7 @@ export const i18nConfig = {
       unemploymentInsurance: 'Bảo hiểm thất nghiệp',
       payslip: 'Phiếu lương',
       generatePayroll: 'Tạo bảng lương',
-      
+
       // Performance
       evaluation: 'Đánh giá',
       reviewPeriod: 'Kỳ đánh giá',
@@ -405,7 +405,7 @@ export const i18nConfig = {
       poor: 'Kém',
       feedback: 'Phản hồi',
       developmentPlan: 'Kế hoạch phát triển',
-      
+
       // Reports
       employeeReport: 'Báo cáo nhân viên',
       payrollReport: 'Báo cáo lương',
@@ -414,7 +414,7 @@ export const i18nConfig = {
       recruitmentReport: 'Báo cáo tuyển dụng',
       exportReport: 'Xuất báo cáo',
       printReport: 'In báo cáo',
-      
+
       // Common actions
       viewProfile: 'Xem hồ sơ',
       editProfile: 'Sửa hồ sơ',
@@ -441,7 +441,7 @@ export const i18nConfig = {
       activeEmployees: 'Active Employees',
       onLeave: 'On Leave',
       newHires: 'New Hires',
-      
+
       // Employee management
       employeeId: 'Employee ID',
       fullName: 'Full Name',
@@ -462,7 +462,7 @@ export const i18nConfig = {
       nationality: 'Nationality',
       idNumber: 'ID Number',
       emergencyContact: 'Emergency Contact',
-      
+
       // Employment details
       hireDate: 'Hire Date',
       endDate: 'End Date',
@@ -480,7 +480,7 @@ export const i18nConfig = {
       baseSalary: 'Base Salary',
       bonus: 'Bonus',
       allowance: 'Allowance',
-      
+
       // Department management
       departmentName: 'Department Name',
       departmentCode: 'Department Code',
@@ -491,7 +491,7 @@ export const i18nConfig = {
       addDepartment: 'Add Department',
       editDepartment: 'Edit Department',
       deleteDepartment: 'Delete Department',
-      
+
       // Position management
       positionTitle: 'Position Title',
       positionCode: 'Position Code',
@@ -503,7 +503,7 @@ export const i18nConfig = {
       addPosition: 'Add Position',
       editPosition: 'Edit Position',
       deletePosition: 'Delete Position',
-      
+
       // Attendance
       checkIn: 'Check In',
       checkOut: 'Check Out',
@@ -515,7 +515,7 @@ export const i18nConfig = {
       present: 'Present',
       attendanceReport: 'Attendance Report',
       workingDays: 'Working Days',
-      
+
       // Leave management
       leaveType: 'Leave Type',
       annualLeave: 'Annual Leave',
@@ -531,7 +531,7 @@ export const i18nConfig = {
       pending: 'Pending',
       rejected: 'Rejected',
       remainingLeave: 'Remaining Leave',
-      
+
       // Payroll
       payrollPeriod: 'Payroll Period',
       grossSalary: 'Gross Salary',
@@ -544,7 +544,7 @@ export const i18nConfig = {
       unemploymentInsurance: 'Unemployment Insurance',
       payslip: 'Payslip',
       generatePayroll: 'Generate Payroll',
-      
+
       // Performance
       evaluation: 'Evaluation',
       reviewPeriod: 'Review Period',
@@ -558,7 +558,7 @@ export const i18nConfig = {
       poor: 'Poor',
       feedback: 'Feedback',
       developmentPlan: 'Development Plan',
-      
+
       // Reports
       employeeReport: 'Employee Report',
       payrollReport: 'Payroll Report',
@@ -567,7 +567,7 @@ export const i18nConfig = {
       recruitmentReport: 'Recruitment Report',
       exportReport: 'Export Report',
       printReport: 'Print Report',
-      
+
       // Common actions
       viewProfile: 'View Profile',
       editProfile: 'Edit Profile',
@@ -713,7 +713,10 @@ export const i18nConfig = {
 
 // Translation namespaces type
 export type TranslationNamespace = keyof typeof i18nConfig;
-export type TranslationModule = Exclude<TranslationNamespace, 'defaultLocale' | 'locales' | 'storageKey'>;
+export type TranslationModule = Exclude<
+  TranslationNamespace,
+  'defaultLocale' | 'locales' | 'storageKey'
+>;
 
 // Helper function để lấy nested translation
 function getNestedTranslation(obj: any, keys: string[]): string {
@@ -721,29 +724,34 @@ function getNestedTranslation(obj: any, keys: string[]): string {
 }
 
 // Hook để sử dụng translations (sẽ được implement trong component)
-export function createTranslationFunction(language: Language, module: TranslationModule = 'common') {
+export function createTranslationFunction(
+  language: Language,
+  module: TranslationModule = 'common'
+) {
   const t = (key: string): string => {
     const keys = key.split('.');
     const moduleTranslations = i18nConfig[module] as any;
     const languageTranslations = moduleTranslations[language];
-    
+
     if (!languageTranslations) {
       console.warn(`Translation module '${module}' not found for language '${language}'`);
       return key;
     }
 
     const translation = getNestedTranslation(languageTranslations, keys);
-    
+
     if (!translation || translation === key) {
       // Fallback to default language (vi)
       const fallbackTranslations = moduleTranslations[i18nConfig.defaultLocale];
       const fallbackTranslation = getNestedTranslation(fallbackTranslations, keys);
-      
+
       if (fallbackTranslation && fallbackTranslation !== key) {
-        console.warn(`Translation key '${key}' not found for language '${language}', using fallback`);
+        console.warn(
+          `Translation key '${key}' not found for language '${language}', using fallback`
+        );
         return fallbackTranslation;
       }
-      
+
       console.warn(`Translation key '${key}' not found in module '${module}' for any language`);
       return key;
     }
@@ -759,16 +767,20 @@ export function useTranslation(module: TranslationModule = 'common') {
   // Placeholder - sẽ được override bởi hook thực tế
   return {
     t: (key: string) => key,
-    language: 'vi' as Language
+    language: 'vi' as Language,
   };
 }
 
 // Utility function để lấy translation mà không cần hook (server-side)
-export function getTranslation(module: TranslationModule, key: string, language: Language = 'vi'): string {
+export function getTranslation(
+  module: TranslationModule,
+  key: string,
+  language: Language = 'vi'
+): string {
   const keys = key.split('.');
   const moduleTranslations = i18nConfig[module] as any;
   const languageTranslations = moduleTranslations[language];
-  
+
   if (!languageTranslations) {
     return key;
   }

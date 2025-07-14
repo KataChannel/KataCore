@@ -8,10 +8,7 @@ export async function GET() {
     return NextResponse.json({ message: 'GET endpoint working' });
   } catch (error) {
     console.error('Error seeding HRM data:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -79,11 +76,7 @@ export async function POST() {
       data: {
         name: 'EMPLOYEE',
         description: 'Regular employee with basic access',
-        permissions: JSON.stringify([
-          'READ',
-          'READ_EMPLOYEES',
-          'READ_DEPARTMENTS',
-        ]),
+        permissions: JSON.stringify(['READ', 'READ_EMPLOYEES', 'READ_DEPARTMENTS']),
       },
     });
 
@@ -97,8 +90,7 @@ export async function POST() {
         phone: '+84901234567',
         displayName: 'HR Manager',
         password: await bcrypt.hash('hr123456', 10),
-        avatar:
-          'https://ui-avatars.com/api/?name=HR+Manager&background=e11d48&color=fff',
+        avatar: 'https://ui-avatars.com/api/?name=HR+Manager&background=e11d48&color=fff',
         isVerified: true,
         isActive: true,
         roleId: hrManagerRole.id,
@@ -112,8 +104,7 @@ export async function POST() {
         phone: '+84901234568',
         displayName: 'IT Manager',
         password: await bcrypt.hash('it123456', 10),
-        avatar:
-          'https://ui-avatars.com/api/?name=IT+Manager&background=3b82f6&color=fff',
+        avatar: 'https://ui-avatars.com/api/?name=IT+Manager&background=3b82f6&color=fff',
         isVerified: true,
         isActive: true,
         roleId: departmentManagerRole.id,
@@ -127,8 +118,7 @@ export async function POST() {
         phone: '+84901234569',
         displayName: 'Sales Manager',
         password: await bcrypt.hash('sales123456', 10),
-        avatar:
-          'https://ui-avatars.com/api/?name=Sales+Manager&background=10b981&color=fff',
+        avatar: 'https://ui-avatars.com/api/?name=Sales+Manager&background=10b981&color=fff',
         isVerified: true,
         isActive: true,
         roleId: departmentManagerRole.id,
@@ -142,8 +132,7 @@ export async function POST() {
         phone: '+84901234570',
         displayName: 'John Doe',
         password: await bcrypt.hash('john123456', 10),
-        avatar:
-          'https://ui-avatars.com/api/?name=John+Doe&background=8b5cf6&color=fff',
+        avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=8b5cf6&color=fff',
         isVerified: true,
         isActive: true,
         roleId: employeeRole.id,
@@ -157,8 +146,7 @@ export async function POST() {
         phone: '+84901234571',
         displayName: 'Jane Smith',
         password: await bcrypt.hash('jane123456', 10),
-        avatar:
-          'https://ui-avatars.com/api/?name=Jane+Smith&background=f59e0b&color=fff',
+        avatar: 'https://ui-avatars.com/api/?name=Jane+Smith&background=f59e0b&color=fff',
         isVerified: true,
         isActive: true,
         roleId: employeeRole.id,
@@ -172,8 +160,7 @@ export async function POST() {
         phone: '+84901234572',
         displayName: 'Mike Wilson',
         password: await bcrypt.hash('mike123456', 10),
-        avatar:
-          'https://ui-avatars.com/api/?name=Mike+Wilson&background=06b6d4&color=fff',
+        avatar: 'https://ui-avatars.com/api/?name=Mike+Wilson&background=06b6d4&color=fff',
         isVerified: true,
         isActive: true,
         roleId: employeeRole.id,
@@ -187,8 +174,7 @@ export async function POST() {
         phone: '+84901234573',
         displayName: 'Sarah Jones',
         password: await bcrypt.hash('sarah123456', 10),
-        avatar:
-          'https://ui-avatars.com/api/?name=Sarah+Jones&background=ec4899&color=fff',
+        avatar: 'https://ui-avatars.com/api/?name=Sarah+Jones&background=ec4899&color=fff',
         isVerified: true,
         isActive: true,
         roleId: employeeRole.id,
@@ -215,8 +201,7 @@ export async function POST() {
     const itDepartment = await prisma.department.create({
       data: {
         name: 'Information Technology',
-        description:
-          'Manages IT infrastructure, software development, and technical support',
+        description: 'Manages IT infrastructure, software development, and technical support',
         code: 'IT',
         budget: 1000000,
         location: 'Floor 3, Building A',
@@ -230,8 +215,7 @@ export async function POST() {
     const salesDepartment = await prisma.department.create({
       data: {
         name: 'Sales & Marketing',
-        description:
-          'Manages sales operations, customer relations, and marketing campaigns',
+        description: 'Manages sales operations, customer relations, and marketing campaigns',
         code: 'SALES',
         budget: 800000,
         location: 'Floor 1, Building A',
@@ -252,8 +236,7 @@ export async function POST() {
         level: 5,
         minSalary: 25000000,
         maxSalary: 35000000,
-        requirements:
-          'Bachelor degree in HR or related field, 5+ years experience',
+        requirements: 'Bachelor degree in HR or related field, 5+ years experience',
         departmentId: hrDepartment.id,
         isActive: true,
       },
@@ -266,8 +249,7 @@ export async function POST() {
         level: 5,
         minSalary: 30000000,
         maxSalary: 40000000,
-        requirements:
-          'Bachelor degree in IT or related field, 5+ years experience',
+        requirements: 'Bachelor degree in IT or related field, 5+ years experience',
         departmentId: itDepartment.id,
         isActive: true,
       },
@@ -280,8 +262,7 @@ export async function POST() {
         level: 5,
         minSalary: 28000000,
         maxSalary: 38000000,
-        requirements:
-          'Bachelor degree in Business or related field, 5+ years experience',
+        requirements: 'Bachelor degree in Business or related field, 5+ years experience',
         departmentId: salesDepartment.id,
         isActive: true,
       },
@@ -294,8 +275,7 @@ export async function POST() {
         level: 4,
         minSalary: 20000000,
         maxSalary: 30000000,
-        requirements:
-          'Bachelor degree in Computer Science, 3+ years experience',
+        requirements: 'Bachelor degree in Computer Science, 3+ years experience',
         departmentId: itDepartment.id,
         isActive: true,
       },
@@ -308,8 +288,7 @@ export async function POST() {
         level: 3,
         minSalary: 15000000,
         maxSalary: 25000000,
-        requirements:
-          'Bachelor degree in Computer Science, 1+ years experience',
+        requirements: 'Bachelor degree in Computer Science, 1+ years experience',
         departmentId: itDepartment.id,
         isActive: true,
       },
@@ -502,12 +481,7 @@ export async function POST() {
     console.log('Employees created');
 
     // Create Attendance Records (last 30 days)
-    const employees = [
-      johnDoeEmployee,
-      janeSmithEmployee,
-      mikeWilsonEmployee,
-      sarahJonesEmployee,
-    ];
+    const employees = [johnDoeEmployee, janeSmithEmployee, mikeWilsonEmployee, sarahJonesEmployee];
 
     const users = [developer1, developer2, salesRep1, salesRep2];
 
@@ -523,16 +497,10 @@ export async function POST() {
         const user = users[j];
 
         const timeIn = new Date(date);
-        timeIn.setHours(
-          8 + Math.floor(Math.random() * 2),
-          Math.floor(Math.random() * 60)
-        );
+        timeIn.setHours(8 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 60));
 
         const timeOut = new Date(date);
-        timeOut.setHours(
-          17 + Math.floor(Math.random() * 2),
-          Math.floor(Math.random() * 60)
-        );
+        timeOut.setHours(17 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 60));
 
         const breakStart = new Date(date);
         breakStart.setHours(12, 0);
@@ -541,9 +509,7 @@ export async function POST() {
         breakEnd.setHours(13, 0);
 
         const totalHours =
-          (timeOut.getTime() -
-            timeIn.getTime() -
-            (breakEnd.getTime() - breakStart.getTime())) /
+          (timeOut.getTime() - timeIn.getTime() - (breakEnd.getTime() - breakStart.getTime())) /
           (1000 * 60 * 60);
 
         await prisma.attendance.create({
@@ -555,8 +521,7 @@ export async function POST() {
             breakEnd: breakEnd,
             totalHours: Math.round(totalHours * 100) / 100,
             overtime: totalHours > 8 ? totalHours - 8 : 0,
-            status:
-              Math.random() > 0.95 ? ('LATE' as const) : ('PRESENT' as const),
+            status: Math.random() > 0.95 ? ('LATE' as const) : ('PRESENT' as const),
             notes: Math.random() > 0.9 ? 'Working on important project' : null,
             employeeId: employee.id,
             userId: user.id,
@@ -636,8 +601,7 @@ export async function POST() {
       const overtime = Math.floor(Math.random() * 20) * 100000; // Random overtime
       const bonus = Math.floor(Math.random() * 5) * 500000; // Random bonus
       const deductions = Math.floor(Math.random() * 3) * 200000; // Random deductions
-      const netSalary =
-        payrollEmployee.basicSalary + overtime + bonus - deductions;
+      const netSalary = payrollEmployee.basicSalary + overtime + bonus - deductions;
 
       await prisma.payroll.create({
         data: {
@@ -667,8 +631,7 @@ export async function POST() {
         achievements:
           'Successfully migrated 80% of components to React, implemented testing framework',
         rating: 4.5,
-        feedback:
-          'Excellent performance, showing strong technical skills and leadership potential',
+        feedback: 'Excellent performance, showing strong technical skills and leadership potential',
       },
       {
         employeeId: janeSmithEmployee.id,
@@ -676,11 +639,9 @@ export async function POST() {
         reviewerId: itManager.id,
         period: '2024-Q1',
         goals: 'Learn new technologies, contribute to team projects',
-        achievements:
-          'Completed Next.js certification, delivered 3 major features',
+        achievements: 'Completed Next.js certification, delivered 3 major features',
         rating: 4.0,
-        feedback:
-          'Good progress, showing steady improvement and team collaboration',
+        feedback: 'Good progress, showing steady improvement and team collaboration',
       },
       {
         employeeId: mikeWilsonEmployee.id,
@@ -698,11 +659,9 @@ export async function POST() {
         reviewerId: salesManager.id,
         period: '2024-Q1',
         goals: 'Improve customer satisfaction, learn new sales techniques',
-        achievements:
-          'Maintained 95% customer satisfaction, completed sales training',
+        achievements: 'Maintained 95% customer satisfaction, completed sales training',
         rating: 4.2,
-        feedback:
-          'Great customer service skills, showing continuous improvement',
+        feedback: 'Great customer service skills, showing continuous improvement',
       },
     ];
 

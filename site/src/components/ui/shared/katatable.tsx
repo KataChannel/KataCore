@@ -76,14 +76,14 @@ function AdvancedTable<T>({
   );
 
   const handleSort = (key: keyof T) => {
-    setSort(prev => ({
+    setSort((prev) => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
 
   const handleFilter = (key: keyof T, value: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -102,7 +102,7 @@ function AdvancedTable<T>({
             type="text"
             placeholder="Search..."
             className="w-full pl-10 pr-4 py-2 border rounded-lg"
-            onChange={e => debouncedSearch(e.target.value)}
+            onChange={(e) => debouncedSearch(e.target.value)}
           />
         </div>
       </div>
@@ -110,14 +110,14 @@ function AdvancedTable<T>({
       {/* Filters */}
       <div className="mb-4 flex gap-4 flex-wrap">
         {columns
-          .filter(col => col.filterable)
-          .map(col => (
+          .filter((col) => col.filterable)
+          .map((col) => (
             <div key={String(col.key)} className="flex-1 min-w-[200px]">
               <input
                 type="text"
                 placeholder={`Filter ${col.header}`}
                 className="w-full px-4 py-2 border rounded-lg"
-                onChange={e => handleFilter(col.key, e.target.value)}
+                onChange={(e) => handleFilter(col.key, e.target.value)}
               />
             </div>
           ))}
@@ -128,11 +128,8 @@ function AdvancedTable<T>({
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
-              {columns.map(col => (
-                <th
-                  key={String(col.key)}
-                  className="p-3 text-left font-semibold"
-                >
+              {columns.map((col) => (
+                <th key={String(col.key)} className="p-3 text-left font-semibold">
                   <div className="flex items-center gap-2">
                     <span>{col.header}</span>
                     {col.sortable && (
@@ -169,11 +166,9 @@ function AdvancedTable<T>({
             ) : (
               data.map((row, index) => (
                 <tr key={index} className="border-t hover:bg-gray-50">
-                  {columns.map(col => (
+                  {columns.map((col) => (
                     <td key={String(col.key)} className="p-3">
-                      {col.render
-                        ? col.render(row[col.key], row)
-                        : String(row[col.key])}
+                      {col.render ? col.render(row[col.key], row) : String(row[col.key])}
                     </td>
                   ))}
                 </tr>
@@ -189,20 +184,20 @@ function AdvancedTable<T>({
           <select
             className="border rounded-lg px-3 py-2"
             value={pageSize}
-            onChange={e => {
+            onChange={(e) => {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
           >
-            {pageSizeOptions.map(size => (
+            {pageSizeOptions.map((size) => (
               <option key={size} value={size}>
                 {size} per page
               </option>
             ))}
           </select>
           <span>
-            Showing {(page - 1) * pageSize + 1} to{' '}
-            {Math.min(page * pageSize, total)} of {total} entries
+            Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, total)} of {total}{' '}
+            entries
           </span>
         </div>
         <div className="flex gap-2">
@@ -216,7 +211,7 @@ function AdvancedTable<T>({
           <button
             className="px-4 py-2 border rounded-lg disabled:opacity-50"
             disabled={page === 1}
-            onClick={() => setPage(prev => prev - 1)}
+            onClick={() => setPage((prev) => prev - 1)}
           >
             Previous
           </button>
@@ -226,7 +221,7 @@ function AdvancedTable<T>({
           <button
             className="px-4 py-2 border rounded-lg disabled:opacity-50"
             disabled={page === totalPages}
-            onClick={() => setPage(prev => prev + 1)}
+            onClick={() => setPage((prev) => prev + 1)}
           >
             Next
           </button>

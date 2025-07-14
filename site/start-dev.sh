@@ -1,0 +1,21 @@
+#!/bin/bash
+echo "🔥 TazaCore Development Server Starting..."
+echo ""
+echo "📋 Available endpoints:"
+echo "  🏠 Homepage: http://localhost:3000"
+echo "  🔐 Login: http://localhost:3000/login"
+echo "  📊 Dashboard: http://localhost:3000/dashboard"
+echo "  🏢 Admin: http://localhost:3000/admin"
+echo ""
+echo "🧪 Test accounts (after seeding):"
+echo "  👑 Super Admin: admin@taza.com / admin123"
+echo "  👨‍💼 Manager: manager@taza.com / manager123"
+echo "  👩‍💻 Employee: employee@taza.com / employee123"
+echo ""
+echo "📚 Documentation: ../TAZA-CORE-STANDARDS.md"
+echo "🗺️  Migration Guide: ../MIGRATION-PLAN.md"
+echo ""
+echo "Starting Next.js development server..."
+echo "======================================="
+
+npm run dev

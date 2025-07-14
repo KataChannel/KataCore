@@ -9,11 +9,7 @@ interface LoginFormProps {
   loading?: boolean;
 }
 
-export default function LoginForm({
-  onLogin,
-  onBack,
-  loading = false,
-}: LoginFormProps) {
+export default function LoginForm({ onLogin, onBack, loading = false }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -39,7 +35,7 @@ export default function LoginForm({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -59,10 +55,7 @@ export default function LoginForm({
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
               </label>
               <input
@@ -79,10 +72,7 @@ export default function LoginForm({
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -120,10 +110,7 @@ export default function LoginForm({
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label
-                  htmlFor="remember"
-                  className="ml-2 block text-sm text-gray-700"
-                >
+                <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
                   Remember me
                 </label>
               </div>
@@ -131,7 +118,7 @@ export default function LoginForm({
               <a
                 href="#"
                 className="text-sm text-blue-600 hover:text-blue-500"
-                onClick={e => e.preventDefault()}
+                onClick={(e) => e.preventDefault()}
               >
                 Forgot password?
               </a>
@@ -167,10 +154,7 @@ export default function LoginForm({
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a
-                href="#"
-                className="text-blue-600 hover:text-blue-500 font-medium"
-              >
+              <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
                 Contact your administrator
               </a>
             </p>

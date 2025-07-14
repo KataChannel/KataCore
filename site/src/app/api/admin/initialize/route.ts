@@ -12,12 +12,9 @@ export async function POST(request: NextRequest) {
 
     // Basic security check - you should set this in environment variables
     const SETUP_KEY = process.env.SYSTEM_SETUP_KEY || 'TazaSetup2024';
-    
+
     if (setupKey !== SETUP_KEY) {
-      return NextResponse.json(
-        { error: 'Invalid setup key' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid setup key' }, { status: 401 });
     }
 
     // Check if system is already initialized
@@ -25,17 +22,14 @@ export async function POST(request: NextRequest) {
       where: {
         role: {
           name: {
-            in: ['Super Administrator', 'super_administrator']
-          }
-        }
-      }
+            in: ['Super Administrator', 'super_administrator'],
+          },
+        },
+      },
     });
 
     if (existingSuperAdmin) {
-      return NextResponse.json(
-        { error: 'System already initialized' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'System already initialized' }, { status: 409 });
     }
 
     // Initialize system
@@ -44,10 +38,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'System initialized successfully',
-      data: result
+      data: result,
     });
-
-  } catch (error:any) {
+  } catch (error: any) {
     console.error('System initialization error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to initialize system' },
@@ -63,31 +56,29 @@ export async function GET(request: NextRequest) {
       where: {
         role: {
           name: {
-            in: ['Super Administrator', 'super_administrator']
-          }
-        }
+            in: ['Super Administrator', 'super_administrator'],
+          },
+        },
       },
-      select: { id: true, email: true, createdAt: true }
+      select: { id: true, email: true, createdAt: true },
     });
 
     const systemStats = await getInitializationStats();
 
     return NextResponse.json({
       initialized: !!superAdminExists,
-      superAdmin: superAdminExists ? {
-        exists: true,
-        email: superAdminExists.email,
-        createdAt: superAdminExists.createdAt
-      } : { exists: false },
-      stats: systemStats
+      superAdmin: superAdminExists
+        ? {
+            exists: true,
+            email: superAdminExists.email,
+            createdAt: superAdminExists.createdAt,
+          }
+        : { exists: false },
+      stats: systemStats,
     });
-
   } catch (error) {
     console.error('Error checking initialization status:', error);
-    return NextResponse.json(
-      { error: 'Failed to check system status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to check system status' }, { status: 500 });
   }
 }
 
@@ -98,7 +89,7 @@ async function initializeSystem(adminData?: any) {
     displayName: 'Super Administrator',
     username: 'superadmin',
     firstName: 'Super',
-    lastName: 'Administrator'
+    lastName: 'Administrator',
   };
 
   const data = { ...defaultAdminData, ...adminData };
@@ -132,8 +123,8 @@ async function initializeSystem(adminData?: any) {
       credentials: {
         email: data.email,
         password: data.password,
-        warning: 'Please change the default password immediately after first login!'
-      }
+        warning: 'Please change the default password immediately after first login!',
+      },
     };
   });
 }
@@ -149,7 +140,7 @@ async function createSystemRoles(tx: any) {
     { action: 'configure', resource: 'system' },
     { action: 'backup', resource: 'system' },
     { action: 'restore', resource: 'system' },
-    
+
     // User and role management
     { action: 'create', resource: 'users' },
     { action: 'read', resource: 'users' },
@@ -157,16 +148,16 @@ async function createSystemRoles(tx: any) {
     { action: 'delete', resource: 'users' },
     { action: 'manage', resource: 'users' },
     { action: 'admin', resource: 'users' },
-    
+
     { action: 'create', resource: 'roles' },
     { action: 'read', resource: 'roles' },
     { action: 'update', resource: 'roles' },
     { action: 'delete', resource: 'roles' },
     { action: 'manage', resource: 'roles' },
     { action: 'admin', resource: 'roles' },
-    
+
     // All module permissions
-    ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+    ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
       { action: 'create', resource: permission.resource },
       { action: 'read', resource: permission.resource },
       { action: 'update', resource: permission.resource },
@@ -176,16 +167,16 @@ async function createSystemRoles(tx: any) {
       { action: 'export', resource: permission.resource },
       { action: 'import', resource: permission.resource },
       { action: 'approve', resource: permission.resource },
-      { action: 'reject', resource: permission.resource }
+      { action: 'reject', resource: permission.resource },
     ]),
-    
+
     // Global permissions
     { action: 'create', resource: '*' },
     { action: 'read', resource: '*' },
     { action: 'update', resource: '*' },
     { action: 'delete', resource: '*' },
     { action: 'manage', resource: '*' },
-    { action: 'admin', resource: '*' }
+    { action: 'admin', resource: '*' },
   ];
 
   // Create Super Administrator Role
@@ -195,7 +186,7 @@ async function createSystemRoles(tx: any) {
       description: 'Super Administrator with full system access and control',
       permissions: JSON.stringify(allPermissions),
       isSystemRole: true,
-      level: 10
+      level: 10,
     },
     create: {
       id: 'super_administrator',
@@ -203,8 +194,8 @@ async function createSystemRoles(tx: any) {
       description: 'Super Administrator with full system access and control',
       permissions: JSON.stringify(allPermissions),
       isSystemRole: true,
-      level: 10
-    }
+      level: 10,
+    },
   });
 
   // Create Administrator Role
@@ -217,16 +208,16 @@ async function createSystemRoles(tx: any) {
         { action: 'read', resource: 'users' },
         { action: 'update', resource: 'users' },
         { action: 'manage', resource: 'users' },
-        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
           { action: 'read', resource: permission.resource },
           { action: 'create', resource: permission.resource },
           { action: 'update', resource: permission.resource },
           { action: 'delete', resource: permission.resource },
-          { action: 'manage', resource: permission.resource }
-        ])
+          { action: 'manage', resource: permission.resource },
+        ]),
       ]),
       isSystemRole: true,
-      level: 8
+      level: 8,
     },
     create: {
       id: 'administrator',
@@ -237,17 +228,17 @@ async function createSystemRoles(tx: any) {
         { action: 'read', resource: 'users' },
         { action: 'update', resource: 'users' },
         { action: 'manage', resource: 'users' },
-        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
           { action: 'read', resource: permission.resource },
           { action: 'create', resource: permission.resource },
           { action: 'update', resource: permission.resource },
           { action: 'delete', resource: permission.resource },
-          { action: 'manage', resource: permission.resource }
-        ])
+          { action: 'manage', resource: permission.resource },
+        ]),
       ]),
       isSystemRole: true,
-      level: 8
-    }
+      level: 8,
+    },
   });
 
   // Create Manager Role
@@ -257,15 +248,15 @@ async function createSystemRoles(tx: any) {
       description: 'Department Manager with supervisory permissions',
       permissions: JSON.stringify([
         { action: 'read', resource: 'users' },
-        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
           { action: 'read', resource: permission.resource },
           { action: 'create', resource: permission.resource },
           { action: 'update', resource: permission.resource },
-          { action: 'delete', resource: permission.resource }
-        ])
+          { action: 'delete', resource: permission.resource },
+        ]),
       ]),
       isSystemRole: true,
-      level: 6
+      level: 6,
     },
     create: {
       id: 'manager',
@@ -273,16 +264,16 @@ async function createSystemRoles(tx: any) {
       description: 'Department Manager with supervisory permissions',
       permissions: JSON.stringify([
         { action: 'read', resource: 'users' },
-        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
           { action: 'read', resource: permission.resource },
           { action: 'create', resource: permission.resource },
           { action: 'update', resource: permission.resource },
-          { action: 'delete', resource: permission.resource }
-        ])
+          { action: 'delete', resource: permission.resource },
+        ]),
       ]),
       isSystemRole: true,
-      level: 6
-    }
+      level: 6,
+    },
   });
 
   // Create Employee Role
@@ -291,29 +282,29 @@ async function createSystemRoles(tx: any) {
     update: {
       description: 'Standard Employee with basic access',
       permissions: JSON.stringify([
-        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
           { action: 'read', resource: permission.resource },
           { action: 'create', resource: permission.resource },
-          { action: 'update', resource: permission.resource }
-        ])
+          { action: 'update', resource: permission.resource },
+        ]),
       ]),
       isSystemRole: true,
-      level: 4
+      level: 4,
     },
     create: {
       id: 'employee',
       name: 'Employee',
       description: 'Standard Employee with basic access',
       permissions: JSON.stringify([
-        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
           { action: 'read', resource: permission.resource },
           { action: 'create', resource: permission.resource },
-          { action: 'update', resource: permission.resource }
-        ])
+          { action: 'update', resource: permission.resource },
+        ]),
       ]),
       isSystemRole: true,
-      level: 4
-    }
+      level: 4,
+    },
   });
 
   // Create Viewer Role
@@ -322,21 +313,27 @@ async function createSystemRoles(tx: any) {
     update: {
       description: 'Read-only access to system',
       permissions: JSON.stringify([
-        ...Object.values(ALL_MODULE_PERMISSIONS).map(permission => ({ action: 'read', resource: permission.resource }))
+        ...Object.values(ALL_MODULE_PERMISSIONS).map((permission) => ({
+          action: 'read',
+          resource: permission.resource,
+        })),
       ]),
       isSystemRole: true,
-      level: 2
+      level: 2,
     },
     create: {
       id: 'viewer',
       name: 'Viewer',
       description: 'Read-only access to system',
       permissions: JSON.stringify([
-        ...Object.values(ALL_MODULE_PERMISSIONS).map(permission => ({ action: 'read', resource: permission.resource }))
+        ...Object.values(ALL_MODULE_PERMISSIONS).map((permission) => ({
+          action: 'read',
+          resource: permission.resource,
+        })),
       ]),
       isSystemRole: true,
-      level: 2
-    }
+      level: 2,
+    },
   });
 
   return {
@@ -344,7 +341,7 @@ async function createSystemRoles(tx: any) {
     administratorRole,
     managerRole,
     employeeRole,
-    viewerRole
+    viewerRole,
   };
 }
 
@@ -363,7 +360,7 @@ async function createSuperAdministrator(tx: any, data: any, superAdminRole: any)
       username: data.username,
       roleId: superAdminRole.id,
       isActive: true,
-      isVerified: true
+      isVerified: true,
     },
     create: {
       email: data.email,
@@ -372,8 +369,8 @@ async function createSuperAdministrator(tx: any, data: any, superAdminRole: any)
       username: data.username,
       roleId: superAdminRole.id,
       isActive: true,
-      isVerified: true
-    }
+      isVerified: true,
+    },
   });
 
   return superAdmin;
@@ -386,13 +383,13 @@ async function createOrganizationStructure(tx: any) {
   const adminDepartment = await tx.department.upsert({
     where: { name: 'Administration' },
     update: {
-      description: 'System Administration Department'
+      description: 'System Administration Department',
     },
     create: {
       name: 'Administration',
       description: 'System Administration Department',
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 
   // Create default position
@@ -400,19 +397,19 @@ async function createOrganizationStructure(tx: any) {
     where: { title: 'Super Administrator' },
     update: {
       description: 'Super Administrator Position',
-      departmentId: adminDepartment.id
+      departmentId: adminDepartment.id,
     },
     create: {
       title: 'Super Administrator',
       description: 'Super Administrator Position',
       departmentId: adminDepartment.id,
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 
   return {
     adminDepartment,
-    superAdminPosition
+    superAdminPosition,
   };
 }
 
@@ -429,8 +426,8 @@ async function createSystemConfiguration(tx: any) {
       multiTenant: false,
       advancedSecurity: true,
       auditLog: true,
-      backup: true
-    }
+      backup: true,
+    },
   };
 
   return config;
@@ -438,23 +435,18 @@ async function createSystemConfiguration(tx: any) {
 
 async function getInitializationStats() {
   try {
-    const [
-      userCount,
-      roleCount,
-      departmentCount,
-      positionCount
-    ] = await Promise.all([
+    const [userCount, roleCount, departmentCount, positionCount] = await Promise.all([
       prisma.user.count(),
       prisma.role.count(),
       prisma.department.count(),
-      prisma.position.count()
+      prisma.position.count(),
     ]);
 
     return {
       users: userCount,
       roles: roleCount,
       departments: departmentCount,
-      positions: positionCount
+      positions: positionCount,
     };
   } catch (error) {
     console.error('Error getting initialization stats:', error);
@@ -462,7 +454,7 @@ async function getInitializationStats() {
       users: 0,
       roles: 0,
       departments: 0,
-      positions: 0
+      positions: 0,
     };
   }
 }

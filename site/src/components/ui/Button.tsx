@@ -8,8 +8,7 @@ import type { FC } from '@/types/global';
 // COMPONENT INTERFACE
 // ============================================================================
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Button content
    */

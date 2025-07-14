@@ -6,26 +6,58 @@ const prisma = new PrismaClient();
 
 // All available modules in TazaCore system
 const ALL_MODULES = [
-  'sales', 'crm', 'inventory', 'finance', 'hrm', 'projects',
-  'manufacturing', 'marketing', 'support', 'analytics', 'ecommerce'
+  'sales',
+  'crm',
+  'inventory',
+  'finance',
+  'hrm',
+  'projects',
+  'manufacturing',
+  'marketing',
+  'support',
+  'analytics',
+  'ecommerce',
 ];
 
 // Comprehensive permissions for Super Administrator
 const SUPER_ADMIN_PERMISSIONS = [
   // System-wide permissions
-  'system:admin', 'system:manage', 'system:configure', 'system:audit',
-  
+  'system:admin',
+  'system:manage',
+  'system:configure',
+  'system:audit',
+
   // User and role management
-  'create:user', 'read:user', 'update:user', 'delete:user', 'manage:user',
-  'create:role', 'read:role', 'update:role', 'delete:role', 'manage:role',
-  
+  'create:user',
+  'read:user',
+  'update:user',
+  'delete:user',
+  'manage:user',
+  'create:role',
+  'read:role',
+  'update:role',
+  'delete:role',
+  'manage:role',
+
   // All modules admin permissions
-  'admin:sales', 'admin:crm', 'admin:inventory', 'admin:finance',
-  'admin:hrm', 'admin:projects', 'admin:manufacturing', 'admin:marketing',
-  'admin:support', 'admin:analytics', 'admin:ecommerce',
-  
+  'admin:sales',
+  'admin:crm',
+  'admin:inventory',
+  'admin:finance',
+  'admin:hrm',
+  'admin:projects',
+  'admin:manufacturing',
+  'admin:marketing',
+  'admin:support',
+  'admin:analytics',
+  'admin:ecommerce',
+
   // Full CRUD for all modules
-  'create:*', 'read:*', 'update:*', 'delete:*', 'manage:*'
+  'create:*',
+  'read:*',
+  'update:*',
+  'delete:*',
+  'manage:*',
 ];
 
 export async function POST(request: NextRequest) {
@@ -35,21 +67,24 @@ export async function POST(request: NextRequest) {
       include: { role: true },
       where: {
         role: {
-          name: 'Super Administrator'
-        }
-      }
+          name: 'Super Administrator',
+        },
+      },
     });
 
     if (existingSuperAdmin) {
-      return NextResponse.json({
-        success: false,
-        error: 'Super Administrator đã tồn tại',
-        existing: {
-          email: existingSuperAdmin.email,
-          displayName: existingSuperAdmin.displayName,
-          createdAt: existingSuperAdmin.createdAt
-        }
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Super Administrator đã tồn tại',
+          existing: {
+            email: existingSuperAdmin.email,
+            displayName: existingSuperAdmin.displayName,
+            createdAt: existingSuperAdmin.createdAt,
+          },
+        },
+        { status: 400 }
+      );
     }
 
     // Create Super Admin Role
@@ -57,13 +92,13 @@ export async function POST(request: NextRequest) {
       where: { name: 'Super Administrator' },
       update: {
         description: 'Quản trị viên cấp cao nhất - có toàn quyền hệ thống TazaCore',
-        permissions: JSON.stringify(SUPER_ADMIN_PERMISSIONS)
+        permissions: JSON.stringify(SUPER_ADMIN_PERMISSIONS),
       },
       create: {
         name: 'Super Administrator',
         description: 'Quản trị viên cấp cao nhất - có toàn quyền hệ thống TazaCore',
-        permissions: JSON.stringify(SUPER_ADMIN_PERMISSIONS)
-      }
+        permissions: JSON.stringify(SUPER_ADMIN_PERMISSIONS),
+      },
     });
 
     // Generate secure password
@@ -81,26 +116,26 @@ export async function POST(request: NextRequest) {
         isVerified: true,
         roleId: superAdminRole.id,
         avatar: 'https://ui-avatars.com/api/?name=Admin&background=dc2626&color=fff&size=128',
-        phone: '+84-xxx-xxx-xxx'
+        phone: '+84-xxx-xxx-xxx',
       },
       include: {
-        role: true
-      }
+        role: true,
+      },
     });
 
     // Update role with user count tracking in permissions metadata
     await prisma.role.update({
       where: { id: superAdminRole.id },
-      data: { 
+      data: {
         permissions: JSON.stringify({
           permissions: SUPER_ADMIN_PERMISSIONS,
           userCount: 1,
           level: 10,
           modules: ALL_MODULES,
           isSystemRole: true,
-          isActive: true
-        })
-      }
+          isActive: true,
+        }),
+      },
     });
 
     // Try to create employee record if HRM module exists
@@ -109,7 +144,7 @@ export async function POST(request: NextRequest) {
       // First check if required tables exist
       const departments = await prisma.department.findMany({ take: 1 });
       const positions = await prisma.position.findMany({ take: 1 });
-      
+
       if (departments.length > 0 && positions.length > 0) {
         await prisma.employee.create({
           data: {
@@ -122,14 +157,16 @@ export async function POST(request: NextRequest) {
             status: 'ACTIVE',
             contractType: 'FULL_TIME',
             departmentId: departments[0].id,
-            positionId: positions[0].id
-          }
+            positionId: positions[0].id,
+          },
         });
         employeeCreated = true;
       }
     } catch (error) {
       // Employee table or related tables might not exist yet
-      console.log('Employee/Department/Position tables not found, skipping employee record creation');
+      console.log(
+        'Employee/Department/Position tables not found, skipping employee record creation'
+      );
     }
 
     return NextResponse.json({
@@ -144,7 +181,7 @@ export async function POST(request: NextRequest) {
         roleLevel: 10, // Static value since schema doesn't have level field
         modules: ALL_MODULES,
         defaultPassword: defaultPassword,
-        employeeCreated: employeeCreated
+        employeeCreated: employeeCreated,
       },
       permissions: SUPER_ADMIN_PERMISSIONS,
       instructions: {
@@ -154,28 +191,33 @@ export async function POST(request: NextRequest) {
           'Đổi mật khẩu ngay sau khi đăng nhập lần đầu',
           'Không chia sẻ thông tin đăng nhập',
           'Kích hoạt 2FA nếu có thể',
-          'Theo dõi hoạt động tài khoản thường xuyên'
-        ]
-      }
+          'Theo dõi hoạt động tài khoản thường xuyên',
+        ],
+      },
     });
-
   } catch (error: any) {
     console.error('Error creating super admin:', error);
-    
+
     // Handle specific database errors
     if (error.code === 'P2002') {
-      return NextResponse.json({
-        success: false,
-        error: 'Email hoặc username đã tồn tại',
-        details: error.meta
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Email hoặc username đã tồn tại',
+          details: error.meta,
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Không thể tạo Super Administrator',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || 'Không thể tạo Super Administrator',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      },
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }
@@ -188,9 +230,9 @@ export async function GET(request: NextRequest) {
       include: { role: true },
       where: {
         role: {
-          name: 'Super Administrator'
-        }
-      }
+          name: 'Super Administrator',
+        },
+      },
     });
 
     if (superAdmin) {
@@ -205,22 +247,24 @@ export async function GET(request: NextRequest) {
           isVerified: superAdmin.isVerified,
           createdAt: superAdmin.createdAt,
           role: superAdmin.role.name,
-          roleLevel: 10 // Static value since schema doesn't have level field
-        }
+          roleLevel: 10, // Static value since schema doesn't have level field
+        },
       });
     }
 
     return NextResponse.json({
       exists: false,
-      message: 'Chưa có Super Administrator trong hệ thống'
+      message: 'Chưa có Super Administrator trong hệ thống',
     });
-
   } catch (error: any) {
     console.error('Error checking super admin:', error);
-    return NextResponse.json({
-      error: 'Không thể kiểm tra Super Administrator',
-      details: error.message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Không thể kiểm tra Super Administrator',
+        details: error.message,
+      },
+      { status: 500 }
+    );
   } finally {
     await prisma.$disconnect();
   }

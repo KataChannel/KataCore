@@ -11,7 +11,11 @@ import {
   ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
 import { useUnifiedTheme } from '../../../hooks/useUnifiedTheme';
-import { ThemeModeToggle, ColorSchemeToggle, LanguageToggle } from '../../../components/ThemeManager';
+import {
+  ThemeModeToggle,
+  ColorSchemeToggle,
+  LanguageToggle,
+} from '../../../components/ThemeManager';
 
 export default function ColorfulThemeDemo() {
   const { config, actualMode, setColorScheme } = useUnifiedTheme();
@@ -90,7 +94,8 @@ export default function ColorfulThemeDemo() {
 
           <div className="mt-8 p-4 bg-gradient-colorful-surface rounded-lg border border-colorful-border">
             <p className="text-sm text-text-muted">
-              {getText('Current Mode', 'Chế độ hiện tại')}: {actualMode} • {config.language} • {config.colorScheme}
+              {getText('Current Mode', 'Chế độ hiện tại')}: {actualMode} • {config.language} •{' '}
+              {config.colorScheme}
             </p>
           </div>
         </div>
@@ -130,9 +135,7 @@ export default function ColorfulThemeDemo() {
                 <div className="p-3 bg-gradient-colorful-primary rounded-lg">
                   <feature.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-text">
-                  {feature.title}
-                </h3>
+                <h3 className="text-xl font-semibold text-text">{feature.title}</h3>
               </div>
               <p className="text-text-secondary">{feature.description}</p>
             </div>
@@ -148,15 +151,9 @@ export default function ColorfulThemeDemo() {
                 {getText('Colorful Buttons', 'Nút nhiều màu')}
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button className="btn-colorful-primary">
-                  {getText('Primary', 'Chính')}
-                </button>
-                <button className="btn-colorful-secondary">
-                  {getText('Secondary', 'Phụ')}
-                </button>
-                <button className="unified-button accent">
-                  {getText('Accent', 'Nhấn')}
-                </button>
+                <button className="btn-colorful-primary">{getText('Primary', 'Chính')}</button>
+                <button className="btn-colorful-secondary">{getText('Secondary', 'Phụ')}</button>
+                <button className="unified-button accent">{getText('Accent', 'Nhấn')}</button>
                 <button className="unified-button success">
                   {getText('Success', 'Thành công')}
                 </button>
@@ -181,7 +178,10 @@ export default function ColorfulThemeDemo() {
                   </p>
                 </div>
 
-                <div className="unified-card" style={{ background: 'var(--colorful-gradient-secondary)' }}>
+                <div
+                  className="unified-card"
+                  style={{ background: 'var(--colorful-gradient-secondary)' }}
+                >
                   <h3 className="text-lg font-semibold mb-2 text-white">
                     {getText('Gradient Card', 'Thẻ gradient')}
                   </h3>
@@ -303,24 +303,32 @@ export default function ColorfulThemeDemo() {
               <h2 className="text-2xl font-bold mb-6 text-text">
                 {getText('Dashboard Example', 'Ví dụ bảng điều khiển')}
               </h2>
-              
+
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="card-colorful text-center">
                   <div className="text-2xl font-bold text-colorful-primary mb-1">1,234</div>
-                  <div className="text-sm text-text-secondary">{getText('Total Users', 'Tổng người dùng')}</div>
+                  <div className="text-sm text-text-secondary">
+                    {getText('Total Users', 'Tổng người dùng')}
+                  </div>
                 </div>
                 <div className="card-colorful text-center">
                   <div className="text-2xl font-bold text-colorful-secondary mb-1">567</div>
-                  <div className="text-sm text-text-secondary">{getText('Active Sessions', 'Phiên hoạt động')}</div>
+                  <div className="text-sm text-text-secondary">
+                    {getText('Active Sessions', 'Phiên hoạt động')}
+                  </div>
                 </div>
                 <div className="card-colorful text-center">
                   <div className="text-2xl font-bold text-colorful-success mb-1">89%</div>
-                  <div className="text-sm text-text-secondary">{getText('Success Rate', 'Tỷ lệ thành công')}</div>
+                  <div className="text-sm text-text-secondary">
+                    {getText('Success Rate', 'Tỷ lệ thành công')}
+                  </div>
                 </div>
                 <div className="card-colorful text-center">
                   <div className="text-2xl font-bold text-colorful-accent mb-1">$12.5K</div>
-                  <div className="text-sm text-text-secondary">{getText('Revenue', 'Doanh thu')}</div>
+                  <div className="text-sm text-text-secondary">
+                    {getText('Revenue', 'Doanh thu')}
+                  </div>
                 </div>
               </div>
 
@@ -330,18 +338,10 @@ export default function ColorfulThemeDemo() {
                   {getText('Status Indicators', 'Chỉ báo trạng thái')}
                 </h3>
                 <div className="flex flex-wrap gap-3">
-                  <span className="badge-colorful-success">
-                    {getText('Active', 'Hoạt động')}
-                  </span>
-                  <span className="badge-colorful-warning">
-                    {getText('Pending', 'Đang chờ')}
-                  </span>
-                  <span className="badge-colorful-error">
-                    {getText('Error', 'Lỗi')}
-                  </span>
-                  <span className="unified-badge accent">
-                    {getText('Info', 'Thông tin')}
-                  </span>
+                  <span className="badge-colorful-success">{getText('Active', 'Hoạt động')}</span>
+                  <span className="badge-colorful-warning">{getText('Pending', 'Đang chờ')}</span>
+                  <span className="badge-colorful-error">{getText('Error', 'Lỗi')}</span>
+                  <span className="unified-badge accent">{getText('Info', 'Thông tin')}</span>
                 </div>
               </div>
             </section>

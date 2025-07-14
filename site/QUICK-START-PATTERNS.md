@@ -135,10 +135,7 @@ interface UseHookReturn<T> {
 // ============================================================================
 // HOOK
 // ============================================================================
-export function useHook<T>(
-  url: string,
-  options: UseHookOptions<T> = {}
-): UseHookReturn<T> {
+export function useHook<T>(url: string, options: UseHookOptions<T> = {}): UseHookReturn<T> {
   const [data, setData] = useState<T | null>(options.initialData || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -183,10 +180,7 @@ export const ThemedComponent = () => {
 
   return (
     <div
-      className={cn(
-        'unified-card',
-        actualMode === 'dark' && 'dark-theme-specific'
-      )}
+      className={cn('unified-card', actualMode === 'dark' && 'dark-theme-specific')}
       style={{ backgroundColor: colors.surface }}
     >
       Content
@@ -257,7 +251,7 @@ const expensiveValue = useMemo(() => {
 }, [data]);
 
 const stableCallback = useCallback(
-  item => {
+  (item) => {
     // Logic here
   },
   [dependency]

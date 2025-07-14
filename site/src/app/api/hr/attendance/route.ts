@@ -123,9 +123,9 @@ export async function POST(request: NextRequest) {
     if (timeIn && timeOut) {
       const timeInDate = new Date(`${date}T${timeIn}`);
       const timeOutDate = new Date(`${date}T${timeOut}`);
-      
+
       let workMinutes = (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60);
-      
+
       // Subtract break time if provided
       if (breakStart && breakEnd) {
         const breakStartDate = new Date(`${date}T${breakStart}`);
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       }
 
       totalHours = workMinutes / 60;
-      
+
       // Calculate overtime (assuming 8 hours is standard work day)
       if (totalHours > 8) {
         overtime = totalHours - 8;

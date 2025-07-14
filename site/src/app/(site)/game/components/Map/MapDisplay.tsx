@@ -12,14 +12,11 @@ export const MapDisplay = ({ mapData, onTileClick }: MapDisplayProps) => {
       <h2 className="text-xl font-bold mb-4 text-center">Exploration Map</h2>
       <div className="grid grid-cols-10 gap-1 justify-center">
         {mapData.map.map((row, rowIndex) =>
-          row.map(tile => (
-            <Tile key={tile.id} tile={tile} onClick={onTileClick} />
-          ))
+          row.map((tile) => <Tile key={tile.id} tile={tile} onClick={onTileClick} />)
         )}
       </div>
       <div className="mt-4 text-xs text-gray-400 text-center">
-        Click undiscovered tiles (?) to explore • Click discovered tiles to
-        activate
+        Click undiscovered tiles (?) to explore • Click discovered tiles to activate
       </div>
     </div>
   );

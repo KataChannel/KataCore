@@ -22,13 +22,10 @@ export const Tile = ({ tile, onClick }: TileProps) => {
       tileBgClass = 'bg-green-700';
     } else {
       const elementType =
-        NGU_HANH_RELATIONS.elementMap[
-          type as keyof typeof NGU_HANH_RELATIONS.elementMap
-        ] || (type === 'empty' ? 'empty' : null);
+        NGU_HANH_RELATIONS.elementMap[type as keyof typeof NGU_HANH_RELATIONS.elementMap] ||
+        (type === 'empty' ? 'empty' : null);
       tileBgClass =
-        ELEMENT_TILE_BG_COLORS[
-          elementType as keyof typeof ELEMENT_TILE_BG_COLORS
-        ] || 'bg-gray-800';
+        ELEMENT_TILE_BG_COLORS[elementType as keyof typeof ELEMENT_TILE_BG_COLORS] || 'bg-gray-800';
     }
   }
 

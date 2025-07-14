@@ -1,7 +1,7 @@
 // API Route for User Management with Module Permissions
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 import { SYSTEM_ROLES } from '@/lib/auth/modules-permissions';
 import bcrypt from 'bcryptjs';
 
@@ -30,10 +30,11 @@ export async function GET(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions - need to be admin or have user management permission
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canManageUsers = userRole?.permissions.some(
-      p => (p.action === 'read' && p.resource === 'users') || 
-          (p.action === 'manage' && p.resource === 'users')
+      (p) =>
+        (p.action === 'read' && p.resource === 'users') ||
+        (p.action === 'manage' && p.resource === 'users')
     );
 
     if (!canManageUsers && userRole?.level < 8) {
@@ -115,9 +116,11 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Enhance users with system role information
-    const enhancedUsers = users.map(user => {
-      const systemRole = SYSTEM_ROLES.find(role => role.id === user.role?.name?.toLowerCase().replace(/ /g, '_'));
-      
+    const enhancedUsers = users.map((user) => {
+      const systemRole = SYSTEM_ROLES.find(
+        (role) => role.id === user.role?.name?.toLowerCase().replace(/ /g, '_')
+      );
+
       return {
         id: user.id,
         email: user.email,
@@ -135,29 +138,31 @@ export async function GET(request: NextRequest) {
           description: user.role?.description,
           permissions: user.role?.permissions ? JSON.parse(user.role.permissions as string) : [],
         },
-        systemRole: systemRole ? {
-          id: systemRole.id,
-          name: systemRole.name,
-          description: systemRole.description,
-          level: systemRole.level,
-          modules: systemRole.modules,
-          permissions: systemRole.permissions,
-        } : null,
-        employee: user.employee ? {
-          id: user.employee.id,
-          firstName: user.employee.firstName,
-          lastName: user.employee.lastName,
-          department: user.employee.department,
-          position: user.employee.position,
-        } : null,
+        systemRole: systemRole
+          ? {
+              id: systemRole.id,
+              name: systemRole.name,
+              description: systemRole.description,
+              level: systemRole.level,
+              modules: systemRole.modules,
+              permissions: systemRole.permissions,
+            }
+          : null,
+        employee: user.employee
+          ? {
+              id: user.employee.id,
+              firstName: user.employee.firstName,
+              lastName: user.employee.lastName,
+              department: user.employee.department,
+              position: user.employee.position,
+            }
+          : null,
       };
     });
 
     // Filter by module access if specified
-    const filteredUsers = moduleFilter 
-      ? enhancedUsers.filter(user => 
-          user.systemRole?.modules.includes(moduleFilter)
-        )
+    const filteredUsers = moduleFilter
+      ? enhancedUsers.filter((user) => user.systemRole?.modules.includes(moduleFilter))
       : enhancedUsers;
 
     return NextResponse.json({
@@ -170,10 +175,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch users' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to fetch users' }, { status: 500 });
   }
 }
 
@@ -183,9 +185,9 @@ export async function POST(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canCreateUsers = userRole?.permissions.some(
-      p => p.action === 'create' && p.resource === 'users'
+      (p) => p.action === 'create' && p.resource === 'users'
     );
 
     if (!canCreateUsers && userRole?.level < 8) {
@@ -229,14 +231,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!role) {
-      return NextResponse.json(
-        { error: 'Invalid role specified' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid role specified' }, { status: 400 });
     }
 
     // Check if role is appropriate for current user's level
-    const targetSystemRole = SYSTEM_ROLES.find(sr => sr.name.toLowerCase().replace(/ /g, '_') === role.name.toLowerCase().replace(/ /g, '_'));
+    const targetSystemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') === role.name.toLowerCase().replace(/ /g, '_')
+    );
     if (targetSystemRole && userRole && targetSystemRole.level > userRole.level) {
       return NextResponse.json(
         { error: 'Cannot assign role with higher level than your own' },
@@ -247,11 +249,7 @@ export async function POST(request: NextRequest) {
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          email ? { email } : {},
-          phone ? { phone } : {},
-          username ? { username } : {},
-        ],
+        OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
     });
 
@@ -309,32 +307,37 @@ export async function POST(request: NextRequest) {
     }
 
     // Get system role information
-    const systemRole = SYSTEM_ROLES.find(sr => sr.name.toLowerCase().replace(/ /g, '_') === role.name.toLowerCase().replace(/ /g, '_'));
-
-    return NextResponse.json({
-      id: newUser.id,
-      email: newUser.email,
-      phone: newUser.phone,
-      username: newUser.username,
-      displayName: newUser.displayName,
-      avatar: newUser.avatar,
-      isActive: newUser.isActive,
-      isVerified: newUser.isVerified,
-      role: {
-        id: newUser.role.id,
-        name: newUser.role.name,
-        description: newUser.role.description,
-        permissions: newUser.role.permissions ? JSON.parse(newUser.role.permissions as string) : [],
-      },
-      systemRole: systemRole || null,
-      employee,
-      createdAt: newUser.createdAt,
-    }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to create user' },
-      { status: 500 }
+    const systemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') === role.name.toLowerCase().replace(/ /g, '_')
     );
+
+    return NextResponse.json(
+      {
+        id: newUser.id,
+        email: newUser.email,
+        phone: newUser.phone,
+        username: newUser.username,
+        displayName: newUser.displayName,
+        avatar: newUser.avatar,
+        isActive: newUser.isActive,
+        isVerified: newUser.isVerified,
+        role: {
+          id: newUser.role.id,
+          name: newUser.role.name,
+          description: newUser.role.description,
+          permissions: newUser.role.permissions
+            ? JSON.parse(newUser.role.permissions as string)
+            : [],
+        },
+        systemRole: systemRole || null,
+        employee,
+        createdAt: newUser.createdAt,
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Failed to create user' }, { status: 500 });
   }
 }
 
@@ -344,9 +347,9 @@ export async function PUT(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canUpdateUsers = userRole?.permissions.some(
-      p => p.action === 'update' && p.resource === 'users'
+      (p) => p.action === 'update' && p.resource === 'users'
     );
 
     if (!canUpdateUsers && userRole?.level < 8) {
@@ -370,10 +373,7 @@ export async function PUT(request: NextRequest) {
     } = body;
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     // Check if target user exists
@@ -383,15 +383,22 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!targetUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Prevent editing higher-level users unless super admin
-    const targetSystemRole = SYSTEM_ROLES.find(sr => sr.name.toLowerCase().replace(/ /g, '_') === targetUser.role?.name.toLowerCase().replace(/ /g, '_'));
-    if (targetSystemRole && userRole && targetSystemRole.level >= userRole.level && user.id !== targetUser.id && userRole.level < 10) {
+    const targetSystemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') ===
+        targetUser.role?.name.toLowerCase().replace(/ /g, '_')
+    );
+    if (
+      targetSystemRole &&
+      userRole &&
+      targetSystemRole.level >= userRole.level &&
+      user.id !== targetUser.id &&
+      userRole.level < 10
+    ) {
       return NextResponse.json(
         { error: 'Cannot edit user with equal or higher permission level' },
         { status: 403 }
@@ -411,13 +418,13 @@ export async function PUT(request: NextRequest) {
     if (roleId && roleId !== targetUser.roleId) {
       const newRole = await prisma.role.findUnique({ where: { id: roleId } });
       if (!newRole) {
-        return NextResponse.json(
-          { error: 'Invalid role specified' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid role specified' }, { status: 400 });
       }
 
-      const newSystemRole = SYSTEM_ROLES.find(sr => sr.name.toLowerCase().replace(/ /g, '_') === newRole.name.toLowerCase().replace(/ /g, '_'));
+      const newSystemRole = SYSTEM_ROLES.find(
+        (sr) =>
+          sr.name.toLowerCase().replace(/ /g, '_') === newRole.name.toLowerCase().replace(/ /g, '_')
+      );
       if (newSystemRole && userRole && newSystemRole.level > userRole.level) {
         return NextResponse.json(
           { error: 'Cannot assign role with higher level than your own' },
@@ -464,7 +471,11 @@ export async function PUT(request: NextRequest) {
     }
 
     // Get system role information
-    const systemRole = SYSTEM_ROLES.find(sr => sr.name.toLowerCase().replace(/ /g, '_') === updatedUser.role?.name.toLowerCase().replace(/ /g, '_'));
+    const systemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') ===
+        updatedUser.role?.name.toLowerCase().replace(/ /g, '_')
+    );
 
     return NextResponse.json({
       id: updatedUser.id,
@@ -479,17 +490,16 @@ export async function PUT(request: NextRequest) {
         id: updatedUser.role?.id,
         name: updatedUser.role?.name,
         description: updatedUser.role?.description,
-        permissions: updatedUser.role?.permissions ? JSON.parse(updatedUser.role.permissions as string) : [],
+        permissions: updatedUser.role?.permissions
+          ? JSON.parse(updatedUser.role.permissions as string)
+          : [],
       },
       systemRole: systemRole || null,
       employee: updatedUser.employee,
       updatedAt: updatedUser.updatedAt,
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to update user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to update user' }, { status: 500 });
   }
 }
 
@@ -499,9 +509,9 @@ export async function DELETE(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canDeleteUsers = userRole?.permissions.some(
-      p => p.action === 'delete' && p.resource === 'users'
+      (p) => p.action === 'delete' && p.resource === 'users'
     );
 
     if (!canDeleteUsers && userRole?.level < 9) {
@@ -516,10 +526,7 @@ export async function DELETE(request: NextRequest) {
     const hardDelete = searchParams.get('hardDelete') === 'true';
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     // Check if target user exists
@@ -529,22 +536,20 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!targetUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Prevent deleting self
     if (targetUser.id === user.id) {
-      return NextResponse.json(
-        { error: 'Cannot delete your own account' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
     }
 
     // Prevent deleting higher-level users
-    const targetSystemRole = SYSTEM_ROLES.find(sr => sr.name.toLowerCase().replace(/ /g, '_') === targetUser.role?.name.toLowerCase().replace(/ /g, '_'));
+    const targetSystemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') ===
+        targetUser.role?.name.toLowerCase().replace(/ /g, '_')
+    );
     if (targetSystemRole && userRole && targetSystemRole.level >= userRole.level) {
       return NextResponse.json(
         { error: 'Cannot delete user with equal or higher permission level' },
@@ -575,9 +580,6 @@ export async function DELETE(request: NextRequest) {
       });
     }
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to delete user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to delete user' }, { status: 500 });
   }
 }

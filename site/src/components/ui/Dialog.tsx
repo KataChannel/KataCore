@@ -17,11 +17,7 @@ interface DialogProps {
 }
 
 const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
-  return (
-    <DialogContext.Provider value={{ open, onOpenChange }}>
-      {children}
-    </DialogContext.Provider>
-  );
+  return <DialogContext.Provider value={{ open, onOpenChange }}>{children}</DialogContext.Provider>;
 };
 
 // Dialog Trigger Component
@@ -30,10 +26,7 @@ interface DialogTriggerProps {
   children: ReactNode;
 }
 
-export const DialogTrigger: React.FC<DialogTriggerProps> = ({
-  asChild,
-  children,
-}) => {
+export const DialogTrigger: React.FC<DialogTriggerProps> = ({ asChild, children }) => {
   const context = useContext(DialogContext);
   if (!context) {
     throw new Error('DialogTrigger must be used within a Dialog');
@@ -131,15 +124,8 @@ interface DialogHeaderProps {
   className?: string;
 }
 
-export const DialogHeader: React.FC<DialogHeaderProps> = ({
-  children,
-  className = '',
-}) => {
-  return (
-    <div className={`px-6 py-5 border-b border-gray-200 ${className}`}>
-      {children}
-    </div>
-  );
+export const DialogHeader: React.FC<DialogHeaderProps> = ({ children, className = '' }) => {
+  return <div className={`px-6 py-5 border-b border-gray-200 ${className}`}>{children}</div>;
 };
 
 // Dialog Title Component
@@ -148,15 +134,8 @@ interface DialogTitleProps {
   className?: string;
 }
 
-export const DialogTitle: React.FC<DialogTitleProps> = ({
-  children,
-  className = '',
-}) => {
-  return (
-    <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>
-      {children}
-    </h2>
-  );
+export const DialogTitle: React.FC<DialogTitleProps> = ({ children, className = '' }) => {
+  return <h2 className={`text-xl font-semibold text-gray-900 ${className}`}>{children}</h2>;
 };
 
 // Dialog Description Component
@@ -169,9 +148,7 @@ export const DialogDescription: React.FC<DialogDescriptionProps> = ({
   children,
   className = '',
 }) => {
-  return (
-    <p className={`mt-1 text-sm text-gray-600 ${className}`}>{children}</p>
-  );
+  return <p className={`mt-1 text-sm text-gray-600 ${className}`}>{children}</p>;
 };
 
 // Dialog Body Component
@@ -180,10 +157,7 @@ interface DialogBodyProps {
   className?: string;
 }
 
-export const DialogBody: React.FC<DialogBodyProps> = ({
-  children,
-  className = '',
-}) => {
+export const DialogBody: React.FC<DialogBodyProps> = ({ children, className = '' }) => {
   return <div className={`px-6 py-4 ${className}`}>{children}</div>;
 };
 
@@ -193,10 +167,7 @@ interface DialogFooterProps {
   className?: string;
 }
 
-export const DialogFooter: React.FC<DialogFooterProps> = ({
-  children,
-  className = '',
-}) => {
+export const DialogFooter: React.FC<DialogFooterProps> = ({ children, className = '' }) => {
   return (
     <div
       className={`px-6 py-4 border-t border-gray-200 flex items-center justify-end space-x-3 bg-gray-50 rounded-b-xl ${className}`}

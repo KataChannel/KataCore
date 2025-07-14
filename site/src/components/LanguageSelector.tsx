@@ -3,11 +3,7 @@
 import React from 'react';
 import { useUnifiedTheme } from '@/hooks/useUnifiedTheme';
 import { Language } from '@/lib/config/i18n';
-import { 
-  LanguageIcon,
-  ChevronDownIcon,
-  GlobeAltIcon
-} from '@heroicons/react/24/outline';
+import { LanguageIcon, ChevronDownIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 interface LanguageSelectorProps {
   className?: string;
@@ -21,11 +17,11 @@ const languageLabels: Record<Language, { name: string; flag: string; nativeName:
   en: { name: 'English', flag: '🇺🇸', nativeName: 'English' },
 };
 
-export function LanguageSelector({ 
+export function LanguageSelector({
   className = '',
   variant = 'dropdown',
   showIcon = true,
-  showLabel = true 
+  showLabel = true,
 }: LanguageSelectorProps) {
   const { config, setLanguage, toggleLanguage } = useUnifiedTheme();
   const { language } = config;
@@ -44,9 +40,7 @@ export function LanguageSelector({
         `}
         title={`Switch to ${language === 'vi' ? 'English' : 'Tiếng Việt'}`}
       >
-        {showIcon && (
-          <GlobeAltIcon className="h-4 w-4" />
-        )}
+        {showIcon && <GlobeAltIcon className="h-4 w-4" />}
         {showLabel && (
           <span className="text-sm font-medium">
             {currentLanguage.flag} {currentLanguage.nativeName}
@@ -65,9 +59,10 @@ export function LanguageSelector({
             onClick={() => setLanguage(lang as Language)}
             className={`
               px-2 py-1 rounded text-xs font-medium transition-all duration-200
-              ${language === lang
-                ? 'bg-accent text-white'
-                : 'bg-surface hover:bg-hover text-text-secondary hover:text-primary border border-border'
+              ${
+                language === lang
+                  ? 'bg-accent text-white'
+                  : 'bg-surface hover:bg-hover text-text-secondary hover:text-primary border border-border'
               }
             `}
           >
@@ -89,9 +84,7 @@ export function LanguageSelector({
           group-hover:border-accent
         `}
       >
-        {showIcon && (
-          <GlobeAltIcon className="h-4 w-4" />
-        )}
+        {showIcon && <GlobeAltIcon className="h-4 w-4" />}
         {showLabel && (
           <span className="text-sm font-medium">
             {currentLanguage.flag} {currentLanguage.nativeName}
@@ -101,13 +94,15 @@ export function LanguageSelector({
       </button>
 
       {/* Dropdown Menu */}
-      <div className={`
+      <div
+        className={`
         absolute right-0 top-full mt-1 w-48 z-50
         bg-surface border border-border rounded-lg shadow-lg
         opacity-0 invisible group-hover:opacity-100 group-hover:visible
         transition-all duration-200 transform origin-top-right
         scale-95 group-hover:scale-100
-      `}>
+      `}
+      >
         {Object.entries(languageLabels).map(([lang, info]) => (
           <button
             key={lang}
@@ -116,9 +111,10 @@ export function LanguageSelector({
               w-full flex items-center space-x-3 px-4 py-3 text-left
               hover:bg-hover transition-colors duration-150
               first:rounded-t-lg last:rounded-b-lg
-              ${language === lang 
-                ? 'bg-accent/10 text-accent border-l-2 border-accent' 
-                : 'text-text-secondary hover:text-primary'
+              ${
+                language === lang
+                  ? 'bg-accent/10 text-accent border-l-2 border-accent'
+                  : 'text-text-secondary hover:text-primary'
               }
             `}
           >
@@ -127,9 +123,7 @@ export function LanguageSelector({
               <div className="text-sm font-medium">{info.nativeName}</div>
               <div className="text-xs text-text-muted">{info.name}</div>
             </div>
-            {language === lang && (
-              <div className="w-2 h-2 bg-accent rounded-full"></div>
-            )}
+            {language === lang && <div className="w-2 h-2 bg-accent rounded-full"></div>}
           </button>
         ))}
       </div>
@@ -154,9 +148,7 @@ export function LanguageToggle({ className = '' }: { className?: string }) {
       `}
       title={`Switch to ${language === 'vi' ? 'English' : 'Tiếng Việt'}`}
     >
-      <span className="text-sm font-semibold">
-        {language === 'vi' ? 'EN' : 'VI'}
-      </span>
+      <span className="text-sm font-semibold">{language === 'vi' ? 'EN' : 'VI'}</span>
     </button>
   );
 }

@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Mail,
-  Phone,
-  MapPin,
-} from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 
 interface FooterLink {
   name: string;
@@ -41,8 +33,7 @@ export interface FooterProps {
 
 // Default values
 const defaultCompanyName = 'Taza Offical';
-const defaultDescription =
-  'Your trusted partner in web development and digital solutions.';
+const defaultDescription = 'Your trusted partner in web development and digital solutions.';
 const defaultContact = {
   address: '123 Taza Street, City, Country',
   phone: '+1 (234) 567-890',
@@ -99,9 +90,7 @@ export default function Footer({
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="mb-4">
-              <h3 className="text-2xl font-bold text-white mb-2">
-                {companyName}
-              </h3>
+              <h3 className="text-2xl font-bold text-white mb-2">{companyName}</h3>
               <p className="text-gray-400 mb-4">{description}</p>
             </div>
 
@@ -126,7 +115,7 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Company</h4>
             <ul className="space-y-2">
-              {footerLinks.company.map(link => (
+              {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
@@ -143,7 +132,7 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Services</h4>
             <ul className="space-y-2">
-              {footerLinks.services.map(link => (
+              {footerLinks.services.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
@@ -160,7 +149,7 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Resources</h4>
             <ul className="space-y-2">
-              {footerLinks.resources.map(link => (
+              {footerLinks.resources.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
@@ -177,7 +166,7 @@ export default function Footer({
           <div>
             <h4 className="font-semibold text-white mb-4">Legal</h4>
             <ul className="space-y-2">
-              {footerLinks.legal.map(link => (
+              {footerLinks.legal.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
@@ -225,7 +214,7 @@ export default function Footer({
 
             {/* Social Links */}
             <div className="flex space-x-4">
-              {socialLinks.map(social => {
+              {socialLinks.map((social) => {
                 const IconComponent = social.icon;
                 return (
                   <a

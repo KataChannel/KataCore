@@ -18,6 +18,7 @@ tsx scripts/quick-create-admin.ts
 ```
 
 **Thông tin mặc định:**
+
 - Email: `admin@taza.com`
 - Username: `superadmin`
 - Password: `TazaAdmin@2024!`
@@ -35,6 +36,7 @@ tsx scripts/create-admin-user.ts
 ```
 
 Script sẽ hỏi bạn nhập:
+
 - Email
 - Username
 - Display Name
@@ -72,6 +74,7 @@ curl http://localhost:3000/api/admin/quick-create-admin
 Super Administrator có toàn quyền trên:
 
 ### 🖥️ System Permissions
+
 - `system:admin` - Quản trị hệ thống
 - `system:manage` - Quản lý hệ thống
 - `system:configure` - Cấu hình hệ thống
@@ -79,10 +82,12 @@ Super Administrator có toàn quyền trên:
 - `system:backup` - Backup và restore
 
 ### 👥 User & Role Management
+
 - `create:user`, `read:user`, `update:user`, `delete:user`, `manage:user`
 - `create:role`, `read:role`, `update:role`, `delete:role`, `manage:role`
 
 ### 📦 Module Permissions (11 Modules)
+
 - **Sales**: `admin:sales`, `manage:sales`, `approve:sales`, `export:sales`, `import:sales`
 - **CRM**: `admin:crm`, `manage:crm`, `export:crm`, `import:crm`
 - **Inventory**: `admin:inventory`, `manage:inventory`, `approve:inventory`, `export:inventory`, `import:inventory`
@@ -96,6 +101,7 @@ Super Administrator có toàn quyền trên:
 - **E-commerce**: `admin:ecommerce`, `manage:ecommerce`, `approve:ecommerce`, `export:ecommerce`
 
 ### 🌟 Universal Permissions
+
 - `create:*`, `read:*`, `update:*`, `delete:*`, `manage:*`, `admin:*`
 
 ## 🔗 Đường dẫn truy cập
@@ -109,12 +115,14 @@ Sau khi tạo thành công, bạn có thể truy cập:
 ## ⚠️ Lưu ý bảo mật
 
 ### Bắt buộc sau khi tạo:
+
 1. **Đổi mật khẩu** ngay sau lần đăng nhập đầu tiên
 2. **Cập nhật email** từ mặc định sang email thực
 3. **Thêm số điện thoại** cho bảo mật 2 lớp
 4. **Kích hoạt 2FA** nếu có sẵn
 
 ### Không nên:
+
 - Chia sẻ thông tin đăng nhập
 - Sử dụng mật khẩu mặc định trong production
 - Tạo nhiều Super Admin không cần thiết
@@ -125,6 +133,7 @@ Sau khi tạo thành công, bạn có thể truy cập:
 ### Lỗi thường gặp:
 
 #### 1. Database Connection Error
+
 ```bash
 # Kiểm tra Prisma connection
 cd ../shared
@@ -132,6 +141,7 @@ npx prisma db push
 ```
 
 #### 2. User Already Exists
+
 ```bash
 # Kiểm tra user hiện tại
 curl http://localhost:3000/api/admin/quick-create-admin
@@ -143,6 +153,7 @@ curl -X POST http://localhost:3000/api/admin/quick-create-admin \
 ```
 
 #### 3. Role Permission Issues
+
 ```bash
 # Reset và tạo lại roles
 npm run db:migrate
@@ -150,6 +161,7 @@ npm run create-admin
 ```
 
 #### 4. Employee Table Missing
+
 Lỗi này không ảnh hưởng tới việc tạo Super Admin. Employee record sẽ được tạo sau khi HRM module được setup.
 
 ## 🔍 Verification

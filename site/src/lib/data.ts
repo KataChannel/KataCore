@@ -34,7 +34,7 @@ export async function fetchRevenue() {
 
 export async function fetchLatestInvoices() {
   return invoices.slice(0, 5).map((invoice, index) => {
-    const customer = customers.find(c => c.id === invoice.customer_id);
+    const customer = customers.find((c) => c.id === invoice.customer_id);
     return {
       id: index.toString(),
       amount: formatCurrency(invoice.amount),
@@ -98,10 +98,7 @@ export async function fetchCardData() {
 }
 
 const ITEMS_PER_PAGE = 6;
-export async function fetchFilteredInvoices(
-  query: string,
-  currentPage: number
-) {
+export async function fetchFilteredInvoices(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
@@ -166,7 +163,7 @@ export async function fetchInvoiceById(id: string) {
       WHERE invoices.id = ${id};
     `;
 
-    const invoice = data.map(invoice => ({
+    const invoice = data.map((invoice) => ({
       ...invoice,
       // Convert amount from cents to dollars
       amount: invoice.amount / 100,
@@ -216,7 +213,7 @@ export async function fetchFilteredCustomers(query: string) {
 		ORDER BY customers.name ASC
 	  `;
 
-    const customers = data.map(customer => ({
+    const customers = data.map((customer) => ({
       ...customer,
       total_pending: formatCurrency(customer.total_pending),
       total_paid: formatCurrency(customer.total_paid),

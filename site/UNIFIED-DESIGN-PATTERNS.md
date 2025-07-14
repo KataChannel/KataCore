@@ -114,10 +114,7 @@ interface UseApiReturn<T> {
 // ============================================================================
 // HOOK
 // ============================================================================
-export function useApi<T>(
-  url: string,
-  options: UseApiOptions<T> = {}
-): UseApiReturn<T> {
+export function useApi<T>(url: string, options: UseApiOptions<T> = {}): UseApiReturn<T> {
   const [data, setData] = useState<T | null>(options.initialData || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

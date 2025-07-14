@@ -148,9 +148,7 @@ export function MonochromeDemo() {
           <div className="mono-card">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-text-secondary">
-                  {t('hr.totalEmployees')}
-                </p>
+                <p className="text-sm font-medium text-text-secondary">{t('hr.totalEmployees')}</p>
                 <p className="text-2xl font-bold text-primary">1,234</p>
               </div>
               <div className="p-3 bg-mono-100 rounded-lg">
@@ -167,9 +165,7 @@ export function MonochromeDemo() {
 
           {/* Action Card */}
           <div className="mono-card">
-            <h3 className="text-lg font-semibold text-primary mb-4">
-              {t('hr.addEmployee')}
-            </h3>
+            <h3 className="text-lg font-semibold text-primary mb-4">{t('hr.addEmployee')}</h3>
             <p className="text-text-secondary mb-4">
               {language === 'vi'
                 ? 'Thêm nhân viên mới vào hệ thống'
@@ -182,9 +178,7 @@ export function MonochromeDemo() {
           <div className="mono-card">
             <div className="flex items-center mb-4">
               <Cog6ToothIcon className="h-5 w-5 text-text-secondary mr-2" />
-              <h3 className="text-lg font-semibold text-primary">
-                {t('settings')}
-              </h3>
+              <h3 className="text-lg font-semibold text-primary">{t('settings')}</h3>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -204,10 +198,7 @@ export function MonochromeDemo() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-text-secondary">{t('language')}</span>
-                <button
-                  onClick={toggleLanguage}
-                  className="mono-button secondary text-sm"
-                >
+                <button onClick={toggleLanguage} className="mono-button secondary text-sm">
                   {language === 'vi' ? 'Tiếng Việt' : 'English'}
                 </button>
               </div>
@@ -228,21 +219,15 @@ export function MonochromeDemo() {
               <input
                 type="text"
                 className="mono-input"
-                placeholder={
-                  language === 'vi' ? 'Nhập tên của bạn' : 'Enter your name'
-                }
+                placeholder={language === 'vi' ? 'Nhập tên của bạn' : 'Enter your name'}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text mb-2">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-text mb-2">Email</label>
               <input
                 type="email"
                 className="mono-input"
-                placeholder={
-                  language === 'vi' ? 'Nhập email của bạn' : 'Enter your email'
-                }
+                placeholder={language === 'vi' ? 'Nhập email của bạn' : 'Enter your email'}
               />
             </div>
             <div>
@@ -252,11 +237,7 @@ export function MonochromeDemo() {
               <textarea
                 className="mono-input"
                 rows={4}
-                placeholder={
-                  language === 'vi'
-                    ? 'Nhập tin nhắn của bạn'
-                    : 'Enter your message'
-                }
+                placeholder={language === 'vi' ? 'Nhập tin nhắn của bạn' : 'Enter your message'}
               />
             </div>
             <div className="flex space-x-4">

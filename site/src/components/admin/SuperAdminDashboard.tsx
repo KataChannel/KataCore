@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Shield, 
-  Users, 
-  Settings, 
-  Database, 
-  Activity, 
+import {
+  Shield,
+  Users,
+  Settings,
+  Database,
+  Activity,
   AlertTriangle,
   CheckCircle,
   Eye,
@@ -16,7 +16,7 @@ import {
   Crown,
   Lock,
   Unlock,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 interface SuperAdmin {
@@ -71,11 +71,11 @@ const SuperAdminDashboard: React.FC = () => {
       const response = await fetch('/api/admin/initialize');
       const data = await response.json();
       setIsInitialized(data.initialized);
-      
+
       if (!data.initialized) {
         setShowInitModal(true);
       }
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Error checking initialization:', error);
       setError('Failed to check system status');
     }
@@ -85,42 +85,44 @@ const SuperAdminDashboard: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-      
+
       console.log('Loading Super Admin data with token:', token ? 'Token exists' : 'No token');
-      
+
       // If no token and system is initialized, redirect to login immediately
       if (!token && isInitialized) {
         console.log('No token found, redirecting to login...');
         window.location.href = '/login';
         return;
       }
-      
+
       const headers: Record<string, string> = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch('/api/admin/super-admin', {
-        headers
+        headers,
       });
 
       console.log('Response status:', response.status);
-      
+
       if (!response.ok) {
         // If unauthorized, redirect to login with a helpful message
         if (response.status === 403 || response.status === 401) {
           try {
             const errorData = await response.json();
-            
+
             // Check if it's a redirect request
             if (errorData.redirectTo) {
               window.location.href = errorData.redirectTo;
               return;
             }
-            
+
             // Show a more user-friendly message
-            alert('Super Admin access required. Please login as a Super Administrator.\n\nDefault credentials:\nEmail: admin@taza.com\nPassword: TazaAdmin@2024!');
-            
+            alert(
+              'Super Admin access required. Please login as a Super Administrator.\n\nDefault credentials:\nEmail: admin@taza.com\nPassword: TazaAdmin@2024!'
+            );
+
             // Redirect to login page
             window.location.href = '/login';
             return;
@@ -130,7 +132,7 @@ const SuperAdminDashboard: React.FC = () => {
             return;
           }
         }
-        
+
         const errorText = await response.text();
         console.log('Error response:', errorText);
         throw new Error(`Failed to load Super Admin data: ${response.status} ${errorText}`);
@@ -140,7 +142,7 @@ const SuperAdminDashboard: React.FC = () => {
       console.log('Received data:', data);
       setSuperAdmins(data.data.superAdmins);
       setSystemStats(data.data.systemStats);
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Error loading Super Admin data:', error);
       setError(error.message);
     } finally {
@@ -153,7 +155,7 @@ const SuperAdminDashboard: React.FC = () => {
       const response = await fetch('/api/admin/initialize', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           setupKey: formData.setupKey,
@@ -161,9 +163,9 @@ const SuperAdminDashboard: React.FC = () => {
             email: formData.email,
             password: formData.password,
             displayName: formData.displayName,
-            username: formData.username
-          }
-        })
+            username: formData.username,
+          },
+        }),
       });
 
       if (!response.ok) {
@@ -174,13 +176,14 @@ const SuperAdminDashboard: React.FC = () => {
       const result = await response.json();
       setIsInitialized(true);
       setShowInitModal(false);
-      
-      alert(`System initialized successfully!\nEmail: ${result.data.credentials.email}\nPassword: ${result.data.credentials.password}\n\nPlease login to continue.`);
-      
+
+      alert(
+        `System initialized successfully!\nEmail: ${result.data.credentials.email}\nPassword: ${result.data.credentials.password}\n\nPlease login to continue.`
+      );
+
       // Redirect to login page instead of loading data immediately
       window.location.href = '/login';
-      
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Error initializing system:', error);
       alert(`Error: ${error.message}`);
     }
@@ -189,17 +192,17 @@ const SuperAdminDashboard: React.FC = () => {
   const handleCreateSuperAdmin = async (formData: any) => {
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-      
+
       const response = await fetch('/api/admin/super-admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           action: 'create-super-admin',
-          userData: formData
-        })
+          userData: formData,
+        }),
       });
 
       if (!response.ok) {
@@ -210,7 +213,7 @@ const SuperAdminDashboard: React.FC = () => {
       setShowCreateModal(false);
       await loadSuperAdminData();
       alert('Super Administrator created successfully!');
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Error creating Super Admin:', error);
       alert(`Error: ${error.message}`);
     }
@@ -223,17 +226,17 @@ const SuperAdminDashboard: React.FC = () => {
 
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-      
+
       const response = await fetch('/api/admin/super-admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           action: 'grant-super-admin',
-          userData: { userId }
-        })
+          userData: { userId },
+        }),
       });
 
       if (!response.ok) {
@@ -243,30 +246,34 @@ const SuperAdminDashboard: React.FC = () => {
 
       await loadSuperAdminData();
       alert('Super Administrator role granted successfully!');
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Error granting Super Admin role:', error);
       alert(`Error: ${error.message}`);
     }
   };
 
   const handleRevokeSuperAdmin = async (userId: string) => {
-    if (!confirm('Are you sure you want to revoke Super Administrator role from this user? This action cannot be undone!')) {
+    if (
+      !confirm(
+        'Are you sure you want to revoke Super Administrator role from this user? This action cannot be undone!'
+      )
+    ) {
       return;
     }
 
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-      
+
       const response = await fetch('/api/admin/super-admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           action: 'revoke-super-admin',
-          userData: { userId }
-        })
+          userData: { userId },
+        }),
       });
 
       if (!response.ok) {
@@ -276,7 +283,7 @@ const SuperAdminDashboard: React.FC = () => {
 
       await loadSuperAdminData();
       alert('Super Administrator role revoked successfully!');
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Error revoking Super Admin role:', error);
       alert(`Error: ${error.message}`);
     }
@@ -304,7 +311,7 @@ const SuperAdminDashboard: React.FC = () => {
               <p className="text-sm text-gray-700">Password: TazaAdmin@2024!</p>
             </div>
             <button
-              onClick={() => window.location.href = '/login'}
+              onClick={() => (window.location.href = '/login')}
               className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 font-medium"
             >
               Go to Login Page
@@ -403,9 +410,13 @@ const SuperAdminDashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">System Health</p>
-                <p className="text-sm font-bold text-green-600 uppercase">{systemStats.systemHealth}</p>
+                <p className="text-sm font-bold text-green-600 uppercase">
+                  {systemStats.systemHealth}
+                </p>
               </div>
-              <Activity className={`h-8 w-8 ${systemStats.systemHealth === 'operational' ? 'text-green-500' : 'text-red-500'}`} />
+              <Activity
+                className={`h-8 w-8 ${systemStats.systemHealth === 'operational' ? 'text-green-500' : 'text-red-500'}`}
+              />
             </div>
           </div>
         </div>
@@ -429,7 +440,10 @@ const SuperAdminDashboard: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {superAdmins.map((admin) => (
-                <div key={admin.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div
+                  key={admin.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                >
                   <div className="flex items-center space-x-4">
                     <div className="h-10 w-10 bg-red-100 rounded-full flex items-center justify-center">
                       <Crown className="h-5 w-5 text-red-600" />
@@ -438,7 +452,9 @@ const SuperAdminDashboard: React.FC = () => {
                       <h3 className="font-semibold text-gray-900">{admin.displayName}</h3>
                       <p className="text-sm text-gray-500">{admin.email}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <span className={`text-xs px-2 py-1 rounded-full ${admin.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${admin.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                        >
                           {admin.isActive ? 'Active' : 'Inactive'}
                         </span>
                         <span className="text-xs text-gray-500">
@@ -482,13 +498,15 @@ const SuperAdminDashboard: React.FC = () => {
 };
 
 // System Initialization Modal
-const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }> = ({ onInitialize }) => {
+const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }> = ({
+  onInitialize,
+}) => {
   const [formData, setFormData] = useState({
     setupKey: '',
     email: 'admin@taza.com',
     password: 'TazaAdmin@2024!',
     displayName: 'Super Administrator',
-    username: 'superadmin'
+    username: 'superadmin',
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -503,14 +521,14 @@ const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }>
         <div className="text-center mb-6">
           <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900">Initialize TazaCore System</h2>
-          <p className="text-gray-600 mt-2">Set up your Super Administrator account to get started</p>
+          <p className="text-gray-600 mt-2">
+            Set up your Super Administrator account to get started
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Setup Key
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Setup Key</label>
             <input
               type="password"
               value={formData.setupKey}
@@ -522,9 +540,7 @@ const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Admin Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Admin Email</label>
             <input
               type="email"
               value={formData.email}
@@ -535,9 +551,7 @@ const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -557,9 +571,7 @@ const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Display Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
             <input
               type="text"
               value={formData.displayName}
@@ -570,9 +582,7 @@ const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
             <input
               type="text"
               value={formData.username}
@@ -592,7 +602,7 @@ const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }>
 
         <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
           <p className="text-sm text-amber-800">
-            <strong>Important:</strong> This will create the initial Super Administrator account. 
+            <strong>Important:</strong> This will create the initial Super Administrator account.
             Make sure to change the default password after first login for security.
           </p>
         </div>
@@ -602,15 +612,15 @@ const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }>
 };
 
 // Create Super Admin Modal
-const CreateSuperAdminModal: React.FC<{ 
-  onClose: () => void; 
-  onSubmit: (data: any) => void; 
+const CreateSuperAdminModal: React.FC<{
+  onClose: () => void;
+  onSubmit: (data: any) => void;
 }> = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     displayName: '',
-    username: ''
+    username: '',
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -624,19 +634,14 @@ const CreateSuperAdminModal: React.FC<{
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-900">Create Super Administrator</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             ×
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               value={formData.email}
@@ -647,9 +652,7 @@ const CreateSuperAdminModal: React.FC<{
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -669,9 +672,7 @@ const CreateSuperAdminModal: React.FC<{
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Display Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
             <input
               type="text"
               value={formData.displayName}
@@ -682,9 +683,7 @@ const CreateSuperAdminModal: React.FC<{
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
             <input
               type="text"
               value={formData.username}

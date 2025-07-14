@@ -52,9 +52,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching users:', error);
-    return NextResponse.json(
-      { error: 'Không thể tải danh sách người dùng' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tải danh sách người dùng' }, { status: 500 });
   }
 }

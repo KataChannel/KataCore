@@ -58,8 +58,7 @@ export interface RegisterData {
 
 class EnhancedAuthService {
   private JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-  private JWT_REFRESH_SECRET =
-    process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
+  private JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
 
   // Generate JWT tokens with theme preferences
   generateTokens(user: AuthUser) {
@@ -77,11 +76,9 @@ class EnhancedAuthService {
       { expiresIn: '15m' }
     );
 
-    const refreshToken = jwt.sign(
-      { userId: user.id },
-      this.JWT_REFRESH_SECRET,
-      { expiresIn: '7d' }
-    );
+    const refreshToken = jwt.sign({ userId: user.id }, this.JWT_REFRESH_SECRET, {
+      expiresIn: '7d',
+    });
 
     return { accessToken, refreshToken };
   }
@@ -161,11 +158,7 @@ class EnhancedAuthService {
     // Check if user exists
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          email ? { email } : {},
-          phone ? { phone } : {},
-          username ? { username } : {},
-        ],
+        OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
     });
 
@@ -212,26 +205,13 @@ class EnhancedAuthService {
   }
 
   // Login with theme context
-  async login(
-    credentials: LoginCredentials
-  ): Promise<{ user: AuthUser; tokens: any }> {
-    const {
-      email,
-      phone,
-      username,
-      password,
-      provider = 'email',
-      clientTheme,
-    } = credentials;
+  async login(credentials: LoginCredentials): Promise<{ user: AuthUser; tokens: any }> {
+    const { email, phone, username, password, provider = 'email', clientTheme } = credentials;
 
     // Find user
     const user = await prisma.user.findFirst({
       where: {
-        OR: [
-          email ? { email } : {},
-          phone ? { phone } : {},
-          username ? { username } : {},
-        ],
+        OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
       include: {
         role: true,
@@ -252,10 +232,7 @@ class EnhancedAuthService {
         throw new Error('Password not set for this account');
       }
 
-      const isPasswordValid = await this.comparePassword(
-        password,
-        user.password
-      );
+      const isPasswordValid = await this.comparePassword(password, user.password);
       if (!isPasswordValid) {
         throw new Error('Invalid password');
       }
@@ -288,10 +265,7 @@ class EnhancedAuthService {
   }
 
   // Login with OTP (for phone)
-  async loginWithOTP(
-    phone: string,
-    otpCode: string
-  ): Promise<{ user: AuthUser; tokens: any }> {
+  async loginWithOTP(phone: string, otpCode: string): Promise<{ user: AuthUser; tokens: any }> {
     const user = await prisma.user.findFirst({
       where: { phone },
       include: { role: true },

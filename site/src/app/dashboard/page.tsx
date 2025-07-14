@@ -18,8 +18,7 @@ export default function DashboardPage() {
     const checkAuth = async () => {
       try {
         // Check token from localStorage/sessionStorage first
-        let token =
-          localStorage.getItem('token') || sessionStorage.getItem('token');
+        let token = localStorage.getItem('token') || sessionStorage.getItem('token');
         console.log(
           'Dashboard: checking token from storage:',
           token ? '***' + token.slice(-10) : 'null'
@@ -29,7 +28,7 @@ export default function DashboardPage() {
         if (!token) {
           const cookieToken = document.cookie
             .split(';')
-            .find(row => row.startsWith('token='))
+            .find((row) => row.startsWith('token='))
             ?.split('=')[1];
           console.log(
             'Dashboard: checking token from cookie:',
@@ -61,8 +60,7 @@ export default function DashboardPage() {
           // Token invalid, redirect to login
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
-          document.cookie =
-            'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+          document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
           router.push('/login');
         }
       } catch (error) {
@@ -97,19 +95,14 @@ export default function DashboardPage() {
         <div className="px-4 py-6 sm:px-0">
           <div className="border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                Welcome to Dashboard
-              </h1>
-              <p className="text-gray-600">
-                Hello, {user.displayName || user.email}!
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to Dashboard</h1>
+              <p className="text-gray-600">Hello, {user.displayName || user.email}!</p>
               <div className="mt-6">
                 <button
                   onClick={() => {
                     localStorage.removeItem('token');
                     sessionStorage.removeItem('token');
-                    document.cookie =
-                      'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                     router.push('/login');
                   }}
                   className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"

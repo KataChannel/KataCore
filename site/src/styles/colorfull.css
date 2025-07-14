@@ -9,63 +9,63 @@
 
 :root {
   /* Primary Brand Colors */
-  --colorful-primary: #3b82f6;         /* Bright Blue */
-  --colorful-primary-light: #60a5fa;   /* Light Blue */
-  --colorful-primary-dark: #1d4ed8;    /* Dark Blue */
-  
+  --colorful-primary: #3b82f6; /* Bright Blue */
+  --colorful-primary-light: #60a5fa; /* Light Blue */
+  --colorful-primary-dark: #1d4ed8; /* Dark Blue */
+
   /* Secondary Colors */
-  --colorful-secondary: #8b5cf6;       /* Purple */
+  --colorful-secondary: #8b5cf6; /* Purple */
   --colorful-secondary-light: #a78bfa; /* Light Purple */
-  --colorful-secondary-dark: #7c3aed;  /* Dark Purple */
-  
+  --colorful-secondary-dark: #7c3aed; /* Dark Purple */
+
   /* Accent Colors */
-  --colorful-accent: #06b6d4;          /* Cyan */
-  --colorful-accent-light: #22d3ee;    /* Light Cyan */
-  --colorful-accent-dark: #0891b2;     /* Dark Cyan */
-  
+  --colorful-accent: #06b6d4; /* Cyan */
+  --colorful-accent-light: #22d3ee; /* Light Cyan */
+  --colorful-accent-dark: #0891b2; /* Dark Cyan */
+
   /* Success Colors */
-  --colorful-success: #10b981;         /* Emerald */
-  --colorful-success-light: #34d399;   /* Light Emerald */
-  --colorful-success-dark: #059669;    /* Dark Emerald */
-  
+  --colorful-success: #10b981; /* Emerald */
+  --colorful-success-light: #34d399; /* Light Emerald */
+  --colorful-success-dark: #059669; /* Dark Emerald */
+
   /* Warning Colors */
-  --colorful-warning: #f59e0b;         /* Amber */
-  --colorful-warning-light: #fbbf24;   /* Light Amber */
-  --colorful-warning-dark: #d97706;    /* Dark Amber */
-  
+  --colorful-warning: #f59e0b; /* Amber */
+  --colorful-warning-light: #fbbf24; /* Light Amber */
+  --colorful-warning-dark: #d97706; /* Dark Amber */
+
   /* Error Colors */
-  --colorful-error: #ef4444;           /* Red */
-  --colorful-error-light: #f87171;     /* Light Red */
-  --colorful-error-dark: #dc2626;      /* Dark Red */
-  
+  --colorful-error: #ef4444; /* Red */
+  --colorful-error-light: #f87171; /* Light Red */
+  --colorful-error-dark: #dc2626; /* Dark Red */
+
   /* Info Colors */
-  --colorful-info: #06b6d4;            /* Cyan */
-  --colorful-info-light: #22d3ee;      /* Light Cyan */
-  --colorful-info-dark: #0891b2;       /* Dark Cyan */
-  
+  --colorful-info: #06b6d4; /* Cyan */
+  --colorful-info-light: #22d3ee; /* Light Cyan */
+  --colorful-info-dark: #0891b2; /* Dark Cyan */
+
   /* Background Colors */
-  --colorful-background: #fefefe;      /* Off-white */
-  --colorful-surface: #f8fafc;         /* Very light gray */
+  --colorful-background: #fefefe; /* Off-white */
+  --colorful-surface: #f8fafc; /* Very light gray */
   --colorful-surface-elevated: #f1f5f9; /* Light gray */
-  --colorful-surface-hover: #e2e8f0;   /* Hover gray */
-  
+  --colorful-surface-hover: #e2e8f0; /* Hover gray */
+
   /* Text Colors */
-  --colorful-text: #1e293b;            /* Dark slate */
-  --colorful-text-secondary: #475569;  /* Medium slate */
-  --colorful-text-muted: #64748b;      /* Light slate */
-  --colorful-text-inverse: #ffffff;    /* White */
-  
+  --colorful-text: #1e293b; /* Dark slate */
+  --colorful-text-secondary: #475569; /* Medium slate */
+  --colorful-text-muted: #64748b; /* Light slate */
+  --colorful-text-inverse: #ffffff; /* White */
+
   /* Border Colors */
-  --colorful-border: #cbd5e1;          /* Light border */
-  --colorful-border-light: #e2e8f0;    /* Very light border */
-  --colorful-border-strong: #94a3b8;   /* Strong border */
-  
+  --colorful-border: #cbd5e1; /* Light border */
+  --colorful-border-light: #e2e8f0; /* Very light border */
+  --colorful-border-strong: #94a3b8; /* Strong border */
+
   /* Interactive Colors */
-  --colorful-hover: #f1f5f9;           /* Light hover */
-  --colorful-active: #e2e8f0;          /* Active state */
-  --colorful-disabled: #f8fafc;        /* Disabled background */
-  --colorful-disabled-text: #cbd5e1;   /* Disabled text */
-  
+  --colorful-hover: #f1f5f9; /* Light hover */
+  --colorful-active: #e2e8f0; /* Active state */
+  --colorful-disabled: #f8fafc; /* Disabled background */
+  --colorful-disabled-text: #cbd5e1; /* Disabled text */
+
   /* Gradient Colors */
   --colorful-gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   --colorful-gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #10b981 100%);
@@ -79,63 +79,63 @@
 
 .dark {
   /* Primary Brand Colors */
-  --colorful-primary: #60a5fa;         /* Light Blue */
-  --colorful-primary-light: #93c5fd;   /* Very Light Blue */
-  --colorful-primary-dark: #3b82f6;    /* Medium Blue */
-  
+  --colorful-primary: #60a5fa; /* Light Blue */
+  --colorful-primary-light: #93c5fd; /* Very Light Blue */
+  --colorful-primary-dark: #3b82f6; /* Medium Blue */
+
   /* Secondary Colors */
-  --colorful-secondary: #a78bfa;       /* Light Purple */
+  --colorful-secondary: #a78bfa; /* Light Purple */
   --colorful-secondary-light: #c4b5fd; /* Very Light Purple */
-  --colorful-secondary-dark: #8b5cf6;  /* Medium Purple */
-  
+  --colorful-secondary-dark: #8b5cf6; /* Medium Purple */
+
   /* Accent Colors */
-  --colorful-accent: #22d3ee;          /* Light Cyan */
-  --colorful-accent-light: #67e8f9;    /* Very Light Cyan */
-  --colorful-accent-dark: #06b6d4;     /* Medium Cyan */
-  
+  --colorful-accent: #22d3ee; /* Light Cyan */
+  --colorful-accent-light: #67e8f9; /* Very Light Cyan */
+  --colorful-accent-dark: #06b6d4; /* Medium Cyan */
+
   /* Success Colors */
-  --colorful-success: #34d399;         /* Light Emerald */
-  --colorful-success-light: #6ee7b7;   /* Very Light Emerald */
-  --colorful-success-dark: #10b981;    /* Medium Emerald */
-  
+  --colorful-success: #34d399; /* Light Emerald */
+  --colorful-success-light: #6ee7b7; /* Very Light Emerald */
+  --colorful-success-dark: #10b981; /* Medium Emerald */
+
   /* Warning Colors */
-  --colorful-warning: #fbbf24;         /* Light Amber */
-  --colorful-warning-light: #fcd34d;   /* Very Light Amber */
-  --colorful-warning-dark: #f59e0b;    /* Medium Amber */
-  
+  --colorful-warning: #fbbf24; /* Light Amber */
+  --colorful-warning-light: #fcd34d; /* Very Light Amber */
+  --colorful-warning-dark: #f59e0b; /* Medium Amber */
+
   /* Error Colors */
-  --colorful-error: #f87171;           /* Light Red */
-  --colorful-error-light: #fca5a5;     /* Very Light Red */
-  --colorful-error-dark: #ef4444;      /* Medium Red */
-  
+  --colorful-error: #f87171; /* Light Red */
+  --colorful-error-light: #fca5a5; /* Very Light Red */
+  --colorful-error-dark: #ef4444; /* Medium Red */
+
   /* Info Colors */
-  --colorful-info: #22d3ee;            /* Light Cyan */
-  --colorful-info-light: #67e8f9;      /* Very Light Cyan */
-  --colorful-info-dark: #06b6d4;       /* Medium Cyan */
-  
+  --colorful-info: #22d3ee; /* Light Cyan */
+  --colorful-info-light: #67e8f9; /* Very Light Cyan */
+  --colorful-info-dark: #06b6d4; /* Medium Cyan */
+
   /* Background Colors */
-  --colorful-background: #0f172a;      /* Very dark slate */
-  --colorful-surface: #1e293b;         /* Dark slate */
+  --colorful-background: #0f172a; /* Very dark slate */
+  --colorful-surface: #1e293b; /* Dark slate */
   --colorful-surface-elevated: #334155; /* Medium slate */
-  --colorful-surface-hover: #475569;   /* Light slate */
-  
+  --colorful-surface-hover: #475569; /* Light slate */
+
   /* Text Colors */
-  --colorful-text: #f8fafc;            /* Light gray */
-  --colorful-text-secondary: #cbd5e1;  /* Medium gray */
-  --colorful-text-muted: #94a3b8;      /* Dark gray */
-  --colorful-text-inverse: #1e293b;    /* Dark slate */
-  
+  --colorful-text: #f8fafc; /* Light gray */
+  --colorful-text-secondary: #cbd5e1; /* Medium gray */
+  --colorful-text-muted: #94a3b8; /* Dark gray */
+  --colorful-text-inverse: #1e293b; /* Dark slate */
+
   /* Border Colors */
-  --colorful-border: #475569;          /* Medium border */
-  --colorful-border-light: #334155;    /* Light border */
-  --colorful-border-strong: #64748b;   /* Strong border */
-  
+  --colorful-border: #475569; /* Medium border */
+  --colorful-border-light: #334155; /* Light border */
+  --colorful-border-strong: #64748b; /* Strong border */
+
   /* Interactive Colors */
-  --colorful-hover: #334155;           /* Dark hover */
-  --colorful-active: #475569;          /* Active state */
-  --colorful-disabled: #1e293b;        /* Disabled background */
-  --colorful-disabled-text: #475569;   /* Disabled text */
-  
+  --colorful-hover: #334155; /* Dark hover */
+  --colorful-active: #475569; /* Active state */
+  --colorful-disabled: #1e293b; /* Disabled background */
+  --colorful-disabled-text: #475569; /* Disabled text */
+
   /* Gradient Colors */
   --colorful-gradient-primary: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
   --colorful-gradient-secondary: linear-gradient(135deg, #22d3ee 0%, #34d399 100%);
@@ -152,22 +152,22 @@
   --color-primary: var(--colorful-primary);
   --color-secondary: var(--colorful-secondary);
   --color-accent: var(--colorful-accent);
-  
+
   --color-background: var(--colorful-background);
   --color-surface: var(--colorful-surface);
   --color-surface-elevated: var(--colorful-surface-elevated);
-  
+
   --color-text: var(--colorful-text);
   --color-text-secondary: var(--colorful-text-secondary);
   --color-text-muted: var(--colorful-text-muted);
-  
+
   --color-border: var(--colorful-border);
   --color-border-light: var(--colorful-border-light);
-  
+
   --color-hover: var(--colorful-hover);
   --color-active: var(--colorful-active);
   --color-disabled: var(--colorful-disabled);
-  
+
   --color-success: var(--colorful-success);
   --color-warning: var(--colorful-warning);
   --color-error: var(--colorful-error);
@@ -396,7 +396,8 @@
 
 /* Pulse Animation for Colorful Elements */
 @keyframes colorful-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -448,7 +449,7 @@
   .card-colorful {
     border-radius: 8px;
   }
-  
+
   .btn-colorful-primary,
   .btn-colorful-secondary,
   .btn-colorful-outline {
@@ -469,7 +470,7 @@
   .card-colorful:hover {
     transform: translateY(-4px);
   }
-  
+
   .btn-colorful-primary:hover,
   .btn-colorful-secondary:hover {
     transform: translateY(-2px);
@@ -529,32 +530,78 @@
 ============================================================================ */
 
 /* Background utilities */
-.bg-colorful-primary { background-color: var(--colorful-primary); }
-.bg-colorful-secondary { background-color: var(--colorful-secondary); }
-.bg-colorful-accent { background-color: var(--colorful-accent); }
-.bg-colorful-surface { background-color: var(--colorful-surface); }
-.bg-colorful-success { background-color: var(--colorful-success); }
-.bg-colorful-warning { background-color: var(--colorful-warning); }
-.bg-colorful-error { background-color: var(--colorful-error); }
-.bg-colorful-info { background-color: var(--colorful-info); }
+.bg-colorful-primary {
+  background-color: var(--colorful-primary);
+}
+.bg-colorful-secondary {
+  background-color: var(--colorful-secondary);
+}
+.bg-colorful-accent {
+  background-color: var(--colorful-accent);
+}
+.bg-colorful-surface {
+  background-color: var(--colorful-surface);
+}
+.bg-colorful-success {
+  background-color: var(--colorful-success);
+}
+.bg-colorful-warning {
+  background-color: var(--colorful-warning);
+}
+.bg-colorful-error {
+  background-color: var(--colorful-error);
+}
+.bg-colorful-info {
+  background-color: var(--colorful-info);
+}
 
 /* Text utilities */
-.text-colorful-primary { color: var(--colorful-primary); }
-.text-colorful-secondary { color: var(--colorful-secondary); }
-.text-colorful-accent { color: var(--colorful-accent); }
-.text-colorful-success { color: var(--colorful-success); }
-.text-colorful-warning { color: var(--colorful-warning); }
-.text-colorful-error { color: var(--colorful-error); }
-.text-colorful-info { color: var(--colorful-info); }
+.text-colorful-primary {
+  color: var(--colorful-primary);
+}
+.text-colorful-secondary {
+  color: var(--colorful-secondary);
+}
+.text-colorful-accent {
+  color: var(--colorful-accent);
+}
+.text-colorful-success {
+  color: var(--colorful-success);
+}
+.text-colorful-warning {
+  color: var(--colorful-warning);
+}
+.text-colorful-error {
+  color: var(--colorful-error);
+}
+.text-colorful-info {
+  color: var(--colorful-info);
+}
 
 /* Border utilities */
-.border-colorful-primary { border-color: var(--colorful-primary); }
-.border-colorful-secondary { border-color: var(--colorful-secondary); }
-.border-colorful-accent { border-color: var(--colorful-accent); }
-.border-colorful { border-color: var(--colorful-border); }
-.border-colorful-strong { border-color: var(--colorful-border-strong); }
+.border-colorful-primary {
+  border-color: var(--colorful-primary);
+}
+.border-colorful-secondary {
+  border-color: var(--colorful-secondary);
+}
+.border-colorful-accent {
+  border-color: var(--colorful-accent);
+}
+.border-colorful {
+  border-color: var(--colorful-border);
+}
+.border-colorful-strong {
+  border-color: var(--colorful-border-strong);
+}
 
 /* Ring utilities for focus states */
-.ring-colorful-primary { --tw-ring-color: rgba(59, 130, 246, 0.5); }
-.ring-colorful-secondary { --tw-ring-color: rgba(139, 92, 246, 0.5); }
-.ring-colorful-accent { --tw-ring-color: rgba(6, 182, 212, 0.5); }
+.ring-colorful-primary {
+  --tw-ring-color: rgba(59, 130, 246, 0.5);
+}
+.ring-colorful-secondary {
+  --tw-ring-color: rgba(139, 92, 246, 0.5);
+}
+.ring-colorful-accent {
+  --tw-ring-color: rgba(6, 182, 212, 0.5);
+}

@@ -15,11 +15,8 @@ export default function useApi<T = any>() {
   });
 
   const request = useCallback(
-    async (
-      url: string,
-      options: RequestOptions = {}
-    ): Promise<ApiResponse<T>> => {
-      setState(prev => ({ ...prev, loading: true, error: null }));
+    async (url: string, options: RequestOptions = {}): Promise<ApiResponse<T>> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
         const response = await fetch(url, {
@@ -45,8 +42,7 @@ export default function useApi<T = any>() {
 
         return result;
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         setState({
           data: null,
           loading: false,
@@ -63,8 +59,7 @@ export default function useApi<T = any>() {
   );
 
   const get = useCallback(
-    (url: string, headers?: Record<string, string>) =>
-      request(url, { method: 'GET', headers }),
+    (url: string, headers?: Record<string, string>) => request(url, { method: 'GET', headers }),
     [request]
   );
 
@@ -81,8 +76,7 @@ export default function useApi<T = any>() {
   );
 
   const del = useCallback(
-    (url: string, headers?: Record<string, string>) =>
-      request(url, { method: 'DELETE', headers }),
+    (url: string, headers?: Record<string, string>) => request(url, { method: 'DELETE', headers }),
     [request]
   );
 

@@ -16,30 +16,64 @@ const DEFAULT_ADMIN = {
   username: 'superadmin',
   password: 'TazaAdmin@2024!',
   displayName: 'Super Administrator',
-  phone: '+84-xxx-xxx-xxx'
+  phone: '+84-xxx-xxx-xxx',
 };
 
 // Tất cả quyền cho Super Administrator
 const SUPER_ADMIN_PERMISSIONS = [
   // System permissions
-  'system:admin', 'system:manage', 'system:configure', 'system:audit', 'system:backup',
-  
+  'system:admin',
+  'system:manage',
+  'system:configure',
+  'system:audit',
+  'system:backup',
+
   // User & Role management
-  'create:user', 'read:user', 'update:user', 'delete:user', 'manage:user',
-  'create:role', 'read:role', 'update:role', 'delete:role', 'manage:role',
-  
+  'create:user',
+  'read:user',
+  'update:user',
+  'delete:user',
+  'manage:user',
+  'create:role',
+  'read:role',
+  'update:role',
+  'delete:role',
+  'manage:role',
+
   // Module admin permissions
-  'admin:sales', 'admin:crm', 'admin:inventory', 'admin:finance',
-  'admin:hrm', 'admin:projects', 'admin:manufacturing', 'admin:marketing',
-  'admin:support', 'admin:analytics', 'admin:ecommerce',
-  
+  'admin:sales',
+  'admin:crm',
+  'admin:inventory',
+  'admin:finance',
+  'admin:hrm',
+  'admin:projects',
+  'admin:manufacturing',
+  'admin:marketing',
+  'admin:support',
+  'admin:analytics',
+  'admin:ecommerce',
+
   // Universal permissions
-  'create:*', 'read:*', 'update:*', 'delete:*', 'manage:*', 'admin:*'
+  'create:*',
+  'read:*',
+  'update:*',
+  'delete:*',
+  'manage:*',
+  'admin:*',
 ];
 
 const ALL_MODULES = [
-  'sales', 'crm', 'inventory', 'finance', 'hrm', 'projects',
-  'manufacturing', 'marketing', 'support', 'analytics', 'ecommerce'
+  'sales',
+  'crm',
+  'inventory',
+  'finance',
+  'hrm',
+  'projects',
+  'manufacturing',
+  'marketing',
+  'support',
+  'analytics',
+  'ecommerce',
 ];
 
 async function createQuickSuperAdmin() {
@@ -58,8 +92,8 @@ async function createQuickSuperAdmin() {
           modules: ALL_MODULES,
           level: 10,
           isSystemRole: true,
-          scope: 'all'
-        })
+          scope: 'all',
+        }),
       },
       create: {
         name: 'Super Administrator',
@@ -69,9 +103,9 @@ async function createQuickSuperAdmin() {
           modules: ALL_MODULES,
           level: 10,
           isSystemRole: true,
-          scope: 'all'
-        })
-      }
+          scope: 'all',
+        }),
+      },
     });
 
     // 2. Mã hóa mật khẩu
@@ -89,7 +123,7 @@ async function createQuickSuperAdmin() {
         roleId: superAdminRole.id,
         isActive: true,
         isVerified: true,
-        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128'
+        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128',
       },
       create: {
         email: DEFAULT_ADMIN.email,
@@ -100,9 +134,9 @@ async function createQuickSuperAdmin() {
         roleId: superAdminRole.id,
         isActive: true,
         isVerified: true,
-        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128'
+        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128',
       },
-      include: { role: true }
+      include: { role: true },
     });
 
     // 4. Tạo employee record (nếu có table)
@@ -115,7 +149,7 @@ async function createQuickSuperAdmin() {
           lastName: 'Administrator',
           email: DEFAULT_ADMIN.email,
           phone: DEFAULT_ADMIN.phone,
-          isActive: true
+          isActive: true,
         },
         create: {
           userId: superAdmin.id,
@@ -127,8 +161,8 @@ async function createQuickSuperAdmin() {
           isActive: true,
           hireDate: new Date(),
           status: 'ACTIVE',
-          contractType: 'FULL_TIME'
-        }
+          contractType: 'FULL_TIME',
+        },
       });
       console.log('✅ Employee record created/updated');
     } catch (error) {
@@ -143,46 +177,55 @@ async function createQuickSuperAdmin() {
         description: 'Quản lý cấp trung',
         permissions: {
           permissions: [
-            'read:user', 'update:user', 'manage:department',
-            'manage:sales', 'read:sales', 'create:sales', 'update:sales',
-            'manage:crm', 'read:crm', 'create:crm', 'update:crm',
-            'read:inventory', 'update:inventory',
-            'read:hrm', 'manage:hrm'
+            'read:user',
+            'update:user',
+            'manage:department',
+            'manage:sales',
+            'read:sales',
+            'create:sales',
+            'update:sales',
+            'manage:crm',
+            'read:crm',
+            'create:crm',
+            'update:crm',
+            'read:inventory',
+            'update:inventory',
+            'read:hrm',
+            'manage:hrm',
           ],
           modules: ['sales', 'crm', 'hrm'],
           level: 7,
-          scope: 'department'
-        }
+          scope: 'department',
+        },
       },
       {
         name: 'Employee',
         description: 'Nhân viên',
         permissions: {
           permissions: [
-            'read:user', 'update:user',
-            'read:sales', 'create:sales',
-            'read:crm', 'create:crm',
-            'read:hrm'
+            'read:user',
+            'update:user',
+            'read:sales',
+            'create:sales',
+            'read:crm',
+            'create:crm',
+            'read:hrm',
           ],
           modules: ['sales', 'crm', 'hrm'],
           level: 3,
-          scope: 'own'
-        }
+          scope: 'own',
+        },
       },
       {
         name: 'Viewer',
         description: 'Chỉ xem',
         permissions: {
-          permissions: [
-            'read:user',
-            'read:sales',
-            'read:crm'
-          ],
+          permissions: ['read:user', 'read:sales', 'read:crm'],
           modules: ['sales', 'crm'],
           level: 1,
-          scope: 'own'
-        }
-      }
+          scope: 'own',
+        },
+      },
     ];
 
     for (const role of additionalRoles) {
@@ -190,13 +233,13 @@ async function createQuickSuperAdmin() {
         where: { name: role.name },
         update: {
           description: role.description,
-          permissions: JSON.stringify(role.permissions)
+          permissions: JSON.stringify(role.permissions),
         },
         create: {
           name: role.name,
           description: role.description,
-          permissions: JSON.stringify(role.permissions)
-        }
+          permissions: JSON.stringify(role.permissions),
+        },
       });
     }
 
@@ -229,7 +272,6 @@ async function createQuickSuperAdmin() {
     console.log('🛡️ Kích hoạt 2FA nếu có thể');
 
     return superAdmin;
-
   } catch (error) {
     console.error('💥 Lỗi khi tạo Super Administrator:', error);
     throw error;

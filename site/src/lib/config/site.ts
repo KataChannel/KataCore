@@ -52,8 +52,7 @@ export const siteConfig = {
     titleTemplate: '%s | TazaCore',
     titleSeparator: '|',
     titleSuffix: 'TazaCore',
-    description:
-      'TazaCore - Hệ thống giao diện đơn sắc với hỗ trợ đa ngôn ngữ và chế độ tối.',
+    description: 'TazaCore - Hệ thống giao diện đơn sắc với hỗ trợ đa ngôn ngữ và chế độ tối.',
     keywords: [
       'monochrome ui',
       'dark mode',

@@ -17,30 +17,64 @@ const DEFAULT_ADMIN = {
   username: 'superadmin',
   password: 'TazaAdmin@2024!',
   displayName: 'TazaCore System Administrator',
-  phone: '+84-xxx-xxx-xxx'
+  phone: '+84-xxx-xxx-xxx',
 };
 
 // Tất cả quyền cho Super Administrator
 const SUPER_ADMIN_PERMISSIONS = [
   // System permissions
-  'system:admin', 'system:manage', 'system:configure', 'system:audit', 'system:backup',
-  
+  'system:admin',
+  'system:manage',
+  'system:configure',
+  'system:audit',
+  'system:backup',
+
   // User & Role management
-  'create:user', 'read:user', 'update:user', 'delete:user', 'manage:user',
-  'create:role', 'read:role', 'update:role', 'delete:role', 'manage:role',
-  
+  'create:user',
+  'read:user',
+  'update:user',
+  'delete:user',
+  'manage:user',
+  'create:role',
+  'read:role',
+  'update:role',
+  'delete:role',
+  'manage:role',
+
   // Module admin permissions
-  'admin:sales', 'admin:crm', 'admin:inventory', 'admin:finance',
-  'admin:hrm', 'admin:projects', 'admin:manufacturing', 'admin:marketing',
-  'admin:support', 'admin:analytics', 'admin:ecommerce',
-  
+  'admin:sales',
+  'admin:crm',
+  'admin:inventory',
+  'admin:finance',
+  'admin:hrm',
+  'admin:projects',
+  'admin:manufacturing',
+  'admin:marketing',
+  'admin:support',
+  'admin:analytics',
+  'admin:ecommerce',
+
   // Universal permissions
-  'create:*', 'read:*', 'update:*', 'delete:*', 'manage:*', 'admin:*'
+  'create:*',
+  'read:*',
+  'update:*',
+  'delete:*',
+  'manage:*',
+  'admin:*',
 ];
 
 const ALL_MODULES = [
-  'sales', 'crm', 'inventory', 'finance', 'hrm', 'projects',
-  'manufacturing', 'marketing', 'support', 'analytics', 'ecommerce'
+  'sales',
+  'crm',
+  'inventory',
+  'finance',
+  'hrm',
+  'projects',
+  'manufacturing',
+  'marketing',
+  'support',
+  'analytics',
+  'ecommerce',
 ];
 
 async function createFixedSuperAdmin() {
@@ -68,8 +102,8 @@ async function createFixedSuperAdmin() {
           modules: ALL_MODULES,
           level: 10,
           isSystemRole: true,
-          scope: 'all'
-        })
+          scope: 'all',
+        }),
       },
       create: {
         name: 'Super Administrator',
@@ -79,9 +113,9 @@ async function createFixedSuperAdmin() {
           modules: ALL_MODULES,
           level: 10,
           isSystemRole: true,
-          scope: 'all'
-        })
-      }
+          scope: 'all',
+        }),
+      },
     });
     console.log('✅ Super Admin Role đã được tạo/cập nhật');
 
@@ -101,7 +135,7 @@ async function createFixedSuperAdmin() {
         roleId: superAdminRole.id,
         isActive: true,
         isVerified: true,
-        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128'
+        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128',
       },
       create: {
         email: DEFAULT_ADMIN.email,
@@ -112,9 +146,9 @@ async function createFixedSuperAdmin() {
         roleId: superAdminRole.id,
         isActive: true,
         isVerified: true,
-        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128'
+        avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=dc2626&color=fff&size=128',
       },
-      include: { role: true }
+      include: { role: true },
     });
     console.log('✅ Super Admin User đã được tạo/cập nhật');
 
@@ -124,7 +158,7 @@ async function createFixedSuperAdmin() {
       // Kiểm tra xem có department và position nào không
       const defaultDepartment = await prisma.department.findFirst();
       const defaultPosition = await prisma.position.findFirst();
-      
+
       if (defaultDepartment && defaultPosition) {
         await prisma.employee.upsert({
           where: { userId: superAdmin.id },
@@ -132,7 +166,7 @@ async function createFixedSuperAdmin() {
             firstName: 'System',
             lastName: 'Administrator',
             fullName: 'System Administrator',
-            status: 'ACTIVE'
+            status: 'ACTIVE',
           },
           create: {
             employeeId: `ADMIN-${Date.now()}`,
@@ -144,8 +178,8 @@ async function createFixedSuperAdmin() {
             hireDate: new Date(),
             userId: superAdmin.id,
             departmentId: defaultDepartment.id,
-            positionId: defaultPosition.id
-          }
+            positionId: defaultPosition.id,
+          },
         });
         console.log('✅ Employee record đã được tạo');
       } else {
@@ -165,7 +199,6 @@ async function createFixedSuperAdmin() {
     console.log('   - Đổi mật khẩu ngay sau lần đăng nhập đầu tiên');
     console.log('   - Cập nhật email từ mặc định sang email thực');
     console.log('   - Thêm số điện thoại cho bảo mật 2 lớp');
-
   } catch (error) {
     console.error('💥 Lỗi khi tạo Super Administrator:', error);
     throw error;

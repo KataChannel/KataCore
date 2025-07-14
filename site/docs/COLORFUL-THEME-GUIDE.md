@@ -7,8 +7,9 @@ Colorful Theme là một hệ thống giao diện sống động và hiện đ�
 ## 🌈 Tính năng chính
 
 ### 1. **Bảng màu phong phú**
+
 - Primary: `#3b82f6` (Blue) / `#60a5fa` (Light Blue - Dark mode)
-- Secondary: `#8b5cf6` (Purple) / `#a78bfa` (Light Purple - Dark mode)  
+- Secondary: `#8b5cf6` (Purple) / `#a78bfa` (Light Purple - Dark mode)
 - Accent: `#06b6d4` (Cyan) / `#22d3ee` (Light Cyan - Dark mode)
 - Success: `#10b981` (Emerald) / `#34d399` (Light Emerald - Dark mode)
 - Warning: `#f59e0b` (Amber) / `#fbbf24` (Light Amber - Dark mode)
@@ -16,12 +17,14 @@ Colorful Theme là một hệ thống giao diện sống động và hiện đ�
 - Info: `#06b6d4` (Cyan) / `#22d3ee` (Light Cyan - Dark mode)
 
 ### 2. **Gradient hỗ trợ**
+
 - Primary Gradient: `linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)`
 - Secondary Gradient: `linear-gradient(135deg, #06b6d4 0%, #10b981 100%)`
 - Accent Gradient: `linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)`
 - Surface Gradient: `linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)`
 
 ### 3. **Adaptive Design**
+
 - Tự động thích ứng với dark/light mode
 - Responsive design cho mobile và desktop
 - High contrast support
@@ -32,26 +35,24 @@ Colorful Theme là một hệ thống giao diện sống động và hiện đ�
 ### 1. Kích hoạt Colorful Theme
 
 #### Qua ThemeManager Component:
+
 ```tsx
 import { useUnifiedTheme } from '@/hooks/useUnifiedTheme';
 
 function MyComponent() {
   const { setColorScheme } = useUnifiedTheme();
-  
+
   // Chuyển sang colorful theme
   const enableColorful = () => {
     setColorScheme('colorful');
   };
-  
-  return (
-    <button onClick={enableColorful}>
-      Bật giao diện nhiều màu
-    </button>
-  );
+
+  return <button onClick={enableColorful}>Bật giao diện nhiều màu</button>;
 }
 ```
 
 #### Qua ColorSchemeToggle Component:
+
 ```tsx
 import { ColorSchemeToggle } from '@/components/ThemeManager';
 
@@ -67,6 +68,7 @@ function Header() {
 ### 2. Sử dụng CSS Classes
 
 #### Buttons:
+
 ```tsx
 // Colorful buttons
 <button className="btn-colorful-primary">Primary Button</button>
@@ -78,6 +80,7 @@ function Header() {
 ```
 
 #### Cards:
+
 ```tsx
 // Colorful card
 <div className="card-colorful">
@@ -93,6 +96,7 @@ function Header() {
 ```
 
 #### Form Elements:
+
 ```tsx
 // Colorful inputs
 <input className="input-colorful" placeholder="Colorful input" />
@@ -103,6 +107,7 @@ function Header() {
 ```
 
 #### Status Badges:
+
 ```tsx
 <span className="badge-colorful-success">Success</span>
 <span className="badge-colorful-warning">Warning</span>
@@ -112,6 +117,7 @@ function Header() {
 ### 3. Sử dụng CSS Variables
 
 #### Background Colors:
+
 ```css
 .my-element {
   background-color: var(--colorful-primary);
@@ -124,13 +130,21 @@ function Header() {
 ```
 
 #### Text Colors:
+
 ```css
-.primary-text { color: var(--colorful-primary); }
-.secondary-text { color: var(--colorful-secondary); }
-.accent-text { color: var(--colorful-accent); }
+.primary-text {
+  color: var(--colorful-primary);
+}
+.secondary-text {
+  color: var(--colorful-secondary);
+}
+.accent-text {
+  color: var(--colorful-accent);
+}
 ```
 
 #### Border Colors:
+
 ```css
 .bordered {
   border: 2px solid var(--colorful-border);
@@ -144,6 +158,7 @@ function Header() {
 ### 4. Utility Classes
 
 #### Background Utilities:
+
 ```html
 <div class="bg-colorful-primary">Primary background</div>
 <div class="bg-colorful-secondary">Secondary background</div>
@@ -151,12 +166,14 @@ function Header() {
 ```
 
 #### Text Utilities:
+
 ```html
 <span class="text-colorful-primary">Primary text</span>
 <span class="text-colorful-success">Success text</span>
 ```
 
 #### Border Utilities:
+
 ```html
 <div class="border-colorful-primary">Primary border</div>
 <div class="border-colorful-accent">Accent border</div>
@@ -165,6 +182,7 @@ function Header() {
 ## 🎯 Best Practices
 
 ### 1. **Semantic Color Usage**
+
 ```tsx
 // ✅ Đúng - Sử dụng màu theo ngữ nghĩa
 <button className="btn-colorful-primary">Save Changes</button>
@@ -177,6 +195,7 @@ function Header() {
 ```
 
 ### 2. **Responsive Design**
+
 ```tsx
 // ✅ Đúng - Responsive và adaptive
 <div className="card-colorful md:w-1/2 lg:w-1/3">
@@ -190,9 +209,10 @@ function Header() {
 ```
 
 ### 3. **Accessibility**
+
 ```tsx
 // ✅ Đúng - Có contrast tốt và accessible
-<button 
+<button
   className="btn-colorful-primary"
   aria-label="Save document"
 >
@@ -206,17 +226,16 @@ function Header() {
 ```
 
 ### 4. **Theme Consistency**
+
 ```tsx
 // ✅ Đúng - Sử dụng unified classes để tự động thích ứng
 <div className="unified-card">
   <button className="unified-button accent">Action</button>
-</div>
+</div>;
 
 // ✅ Đúng - Kiểm tra theme hiện tại
 const { config } = useUnifiedTheme();
-const buttonClass = config.colorScheme === 'colorful' 
-  ? 'btn-colorful-primary' 
-  : 'mono-button';
+const buttonClass = config.colorScheme === 'colorful' ? 'btn-colorful-primary' : 'mono-button';
 ```
 
 ## 🔧 Customization
@@ -252,14 +271,10 @@ export function MyColorfulCard({ variant = 'primary', children }: MyColorfulCard
   const variantClasses = {
     primary: 'border-colorful-primary bg-colorful-surface',
     secondary: 'border-colorful-secondary bg-gradient-colorful-secondary',
-    accent: 'border-colorful-accent bg-colorful-accent/10'
+    accent: 'border-colorful-accent bg-colorful-accent/10',
   };
 
-  return (
-    <div className={`card-colorful ${variantClasses[variant]}`}>
-      {children}
-    </div>
-  );
+  return <div className={`card-colorful ${variantClasses[variant]}`}>{children}</div>;
 }
 ```
 
@@ -290,10 +305,11 @@ export function MyColorfulCard({ variant = 'primary', children }: MyColorfulCard
 ## 📝 Examples
 
 ### Dashboard với Colorful Theme:
+
 ```tsx
 function ColorfulDashboard() {
   const { config } = useUnifiedTheme();
-  
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -301,7 +317,7 @@ function ColorfulDashboard() {
         <h1 className="text-2xl font-bold">Colorful Dashboard</h1>
         <p>Welcome to the vibrant interface</p>
       </div>
-      
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="card-colorful text-center">
@@ -321,7 +337,7 @@ function ColorfulDashboard() {
           <div className="text-text-secondary">Revenue</div>
         </div>
       </div>
-      
+
       {/* Actions */}
       <div className="flex gap-4">
         <button className="btn-colorful-primary">Create New</button>
@@ -336,14 +352,17 @@ function ColorfulDashboard() {
 ## 🔗 API Reference
 
 ### Hooks
+
 - `useUnifiedTheme()` - Main theme hook
 - `setColorScheme('colorful')` - Switch to colorful theme
 
 ### Components
+
 - `<ColorSchemeToggle />` - Toggle between monochrome/colorful
 - `<ThemeControlPanel />` - Complete theme settings panel
 
 ### CSS Classes
+
 - `.card-colorful` - Colorful card styling
 - `.btn-colorful-{variant}` - Colorful buttons
 - `.input-colorful` - Colorful form inputs
@@ -353,6 +372,7 @@ function ColorfulDashboard() {
 - `.border-colorful-{color}` - Border utilities
 
 ### CSS Variables
+
 - `--colorful-primary` - Primary color
 - `--colorful-secondary` - Secondary color
 - `--colorful-accent` - Accent color
@@ -363,7 +383,9 @@ function ColorfulDashboard() {
 ## 📋 Migration từ Monochrome
 
 ### Tự động migration:
+
 Các unified classes sẽ tự động thích ứng:
+
 ```tsx
 // Không cần thay đổi - tự động adaptive
 <div className="unified-card">
@@ -372,6 +394,7 @@ Các unified classes sẽ tự động thích ứng:
 ```
 
 ### Manual migration:
+
 ```tsx
 // Before (monochrome only)
 <div className="mono-card">
@@ -392,14 +415,18 @@ Các unified classes sẽ tự động thích ứng:
 ## 🐛 Troubleshooting
 
 ### CSS Variables không load:
+
 Đảm bảo `colorfull.css` được import trong `globals.css`:
+
 ```css
 @import '../styles/unified-theme.css';
 @import '../styles/colorfull.css';
 ```
 
 ### Theme không chuyển đổi:
+
 Kiểm tra ThemeManager có được wrap đúng không:
+
 ```tsx
 <ThemeManager>
   <App />
@@ -407,7 +434,9 @@ Kiểm tra ThemeManager có được wrap đúng không:
 ```
 
 ### Performance issues:
+
 Sử dụng CSS variables thay vì inline styles:
+
 ```tsx
 // ✅ Đúng
 <div className="bg-colorful-primary">

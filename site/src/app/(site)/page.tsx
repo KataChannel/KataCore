@@ -21,22 +21,26 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 import ThemeManager, { ColorSchemeToggle } from '@/components/ThemeManager';
-import { AuthProvider, useAuth, LoginModal, ModuleAccessBadge } from '@/components/auth/ModuleGuard';
+import {
+  AuthProvider,
+  useAuth,
+  LoginModal,
+  AccessBadge,
+} from '@/components/auth/UnifiedAuthProvider';
 
 function HomePageContent() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { user, loading, checkModuleAccess, logout } = useAuth();
+  const { user, loading, hasModuleAccess, logout } = useAuth();
 
   // Load theme from localStorage on component mount
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+    console.log(user);
   }, []);
 
   // Save theme to localStorage when it changes
@@ -73,7 +77,7 @@ function HomePageContent() {
       href: '/admin/crm',
       color: 'from-green-500 to-emerald-500',
       module: 'crm',
-      permissions: ['read:customer', 'read:lead', 'manage:campaign'],
+      permissions: ['read:admin', 'read:customer', 'read:lead', 'manage:campaign'],
     },
     {
       title: 'Quản lý Kho',
@@ -89,8 +93,7 @@ function HomePageContent() {
     {
       title: 'Quản lý Tài chính',
       subtitle: 'Accounting & Finance',
-      description:
-        'Quản lý dòng tiền, hóa đơn điện tử, báo cáo thuế, đảm bảo tuân thủ pháp luật.',
+      description: 'Quản lý dòng tiền, hóa đơn điện tử, báo cáo thuế, đảm bảo tuân thủ pháp luật.',
       icon: CurrencyDollarIcon,
       href: '/finance',
       color: 'from-yellow-500 to-orange-500',
@@ -111,8 +114,7 @@ function HomePageContent() {
     {
       title: 'Quản lý Dự án',
       subtitle: 'Project Management',
-      description:
-        'Theo dõi tiến độ dự án, phân công nhiệm vụ, hỗ trợ quản lý nội bộ.',
+      description: 'Theo dõi tiến độ dự án, phân công nhiệm vụ, hỗ trợ quản lý nội bộ.',
       icon: ClipboardDocumentListIcon,
       href: '/projects',
       color: 'from-indigo-500 to-purple-500',
@@ -154,8 +156,7 @@ function HomePageContent() {
     {
       title: 'Báo cáo & Phân tích',
       subtitle: 'Analytics',
-      description:
-        'Cung cấp dữ liệu để ra quyết định, phân tích hiệu suất kinh doanh.',
+      description: 'Cung cấp dữ liệu để ra quyết định, phân tích hiệu suất kinh doanh.',
       icon: DocumentChartBarIcon,
       href: '/analytics',
       color: 'from-violet-500 to-purple-500',
@@ -184,7 +185,7 @@ function HomePageContent() {
     }
 
     // If user doesn't have access to this module, prevent navigation
-    if (!checkModuleAccess(module.module)) {
+    if (!hasModuleAccess(module.module)) {
       e.preventDefault();
       alert(`Access denied. You don't have permission to access ${module.title}`);
       return;
@@ -198,8 +199,8 @@ function HomePageContent() {
   return (
     <div
       className={`font-mono min-h-screen transition-all duration-700 ease-in-out ${
-        isDarkMode 
-          ? 'bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white' 
+        isDarkMode
+          ? 'bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white'
           : 'bg-gradient-to-br from-gray-50 via-white to-gray-100 text-black'
       }`}
     >
@@ -215,31 +216,33 @@ function HomePageContent() {
           aria-label="Toggle theme"
         >
           <div className="relative w-5 h-5 sm:w-6 sm:h-6">
-            <SunIcon 
+            <SunIcon
               className={`w-full h-full transition-all duration-500 absolute inset-0 ${
                 isDarkMode ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'
-              }`} 
+              }`}
             />
-            <MoonIcon 
+            <MoonIcon
               className={`w-full h-full transition-all duration-500 absolute inset-0 ${
                 isDarkMode ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-180 scale-0'
-              }`} 
+              }`}
             />
           </div>
         </button>
-        
-        <ColorSchemeToggle 
+
+        <ColorSchemeToggle
           showLabel={false}
-          className="hidden sm:flex items-center gap-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105" 
+          className="hidden sm:flex items-center gap-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105"
         />
 
         {/* User Auth Status */}
         {user ? (
-          <div className={`flex flex-col items-center gap-2 p-3 rounded-lg backdrop-blur-md transition-all duration-300 ${
-            isDarkMode
-              ? 'bg-white/10 border border-white/20'
-              : 'bg-black/10 border border-black/20'
-          }`}>
+          <div
+            className={`flex flex-col items-center gap-2 p-3 rounded-lg backdrop-blur-md transition-all duration-300 ${
+              isDarkMode
+                ? 'bg-white/10 border border-white/20'
+                : 'bg-black/10 border border-black/20'
+            }`}
+          >
             <div className="flex items-center gap-2">
               <UserIcon className="w-4 h-4" />
               <span className="text-xs font-medium">{user.displayName}</span>
@@ -270,21 +273,23 @@ function HomePageContent() {
       <section id="modules" className="py-12 sm:py-20 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-20">
-            <h3 className={`text-3xl sm:text-4xl lg:text-6xl font-black mb-4 sm:mb-6 tracking-tighter transition-all duration-700 ${
-              isDarkMode 
-                ? 'bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent'
-                : 'bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent'
-            }`}>
+            <h3
+              className={`text-3xl sm:text-4xl lg:text-6xl font-black mb-4 sm:mb-6 tracking-tighter transition-all duration-700 ${
+                isDarkMode
+                  ? 'bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent'
+                  : 'bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent'
+              }`}
+            >
               Taza Group
             </h3>
             <div
               className={`w-12 sm:w-16 h-px mx-auto transition-all duration-700 ${
-                isDarkMode 
-                  ? 'bg-gradient-to-r from-transparent via-white to-transparent' 
+                isDarkMode
+                  ? 'bg-gradient-to-r from-transparent via-white to-transparent'
                   : 'bg-gradient-to-r from-transparent via-black to-transparent'
               }`}
             ></div>
-            
+
             {user && (
               <div className="mt-8">
                 <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -297,17 +302,17 @@ function HomePageContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {modules.map((module, index) => {
               const IconComponent = module.icon;
-              const hasAccess = user ? checkModuleAccess(module.module) : false;
+              const hasAccess = user ? hasModuleAccess(module.module) : false;
               const isDisabled = user && !hasAccess;
-              
+
               return (
                 <Link
                   key={index}
                   href={module.href}
                   onClick={(e) => handleModuleClick(module, e)}
                   className={`group border rounded-xl p-6 sm:p-8 transition-all duration-700 cursor-pointer block relative overflow-hidden ${
-                    isDisabled 
-                      ? 'opacity-50 cursor-not-allowed' 
+                    isDisabled
+                      ? 'opacity-50 cursor-not-allowed'
                       : 'hover:scale-[1.05] hover:-translate-y-2'
                   } ${
                     isDarkMode
@@ -319,41 +324,53 @@ function HomePageContent() {
                   }}
                 >
                   {/* Gradient overlay on hover */}
-                  <div className={`absolute inset-0 bg-gradient-to-r ${module.color} opacity-0 group-hover:opacity-10 transition-opacity duration-700`}></div>
-                  
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${module.color} opacity-0 group-hover:opacity-10 transition-opacity duration-700`}
+                  ></div>
+
                   {/* Lock overlay for disabled modules */}
                   {isDisabled && (
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10">
                       <LockClosedIcon className="w-8 h-8 text-gray-400" />
                     </div>
                   )}
-                  
+
                   <div className="relative z-10">
                     <div className="mb-6">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-r ${module.color} p-2.5 sm:p-3 transition-all duration-500 ${
-                        !isDisabled ? 'group-hover:scale-110 group-hover:rotate-6' : ''
-                      }`}>
+                      <div
+                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-r ${module.color} p-2.5 sm:p-3 transition-all duration-500 ${
+                          !isDisabled ? 'group-hover:scale-110 group-hover:rotate-6' : ''
+                        }`}
+                      >
                         <IconComponent className="w-full h-full text-white" />
                       </div>
                     </div>
 
-                    <h4 className={`text-lg sm:text-xl font-bold mb-2 leading-tight transition-colors duration-500 ${
-                      isDarkMode ? 'text-white group-hover:text-gray-200' : 'text-black group-hover:text-gray-800'
-                    }`}>
+                    <h4
+                      className={`text-lg sm:text-xl font-bold mb-2 leading-tight transition-colors duration-500 ${
+                        isDarkMode
+                          ? 'text-white group-hover:text-gray-200'
+                          : 'text-black group-hover:text-gray-800'
+                      }`}
+                    >
                       {module.title}
                     </h4>
-                    
+
                     <p
                       className={`text-xs sm:text-sm font-medium mb-4 uppercase tracking-wider transition-colors duration-500 ${
-                        isDarkMode ? 'text-gray-400 group-hover:text-gray-300' : 'text-gray-500 group-hover:text-gray-600'
+                        isDarkMode
+                          ? 'text-gray-400 group-hover:text-gray-300'
+                          : 'text-gray-500 group-hover:text-gray-600'
                       }`}
                     >
                       {module.subtitle}
                     </p>
-                    
+
                     <p
                       className={`text-sm leading-relaxed mb-4 transition-colors duration-500 ${
-                        isDarkMode ? 'text-gray-300 group-hover:text-gray-200' : 'text-gray-600 group-hover:text-gray-700'
+                        isDarkMode
+                          ? 'text-gray-300 group-hover:text-gray-200'
+                          : 'text-gray-600 group-hover:text-gray-700'
                       }`}
                     >
                       {module.description}
@@ -362,20 +379,23 @@ function HomePageContent() {
                     {/* Access Control Information */}
                     <div className="flex flex-wrap gap-2 mt-4">
                       {user ? (
-                        <ModuleAccessBadge module={module.module} />
+                        <AccessBadge module={module.module} />
                       ) : (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                           Login Required
                         </span>
                       )}
-                      
+
                       {/* Show required permissions for admins or developers */}
-                      {user && (user.role?.name === 'Super Administrator' || user.role?.name === 'ADMIN') && (
-                        <div className="text-xs text-gray-500 mt-2">
-                          Required: {module.permissions.slice(0, 2).join(', ')}
-                          {module.permissions.length > 2 && ` +${module.permissions.length - 2} more`}
-                        </div>
-                      )}
+                      {user &&
+                        (user.role?.name === 'Super Administrator' ||
+                          user.role?.name === 'ADMIN') && (
+                          <div className="text-xs text-gray-500 mt-2">
+                            Required: {module.permissions.slice(0, 2).join(', ')}
+                            {module.permissions.length > 2 &&
+                              ` +${module.permissions.length - 2} more`}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </Link>
@@ -388,8 +408,8 @@ function HomePageContent() {
       {/* Footer */}
       <footer
         className={`border-t py-8 sm:py-12 px-4 sm:px-6 transition-all duration-700 ${
-          isDarkMode 
-            ? 'border-gray-800 bg-gray-900/30 backdrop-blur-sm' 
+          isDarkMode
+            ? 'border-gray-800 bg-gray-900/30 backdrop-blur-sm'
             : 'border-gray-200 bg-white/30 backdrop-blur-sm'
         }`}
       >
@@ -402,9 +422,11 @@ function HomePageContent() {
             © 2024 Taza Group. All rights reserved.
           </p>
           {user && (
-            <p className={`text-xs mt-2 transition-colors duration-500 ${
-              isDarkMode ? 'text-gray-500' : 'text-gray-400'
-            }`}>
+            <p
+              className={`text-xs mt-2 transition-colors duration-500 ${
+                isDarkMode ? 'text-gray-500' : 'text-gray-400'
+              }`}
+            >
               Logged in as {user.displayName} | Role: {user.role?.name}
             </p>
           )}

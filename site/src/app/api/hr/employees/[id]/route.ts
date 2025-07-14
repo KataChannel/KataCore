@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/hr/employees/[id] - Lấy thông tin nhân viên
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
 
@@ -54,10 +51,7 @@ export async function GET(
 }
 
 // PUT /api/hr/employees/[id] - Cập nhật nhân viên
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
     const body = await request.json();
@@ -149,10 +143,7 @@ export async function PUT(
 }
 
 // DELETE /api/hr/employees/[id] - Xóa nhân viên
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
 
@@ -188,9 +179,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error deleting employee:', error);
-    return NextResponse.json(
-      { success: false, error: 'Không thể xóa nhân viên' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Không thể xóa nhân viên' }, { status: 500 });
   }
 }

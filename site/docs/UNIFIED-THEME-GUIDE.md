@@ -39,11 +39,7 @@ Hệ thống theme thống nhất của TazaCore cung cấp một giải pháp t
 import { ThemeManager, ThemeInitScript } from '@/src/components/ThemeManager';
 import '@/src/styles/unified-theme.css';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
@@ -88,9 +84,7 @@ export function MyComponent() {
 
   return (
     <div className="unified-card">
-      <h1 style={{ color: colors.text }}>
-        {config.language === 'vi' ? 'Xin chào' : 'Hello'}
-      </h1>
+      <h1 style={{ color: colors.text }}>{config.language === 'vi' ? 'Xin chào' : 'Hello'}</h1>
 
       <button onClick={toggleMode} className="unified-button">
         {config.mode === 'light' ? '🌙' : '☀️'}
@@ -153,22 +147,14 @@ import { useIsDarkMode } from '@/src/hooks/useUnifiedTheme';
 export function ConditionalComponent() {
   const isDark = useIsDarkMode();
 
-  return (
-    <div className={isDark ? 'dark-specific-class' : 'light-specific-class'}>
-      Content
-    </div>
-  );
+  return <div className={isDark ? 'dark-specific-class' : 'light-specific-class'}>Content</div>;
 }
 ```
 
 ### 4. Sử dụng Components có sẵn
 
 ```tsx
-import {
-  ThemeModeToggle,
-  LanguageToggle,
-  ThemeControlPanel,
-} from '@/src/components/ThemeManager';
+import { ThemeModeToggle, LanguageToggle, ThemeControlPanel } from '@/src/components/ThemeManager';
 
 export function Header() {
   return (
@@ -321,7 +307,7 @@ export function AuthenticatedApp() {
 
   // Save theme changes
   const handleThemeChange = useCallback(
-    newConfig => {
+    (newConfig) => {
       updateConfig(newConfig);
       enhancedAuthService.updateUserThemePreferences(userId, newConfig);
     },
@@ -339,19 +325,13 @@ import { withTheme, withThemeMode } from '@/src/hooks/useUnifiedTheme';
 
 // Inject toàn bộ theme context
 const ThemedComponent = withTheme(({ theme, ...props }) => {
-  return (
-    <div style={{ color: theme.colors.text }}>
-      Content with theme: {theme.actualMode}
-    </div>
-  );
+  return <div style={{ color: theme.colors.text }}>Content with theme: {theme.actualMode}</div>;
 });
 
 // Chỉ inject theme mode
 const ModeAwareComponent = withThemeMode(({ themeMode, ...props }) => {
   return (
-    <div
-      className={themeMode.actualMode === 'dark' ? 'dark-style' : 'light-style'}
-    >
+    <div className={themeMode.actualMode === 'dark' ? 'dark-style' : 'light-style'}>
       Current mode: {themeMode.mode}
     </div>
   );
@@ -380,12 +360,8 @@ const ModeAwareComponent = withThemeMode(({ themeMode, ...props }) => {
 import { useAccessibility } from '@/src/hooks/useUnifiedTheme';
 
 export function AccessibleComponent() {
-  const {
-    highContrast,
-    reducedMotion,
-    enableHighContrast,
-    enableReducedMotion,
-  } = useAccessibility();
+  const { highContrast, reducedMotion, enableHighContrast, enableReducedMotion } =
+    useAccessibility();
 
   return (
     <div>

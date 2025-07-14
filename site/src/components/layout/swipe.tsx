@@ -53,7 +53,7 @@ const Swipe: React.FC<SwipeProps> = ({
     setFading(true);
 
     setTimeout(() => {
-      setCurrentSlide(prev => {
+      setCurrentSlide((prev) => {
         if (infinite) {
           return (prev + 1) % slides.length;
         } else {
@@ -75,7 +75,7 @@ const Swipe: React.FC<SwipeProps> = ({
     setFading(true);
 
     setTimeout(() => {
-      setCurrentSlide(prev => {
+      setCurrentSlide((prev) => {
         if (infinite) {
           return prev === 0 ? slides.length - 1 : prev - 1;
         } else {
@@ -139,9 +139,7 @@ const Swipe: React.FC<SwipeProps> = ({
     height: '400px',
     border: darkMode ? '1px solid #333' : 'none',
     backgroundColor: darkMode ? '#2a2a2a' : '#fff',
-    boxShadow: darkMode
-      ? '0 4px 8px rgba(0,0,0,0.6)'
-      : '0 4px 8px rgba(0,0,0,0.1)',
+    boxShadow: darkMode ? '0 4px 8px rgba(0,0,0,0.6)' : '0 4px 8px rgba(0,0,0,0.1)',
     borderRadius: '8px',
     opacity: fading ? 0 : 1,
     transition: isTransitioning
@@ -168,9 +166,7 @@ const Swipe: React.FC<SwipeProps> = ({
     position: 'absolute',
     top: '50%',
     transform: 'translateY(-50%)',
-    backgroundColor: darkMode
-      ? 'rgba(51, 51, 51, 0.8)'
-      : 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: darkMode ? 'rgba(51, 51, 51, 0.8)' : 'rgba(255, 255, 255, 0.9)',
     color: darkMode ? '#f0f0f0' : '#1a1a1a',
     border: 'none',
     borderRadius: '50%',
@@ -198,13 +194,7 @@ const Swipe: React.FC<SwipeProps> = ({
   const dotStyle = (active: boolean): React.CSSProperties => ({
     height: '12px',
     width: active ? '24px' : '12px',
-    backgroundColor: active
-      ? darkMode
-        ? '#f0f0f0'
-        : '#1a1a1a'
-      : darkMode
-        ? '#555'
-        : '#ccc',
+    backgroundColor: active ? (darkMode ? '#f0f0f0' : '#1a1a1a') : darkMode ? '#555' : '#ccc',
     borderRadius: '6px',
     cursor: 'pointer',
     border: 'none',
@@ -378,8 +368,7 @@ const Swipe: React.FC<SwipeProps> = ({
                 ...arrowStyle,
                 left: '15px',
                 opacity: !infinite && currentSlide === 0 ? 0.3 : 1,
-                cursor:
-                  !infinite && currentSlide === 0 ? 'not-allowed' : 'pointer',
+                cursor: !infinite && currentSlide === 0 ? 'not-allowed' : 'pointer',
               }}
               disabled={!infinite && currentSlide === 0}
               aria-label="Previous slide"
@@ -391,12 +380,8 @@ const Swipe: React.FC<SwipeProps> = ({
               style={{
                 ...arrowStyle,
                 right: '15px',
-                opacity:
-                  !infinite && currentSlide === slides.length - 1 ? 0.3 : 1,
-                cursor:
-                  !infinite && currentSlide === slides.length - 1
-                    ? 'not-allowed'
-                    : 'pointer',
+                opacity: !infinite && currentSlide === slides.length - 1 ? 0.3 : 1,
+                cursor: !infinite && currentSlide === slides.length - 1 ? 'not-allowed' : 'pointer',
               }}
               disabled={!infinite && currentSlide === slides.length - 1}
               aria-label="Next slide"
@@ -424,11 +409,11 @@ const Swipe: React.FC<SwipeProps> = ({
                 <a
                   href={currentSlideData.shopUrl}
                   style={shopButtonStyle}
-                  onMouseEnter={e => {
+                  onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#e55a00';
                     e.currentTarget.style.transform = 'translateY(-2px)';
                   }}
-                  onMouseLeave={e => {
+                  onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = '#ff6600';
                     e.currentTarget.style.transform = 'translateY(0)';
                   }}

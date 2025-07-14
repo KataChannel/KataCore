@@ -309,13 +309,7 @@ export const UNIFIED_THEME_CONFIG = {
   // Typography configuration
   typography: {
     fontFamily: {
-      sans: [
-        'Inter',
-        'system-ui',
-        '-apple-system',
-        'BlinkMacSystemFont',
-        'sans-serif',
-      ],
+      sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'monospace'],
       display: ['Inter', 'system-ui', 'sans-serif'],
     },
@@ -435,12 +429,17 @@ export const UNIFIED_THEME_CONFIG = {
  * Get theme colors based on mode and color scheme
  */
 export function getThemeColors(
-  mode: ThemeMode, 
+  mode: ThemeMode,
   colorScheme: ColorScheme = 'monochrome'
 ): ColorPalette {
-  const actualMode = mode === 'auto' 
-    ? (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : mode === 'dark' ? 'dark' : 'light';
+  const actualMode =
+    mode === 'auto'
+      ? typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : mode === 'dark'
+        ? 'dark'
+        : 'light';
 
   // Return colorful theme colors if colorScheme is colorful
   if (colorScheme === 'colorful') {
@@ -454,13 +453,10 @@ export function getThemeColors(
 /**
  * Generate CSS variables from theme colors
  */
-export function generateCSSVariables(
-  config: Partial<ThemeConfig>
-): Record<string, string> {
+export function generateCSSVariables(config: Partial<ThemeConfig>): Record<string, string> {
   const actualMode =
     config.mode === 'auto'
-      ? typeof window !== 'undefined' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
       : config.mode || 'light';
@@ -471,8 +467,7 @@ export function generateCSSVariables(
   // Color variables
   Object.entries(colors).forEach(([key, value]) => {
     if (typeof value === 'string') {
-      variables[`--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`] =
-        value;
+      variables[`--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`] = value;
     } else if (typeof value === 'object' && value !== null) {
       Object.entries(value).forEach(([subKey, subValue]) => {
         if (typeof subValue === 'string') {
@@ -483,32 +478,24 @@ export function generateCSSVariables(
   });
 
   // Layout variables
-  Object.entries(UNIFIED_THEME_CONFIG.layout.shadows).forEach(
-    ([key, value]) => {
-      variables[`--shadow-${key}`] = value;
-    }
-  );
+  Object.entries(UNIFIED_THEME_CONFIG.layout.shadows).forEach(([key, value]) => {
+    variables[`--shadow-${key}`] = value;
+  });
 
   // Animation variables
-  Object.entries(UNIFIED_THEME_CONFIG.animations.duration).forEach(
-    ([key, value]) => {
-      variables[`--duration-${key}`] = value;
-    }
-  );
+  Object.entries(UNIFIED_THEME_CONFIG.animations.duration).forEach(([key, value]) => {
+    variables[`--duration-${key}`] = value;
+  });
 
-  Object.entries(UNIFIED_THEME_CONFIG.animations.easing).forEach(
-    ([key, value]) => {
-      variables[`--easing-${key}`] = value;
-    }
-  );
+  Object.entries(UNIFIED_THEME_CONFIG.animations.easing).forEach(([key, value]) => {
+    variables[`--easing-${key}`] = value;
+  });
 
   // Typography variables
-  Object.entries(UNIFIED_THEME_CONFIG.typography.fontSize).forEach(
-    ([key, value]) => {
-      variables[`--font-size-${key}`] = value.size;
-      variables[`--line-height-${key}`] = value.lineHeight;
-    }
-  );
+  Object.entries(UNIFIED_THEME_CONFIG.typography.fontSize).forEach(([key, value]) => {
+    variables[`--font-size-${key}`] = value.size;
+    variables[`--line-height-${key}`] = value.lineHeight;
+  });
 
   return variables;
 }
@@ -534,9 +521,7 @@ export function applyThemeMode(mode: ThemeMode): 'light' | 'dark' {
   let actualMode: 'light' | 'dark' = 'light';
 
   if (mode === 'auto') {
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     actualMode = prefersDark ? 'dark' : 'light';
   } else {
     actualMode = mode === 'dark' ? 'dark' : 'light';
@@ -563,10 +548,7 @@ export function saveThemeConfig(config: Partial<ThemeConfig>): void {
 
   try {
     const validatedConfig = ThemeConfigSchema.partial().parse(config);
-    localStorage.setItem(
-      UNIFIED_THEME_CONFIG.storageKeys.theme,
-      JSON.stringify(validatedConfig)
-    );
+    localStorage.setItem(UNIFIED_THEME_CONFIG.storageKeys.theme, JSON.stringify(validatedConfig));
   } catch (error) {
     console.warn('Failed to save theme config:', error);
   }
@@ -597,9 +579,7 @@ export function loadThemeConfig(): ThemeConfig {
 /**
  * Listen for system theme changes
  */
-export function createSystemThemeListener(
-  callback: (isDark: boolean) => void
-): () => void {
+export function createSystemThemeListener(callback: (isDark: boolean) => void): () => void {
   if (typeof window === 'undefined') return () => {};
 
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -623,8 +603,7 @@ export function getThemeClasses(config: Partial<ThemeConfig>): {
 } {
   const actualMode =
     config.mode === 'auto'
-      ? typeof window !== 'undefined' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
       : config.mode || 'light';

@@ -26,7 +26,7 @@ export class ModulePermissionService {
 
   constructor(user: User) {
     this.user = user;
-    this.userRole = SYSTEM_ROLES.find(role => role.id === user.roleId) || null;
+    this.userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId) || null;
   }
 
   // ==============================================
@@ -47,7 +47,7 @@ export class ModulePermissionService {
     if (!this.userRole) return false;
 
     const permission = this.userRole.permissions.find(
-      p => p.action === action && p.resource === resource
+      (p) => p.action === action && p.resource === resource
     );
 
     if (!permission) return false;
@@ -987,7 +987,7 @@ export class ModulePermissionService {
       },
     ];
 
-    return navigation.filter(item => item.permission());
+    return navigation.filter((item) => item.permission());
   }
 }
 

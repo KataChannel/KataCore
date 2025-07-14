@@ -52,11 +52,7 @@ Bao bọc ứng dụng của bạn với `ThemeProvider` và `LanguageProvider`:
 // app/layout.tsx
 import { ThemeProvider, LanguageProvider } from './hooks/useTheme';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
       <body>
@@ -84,13 +80,9 @@ function MyComponent() {
     <div className="bg-background text-text">
       <h1>{t('welcome')}</h1>
 
-      <button onClick={toggleMode}>
-        {mode === 'light' ? t('darkMode') : t('lightMode')}
-      </button>
+      <button onClick={toggleMode}>{mode === 'light' ? t('darkMode') : t('lightMode')}</button>
 
-      <button onClick={toggleLanguage}>
-        {language === 'vi' ? 'English' : 'Tiếng Việt'}
-      </button>
+      <button onClick={toggleLanguage}>{language === 'vi' ? 'English' : 'Tiếng Việt'}</button>
     </div>
   );
 }
@@ -248,9 +240,7 @@ export function CustomMonoComponent() {
   const { t } = useTranslation(language);
 
   return (
-    <div
-      className={`mono-card ${mode === 'dark' ? 'dark-specific-class' : ''}`}
-    >
+    <div className={`mono-card ${mode === 'dark' ? 'dark-specific-class' : ''}`}>
       <h2 className="text-primary">{t('custom.title')}</h2>
       <p className="text-text-secondary">{t('custom.description')}</p>
     </div>
@@ -269,9 +259,7 @@ Hệ thống sử dụng Tailwind CSS breakpoints:
 - `2xl`: >= 1536px
 
 ```tsx
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-  {/* Responsive grid */}
-</div>
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{/* Responsive grid */}</div>
 ```
 
 ## ♿ Accessibility

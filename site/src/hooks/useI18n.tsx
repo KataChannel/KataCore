@@ -2,11 +2,15 @@
 
 import { useMemo } from 'react';
 import { useUnifiedTheme } from './useUnifiedTheme';
-import { createTranslationFunction, type TranslationModule, type Language } from '@/lib/config/i18n';
+import {
+  createTranslationFunction,
+  type TranslationModule,
+  type Language,
+} from '@/lib/config/i18n';
 
 /**
  * Hook để sử dụng translations với unified theme system
- * 
+ *
  * @param module - Module translation muốn sử dụng (default: 'common')
  * @returns Object chứa function translate và language hiện tại
  */
@@ -20,7 +24,7 @@ export function useI18n(module: TranslationModule = 'common') {
 
   return {
     t,
-    language
+    language,
   };
 }
 

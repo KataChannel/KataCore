@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,10 +7,7 @@ export async function POST(request: NextRequest) {
     const { phone, otpCode } = body;
 
     if (!phone || !otpCode) {
-      return NextResponse.json(
-        { error: 'Phone and OTP code are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Phone and OTP code are required' }, { status: 400 });
     }
 
     const result = await authService.loginWithOTP(phone, otpCode);

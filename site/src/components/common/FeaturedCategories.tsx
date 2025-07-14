@@ -21,7 +21,7 @@ const FeaturedCategories: React.FC = () => {
         Featured Categories
       </h2>
       <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-        {sampleCategories.map(category => (
+        {sampleCategories.map((category) => (
           <div
             key={category.id}
             className="flex items-center justify-center h-24 bg-gray-200 dark:bg-gray-700 rounded-lg shadow hover:shadow-md transition"

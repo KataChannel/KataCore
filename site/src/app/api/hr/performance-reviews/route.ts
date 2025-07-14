@@ -138,15 +138,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      employeeId,
-      reviewerId,
-      period,
-      goals,
-      achievements,
-      rating,
-      feedback,
-    } = body;
+    const { employeeId, reviewerId, period, goals, achievements, rating, feedback } = body;
 
     if (!employeeId || !reviewerId || !period) {
       return NextResponse.json(
@@ -266,10 +258,7 @@ export async function PUT(request: NextRequest) {
     const { id, goals, achievements, rating, feedback } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Thiếu ID đánh giá' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Thiếu ID đánh giá' }, { status: 400 });
     }
 
     const existingReview = await prisma.performanceReview.findUnique({
@@ -295,10 +284,7 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         goals: goals !== undefined ? goals : existingReview.goals,
-        achievements:
-          achievements !== undefined
-            ? achievements
-            : existingReview.achievements,
+        achievements: achievements !== undefined ? achievements : existingReview.achievements,
         rating: rating !== undefined ? rating : existingReview.rating,
         feedback: feedback !== undefined ? feedback : existingReview.feedback,
       },
@@ -353,10 +339,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Thiếu ID đánh giá' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Thiếu ID đánh giá' }, { status: 400 });
     }
 
     const existingReview = await prisma.performanceReview.findUnique({

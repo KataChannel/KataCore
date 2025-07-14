@@ -9,19 +9,17 @@ interface MaintenanceGuardProps {
   children: React.ReactNode;
 }
 
-const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({
-  children,
-}) => {
+const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({ children }) => {
   const { user, login, logout, loading } = useAuth();
   const [showLogin, setShowLogin] = React.useState(false);
 
   if (loading) {
     return (
       <div>
-      <Loading className="!min-h-screen" />
+        <Loading className="!min-h-screen" />
       </div>
       // <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      //   <div className="text-center space-y-6">          
+      //   <div className="text-center space-y-6">
       //     {/* Coffee Cup Icon */}
       // <div className="flex justify-center">
       //   <div className="relative">
@@ -40,12 +38,12 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({
       //     </div>
       //   </div>
       //     </div>
-          
+
       //     <div className="space-y-2">
       //   <h3 className="text-lg font-semibold text-slate-800">Đang tải</h3>
       //   <p className="text-slate-500 text-sm">Pha một tách cà phê và chờ trong giây lát...</p>
       //     </div>
-          
+
       //   <div className="flex justify-center space-x-1">
       //   <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
       //   <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -82,12 +80,8 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Website đang bảo trì
-              </h1>
-              <p className="text-gray-600 mb-4">
-                {siteConfig.maintenance.message}
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Website đang bảo trì</h1>
+              <p className="text-gray-600 mb-4">{siteConfig.maintenance.message}</p>
               {siteConfig.maintenance.estimatedTime && (
                 <p className="text-sm text-gray-500 mb-6">
                   Thời gian dự kiến: {siteConfig.maintenance.estimatedTime}
@@ -139,16 +133,11 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({
                     />
                   </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Không có quyền truy cập
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Không có quyền truy cập</h1>
                 <p className="text-gray-600 mb-4">
-                  Tài khoản của bạn không có quyền truy cập trong thời gian bảo
-                  trì.
+                  Tài khoản của bạn không có quyền truy cập trong thời gian bảo trì.
                 </p>
-                <p className="text-sm text-gray-500 mb-6">
-                  Đăng nhập: {user.email}
-                </p>
+                <p className="text-sm text-gray-500 mb-6">Đăng nhập: {user.email}</p>
               </div>
               <button
                 onClick={logout}
@@ -167,17 +156,14 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({
       <div>
         <div className="bg-yellow-500 text-white px-4 py-2 text-center text-sm font-medium relative">
           <span>
-            ⚠️ Website đang trong chế độ bảo trì - Bạn đang truy cập với quyền
-            quản trị ({user.role})
+            ⚠️ Website đang trong chế độ bảo trì - Bạn đang truy cập với quyền quản trị ({user.role}
+            )
           </span>
           <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
             <a href="/admin" className="underline hover:no-underline text-xs">
               Admin Panel
             </a>
-            <button
-              onClick={logout}
-              className="underline hover:no-underline text-xs"
-            >
+            <button onClick={logout} className="underline hover:no-underline text-xs">
               Đăng xuất
             </button>
           </div>

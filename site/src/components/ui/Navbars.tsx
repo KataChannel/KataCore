@@ -33,7 +33,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            {navigationItems.map(item => (
+            {navigationItems.map((item) => (
               <div key={item.name} className="relative">
                 {item.hasDropdown ? (
                   <div className="relative">
@@ -50,7 +50,7 @@ export default function Navbar() {
                     </button>
                     {isDropdownOpen && (
                       <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-black rounded-md shadow border border-gray-300 dark:border-gray-600 py-1">
-                        {item.dropdownItems.map(dropdownItem => (
+                        {item.dropdownItems.map((dropdownItem) => (
                           <a
                             key={dropdownItem.name}
                             href={dropdownItem.href}
@@ -78,11 +78,7 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden p-2 rounded-md text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 active:scale-95 transition-transform"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
@@ -103,7 +99,7 @@ export default function Navbar() {
               </div>
             </div>
 
-            {navigationItems.map(item => (
+            {navigationItems.map((item) => (
               <div key={item.name}>
                 {item.hasDropdown ? (
                   <div>
@@ -120,7 +116,7 @@ export default function Navbar() {
                     </button>
                     {isDropdownOpen && (
                       <div className="pl-6 space-y-1">
-                        {item.dropdownItems.map(dropdownItem => (
+                        {item.dropdownItems.map((dropdownItem) => (
                           <a
                             key={dropdownItem.name}
                             href={dropdownItem.href}

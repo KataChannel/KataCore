@@ -26,10 +26,7 @@ export const authOptions: NextAuthOptions = {
         };
 
         // TODO: Replace with actual password verification
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          '$2a$10$hashedpassword'
-        );
+        const isValidPassword = await bcrypt.compare(credentials.password, '$2a$10$hashedpassword');
 
         if (user && isValidPassword) {
           return {

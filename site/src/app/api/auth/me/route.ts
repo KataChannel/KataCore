@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,9 +28,6 @@ export async function GET(request: NextRequest) {
       isVerified: user.isVerified,
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to get user' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to get user' }, { status: 401 });
   }
 }

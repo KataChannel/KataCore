@@ -19,12 +19,12 @@ Visit `/auth-demo` to test the authentication system with different user roles a
 
 ### User Roles & System Levels
 
-| Role | System Level | Description | Default Modules |
-|------|--------------|-------------|-----------------|
-| Admin | 10 | Full system access | All 11 modules |
-| Manager | 7-9 | Department management | 6-8 modules |
-| Employee | 3-6 | Standard user access | 2-4 modules |
-| Viewer | 1-2 | Read-only access | 1-2 modules |
+| Role     | System Level | Description           | Default Modules |
+| -------- | ------------ | --------------------- | --------------- |
+| Admin    | 10           | Full system access    | All 11 modules  |
+| Manager  | 7-9          | Department management | 6-8 modules     |
+| Employee | 3-6          | Standard user access  | 2-4 modules     |
+| Viewer   | 1-2          | Read-only access      | 1-2 modules     |
 
 ### Business Modules
 
@@ -50,7 +50,7 @@ const demoAccounts = [
   { email: 'admin@taza.com', role: 'admin', level: 10 },
   { email: 'manager@taza.com', role: 'manager', level: 7 },
   { email: 'employee@taza.com', role: 'employee', level: 3 },
-  { email: 'viewer@taza.com', role: 'viewer', level: 1 }
+  { email: 'viewer@taza.com', role: 'viewer', level: 1 },
 ];
 ```
 
@@ -114,11 +114,11 @@ const ProtectedSalesPage = withModuleGuard(SalesPage, 'sales', 'read');
 // Use auth in components
 function MyComponent() {
   const { user, checkModuleAccess, logout } = useAuth();
-  
+
   if (!checkModuleAccess('crm')) {
     return <AccessDenied />;
   }
-  
+
   return <CRMDashboard />;
 }
 ```
@@ -132,26 +132,26 @@ function MyComponent() {
 // Example API call with authentication
 const response = await fetch('/api/sales/orders', {
   headers: {
-    'Authorization': `Bearer ${token}`
-  }
+    Authorization: `Bearer ${token}`,
+  },
 });
 ```
 
 ## Access Control Matrix
 
-| Module | Viewer | Employee | Manager | Admin |
-|--------|--------|----------|---------|-------|
-| Sales | ❌ | ✅ Read/Write | ✅ Manage | ✅ Admin |
-| CRM | ❌ | ✅ Read/Write | ✅ Manage | ✅ Admin |
-| Inventory | ❌ | ❌ | ✅ Read/Write | ✅ Admin |
-| Finance | ❌ | ❌ | ✅ Read | ✅ Admin |
-| HRM | ❌ | ❌ | ✅ Read | ✅ Admin |
-| Projects | ❌ | ❌ | ✅ Manage | ✅ Admin |
-| Manufacturing | ❌ | ❌ | ❌ | ✅ Admin |
-| Marketing | ❌ | ❌ | ✅ Manage | ✅ Admin |
-| Support | ❌ | ❌ | ✅ Read | ✅ Admin |
-| Analytics | ✅ Read | ❌ | ✅ Read | ✅ Admin |
-| E-commerce | ❌ | ❌ | ❌ | ✅ Admin |
+| Module        | Viewer  | Employee      | Manager       | Admin    |
+| ------------- | ------- | ------------- | ------------- | -------- |
+| Sales         | ❌      | ✅ Read/Write | ✅ Manage     | ✅ Admin |
+| CRM           | ❌      | ✅ Read/Write | ✅ Manage     | ✅ Admin |
+| Inventory     | ❌      | ❌            | ✅ Read/Write | ✅ Admin |
+| Finance       | ❌      | ❌            | ✅ Read       | ✅ Admin |
+| HRM           | ❌      | ❌            | ✅ Read       | ✅ Admin |
+| Projects      | ❌      | ❌            | ✅ Manage     | ✅ Admin |
+| Manufacturing | ❌      | ❌            | ❌            | ✅ Admin |
+| Marketing     | ❌      | ❌            | ✅ Manage     | ✅ Admin |
+| Support       | ❌      | ❌            | ✅ Read       | ✅ Admin |
+| Analytics     | ✅ Read | ❌            | ✅ Read       | ✅ Admin |
+| E-commerce    | ❌      | ❌            | ❌            | ✅ Admin |
 
 ## Navigation & UI
 
@@ -242,7 +242,7 @@ console.log(localStorage.getItem('auth-token'));
 ### Authentication Endpoints
 
 - `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout  
+- `POST /api/auth/logout` - User logout
 - `POST /api/auth/refresh` - Token refresh
 - `GET /api/auth/me` - Current user info
 
@@ -279,5 +279,5 @@ For technical support or questions about the authentication system:
 
 ---
 
-*Last updated: July 2025*
-*TazaCore Enterprise v2.0.0*
+_Last updated: July 2025_
+_TazaCore Enterprise v2.0.0_

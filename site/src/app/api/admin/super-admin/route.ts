@@ -1,7 +1,7 @@
 // API Route for Super Administrator Management
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 import { SYSTEM_ROLES, ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permissions';
 import bcrypt from 'bcryptjs';
 
@@ -23,8 +23,8 @@ async function authenticateSuperAdmin(request: NextRequest) {
     }
 
     // Check if user is Super Administrator
-    const isSuperAdmin = user.role.name === 'Super Administrator' || 
-                        user.role.name === 'super_administrator';
+    const isSuperAdmin =
+      user.role.name === 'Super Administrator' || user.role.name === 'super_administrator';
 
     if (!isSuperAdmin) {
       throw new Error('Access denied: Super Administrator role required');
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     // For other actions, require Super Admin authentication
     const user = await authenticateSuperAdmin(request);
-    
+
     switch (action) {
       case 'create-admin':
         return await createAdministrator(userData);
@@ -59,10 +59,7 @@ export async function POST(request: NextRequest) {
       case 'revoke-super-admin':
         return await revokeSuperAdminRole(userData.userId);
       default:
-        return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error: any) {
     console.error('Super Admin API Error:', error);
@@ -81,10 +78,10 @@ export async function GET(request: NextRequest) {
       where: {
         role: {
           name: {
-            in: ['Super Administrator', 'super_administrator']
-          }
-        }
-      }
+            in: ['Super Administrator', 'super_administrator'],
+          },
+        },
+      },
     });
 
     // If no Super Admin exists, return basic system info without authentication
@@ -96,8 +93,8 @@ export async function GET(request: NextRequest) {
           superAdmins: [],
           systemStats: stats,
           currentUser: null,
-          needsInitialization: true
-        }
+          needsInitialization: true,
+        },
       });
     }
 
@@ -121,19 +118,19 @@ export async function GET(request: NextRequest) {
       where: {
         role: {
           name: {
-            in: ['Super Administrator', 'super_administrator']
-          }
-        }
+            in: ['Super Administrator', 'super_administrator'],
+          },
+        },
       },
       include: {
         role: true,
         employee: {
           include: {
             department: true,
-            position: true
-          }
-        }
-      }
+            position: true,
+          },
+        },
+      },
     });
 
     // Get system statistics
@@ -142,7 +139,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        superAdmins: superAdmins.map(admin => ({
+        superAdmins: superAdmins.map((admin) => ({
           id: admin.id,
           email: admin.email,
           displayName: admin.displayName,
@@ -150,17 +147,16 @@ export async function GET(request: NextRequest) {
           lastLoginAt: admin.lastSeen || null,
           createdAt: admin.createdAt,
           role: admin.role,
-          employee: admin.employee
+          employee: admin.employee,
         })),
         systemStats: stats,
         currentUser: {
           id: user.id,
           email: user.email,
-          displayName: user.displayName
-        }
-      }
+          displayName: user.displayName,
+        },
+      },
     });
-
   } catch (error: any) {
     console.error('Super Admin GET Error:', error);
     return NextResponse.json(
@@ -176,7 +172,7 @@ async function createSuperAdmin(userData?: any) {
     email: 'admin@taza.com',
     password: 'TazaAdmin@2024!',
     displayName: 'Super Administrator',
-    username: 'superadmin'
+    username: 'superadmin',
   };
 
   const data = { ...defaultData, ...userData };
@@ -191,7 +187,7 @@ async function createSuperAdmin(userData?: any) {
         { action: 'manage', resource: 'system' },
         { action: 'configure', resource: 'system' },
         { action: 'backup', resource: 'system' },
-        
+
         // User and role management
         { action: 'create', resource: 'users' },
         { action: 'read', resource: 'users' },
@@ -199,44 +195,44 @@ async function createSuperAdmin(userData?: any) {
         { action: 'delete', resource: 'users' },
         { action: 'manage', resource: 'users' },
         { action: 'admin', resource: 'users' },
-        
+
         { action: 'create', resource: 'roles' },
         { action: 'read', resource: 'roles' },
         { action: 'update', resource: 'roles' },
         { action: 'delete', resource: 'roles' },
         { action: 'manage', resource: 'roles' },
         { action: 'admin', resource: 'roles' },
-        
+
         // All module permissions
-        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+        ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
           { action: 'create', resource: permission.resource },
           { action: 'read', resource: permission.resource },
           { action: 'update', resource: permission.resource },
           { action: 'delete', resource: permission.resource },
           { action: 'manage', resource: permission.resource },
-          { action: 'admin', resource: permission.resource }
+          { action: 'admin', resource: permission.resource },
         ]),
-        
+
         // Global permissions
         { action: 'create', resource: '*' },
         { action: 'read', resource: '*' },
         { action: 'update', resource: '*' },
         { action: 'delete', resource: '*' },
         { action: 'manage', resource: '*' },
-        { action: 'admin', resource: '*' }
+        { action: 'admin', resource: '*' },
       ];
 
       const superAdminRole = await tx.role.upsert({
         where: { name: 'Super Administrator' },
         update: {
           description: 'Super Administrator with full system access',
-          permissions: JSON.stringify(allPermissions)
+          permissions: JSON.stringify(allPermissions),
         },
         create: {
           name: 'Super Administrator',
           description: 'Super Administrator with full system access',
-          permissions: JSON.stringify(allPermissions)
-        }
+          permissions: JSON.stringify(allPermissions),
+        },
       });
 
       // 2. Hash password
@@ -244,7 +240,7 @@ async function createSuperAdmin(userData?: any) {
 
       // 3. Check if user already exists
       const existingUser = await tx.user.findUnique({
-        where: { email: data.email }
+        where: { email: data.email },
       });
 
       let user;
@@ -258,8 +254,8 @@ async function createSuperAdmin(userData?: any) {
             username: data.username,
             roleId: superAdminRole.id,
             isActive: true,
-            isVerified: true
-          }
+            isVerified: true,
+          },
         });
       } else {
         // Create new Super Admin user
@@ -271,8 +267,8 @@ async function createSuperAdmin(userData?: any) {
             username: data.username,
             roleId: superAdminRole.id,
             isActive: true,
-            isVerified: true
-          }
+            isVerified: true,
+          },
         });
       }
 
@@ -281,11 +277,11 @@ async function createSuperAdmin(userData?: any) {
       try {
         // Check if we have required department and position
         const defaultDepartment = await tx.department.findFirst({
-          where: { name: { in: ['Administration', 'IT', 'Management'] } }
+          where: { name: { in: ['Administration', 'IT', 'Management'] } },
         });
-        
+
         const defaultPosition = await tx.position.findFirst({
-          where: { title: { in: ['Administrator', 'System Admin', 'Manager'] } }
+          where: { title: { in: ['Administrator', 'System Admin', 'Manager'] } },
         });
 
         if (defaultDepartment && defaultPosition) {
@@ -295,7 +291,7 @@ async function createSuperAdmin(userData?: any) {
               firstName: data.displayName.split(' ')[0] || 'Super',
               lastName: data.displayName.split(' ').slice(1).join(' ') || 'Admin',
               fullName: data.displayName,
-              status: 'ACTIVE'
+              status: 'ACTIVE',
             },
             create: {
               employeeId: `EMP-SA-${Date.now()}`,
@@ -307,12 +303,15 @@ async function createSuperAdmin(userData?: any) {
               departmentId: defaultDepartment.id,
               positionId: defaultPosition.id,
               status: 'ACTIVE',
-              hireDate: new Date()
-            }
+              hireDate: new Date(),
+            },
           });
         }
       } catch (empError) {
-        console.warn('Could not create employee record (departments/positions may not exist):', empError);
+        console.warn(
+          'Could not create employee record (departments/positions may not exist):',
+          empError
+        );
       }
 
       return { user, role: superAdminRole, employee };
@@ -321,7 +320,7 @@ async function createSuperAdmin(userData?: any) {
     console.log('✅ Super Administrator created successfully:', {
       userId: result.user.id,
       email: result.user.email,
-      roleId: result.role.id
+      roleId: result.role.id,
     });
 
     return NextResponse.json({
@@ -332,19 +331,20 @@ async function createSuperAdmin(userData?: any) {
           id: result.user.id,
           email: result.user.email,
           displayName: result.user.displayName,
-          username: result.user.username
+          username: result.user.username,
         },
         role: {
           id: result.role.id,
           name: result.role.name,
         },
-        employee: result.employee ? {
-          id: result.employee.id,
-          employeeId: result.employee.employeeId
-        } : null
-      }
+        employee: result.employee
+          ? {
+              id: result.employee.id,
+              employeeId: result.employee.employeeId,
+            }
+          : null,
+      },
     });
-
   } catch (error: any) {
     console.error('❌ Error creating Super Administrator:', error);
     throw new Error(`Failed to create Super Administrator: ${error?.message || 'Unknown error'}`);
@@ -370,15 +370,15 @@ async function createAdministrator(userData: any) {
             { action: 'read', resource: 'users' },
             { action: 'update', resource: 'users' },
             { action: 'manage', resource: 'users' },
-            ...Object.values(ALL_MODULE_PERMISSIONS).flatMap(permission => [
+            ...Object.values(ALL_MODULE_PERMISSIONS).flatMap((permission) => [
               { action: 'read', resource: permission.resource },
               { action: 'create', resource: permission.resource },
               { action: 'update', resource: permission.resource },
               { action: 'delete', resource: permission.resource },
-              { action: 'manage', resource: permission.resource }
-            ])
-          ])
-        }
+              { action: 'manage', resource: permission.resource },
+            ]),
+          ]),
+        },
       });
 
       const user = await tx.user.create({
@@ -389,8 +389,8 @@ async function createAdministrator(userData: any) {
           username: userData.username,
           roleId: adminRole.id,
           isActive: true,
-          isVerified: true
-        }
+          isVerified: true,
+        },
       });
 
       const employee = await tx.employee.create({
@@ -405,8 +405,8 @@ async function createAdministrator(userData: any) {
           hireDate: new Date(),
           // Add required fields with default values
           departmentId: 'default-dept', // This should be set to an actual department ID
-          positionId: 'default-pos'      // This should be set to an actual position ID
-        }
+          positionId: 'default-pos', // This should be set to an actual position ID
+        },
       });
 
       return { user, role: adminRole, employee };
@@ -419,11 +419,10 @@ async function createAdministrator(userData: any) {
         user: {
           id: result.user.id,
           email: result.user.email,
-          displayName: result.user.displayName
-        }
-      }
+          displayName: result.user.displayName,
+        },
+      },
     });
-
   } catch (error: any) {
     console.error('Error creating Administrator:', error);
     throw new Error(`Failed to create Administrator: ${error?.message || 'Unknown error'}`);
@@ -434,7 +433,7 @@ async function createAdministrator(userData: any) {
 async function grantSuperAdminRole(userId: string) {
   try {
     const superAdminRole = await prisma.role.findUnique({
-      where: { name: 'Super Administrator' }
+      where: { name: 'Super Administrator' },
     });
 
     if (!superAdminRole) {
@@ -444,15 +443,14 @@ async function grantSuperAdminRole(userId: string) {
     const user = await prisma.user.update({
       where: { id: userId },
       data: { roleId: superAdminRole.id },
-      include: { role: true }
+      include: { role: true },
     });
 
     return NextResponse.json({
       success: true,
       message: 'Super Administrator role granted successfully',
-      data: { user }
+      data: { user },
     });
-
   } catch (error: any) {
     console.error('Error granting Super Admin role:', error);
     throw new Error(`Failed to grant Super Admin role: ${error?.message || 'Unknown error'}`);
@@ -464,7 +462,7 @@ async function revokeSuperAdminRole(userId: string) {
   try {
     // Get a default role (e.g., Manager or Employee)
     const defaultRole = await prisma.role.findFirst({
-      where: { name: { in: ['Manager', 'Employee'] } }
+      where: { name: { in: ['Manager', 'Employee'] } },
     });
 
     if (!defaultRole) {
@@ -474,15 +472,14 @@ async function revokeSuperAdminRole(userId: string) {
     const user = await prisma.user.update({
       where: { id: userId },
       data: { roleId: defaultRole.id },
-      include: { role: true }
+      include: { role: true },
     });
 
     return NextResponse.json({
       success: true,
       message: 'Super Administrator role revoked successfully',
-      data: { user }
+      data: { user },
     });
-
   } catch (error: any) {
     console.error('Error revoking Super Admin role:', error);
     throw new Error(`Failed to revoke Super Admin role: ${error?.message || 'Unknown error'}`);
@@ -492,13 +489,7 @@ async function revokeSuperAdminRole(userId: string) {
 // Get system statistics
 async function getSystemStats() {
   try {
-    const [
-      totalUsers,
-      activeUsers,
-      totalRoles,
-      totalEmployees,
-      recentLogins
-    ] = await Promise.all([
+    const [totalUsers, activeUsers, totalRoles, totalEmployees, recentLogins] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { isActive: true } }),
       prisma.role.count(),
@@ -506,10 +497,10 @@ async function getSystemStats() {
       prisma.user.count({
         where: {
           lastSeen: {
-            gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
-          }
-        }
-      })
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+          },
+        },
+      }),
     ]);
 
     return {
@@ -518,7 +509,7 @@ async function getSystemStats() {
       totalRoles,
       totalEmployees,
       recentLogins,
-      systemHealth: 'operational'
+      systemHealth: 'operational',
     };
   } catch (error) {
     console.error('Error getting system stats:', error);
@@ -528,7 +519,7 @@ async function getSystemStats() {
       totalRoles: 0,
       totalEmployees: 0,
       recentLogins: 0,
-      systemHealth: 'error'
+      systemHealth: 'error',
     };
   }
 }
@@ -548,10 +539,7 @@ export async function PUT(request: NextRequest) {
       case 'update-settings':
         return await updateSystemSettings(data);
       default:
-        return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error: any) {
     console.error('Super Admin PUT Error:', error);
@@ -568,38 +556,38 @@ async function updateSuperAdminProfile(userId: string, data: any) {
     data: {
       displayName: data.displayName,
       phone: data.phone,
-      avatar: data.avatar
-    }
+      avatar: data.avatar,
+    },
   });
 
   return NextResponse.json({
     success: true,
     message: 'Profile updated successfully',
-    data: { user }
+    data: { user },
   });
 }
 
 async function changeSuperAdminPassword(userId: string, data: any) {
   const hashedPassword = await bcrypt.hash(data.newPassword, 12);
-  
+
   await prisma.user.update({
     where: { id: userId },
-    data: { password: hashedPassword }
+    data: { password: hashedPassword },
   });
 
   return NextResponse.json({
     success: true,
-    message: 'Password changed successfully'
+    message: 'Password changed successfully',
   });
 }
 
 async function updateSystemSettings(data: any) {
   // Implementation for system settings update
   // This could involve updating various system configurations
-  
+
   return NextResponse.json({
     success: true,
     message: 'System settings updated successfully',
-    data
+    data,
   });
 }

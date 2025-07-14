@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,17 +18,11 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!displayName) {
-      return NextResponse.json(
-        { error: 'Display name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Display name is required' }, { status: 400 });
     }
 
     if (!email && !phone && !username) {
-      return NextResponse.json(
-        { error: 'Email, phone, or username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email, phone, or username is required' }, { status: 400 });
     }
 
     if (provider === 'email' && !password) {
@@ -77,9 +71,6 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Registration failed' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: error.message || 'Registration failed' }, { status: 400 });
   }
 }

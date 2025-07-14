@@ -16,13 +16,7 @@ export const GAME_PHASES = {
   ADVANCED: 'advanced',
 } as const;
 
-export const RESOURCE_TYPES = [
-  'metal',
-  'wood',
-  'water',
-  'fire',
-  'earth',
-] as const;
+export const RESOURCE_TYPES = ['metal', 'wood', 'water', 'fire', 'earth'] as const;
 
 export const RESOURCE_ICONS = {
   metal: '💰',

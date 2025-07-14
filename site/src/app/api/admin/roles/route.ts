@@ -1,7 +1,7 @@
 // API Route for Role Management with Module Permissions
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 import { SYSTEM_ROLES, ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permissions';
 
 // Middleware to check authentication
@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canReadRoles = userRole?.permissions.some(
-      p => p.action === 'read' && p.resource === 'roles'
+      (p) => p.action === 'read' && p.resource === 'roles'
     );
 
     if (!canReadRoles && userRole?.level < 8) {
@@ -78,14 +78,16 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Enhance with system role information
-    const enhancedRoles = dbRoles.map(dbRole => {
-      const systemRole = SYSTEM_ROLES.find(sr => 
-        sr.name.toLowerCase().replace(/ /g, '_') === dbRole.name.toLowerCase().replace(/ /g, '_') ||
-        sr.id === dbRole.name.toLowerCase().replace(/ /g, '_')
+    const enhancedRoles = dbRoles.map((dbRole) => {
+      const systemRole = SYSTEM_ROLES.find(
+        (sr) =>
+          sr.name.toLowerCase().replace(/ /g, '_') ===
+            dbRole.name.toLowerCase().replace(/ /g, '_') ||
+          sr.id === dbRole.name.toLowerCase().replace(/ /g, '_')
       );
 
       const dbPermissions = dbRole.permissions ? JSON.parse(dbRole.permissions as string) : [];
-      
+
       return {
         id: dbRole.id,
         name: dbRole.name,
@@ -95,17 +97,19 @@ export async function GET(request: NextRequest) {
         isActive: true, // Database roles are considered active
         createdAt: dbRole.createdAt,
         updatedAt: dbRole.updatedAt,
-        
+
         // System role information
-        systemRole: systemRole ? {
-          id: systemRole.id,
-          name: systemRole.name,
-          description: systemRole.description,
-          level: systemRole.level,
-          modules: systemRole.modules,
-          permissions: systemRole.permissions,
-        } : null,
-        
+        systemRole: systemRole
+          ? {
+              id: systemRole.id,
+              name: systemRole.name,
+              description: systemRole.description,
+              level: systemRole.level,
+              modules: systemRole.modules,
+              permissions: systemRole.permissions,
+            }
+          : null,
+
         // Computed fields
         level: systemRole?.level || 1,
         modules: systemRole?.modules || [],
@@ -114,23 +118,26 @@ export async function GET(request: NextRequest) {
     });
 
     // Filter by module if specified
-    const filteredRoles = moduleFilter 
-      ? enhancedRoles.filter(role => 
-          role.modules.includes(moduleFilter)
-        )
+    const filteredRoles = moduleFilter
+      ? enhancedRoles.filter((role) => role.modules.includes(moduleFilter))
       : enhancedRoles;
 
     // Add system roles that don't exist in database yet
-    const missingSystemRoles = SYSTEM_ROLES.filter(systemRole => 
-      !dbRoles.some(dbRole => 
-        dbRole.name.toLowerCase().replace(/ /g, '_') === systemRole.id ||
-        dbRole.name.toLowerCase().replace(/ /g, '_') === systemRole.name.toLowerCase().replace(/ /g, '_')
-      )
-    ).map(systemRole => ({
+    const missingSystemRoles = SYSTEM_ROLES.filter(
+      (systemRole) =>
+        !dbRoles.some(
+          (dbRole) =>
+            dbRole.name.toLowerCase().replace(/ /g, '_') === systemRole.id ||
+            dbRole.name.toLowerCase().replace(/ /g, '_') ===
+              systemRole.name.toLowerCase().replace(/ /g, '_')
+        )
+    ).map((systemRole) => ({
       id: systemRole.id,
       name: systemRole.name,
       description: systemRole.description,
-      permissions: systemRole.permissions.map(p => `${p.action}:${p.resource}${p.scope ? `:${p.scope}` : ''}`),
+      permissions: systemRole.permissions.map(
+        (p) => `${p.action}:${p.resource}${p.scope ? `:${p.scope}` : ''}`
+      ),
       userCount: 0,
       isActive: true,
       createdAt: null,
@@ -164,13 +171,16 @@ export async function GET(request: NextRequest) {
       systemRoles: SYSTEM_ROLES,
       availablePermissions: Object.entries(ALL_MODULE_PERMISSIONS).map(([key, permission]) => ({
         id: key,
-        name: key.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+        name: key
+          .replace(/_/g, ' ')
+          .toLowerCase()
+          .replace(/\b\w/g, (l) => l.toUpperCase()),
         action: permission.action,
         resource: permission.resource,
         description: permission.description || `${permission.action} ${permission.resource}`,
         module: getModuleFromResource(permission.resource),
       })),
-      modules: Array.from(new Set(SYSTEM_ROLES.flatMap(role => role.modules))),
+      modules: Array.from(new Set(SYSTEM_ROLES.flatMap((role) => role.modules))),
       pagination: {
         page,
         limit,
@@ -179,10 +189,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch roles' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to fetch roles' }, { status: 500 });
   }
 }
 
@@ -192,9 +199,9 @@ export async function POST(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canCreateRoles = userRole?.permissions.some(
-      p => p.action === 'create' && p.resource === 'roles'
+      (p) => p.action === 'create' && p.resource === 'roles'
     );
 
     if (!canCreateRoles && userRole?.level < 9) {
@@ -216,10 +223,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name || !description) {
-      return NextResponse.json(
-        { error: 'Name and description are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name and description are required' }, { status: 400 });
     }
 
     // Prevent creating roles with higher level than current user
@@ -241,17 +245,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingRole) {
-      return NextResponse.json(
-        { error: 'Role with this name already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Role with this name already exists' }, { status: 400 });
     }
 
     // Validate permissions
     const validPermissions = permissions.filter((perm: string) => {
       const [action, resource] = perm.split(':');
-      return action && resource && Object.values(ALL_MODULE_PERMISSIONS).some(
-        p => p.action === action && p.resource === resource
+      return (
+        action &&
+        resource &&
+        Object.values(ALL_MODULE_PERMISSIONS).some(
+          (p) => p.action === action && p.resource === resource
+        )
       );
     });
 
@@ -272,41 +277,43 @@ export async function POST(request: NextRequest) {
     });
 
     // If it's a system role, we might want to update our system roles
-    const systemRole = isSystemRole ? {
-      id: name.toLowerCase().replace(/ /g, '_'),
-      name,
-      description,
-      level,
-      modules,
-      permissions: validPermissions.map((perm: string) => {
-        const [action, resource, scope] = perm.split(':');
-        return {
-          action,
-          resource,
-          scope: scope || 'all',
-          description: `${action} ${resource}`,
-        };
-      }),
-    } : null;
+    const systemRole = isSystemRole
+      ? {
+          id: name.toLowerCase().replace(/ /g, '_'),
+          name,
+          description,
+          level,
+          modules,
+          permissions: validPermissions.map((perm: string) => {
+            const [action, resource, scope] = perm.split(':');
+            return {
+              action,
+              resource,
+              scope: scope || 'all',
+              description: `${action} ${resource}`,
+            };
+          }),
+        }
+      : null;
 
-    return NextResponse.json({
-      id: newRole.id,
-      name: newRole.name,
-      description: newRole.description,
-      permissions: validPermissions,
-      userCount: newRole._count.users,
-      isActive: true,
-      createdAt: newRole.createdAt,
-      systemRole,
-      level,
-      modules,
-      isSystemRole,
-    }, { status: 201 });
-  } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || 'Failed to create role' },
-      { status: 500 }
+      {
+        id: newRole.id,
+        name: newRole.name,
+        description: newRole.description,
+        permissions: validPermissions,
+        userCount: newRole._count.users,
+        isActive: true,
+        createdAt: newRole.createdAt,
+        systemRole,
+        level,
+        modules,
+        isSystemRole,
+      },
+      { status: 201 }
     );
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Failed to create role' }, { status: 500 });
   }
 }
 
@@ -316,9 +323,9 @@ export async function PUT(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canUpdateRoles = userRole?.permissions.some(
-      p => p.action === 'update' && p.resource === 'roles'
+      (p) => p.action === 'update' && p.resource === 'roles'
     );
 
     if (!canUpdateRoles && userRole?.level < 8) {
@@ -329,20 +336,10 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      roleId,
-      name,
-      description,
-      permissions = [],
-      modules = [],
-      level,
-    } = body;
+    const { roleId, name, description, permissions = [], modules = [], level } = body;
 
     if (!roleId) {
-      return NextResponse.json(
-        { error: 'Role ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Role ID is required' }, { status: 400 });
     }
 
     // Check if role exists
@@ -351,18 +348,22 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!existingRole) {
-      return NextResponse.json(
-        { error: 'Role not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Role not found' }, { status: 404 });
     }
 
     // Check if we can modify this role
-    const existingSystemRole = SYSTEM_ROLES.find(sr => 
-      sr.name.toLowerCase().replace(/ /g, '_') === existingRole.name.toLowerCase().replace(/ /g, '_')
+    const existingSystemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') ===
+        existingRole.name.toLowerCase().replace(/ /g, '_')
     );
 
-    if (existingSystemRole && userRole && existingSystemRole.level >= userRole.level && userRole.level < 10) {
+    if (
+      existingSystemRole &&
+      userRole &&
+      existingSystemRole.level >= userRole.level &&
+      userRole.level < 10
+    ) {
       return NextResponse.json(
         { error: 'Cannot modify role with equal or higher level' },
         { status: 403 }
@@ -395,10 +396,7 @@ export async function PUT(request: NextRequest) {
       });
 
       if (conflictingRole) {
-        return NextResponse.json(
-          { error: 'Role with this name already exists' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Role with this name already exists' }, { status: 400 });
       }
 
       updateData.name = name;
@@ -410,8 +408,12 @@ export async function PUT(request: NextRequest) {
       // Validate permissions
       const validPermissions = permissions.filter((perm: string) => {
         const [action, resource] = perm.split(':');
-        return action && resource && Object.values(ALL_MODULE_PERMISSIONS).some(
-          p => p.action === action && p.resource === resource
+        return (
+          action &&
+          resource &&
+          Object.values(ALL_MODULE_PERMISSIONS).some(
+            (p) => p.action === action && p.resource === resource
+          )
         );
       });
 
@@ -431,8 +433,10 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    const systemRole = SYSTEM_ROLES.find(sr => 
-      sr.name.toLowerCase().replace(/ /g, '_') === updatedRole.name.toLowerCase().replace(/ /g, '_')
+    const systemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') ===
+        updatedRole.name.toLowerCase().replace(/ /g, '_')
     );
 
     return NextResponse.json({
@@ -443,22 +447,21 @@ export async function PUT(request: NextRequest) {
       userCount: updatedRole._count.users,
       isActive: true,
       updatedAt: updatedRole.updatedAt,
-      systemRole: systemRole ? {
-        id: systemRole.id,
-        name: systemRole.name,
-        description: systemRole.description,
-        level: systemRole.level,
-        modules: systemRole.modules,
-        permissions: systemRole.permissions,
-      } : null,
+      systemRole: systemRole
+        ? {
+            id: systemRole.id,
+            name: systemRole.name,
+            description: systemRole.description,
+            level: systemRole.level,
+            modules: systemRole.modules,
+            permissions: systemRole.permissions,
+          }
+        : null,
       level: level || systemRole?.level || 1,
       modules: modules || systemRole?.modules || [],
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to update role' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to update role' }, { status: 500 });
   }
 }
 
@@ -468,9 +471,9 @@ export async function DELETE(request: NextRequest) {
     const user = await authenticate(request);
 
     // Check permissions
-    const userRole = SYSTEM_ROLES.find(role => role.id === user.roleId);
+    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canDeleteRoles = userRole?.permissions.some(
-      p => p.action === 'delete' && p.resource === 'roles'
+      (p) => p.action === 'delete' && p.resource === 'roles'
     );
 
     if (!canDeleteRoles && userRole?.level < 9) {
@@ -484,10 +487,7 @@ export async function DELETE(request: NextRequest) {
     const roleId = searchParams.get('roleId');
 
     if (!roleId) {
-      return NextResponse.json(
-        { error: 'Role ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Role ID is required' }, { status: 400 });
     }
 
     // Check if role exists
@@ -503,10 +503,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!existingRole) {
-      return NextResponse.json(
-        { error: 'Role not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Role not found' }, { status: 404 });
     }
 
     // Check if role has users
@@ -518,11 +515,18 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check if we can delete this role
-    const existingSystemRole = SYSTEM_ROLES.find(sr => 
-      sr.name.toLowerCase().replace(/ /g, '_') === existingRole.name.toLowerCase().replace(/ /g, '_')
+    const existingSystemRole = SYSTEM_ROLES.find(
+      (sr) =>
+        sr.name.toLowerCase().replace(/ /g, '_') ===
+        existingRole.name.toLowerCase().replace(/ /g, '_')
     );
 
-    if (existingSystemRole && userRole && existingSystemRole.level >= userRole.level && userRole.level < 10) {
+    if (
+      existingSystemRole &&
+      userRole &&
+      existingSystemRole.level >= userRole.level &&
+      userRole.level < 10
+    ) {
       return NextResponse.json(
         { error: 'Cannot delete role with equal or higher level' },
         { status: 403 }
@@ -532,10 +536,7 @@ export async function DELETE(request: NextRequest) {
     // Prevent deleting critical system roles
     const criticalRoles = ['super_admin', 'admin', 'hr_manager', 'employee'];
     if (criticalRoles.includes(existingRole.name.toLowerCase().replace(/ /g, '_'))) {
-      return NextResponse.json(
-        { error: 'Cannot delete critical system role' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Cannot delete critical system role' }, { status: 400 });
     }
 
     // Delete role
@@ -548,10 +549,7 @@ export async function DELETE(request: NextRequest) {
       roleId,
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to delete role' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to delete role' }, { status: 500 });
   }
 }
 

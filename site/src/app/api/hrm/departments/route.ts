@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 
 // Middleware to check authentication
 async function authenticate(request: NextRequest) {
@@ -28,10 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Check permissions
     if (!user.role.permissions.includes('READ_DEPARTMENTS')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -121,31 +118,15 @@ export async function POST(request: NextRequest) {
 
     // Check permissions
     if (!user.role.permissions.includes('CREATE_DEPARTMENTS')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
     const body = await request.json();
-    const {
-      name,
-      code,
-      description,
-      managerId,
-      parentId,
-      budget,
-      location,
-      phone,
-      email,
-    } = body;
+    const { name, code, description, managerId, parentId, budget, location, phone, email } = body;
 
     // Validate required fields
     if (!name || !code) {
-      return NextResponse.json(
-        { error: 'Name and code are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name and code are required' }, { status: 400 });
     }
 
     // Check if department code already exists

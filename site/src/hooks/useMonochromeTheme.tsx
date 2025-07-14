@@ -1,12 +1,6 @@
 'use client';
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import {
   ThemeMode,
   Language,
@@ -40,9 +34,7 @@ interface LanguageContextType {
   isLoading: boolean;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
-);
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 // Theme Provider Props
 interface ThemeProviderProps {
@@ -110,8 +102,7 @@ export function ThemeProvider({ children, defaultMode }: ThemeProviderProps) {
   }, [mode]);
 
   const toggleMode = () => {
-    const newMode: ThemeMode =
-      mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
+    const newMode: ThemeMode = mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
     setModeState(newMode);
   };
 
@@ -120,19 +111,14 @@ export function ThemeProvider({ children, defaultMode }: ThemeProviderProps) {
   };
 
   return (
-    <ThemeContext.Provider
-      value={{ mode, actualMode, colors, toggleMode, setMode, isLoading }}
-    >
+    <ThemeContext.Provider value={{ mode, actualMode, colors, toggleMode, setMode, isLoading }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
 // Language Provider Component
-export function LanguageProvider({
-  children,
-  defaultLanguage,
-}: LanguageProviderProps) {
+export function LanguageProvider({ children, defaultLanguage }: LanguageProviderProps) {
   const [language, setLanguageState] = useState<Language>(
     defaultLanguage || monochromeThemeConfig.defaults.language
   );
@@ -161,13 +147,11 @@ export function LanguageProvider({
   };
 
   const toggleLanguage = () => {
-    setLanguageState(prev => (prev === 'vi' ? 'en' : 'vi'));
+    setLanguageState((prev) => (prev === 'vi' ? 'en' : 'vi'));
   };
 
   return (
-    <LanguageContext.Provider
-      value={{ language, setLanguage, toggleLanguage, isLoading }}
-    >
+    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, isLoading }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -181,9 +165,7 @@ export function MonochromeProvider({
 }: MonochromeProviderProps) {
   return (
     <ThemeProvider defaultMode={defaultMode}>
-      <LanguageProvider defaultLanguage={defaultLanguage}>
-        {children}
-      </LanguageProvider>
+      <LanguageProvider defaultLanguage={defaultLanguage}>{children}</LanguageProvider>
     </ThemeProvider>
   );
 }
@@ -192,9 +174,7 @@ export function MonochromeProvider({
 export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error(
-      'useTheme must be used within a ThemeProvider or MonochromeProvider'
-    );
+    throw new Error('useTheme must be used within a ThemeProvider or MonochromeProvider');
   }
   return context;
 }
@@ -203,9 +183,7 @@ export function useTheme(): ThemeContextType {
 export function useLanguage(): LanguageContextType {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error(
-      'useLanguage must be used within a LanguageProvider or MonochromeProvider'
-    );
+    throw new Error('useLanguage must be used within a LanguageProvider or MonochromeProvider');
   }
   return context;
 }
@@ -263,9 +241,7 @@ export function withTheme<T extends object>(Component: React.ComponentType<T>) {
 }
 
 // HOC for language-aware components
-export function withLanguage<T extends object>(
-  Component: React.ComponentType<T>
-) {
+export function withLanguage<T extends object>(Component: React.ComponentType<T>) {
   const WrappedComponent = (props: T) => {
     const language = useLanguage();
     return <Component {...props} language={language} />;
@@ -276,9 +252,7 @@ export function withLanguage<T extends object>(
 }
 
 // HOC for monochrome-aware components
-export function withMonochrome<T extends object>(
-  Component: React.ComponentType<T>
-) {
+export function withMonochrome<T extends object>(Component: React.ComponentType<T>) {
   const WrappedComponent = (props: T) => {
     const monochrome = useMonochrome();
     return <Component {...props} monochrome={monochrome} />;

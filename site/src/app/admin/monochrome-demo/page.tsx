@@ -103,11 +103,7 @@ export default function MonochromeShowcase() {
               className="mono-button secondary"
               title={getText('Toggle dark mode', 'Chuyển đổi chế độ tối')}
             >
-              {darkMode ? (
-                <SunIcon className="h-5 w-5" />
-              ) : (
-                <MoonIcon className="h-5 w-5" />
-              )}
+              {darkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
               {getText('Dark Mode', 'Chế độ tối')}
             </button>
             <button
@@ -138,12 +134,8 @@ export default function MonochromeShowcase() {
               <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg inline-flex mb-4">
                 <feature.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-lg font-semibold text-primary mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-text-secondary text-sm">
-                {feature.description}
-              </p>
+              <h3 className="text-lg font-semibold text-primary mb-2">{feature.title}</h3>
+              <p className="text-text-secondary text-sm">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -202,19 +194,12 @@ export default function MonochromeShowcase() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {components.map((component, index) => (
-              <div
-                key={index}
-                className="p-4 bg-mono-50 dark:bg-mono-900 rounded-lg"
-              >
-                <h4 className="font-semibold text-primary mb-2">
-                  {component.name}
-                </h4>
+              <div key={index} className="p-4 bg-mono-50 dark:bg-mono-900 rounded-lg">
+                <h4 className="font-semibold text-primary mb-2">{component.name}</h4>
                 <code className="text-sm text-accent bg-mono-100 dark:bg-mono-800 px-2 py-1 rounded">
                   .{component.class}
                 </code>
-                <p className="text-xs text-text-secondary mt-2">
-                  {component.example}
-                </p>
+                <p className="text-xs text-text-secondary mt-2">{component.example}</p>
               </div>
             ))}
           </div>

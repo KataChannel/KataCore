@@ -139,9 +139,7 @@ export function MyComponent() {
 
   return (
     <div className="unified-card">
-      <h1 style={{ color: colors.text }}>
-        {config.language === 'vi' ? 'Xin chào' : 'Hello'}
-      </h1>
+      <h1 style={{ color: colors.text }}>{config.language === 'vi' ? 'Xin chào' : 'Hello'}</h1>
       <ThemeModeToggle showLabel />
       <button onClick={toggleLanguage} className="unified-button secondary">
         🌍 {config.language === 'vi' ? 'English' : 'Tiếng Việt'}

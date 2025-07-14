@@ -1,14 +1,7 @@
 // Unified Theme Hook - Centralized theme management for TazaCore
 // Replaces all other theme hooks with a single, synchronized solution
 'use client';
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import {
   UNIFIED_THEME_CONFIG,
   ThemeConfig,
@@ -66,9 +59,7 @@ interface UnifiedThemeContextType {
 // CONTEXT CREATION
 // ============================================================================
 
-const UnifiedThemeContext = createContext<UnifiedThemeContextType | undefined>(
-  undefined
-);
+const UnifiedThemeContext = createContext<UnifiedThemeContextType | undefined>(undefined);
 
 // ============================================================================
 // PROVIDER COMPONENT
@@ -217,11 +208,7 @@ export function UnifiedThemeProvider({
 
   const toggleMode = useCallback(() => {
     const nextMode: ThemeMode =
-      config.mode === 'light'
-        ? 'dark'
-        : config.mode === 'dark'
-          ? 'auto'
-          : 'light';
+      config.mode === 'light' ? 'dark' : config.mode === 'dark' ? 'auto' : 'light';
     setMode(nextMode);
   }, [config.mode, setMode]);
 
@@ -304,9 +291,7 @@ export function UnifiedThemeProvider({
   };
 
   return (
-    <UnifiedThemeContext.Provider value={contextValue}>
-      {children}
-    </UnifiedThemeContext.Provider>
+    <UnifiedThemeContext.Provider value={contextValue}>{children}</UnifiedThemeContext.Provider>
   );
 }
 
@@ -320,9 +305,7 @@ export function UnifiedThemeProvider({
 export function useUnifiedTheme(): UnifiedThemeContextType {
   const context = useContext(UnifiedThemeContext);
   if (context === undefined) {
-    throw new Error(
-      'useUnifiedTheme must be used within a UnifiedThemeProvider'
-    );
+    throw new Error('useUnifiedTheme must be used within a UnifiedThemeProvider');
   }
   return context;
 }
@@ -331,8 +314,7 @@ export function useUnifiedTheme(): UnifiedThemeContextType {
  * Hook for theme mode only
  */
 export function useThemeMode() {
-  const { config, actualMode, setMode, toggleMode, isSystemMode } =
-    useUnifiedTheme();
+  const { config, actualMode, setMode, toggleMode, isSystemMode } = useUnifiedTheme();
   return {
     mode: config.mode,
     actualMode,
@@ -412,9 +394,7 @@ export function withTheme<P extends object>(
  * HOC to inject only theme mode
  */
 export function withThemeMode<P extends object>(
-  Component: React.ComponentType<
-    P & { themeMode: ReturnType<typeof useThemeMode> }
-  >
+  Component: React.ComponentType<P & { themeMode: ReturnType<typeof useThemeMode> }>
 ) {
   return function ThemedComponent(props: P) {
     const themeMode = useThemeMode();
@@ -426,9 +406,7 @@ export function withThemeMode<P extends object>(
  * HOC to inject only language
  */
 export function withLanguage<P extends object>(
-  Component: React.ComponentType<
-    P & { language: ReturnType<typeof useLanguage> }
-  >
+  Component: React.ComponentType<P & { language: ReturnType<typeof useLanguage> }>
 ) {
   return function ThemedComponent(props: P) {
     const language = useLanguage();

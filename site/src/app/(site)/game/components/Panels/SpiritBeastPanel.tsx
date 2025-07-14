@@ -11,17 +11,13 @@ export const SpiritBeastPanel = ({
   resources,
   unlockedTier2Upgrades,
 }: SpiritBeastPanelProps) => {
-  const activeBeasts = Object.entries(spiritBeasts).filter(
-    ([_, beast]) => beast.isActive
-  );
+  const activeBeasts = Object.entries(spiritBeasts).filter(([_, beast]) => beast.isActive);
 
   return (
     <div className="space-y-3">
       <h3 className="font-semibold">Spirit Beasts</h3>
       {activeBeasts.length === 0 ? (
-        <p className="text-gray-400 text-sm">
-          No spirit beasts activated yet...
-        </p>
+        <p className="text-gray-400 text-sm">No spirit beasts activated yet...</p>
       ) : (
         activeBeasts.map(([beastId, beast]) => (
           <div key={beastId} className="bg-gray-700 rounded p-3">
@@ -31,9 +27,7 @@ export const SpiritBeastPanel = ({
               </span>
               <span className="text-sm text-gray-400">Lv.{beast.level}</span>
             </div>
-            <p className="text-xs text-green-400 mt-1">
-              +{Math.round(beast.bonus * 100)}% bonus
-            </p>
+            <p className="text-xs text-green-400 mt-1">+{Math.round(beast.bonus * 100)}% bonus</p>
           </div>
         ))
       )}

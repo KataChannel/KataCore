@@ -88,13 +88,9 @@ const Dropdown: React.FC<DropdownProps> = ({ item, mobile = false }) => {
       {open && (
         <div id={`${item.name}-dropdown`} className={containerClasses}>
           {item.dropdownItems
-            ?.filter(dropItem => dropItem.visible !== false)
-            .map(dropItem => (
-              <Link
-                key={dropItem.name}
-                href={dropItem.href}
-                className={linkClasses}
-              >
+            ?.filter((dropItem) => dropItem.visible !== false)
+            .map((dropItem) => (
+              <Link key={dropItem.name} href={dropItem.href} className={linkClasses}>
                 {dropItem.name}
               </Link>
             ))}
@@ -150,7 +146,7 @@ const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const toggleMobileMenu = () => setIsMobileMenuOpen(prev => !prev);
+  const toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
 
   const handleAuthIcon = () => {
     if (!isLoggedIn) {
@@ -161,11 +157,10 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   // Filter menu items that should be visible
-  const visibleMenuItems = menuItems.filter(item => item.visible !== false);
+  const visibleMenuItems = menuItems.filter((item) => item.visible !== false);
 
   // Classes for mobile drawer position
-  const drawerPositionClasses =
-    drawerPosition === 'left' ? 'left-0' : 'right-0';
+  const drawerPositionClasses = drawerPosition === 'left' ? 'left-0' : 'right-0';
 
   return (
     <>
@@ -177,30 +172,21 @@ const Header: React.FC<HeaderProps> = ({
             className="p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 transition-all duration-200"
             aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
 
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" className="transition-opacity hover:opacity-80">
-            <Image
-              src={siteConfig.logo.default}
-              alt="Logo"
-              width={40}
-              height={40}
-            />
+            <Image src={siteConfig.logo.default} alt="Logo" width={40} height={40} />
           </Link>
         </div>
 
         {/* Navigation for Desktop */}
         <nav className="hidden lg:block">
           <div className="flex items-center space-x-1">
-            {visibleMenuItems.map(item =>
+            {visibleMenuItems.map((item) =>
               item.hasDropdown ? (
                 <Dropdown key={item.name} item={item} />
               ) : (
@@ -278,7 +264,7 @@ const Header: React.FC<HeaderProps> = ({
 
                 {/* Mobile Navigation - giữ nguyên */}
                 <nav className="space-y-2">
-                  {visibleMenuItems.map(item =>
+                  {visibleMenuItems.map((item) =>
                     item.hasDropdown ? (
                       <Dropdown key={item.name} item={item} mobile />
                     ) : (

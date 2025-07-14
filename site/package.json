@@ -20,7 +20,13 @@
     "create-admin": "tsx scripts/quick-create-admin.ts",
     "create-admin-interactive": "tsx scripts/create-admin-user.ts",
     "format": "prettier --write .",
-    "clean": "rm -rf .next"
+    "clean": "rm -rf .next",
+    "dev:unified": "next dev --turbo",
+    "build:check": "npm run type-check && npm run lint && npm run build",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "test:unit": "jest",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+    "analyze": "ANALYZE=true npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

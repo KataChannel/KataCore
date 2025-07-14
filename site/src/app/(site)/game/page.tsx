@@ -77,10 +77,7 @@ export default function GamePage() {
         />
       </div>
 
-      <NotificationSystem
-        notifications={notifications}
-        setNotifications={setNotifications}
-      />
+      <NotificationSystem notifications={notifications} setNotifications={setNotifications} />
     </>
   );
 }

@@ -28,9 +28,7 @@ export default function TestAuthPage() {
 
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">LocalStorage Token</h2>
-            <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">
-              {localStorageToken}
-            </pre>
+            <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">{localStorageToken}</pre>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow">
@@ -59,8 +57,7 @@ export default function TestAuthPage() {
                 onClick={() => {
                   window.localStorage.removeItem('token');
                   window.sessionStorage.removeItem('token');
-                  document.cookie =
-                    'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                  document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                   window.location.reload();
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"

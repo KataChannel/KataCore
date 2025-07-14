@@ -68,10 +68,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching leave requests:', error);
-    return NextResponse.json(
-      { error: 'Không thể tải danh sách đơn nghỉ phép' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tải danh sách đơn nghỉ phép' }, { status: 500 });
   }
 }
 
@@ -88,10 +85,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!employee) {
-      return NextResponse.json(
-        { error: 'Không tìm thấy nhân viên' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Không tìm thấy nhân viên' }, { status: 404 });
     }
 
     // Kiểm tra xung đột thời gian
@@ -159,9 +153,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(leaveRequest, { status: 201 });
   } catch (error) {
     console.error('Error creating leave request:', error);
-    return NextResponse.json(
-      { error: 'Không thể tạo đơn nghỉ phép mới' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tạo đơn nghỉ phép mới' }, { status: 500 });
   }
 }

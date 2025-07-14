@@ -15,15 +15,8 @@ import { useMonochrome } from '../hooks/useMonochromeTheme';
 import { useTranslation } from '../lib/config/i18n';
 
 const MonochromeShowcase: React.FC = () => {
-  const {
-    mode,
-    actualMode,
-    toggleMode,
-    setMode,
-    language,
-    toggleLanguage,
-    isLoading,
-  } = useMonochrome();
+  const { mode, actualMode, toggleMode, setMode, language, toggleLanguage, isLoading } =
+    useMonochrome();
 
   const { t } = useTranslation(language);
 
@@ -121,11 +114,7 @@ const MonochromeShowcase: React.FC = () => {
             <button
               onClick={toggleMode}
               className="mono-button secondary"
-              title={
-                language === 'en'
-                  ? 'Toggle theme mode'
-                  : 'Chuyển đổi chế độ theme'
-              }
+              title={language === 'en' ? 'Toggle theme mode' : 'Chuyển đổi chế độ theme'}
             >
               {getModeIcon()}
               {getModeText()}
@@ -154,8 +143,7 @@ const MonochromeShowcase: React.FC = () => {
           </p>
 
           <div className="mono-badge accent mt-4">
-            {language === 'en' ? 'Current Mode' : 'Chế độ hiện tại'}:{' '}
-            {actualMode} • {language}
+            {language === 'en' ? 'Current Mode' : 'Chế độ hiện tại'}: {actualMode} • {language}
           </div>
         </div>
 
@@ -169,9 +157,7 @@ const MonochromeShowcase: React.FC = () => {
             >
               <div className="flex items-center gap-3 mb-4">
                 <feature.icon className="h-6 w-6 text-accent mono-transition group-hover:scale-110" />
-                <h3 className="mono-heading text-lg font-semibold">
-                  {feature.title}
-                </h3>
+                <h3 className="mono-heading text-lg font-semibold">{feature.title}</h3>
               </div>
               <p className="mono-text-secondary">{feature.description}</p>
             </div>
@@ -216,32 +202,24 @@ const MonochromeShowcase: React.FC = () => {
             <div className="mono-grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 className="mono-input"
-                placeholder={
-                  language === 'en' ? 'Enter text...' : 'Nhập văn bản...'
-                }
+                placeholder={language === 'en' ? 'Enter text...' : 'Nhập văn bản...'}
               />
               <select className="mono-input mono-select">
-                <option>
-                  {language === 'en' ? 'Select option' : 'Chọn tùy chọn'}
-                </option>
+                <option>{language === 'en' ? 'Select option' : 'Chọn tùy chọn'}</option>
                 <option>Option 1</option>
                 <option>Option 2</option>
               </select>
               <textarea
                 className="mono-input"
                 rows={3}
-                placeholder={
-                  language === 'en' ? 'Enter description...' : 'Nhập mô tả...'
-                }
+                placeholder={language === 'en' ? 'Enter description...' : 'Nhập mô tả...'}
               />
               <div className="space-y-2">
                 <label className="mono-checkbox flex items-center gap-2">
                   <input type="checkbox" />
                   <span className="checkmark"></span>
                   <span className="mono-text-secondary">
-                    {language === 'en'
-                      ? 'Checkbox option'
-                      : 'Tùy chọn checkbox'}
+                    {language === 'en' ? 'Checkbox option' : 'Tùy chọn checkbox'}
                   </span>
                 </label>
                 <label className="mono-radio flex items-center gap-2">
@@ -285,19 +263,13 @@ const MonochromeShowcase: React.FC = () => {
                 {language === 'en' ? 'Heading 3' : 'Tiêu đề 3'}
               </h3>
               <p className="mono-text-primary">
-                {language === 'en'
-                  ? 'Primary text content'
-                  : 'Nội dung văn bản chính'}
+                {language === 'en' ? 'Primary text content' : 'Nội dung văn bản chính'}
               </p>
               <p className="mono-text-secondary">
-                {language === 'en'
-                  ? 'Secondary text content'
-                  : 'Nội dung văn bản phụ'}
+                {language === 'en' ? 'Secondary text content' : 'Nội dung văn bản phụ'}
               </p>
               <p className="mono-text-muted">
-                {language === 'en'
-                  ? 'Muted text content'
-                  : 'Nội dung văn bản mờ'}
+                {language === 'en' ? 'Muted text content' : 'Nội dung văn bản mờ'}
               </p>
               <a href="#" className="mono-link">
                 {language === 'en' ? 'Link example' : 'Ví dụ liên kết'}

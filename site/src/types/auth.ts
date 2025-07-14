@@ -4,7 +4,7 @@ export interface AuthUser extends User {
   id: string;
   email: string;
   name: string;
-  role: "admin" | "manager" | "user";
+  role: 'admin' | 'manager' | 'user';
 }
 
 export interface LoginCredentials {

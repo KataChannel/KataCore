@@ -13,17 +13,20 @@
 ### 🔐 Quyền hạn đầy đủ được cấp:
 
 #### System-wide Permissions:
+
 - `system:admin` - Quản trị toàn hệ thống
-- `system:manage` - Quản lý hệ thống 
+- `system:manage` - Quản lý hệ thống
 - `system:configure` - Cấu hình hệ thống
 - `system:audit` - Kiểm toán hệ thống
 - `system:backup` - Sao lưu hệ thống
 
 #### User & Role Management:
+
 - `create:user`, `read:user`, `update:user`, `delete:user`, `manage:user`
 - `create:role`, `read:role`, `update:role`, `delete:role`, `manage:role`
 
 #### All Module Admin Permissions:
+
 - `admin:sales` - Quản trị module Sales
 - `admin:crm` - Quản trị module CRM
 - `admin:inventory` - Quản trị module Inventory
@@ -37,6 +40,7 @@
 - `admin:ecommerce` - Quản trị module E-commerce
 
 #### Universal Permissions:
+
 - `create:*`, `read:*`, `update:*`, `delete:*`, `manage:*`, `admin:*`
 
 ### 🌐 Truy cập hệ thống:

@@ -139,7 +139,7 @@ const generateMapContent = (size: number) => {
   const sources: any = {};
   const spiritBeasts: any = {};
 
-  typesToPlace.forEach(type => {
+  typesToPlace.forEach((type) => {
     if (availablePositions.length === 0) return;
     const randomIndex = getRandomInt(0, availablePositions.length - 1);
     const { r, c } = availablePositions.splice(randomIndex, 1)[0];
@@ -254,8 +254,7 @@ const loadGame = () => {
       loadedState.unlockedTier2Upgrades = false;
     }
 
-    const currentMapSources =
-      loadedState.maps[loadedState.currentMapId]?.sources;
+    const currentMapSources = loadedState.maps[loadedState.currentMapId]?.sources;
     if (
       currentMapSources &&
       currentMapSources.wood_forest &&
@@ -267,8 +266,7 @@ const loadGame = () => {
     }
     loadedState.logs = loadedState.logs || [];
     loadedState.lastPlayedTime = loadedState.lastPlayedTime || Date.now();
-    loadedState.isAutoHarvestingOnLoad =
-      loadedState.isAutoHarvestingOnLoad || false;
+    loadedState.isAutoHarvestingOnLoad = loadedState.isAutoHarvestingOnLoad || false;
 
     return loadedState;
   } catch (error) {
@@ -281,9 +279,7 @@ const loadGame = () => {
 const discoverTile = (gameState: any, row: any, col: any) => {
   const { currentMapId, maps, resources } = gameState;
   const currentMapData = maps[currentMapId];
-  const newMap = currentMapData.map.map((rowArr: any) =>
-    rowArr.map((tile: any) => ({ ...tile }))
-  );
+  const newMap = currentMapData.map.map((rowArr: any) => rowArr.map((tile: any) => ({ ...tile })));
   const newResources = { ...resources };
   const tile = newMap[row][col];
 
@@ -349,13 +345,9 @@ const activateTile = (gameState: any, row: any, col: any) => {
 
   if (currentMapData.sources[tile.type]) {
     const sourceResourceType =
-      NGU_HANH_RELATIONS.elementMap[
-        tile.type as keyof typeof NGU_HANH_RELATIONS.elementMap
-      ];
+      NGU_HANH_RELATIONS.elementMap[tile.type as keyof typeof NGU_HANH_RELATIONS.elementMap];
     const generatingResource =
-      NGU_HANH_RELATIONS.generates[
-        sourceResourceType as keyof typeof NGU_HANH_RELATIONS.generates
-      ];
+      NGU_HANH_RELATIONS.generates[sourceResourceType as keyof typeof NGU_HANH_RELATIONS.generates];
 
     if (newResources[generatingResource] < ACTIVATION_COST_AMOUNT) {
       return {
@@ -373,17 +365,11 @@ const activateTile = (gameState: any, row: any, col: any) => {
       .replace('forest', 'Forest')
       .replace('spring', 'Spring')
       .replace('forge', 'Forge')
-      .replace(
-        'field',
-        'Field'
-      )}! Cost ${ACTIVATION_COST_AMOUNT} ${generatingResource}.`;
+      .replace('field', 'Field')}! Cost ${ACTIVATION_COST_AMOUNT} ${generatingResource}.`;
   } else if (currentMapData.spiritBeasts[tile.type]) {
     currentMapData.spiritBeasts[tile.type].isActive = true;
     tile.isActive = true;
-    message = `Activated spirit beast ${tile.type.replace(
-      'spirit_',
-      'Spirit Beast '
-    )}!`;
+    message = `Activated spirit beast ${tile.type.replace('spirit_', 'Spirit Beast ')}!`;
 
     if (
       currentMapId === GAME_PHASE_ADVANCED &&
@@ -426,9 +412,7 @@ const harvestSource = (gameState: any, sourceKey: any, isOffline = false) => {
 
   const now = Date.now();
   if (!isOffline && source.lastHarvestTime + source.cooldown > now) {
-    const remainingTime = Math.ceil(
-      (source.lastHarvestTime + source.cooldown - now) / 1000
-    );
+    const remainingTime = Math.ceil((source.lastHarvestTime + source.cooldown - now) / 1000);
     return {
       success: false,
       message: `Source on cooldown. Wait ${remainingTime} seconds.`,
@@ -436,11 +420,7 @@ const harvestSource = (gameState: any, sourceKey: any, isOffline = false) => {
   }
 
   let canHarvestOthers = gameState.canHarvestOtherSources;
-  if (
-    currentMapId === GAME_PHASE_INITIAL &&
-    sourceKey !== 'wood_forest' &&
-    !canHarvestOthers
-  ) {
+  if (currentMapId === GAME_PHASE_INITIAL && sourceKey !== 'wood_forest' && !canHarvestOthers) {
     return { success: false, message: "Harvest 'Wood Forest' first." };
   }
   if (sourceKey === 'wood_forest' && !canHarvestOthers) {
@@ -448,8 +428,7 @@ const harvestSource = (gameState: any, sourceKey: any, isOffline = false) => {
   }
 
   const primaryResourceType = NGU_HANH_RELATIONS.elementMap[source.type];
-  const generatedResourceType =
-    NGU_HANH_RELATIONS.generates[primaryResourceType];
+  const generatedResourceType = NGU_HANH_RELATIONS.generates[primaryResourceType];
 
   let actualYield = source.yield;
   const spiritBeastType = `spirit_${primaryResourceType}`;
@@ -457,17 +436,14 @@ const harvestSource = (gameState: any, sourceKey: any, isOffline = false) => {
     currentMapData.spiritBeasts[spiritBeastType] &&
     currentMapData.spiritBeasts[spiritBeastType].isActive
   ) {
-    actualYield +=
-      actualYield * currentMapData.spiritBeasts[spiritBeastType].bonus;
+    actualYield += actualYield * currentMapData.spiritBeasts[spiritBeastType].bonus;
   }
   actualYield = Math.floor(actualYield);
 
   const generatedYield = Math.floor(actualYield / 5);
 
-  newResources[primaryResourceType] =
-    (newResources[primaryResourceType] || 0) + actualYield;
-  newResources[generatedResourceType] =
-    (newResources[generatedResourceType] || 0) + generatedYield;
+  newResources[primaryResourceType] = (newResources[primaryResourceType] || 0) + actualYield;
+  newResources[generatedResourceType] = (newResources[generatedResourceType] || 0) + generatedYield;
 
   source.lastHarvestTime = now;
 
@@ -510,9 +486,7 @@ const upgradeSource = (gameState: any, sourceKey: any) => {
     };
   }
 
-  const maxLevelForThisUpgrade = unlockedTier2Upgrades
-    ? MAX_LEVEL_FINAL
-    : MAX_LEVEL_INITIAL_TIER;
+  const maxLevelForThisUpgrade = unlockedTier2Upgrades ? MAX_LEVEL_FINAL : MAX_LEVEL_INITIAL_TIER;
   if (source.level >= maxLevelForThisUpgrade) {
     return {
       success: false,
@@ -525,20 +499,17 @@ const upgradeSource = (gameState: any, sourceKey: any) => {
   }
 
   const primaryResourceType = NGU_HANH_RELATIONS.elementMap[source.type];
-  const oppositeResourceType =
-    NGU_HANH_RELATIONS.overcomes[primaryResourceType];
+  const oppositeResourceType = NGU_HANH_RELATIONS.overcomes[primaryResourceType];
   const currentMultiplier =
     source.level < MAX_LEVEL_INITIAL_TIER
       ? UPGRADE_COSTS.source.multiplier
       : UPGRADE_COSTS.source.tier2Multiplier;
 
   const primaryCost = Math.floor(
-    UPGRADE_COSTS.source.basePrimary *
-      Math.pow(currentMultiplier, source.level - 1)
+    UPGRADE_COSTS.source.basePrimary * Math.pow(currentMultiplier, source.level - 1)
   );
   const oppositeCost = Math.floor(
-    UPGRADE_COSTS.source.baseOpposite *
-      Math.pow(currentMultiplier, source.level - 1)
+    UPGRADE_COSTS.source.baseOpposite * Math.pow(currentMultiplier, source.level - 1)
   );
 
   if (
@@ -556,10 +527,7 @@ const upgradeSource = (gameState: any, sourceKey: any) => {
 
   source.level += 1;
   source.yield += BASE_RESOURCE_YIELD * 0.5;
-  source.cooldown = Math.max(
-    BASE_HARVEST_COOLDOWN_MS * 0.8,
-    source.cooldown * 0.9
-  );
+  source.cooldown = Math.max(BASE_HARVEST_COOLDOWN_MS * 0.8, source.cooldown * 0.9);
 
   return {
     success: true,
@@ -595,9 +563,7 @@ const upgradeSpiritBeast = (gameState: any, spiritBeastKey: any) => {
     };
   }
 
-  const maxLevelForThisUpgrade = unlockedTier2Upgrades
-    ? MAX_LEVEL_FINAL
-    : MAX_LEVEL_INITIAL_TIER;
+  const maxLevelForThisUpgrade = unlockedTier2Upgrades ? MAX_LEVEL_FINAL : MAX_LEVEL_INITIAL_TIER;
   if (spiritBeast.level >= maxLevelForThisUpgrade) {
     return {
       success: false,
@@ -610,20 +576,17 @@ const upgradeSpiritBeast = (gameState: any, spiritBeastKey: any) => {
   }
 
   const primaryResourceType = NGU_HANH_RELATIONS.elementMap[spiritBeast.type];
-  const generatesResourceType =
-    NGU_HANH_RELATIONS.generates[primaryResourceType];
+  const generatesResourceType = NGU_HANH_RELATIONS.generates[primaryResourceType];
   const currentMultiplier =
     spiritBeast.level < MAX_LEVEL_INITIAL_TIER
       ? UPGRADE_COSTS.spiritBeast.multiplier
       : UPGRADE_COSTS.spiritBeast.tier2Multiplier;
 
   const primaryCost = Math.floor(
-    UPGRADE_COSTS.spiritBeast.basePrimary *
-      Math.pow(currentMultiplier, spiritBeast.level - 1)
+    UPGRADE_COSTS.spiritBeast.basePrimary * Math.pow(currentMultiplier, spiritBeast.level - 1)
   );
   const generatesCost = Math.floor(
-    UPGRADE_COSTS.spiritBeast.baseGenerates *
-      Math.pow(currentMultiplier, spiritBeast.level - 1)
+    UPGRADE_COSTS.spiritBeast.baseGenerates * Math.pow(currentMultiplier, spiritBeast.level - 1)
   );
 
   if (
@@ -702,12 +665,8 @@ const ResourceItem = ({ type, amount, icon, lastChange, hasBonus }: any) => {
   return (
     <div className="relative flex flex-col justify-center items-center gap-2 p-1 bg-gray-600 rounded-md overflow-hidden">
       <span className="text-base">{icon}</span>
-      <span className="font-bold text-green-300 text-xs">
-        {amount.toLocaleString('vi-VN')}
-      </span>
-      {hasBonus && (
-        <span className="text-green-400 font-bold ml-1 text-sm">+</span>
-      )}
+      <span className="font-bold text-green-300 text-xs">{amount.toLocaleString('vi-VN')}</span>
+      {hasBonus && <span className="text-green-400 font-bold ml-1 text-sm">+</span>}
       {showAnimation && animationValueRef.current > 0 && (
         <span className="absolute text-green-400 font-bold text-xl opacity-0 animate-resource-gain">
           +{animationValueRef.current}
@@ -736,20 +695,14 @@ const ResourcePanel = ({
           <button
             onClick={toggleAutoHarvest}
             className={`p-2 rounded-lg text-sm font-bold transition-colors duration-200 shadow-lg ${
-              isAutoHarvesting
-                ? 'bg-red-700 hover:bg-red-800'
-                : 'bg-green-700 hover:bg-green-800'
+              isAutoHarvesting ? 'bg-red-700 hover:bg-red-800' : 'bg-green-700 hover:bg-green-800'
             } text-white`}
           >
             {isAutoHarvesting ? '🤖 Stop Auto' : '🤖 Start Auto'}
           </button>
           <button
             onClick={() => {
-              if (
-                confirm(
-                  'Are you sure you want to reset your game? All progress will be lost!'
-                )
-              ) {
+              if (confirm('Are you sure you want to reset your game? All progress will be lost!')) {
                 const newGameState = resetGame();
                 setGameState(newGameState);
                 setLogs([]);
@@ -790,8 +743,7 @@ const Tile = ({ tile, onClick }: any) => {
       tileBgClass = 'bg-green-700';
     } else {
       const elementType =
-        NGU_HANH_RELATIONS.elementMap[type] ||
-        (type === 'empty' ? 'empty' : null);
+        NGU_HANH_RELATIONS.elementMap[type] || (type === 'empty' ? 'empty' : null);
       tileBgClass = ELEMENT_TILE_BG_COLORS[elementType] || 'bg-gray-800';
     }
   }
@@ -830,9 +782,7 @@ const Map = ({ map, onTileClick }: any) => {
       }}
     >
       {map.map((row: any) =>
-        row.map((tile: any) => (
-          <Tile key={tile.id} tile={tile} onClick={onTileClick} />
-        ))
+        row.map((tile: any) => <Tile key={tile.id} tile={tile} onClick={onTileClick} />)
       )}
     </div>
   );
@@ -852,20 +802,17 @@ const SourcePanel = ({
 
   const getUpgradeCosts = useCallback((source: any) => {
     const primaryResourceType = NGU_HANH_RELATIONS.elementMap[source.type];
-    const oppositeResourceType =
-      NGU_HANH_RELATIONS.overcomes[primaryResourceType];
+    const oppositeResourceType = NGU_HANH_RELATIONS.overcomes[primaryResourceType];
     const currentMultiplier =
       source.level < MAX_LEVEL_INITIAL_TIER
         ? UPGRADE_COSTS.source.multiplier
         : UPGRADE_COSTS.source.tier2Multiplier;
 
     const primaryCost = Math.floor(
-      UPGRADE_COSTS.source.basePrimary *
-        Math.pow(currentMultiplier, source.level - 1)
+      UPGRADE_COSTS.source.basePrimary * Math.pow(currentMultiplier, source.level - 1)
     );
     const oppositeCost = Math.floor(
-      UPGRADE_COSTS.source.baseOpposite *
-        Math.pow(currentMultiplier, source.level - 1)
+      UPGRADE_COSTS.source.baseOpposite * Math.pow(currentMultiplier, source.level - 1)
     );
     return {
       primaryResourceType,
@@ -880,12 +827,8 @@ const SourcePanel = ({
       <h3 className="text-lg font-semibold mb-2 text-cyan-300">Sources</h3>
       <div className="grid grid-cols-1 gap-2">
         {sortedSources.map((source: any) => {
-          const {
-            primaryResourceType,
-            oppositeResourceType,
-            primaryCost,
-            oppositeCost,
-          } = getUpgradeCosts(source);
+          const { primaryResourceType, oppositeResourceType, primaryCost, oppositeCost } =
+            getUpgradeCosts(source);
           const maxLevelForThisUpgrade = unlockedTier2Upgrades
             ? MAX_LEVEL_FINAL
             : MAX_LEVEL_INITIAL_TIER;
@@ -896,9 +839,7 @@ const SourcePanel = ({
           const now = Date.now();
           const cooldownRemaining =
             source.lastHarvestTime + source.cooldown > now
-              ? Math.ceil(
-                  (source.lastHarvestTime + source.cooldown - now) / 1000
-                )
+              ? Math.ceil((source.lastHarvestTime + source.cooldown - now) / 1000)
               : 0;
           const canHarvest =
             cooldownRemaining === 0 &&
@@ -906,16 +847,11 @@ const SourcePanel = ({
             (source.type === 'wood_forest' || canHarvestOtherSources);
 
           return (
-            <div
-              key={source.type}
-              className="bg-gray-600 p-2 rounded-md flex flex-col gap-1"
-            >
+            <div key={source.type} className="bg-gray-600 p-2 rounded-md flex flex-col gap-1">
               <div className="flex flex-row gap-1 text-xs">
                 <span
                   className={`font-bold flex items-center gap-1 ${
-                    source.isActive
-                      ? 'text-green-400 grayscale-0'
-                      : 'text-red-400 grayscale'
+                    source.isActive ? 'text-green-400 grayscale-0' : 'text-red-400 grayscale'
                   }`}
                 >
                   {SOURCE_ICONS[source.type]} ({source.level})
@@ -928,16 +864,11 @@ const SourcePanel = ({
                   {source.isActive ? "Active" : "Inactive"}
                 </span> */}
                 <span>
-                  + {Math.floor(source.yield)}{' '}
-                  {RESOURCE_ICONS[primaryResourceType]}
+                  + {Math.floor(source.yield)} {RESOURCE_ICONS[primaryResourceType]}
                 </span>
                 <span>
                   + {Math.floor(source.yield / 5)}{' '}
-                  {
-                    RESOURCE_ICONS[
-                      NGU_HANH_RELATIONS.generates[primaryResourceType]
-                    ]
-                  }
+                  {RESOURCE_ICONS[NGU_HANH_RELATIONS.generates[primaryResourceType]]}
                 </span>
                 {/* <span>🕒 {Math.ceil(source.cooldown / 1000)}s</span> */}
               </div>
@@ -979,14 +910,12 @@ const SourcePanel = ({
                   ⬆️({source.level})
                 </button>
               </div>
-              {!canUpgrade &&
-                source.isActive &&
-                source.level < maxLevelForThisUpgrade && (
-                  <p className="text-xs text-red-300 mt-0.5">
-                    -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]},{' '}
-                    {oppositeCost} {RESOURCE_ICONS[oppositeResourceType]}
-                  </p>
-                )}
+              {!canUpgrade && source.isActive && source.level < maxLevelForThisUpgrade && (
+                <p className="text-xs text-red-300 mt-0.5">
+                  -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]}, {oppositeCost}{' '}
+                  {RESOURCE_ICONS[oppositeResourceType]}
+                </p>
+              )}
               {source.level >= maxLevelForThisUpgrade && (
                 <p className="text-xs text-blue-300 mt-0.5">Max Level!</p>
               )}
@@ -998,32 +927,24 @@ const SourcePanel = ({
   );
 };
 
-const SpiritBeastPanel = ({
-  spiritBeasts,
-  onUpgrade,
-  resources,
-  unlockedTier2Upgrades,
-}: any) => {
-  const sortedSpiritBeasts = Object.values(spiritBeasts).sort(
-    (a: any, b: any) => a.type.localeCompare(b.type)
+const SpiritBeastPanel = ({ spiritBeasts, onUpgrade, resources, unlockedTier2Upgrades }: any) => {
+  const sortedSpiritBeasts = Object.values(spiritBeasts).sort((a: any, b: any) =>
+    a.type.localeCompare(b.type)
   );
 
   const getUpgradeCosts = useCallback((beast: any) => {
     const primaryResourceType = NGU_HANH_RELATIONS.elementMap[beast.type];
-    const generatesResourceType =
-      NGU_HANH_RELATIONS.generates[primaryResourceType];
+    const generatesResourceType = NGU_HANH_RELATIONS.generates[primaryResourceType];
     const currentMultiplier =
       beast.level < MAX_LEVEL_INITIAL_TIER
         ? UPGRADE_COSTS.spiritBeast.multiplier
         : UPGRADE_COSTS.spiritBeast.tier2Multiplier;
 
     const primaryCost = Math.floor(
-      UPGRADE_COSTS.spiritBeast.basePrimary *
-        Math.pow(currentMultiplier, beast.level - 1)
+      UPGRADE_COSTS.spiritBeast.basePrimary * Math.pow(currentMultiplier, beast.level - 1)
     );
     const generatesCost = Math.floor(
-      UPGRADE_COSTS.spiritBeast.baseGenerates *
-        Math.pow(currentMultiplier, beast.level - 1)
+      UPGRADE_COSTS.spiritBeast.baseGenerates * Math.pow(currentMultiplier, beast.level - 1)
     );
     return {
       primaryResourceType,
@@ -1035,17 +956,11 @@ const SpiritBeastPanel = ({
 
   return (
     <div className="p-4 bg-gray-700 rounded-lg shadow-inner">
-      <h3 className="text-lg font-semibold mb-2 text-cyan-300">
-        Spirit Beasts
-      </h3>
+      <h3 className="text-lg font-semibold mb-2 text-cyan-300">Spirit Beasts</h3>
       <div className="grid grid-cols-5 gap-2">
         {sortedSpiritBeasts.map((beast: any) => {
-          const {
-            primaryResourceType,
-            generatesResourceType,
-            primaryCost,
-            generatesCost,
-          } = getUpgradeCosts(beast);
+          const { primaryResourceType, generatesResourceType, primaryCost, generatesCost } =
+            getUpgradeCosts(beast);
           const maxLevelForThisUpgrade = unlockedTier2Upgrades
             ? MAX_LEVEL_FINAL
             : MAX_LEVEL_INITIAL_TIER;
@@ -1055,17 +970,12 @@ const SpiritBeastPanel = ({
             resources[generatesResourceType] >= generatesCost;
 
           return (
-            <div
-              key={beast.type}
-              className="bg-gray-600 p-3 rounded-md flex flex-col gap-2"
-            >
+            <div key={beast.type} className="bg-gray-600 p-3 rounded-md flex flex-col gap-2">
               <div className="flex flex-col gap-1 text-xs">
                 <span className="text-lg font-bold flex items-center gap-1">
                   {SPIRIT_BEAST_ICONS[beast.type]} ({beast.level})
                 </span>
-                <span
-                  className={beast.isActive ? 'text-green-400' : 'text-red-400'}
-                >
+                <span className={beast.isActive ? 'text-green-400' : 'text-red-400'}>
                   {beast.isActive ? 'Active' : 'Inactive'}
                 </span>
               </div>
@@ -1080,14 +990,12 @@ const SpiritBeastPanel = ({
               >
                 ⬆️
               </button>
-              {!canUpgrade &&
-                beast.isActive &&
-                beast.level < maxLevelForThisUpgrade && (
-                  <p className="text-xs text-red-300 mt-1">
-                    -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]},{' '}
-                    {generatesCost} {RESOURCE_ICONS[generatesResourceType]}
-                  </p>
-                )}
+              {!canUpgrade && beast.isActive && beast.level < maxLevelForThisUpgrade && (
+                <p className="text-xs text-red-300 mt-1">
+                  -: {primaryCost} {RESOURCE_ICONS[primaryResourceType]}, {generatesCost}{' '}
+                  {RESOURCE_ICONS[generatesResourceType]}
+                </p>
+              )}
               {beast.level >= maxLevelForThisUpgrade && (
                 <p className="text-xs text-blue-300 mt-0.5">Max Level!</p>
               )}
@@ -1121,9 +1029,7 @@ const ActivityLog = ({ logs }: any) => {
                   : 'text-gray-300'
             }`}
           >
-            <span className="text-gray-500">
-              [{new Date(log.timestamp).toLocaleTimeString()}]
-            </span>{' '}
+            <span className="text-gray-500">[{new Date(log.timestamp).toLocaleTimeString()}]</span>{' '}
             {log.message}
           </p>
         ))}
@@ -1151,16 +1057,9 @@ const ActivityLog = ({ logs }: any) => {
 
 // --- Main Component ---
 export default function Game1() {
-  const [gameState, setGameState] = useState(
-    () => loadGame() || initializeGame()
-  );
-  const {
-    currentMapId,
-    maps,
-    resources,
-    canHarvestOtherSources,
-    unlockedTier2Upgrades,
-  } = gameState;
+  const [gameState, setGameState] = useState(() => loadGame() || initializeGame());
+  const { currentMapId, maps, resources, canHarvestOtherSources, unlockedTier2Upgrades } =
+    gameState;
   const currentMapData = maps[currentMapId];
   const [notifications, setNotifications] = useState<any[]>([]);
   const [logs, setLogs] = useState(() => loadGame()?.logs || []);
@@ -1186,33 +1085,25 @@ export default function Game1() {
           let updatedGameState = { ...prevGameState };
           let totalOfflineYield: any = {};
           let harvestedAnyOffline = false;
-          const currentMap =
-            updatedGameState.maps[updatedGameState.currentMapId];
+          const currentMap = updatedGameState.maps[updatedGameState.currentMapId];
           const sourcesToProcess = { ...currentMap.sources };
 
           for (const sourceKey in sourcesToProcess) {
             const source = sourcesToProcess[sourceKey];
             if (source.isActive) {
-              const elapsedTimeSinceLastHarvest =
-                Date.now() - source.lastHarvestTime;
-              const numHarvests = Math.floor(
-                elapsedTimeSinceLastHarvest / source.cooldown
-              );
+              const elapsedTimeSinceLastHarvest = Date.now() - source.lastHarvestTime;
+              const numHarvests = Math.floor(elapsedTimeSinceLastHarvest / source.cooldown);
 
               if (numHarvests > 0) {
-                const primaryResourceType =
-                  NGU_HANH_RELATIONS.elementMap[source.type];
-                const generatedResourceType =
-                  NGU_HANH_RELATIONS.generates[primaryResourceType];
+                const primaryResourceType = NGU_HANH_RELATIONS.elementMap[source.type];
+                const generatedResourceType = NGU_HANH_RELATIONS.generates[primaryResourceType];
                 let actualYield = source.yield;
                 const spiritBeastType = `spirit_${primaryResourceType}`;
                 if (
                   currentMap.spiritBeasts[spiritBeastType] &&
                   currentMap.spiritBeasts[spiritBeastType].isActive
                 ) {
-                  actualYield +=
-                    actualYield *
-                    currentMap.spiritBeasts[spiritBeastType].bonus;
+                  actualYield += actualYield * currentMap.spiritBeasts[spiritBeastType].bonus;
                 }
                 actualYield = Math.floor(actualYield);
 
@@ -1221,20 +1112,15 @@ export default function Game1() {
                 const totalGeneratedYield = numHarvests * generatedYield;
 
                 updatedGameState.resources[primaryResourceType] =
-                  (updatedGameState.resources[primaryResourceType] || 0) +
-                  totalPrimaryYield;
+                  (updatedGameState.resources[primaryResourceType] || 0) + totalPrimaryYield;
                 updatedGameState.resources[generatedResourceType] =
-                  (updatedGameState.resources[generatedResourceType] || 0) +
-                  totalGeneratedYield;
+                  (updatedGameState.resources[generatedResourceType] || 0) + totalGeneratedYield;
 
-                sourcesToProcess[sourceKey].lastHarvestTime +=
-                  numHarvests * source.cooldown;
+                sourcesToProcess[sourceKey].lastHarvestTime += numHarvests * source.cooldown;
                 totalOfflineYield[primaryResourceType] =
-                  (totalOfflineYield[primaryResourceType] || 0) +
-                  totalPrimaryYield;
+                  (totalOfflineYield[primaryResourceType] || 0) + totalPrimaryYield;
                 totalOfflineYield[generatedResourceType] =
-                  (totalOfflineYield[generatedResourceType] || 0) +
-                  totalGeneratedYield;
+                  (totalOfflineYield[generatedResourceType] || 0) + totalGeneratedYield;
                 harvestedAnyOffline = true;
               }
             }
@@ -1247,8 +1133,7 @@ export default function Game1() {
                 .join(', ')}`,
               'success'
             );
-            updatedGameState.maps[updatedGameState.currentMapId].sources =
-              sourcesToProcess;
+            updatedGameState.maps[updatedGameState.currentMapId].sources = sourcesToProcess;
           }
 
           updatedGameState.lastPlayedTime = Date.now();
@@ -1288,19 +1173,16 @@ export default function Game1() {
       const allSourcesMaxedInitialTier = Object.values(initialSources).every(
         (s: any) => s.level >= MAX_LEVEL_INITIAL_TIER
       );
-      const allSpiritBeastsMaxedInitialTier = Object.values(
-        initialSpiritBeasts
-      ).every((sb: any) => sb.level >= MAX_LEVEL_INITIAL_TIER);
+      const allSpiritBeastsMaxedInitialTier = Object.values(initialSpiritBeasts).every(
+        (sb: any) => sb.level >= MAX_LEVEL_INITIAL_TIER
+      );
 
       if (
         allSourcesMaxedInitialTier &&
         allSpiritBeastsMaxedInitialTier &&
         !maps[GAME_PHASE_ADVANCED]
       ) {
-        addLog(
-          'All sources and spirit beasts at initial max level! Unlocking new map...',
-          'info'
-        );
+        addLog('All sources and spirit beasts at initial max level! Unlocking new map...', 'info');
         const advancedMapContent = generateMapContent(MAP_SIZE);
 
         setGameState((prev: any) => ({
@@ -1325,8 +1207,7 @@ export default function Game1() {
       let currentGameState = { ...prevGameState };
       let harvestedCount = 0;
       let totalYieldedAmounts: any = {};
-      const currentSources =
-        currentGameState.maps[currentGameState.currentMapId].sources;
+      const currentSources = currentGameState.maps[currentGameState.currentMapId].sources;
 
       for (const sourceKey in currentSources) {
         const source = currentSources[sourceKey];
@@ -1346,8 +1227,7 @@ export default function Game1() {
             harvestedCount++;
             for (const resType in harvestResult.yieldedAmounts) {
               totalYieldedAmounts[resType] =
-                (totalYieldedAmounts[resType] || 0) +
-                harvestResult.yieldedAmounts[resType];
+                (totalYieldedAmounts[resType] || 0) + harvestResult.yieldedAmounts[resType];
             }
           }
         }
@@ -1437,10 +1317,7 @@ export default function Game1() {
 
   const toggleAutoHarvest = () => {
     setIsAutoHarvesting((prev: any) => !prev);
-    addLog(
-      isAutoHarvesting ? 'Auto-harvest disabled.' : 'Auto-harvest enabled.',
-      'info'
-    );
+    addLog(isAutoHarvesting ? 'Auto-harvest disabled.' : 'Auto-harvest enabled.', 'info');
   };
 
   return (
@@ -1491,8 +1368,7 @@ export default function Game1() {
       <div className="grid grid-cols-2 lg:grid-cols-3 w-full max-w-7xl gap-4 mx-auto">
         <div className="lg:col-span-2 w-full bg-gray-800 p-2 rounded-xl shadow-2xl border border-gray-700 flex flex-col items-center">
           <h2 className="text-xl font-bold mb-4 text-gray-200">
-            Exploration Map (
-            {currentMapId === GAME_PHASE_INITIAL ? 'Initial' : 'Advanced'})
+            Exploration Map ({currentMapId === GAME_PHASE_INITIAL ? 'Initial' : 'Advanced'})
           </h2>
           <ResourcePanel
             resources={resources}
@@ -1501,12 +1377,10 @@ export default function Game1() {
             toggleAutoHarvest={toggleAutoHarvest}
             isAutoHarvesting={isAutoHarvesting}
           />
-          {currentMapData && (
-            <Map map={currentMapData.map} onTileClick={handleTileClick} />
-          )}
+          {currentMapData && <Map map={currentMapData.map} onTileClick={handleTileClick} />}
           <p className="text-sm text-gray-400 mt-4 text-center">
-            Click an undiscovered tile to reveal it. Click a discovered tile to
-            activate its source or spirit beast.
+            Click an undiscovered tile to reveal it. Click a discovered tile to activate its source
+            or spirit beast.
           </p>
           <ActivityLog logs={logs} />
         </div>
@@ -1545,10 +1419,7 @@ export default function Game1() {
           </div>
         </div>
       </div>
-      <NotificationSystem
-        notifications={notifications}
-        setNotifications={setNotifications}
-      />
+      <NotificationSystem notifications={notifications} setNotifications={setNotifications} />
     </div>
   );
 }

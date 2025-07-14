@@ -27,9 +27,7 @@ const Promo = () => {
               height={300}
             />
             <div className="p-4 flex flex-col justify-center">
-              <h2 className="text-2xl font-semibold mb-2">
-                Freshly Baked Buns
-              </h2>
+              <h2 className="text-2xl font-semibold mb-2">Freshly Baked Buns</h2>
               <p className="text-lg mb-4">Get Up to 25% Off</p>
               <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                 Shop Now

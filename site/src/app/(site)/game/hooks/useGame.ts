@@ -7,9 +7,7 @@ import { GameActionsService } from '../services/gameActions.service';
 
 const initializeGame = (): GameState => {
   const initialResources = { metal: 0, wood: 10, water: 0, fire: 0, earth: 0 };
-  const initialMapContent = MapGeneratorService.generateMapContent(
-    GAME_CONFIG.MAP_SIZE
-  );
+  const initialMapContent = MapGeneratorService.generateMapContent(GAME_CONFIG.MAP_SIZE);
 
   // Auto-discover and activate wood forest
   let woodForestTile = null;
@@ -51,9 +49,7 @@ export const useGame = () => {
   );
 
   const [notifications, setNotifications] = useState<LogEntry[]>([]);
-  const [logs, setLogs] = useState<LogEntry[]>(
-    () => GameStorageService.loadGame()?.logs || []
-  );
+  const [logs, setLogs] = useState<LogEntry[]>(() => GameStorageService.loadGame()?.logs || []);
 
   const [isAutoHarvesting, setIsAutoHarvesting] = useState(
     gameState.isAutoHarvestingOnLoad || false
@@ -64,14 +60,11 @@ export const useGame = () => {
 
   const autoHarvestIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const addLog = useCallback(
-    (message: string, type: LogEntry['type'] = 'info') => {
-      const logEntry: LogEntry = { timestamp: Date.now(), message, type };
-      setNotifications(prev => [...prev, logEntry]);
-      setLogs(prev => [...prev, logEntry]);
-    },
-    []
-  );
+  const addLog = useCallback((message: string, type: LogEntry['type'] = 'info') => {
+    const logEntry: LogEntry = { timestamp: Date.now(), message, type };
+    setNotifications((prev) => [...prev, logEntry]);
+    setLogs((prev) => [...prev, logEntry]);
+  }, []);
 
   // Save game when state changes
   useEffect(() => {
@@ -125,12 +118,9 @@ export const useGame = () => {
     ),
 
     toggleAutoHarvest: useCallback(() => {
-      setIsAutoHarvesting(prev => {
+      setIsAutoHarvesting((prev) => {
         const newValue = !prev;
-        addLog(
-          newValue ? 'Auto-harvest enabled.' : 'Auto-harvest disabled.',
-          'info'
-        );
+        addLog(newValue ? 'Auto-harvest enabled.' : 'Auto-harvest disabled.', 'info');
         return newValue;
       });
     }, [addLog]),

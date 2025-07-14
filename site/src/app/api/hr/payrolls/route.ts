@@ -139,15 +139,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      employeeId,
-      period,
-      basicSalary,
-      overtime,
-      bonus,
-      deductions,
-      notes,
-    } = body;
+    const { employeeId, period, basicSalary, overtime, bonus, deductions, notes } = body;
 
     if (!employeeId || !period || !basicSalary) {
       return NextResponse.json(
@@ -186,8 +178,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Tính toán lương thực nhận
-    const netSalary =
-      basicSalary + (overtime || 0) + (bonus || 0) - (deductions || 0);
+    const netSalary = basicSalary + (overtime || 0) + (bonus || 0) - (deductions || 0);
 
     const payroll = await prisma.payroll.create({
       data: {
@@ -242,14 +233,10 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, basicSalary, overtime, bonus, deductions, notes, paidAt } =
-      body;
+    const { id, basicSalary, overtime, bonus, deductions, notes, paidAt } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Thiếu ID bảng lương' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Thiếu ID bảng lương' }, { status: 400 });
     }
 
     const existingPayroll = await prisma.payroll.findUnique({
@@ -279,12 +266,7 @@ export async function PUT(request: NextRequest) {
         deductions: deductions || existingPayroll.deductions,
         netSalary,
         notes: notes !== undefined ? notes : existingPayroll.notes,
-        paidAt:
-          paidAt !== undefined
-            ? paidAt
-              ? new Date(paidAt)
-              : null
-            : existingPayroll.paidAt,
+        paidAt: paidAt !== undefined ? (paidAt ? new Date(paidAt) : null) : existingPayroll.paidAt,
       },
       include: {
         employee: {
@@ -330,10 +312,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Thiếu ID bảng lương' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Thiếu ID bảng lương' }, { status: 400 });
     }
 
     const existingPayroll = await prisma.payroll.findUnique({

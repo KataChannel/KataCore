@@ -1,12 +1,5 @@
 'use client';
-import React, {
-  ReactNode,
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
+import React, { ReactNode, createContext, useContext, useState, useEffect, useRef } from 'react';
 
 // Search Dialog Context
 interface SearchDialogContextType {
@@ -18,9 +11,7 @@ interface SearchDialogContextType {
   setSelectedIndex: (index: number) => void;
 }
 
-const SearchDialogContext = createContext<SearchDialogContextType | undefined>(
-  undefined
-);
+const SearchDialogContext = createContext<SearchDialogContextType | undefined>(undefined);
 
 // Search Result Interface
 export interface SearchResult {
@@ -39,11 +30,7 @@ interface SearchDialogProps {
   children: ReactNode;
 }
 
-const SearchDialog: React.FC<SearchDialogProps> = ({
-  open,
-  onOpenChange,
-  children,
-}) => {
+const SearchDialog: React.FC<SearchDialogProps> = ({ open, onOpenChange, children }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -77,10 +64,7 @@ interface SearchDialogTriggerProps {
   children: ReactNode;
 }
 
-export const SearchDialogTrigger: React.FC<SearchDialogTriggerProps> = ({
-  asChild,
-  children,
-}) => {
+export const SearchDialogTrigger: React.FC<SearchDialogTriggerProps> = ({ asChild, children }) => {
   const context = useContext(SearchDialogContext);
   if (!context) {
     throw new Error('SearchDialogTrigger must be used within a SearchDialog');
@@ -103,12 +87,7 @@ export const SearchDialogTrigger: React.FC<SearchDialogTriggerProps> = ({
       onClick={handleClick}
       className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
     >
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -141,14 +120,7 @@ export const SearchDialogContent: React.FC<SearchDialogContentProps> = ({
     throw new Error('SearchDialogContent must be used within a SearchDialog');
   }
 
-  const {
-    open,
-    onOpenChange,
-    query,
-    setQuery,
-    selectedIndex,
-    setSelectedIndex,
-  } = context;
+  const { open, onOpenChange, query, setQuery, selectedIndex, setSelectedIndex } = context;
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when dialog opens
@@ -212,7 +184,7 @@ export const SearchDialogContent: React.FC<SearchDialogContentProps> = ({
             ref={inputRef}
             type="text"
             value={query}
-            onChange={e => {
+            onChange={(e) => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
@@ -242,24 +214,16 @@ export const SearchDialogContent: React.FC<SearchDialogContentProps> = ({
         <div className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">
-                ↑
-              </span>
-              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">
-                ↓
-              </span>
+              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">↑</span>
+              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">↓</span>
               <span>to navigate</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">
-                ↵
-              </span>
+              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">↵</span>
               <span>to select</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">
-                ESC
-              </span>
+              <span className="border border-gray-300 dark:border-gray-600 rounded p-1">ESC</span>
               <span>to close</span>
             </div>
           </div>

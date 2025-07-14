@@ -38,8 +38,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const pathname = usePathname();
 
   const toggleMenuExpansion = (path: string) => {
-    setExpandedMenus(prev =>
-      prev.includes(path) ? prev.filter(item => item !== path) : [...prev, path]
+    setExpandedMenus((prev) =>
+      prev.includes(path) ? prev.filter((item) => item !== path) : [...prev, path]
     );
   };
 
@@ -69,9 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
-        <h1
-          className={`font-bold text-xl text-black dark:text-white ${!sidebarOpen && 'hidden'}`}
-        >
+        <h1 className={`font-bold text-xl text-black dark:text-white ${!sidebarOpen && 'hidden'}`}>
           {title}
         </h1>
         {showToggle && (
@@ -86,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Navigation */}
       <nav className="mt-2">
-        {menuItems.map(item => (
+        {menuItems.map((item) => (
           <div key={item.path}>
             <button
               onClick={() => handleMenuClick(item)}
@@ -108,26 +106,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
 
             {/* Submenu */}
-            {item.children &&
-              expandedMenus.includes(item.path) &&
-              sidebarOpen && (
-                <div className="ml-6 border-l-2 border-gray-200 dark:border-gray-800">
-                  {item.children.map(subItem => (
-                    <button
-                      key={subItem.href}
-                      onClick={() => handleSubMenuClick(subItem)}
-                      className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors text-sm
+            {item.children && expandedMenus.includes(item.path) && sidebarOpen && (
+              <div className="ml-6 border-l-2 border-gray-200 dark:border-gray-800">
+                {item.children.map((subItem) => (
+                  <button
+                    key={subItem.href}
+                    onClick={() => handleSubMenuClick(subItem)}
+                    className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors text-sm
                                             ${pathname === subItem.href ? 'bg-gray-50 dark:bg-gray-900 border-r-4 border-black dark:border-white' : ''}
                                         `}
-                    >
-                      <span className="text-lg mr-3">{subItem.icon}</span>
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {subItem.nameVi}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
+                  >
+                    <span className="text-lg mr-3">{subItem.icon}</span>
+                    <span className="text-gray-700 dark:text-gray-300">{subItem.nameVi}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </nav>

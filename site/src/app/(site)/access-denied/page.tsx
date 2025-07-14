@@ -15,11 +15,11 @@ interface AccessDeniedPageProps {
   suggestedActions?: string[];
 }
 
-export default function AccessDeniedPage({ 
+export default function AccessDeniedPage({
   module = 'this resource',
   requiredPermission = 'access',
   userRole = 'current role',
-  suggestedActions = []
+  suggestedActions = [],
 }: AccessDeniedPageProps) {
   const router = useRouter();
 
@@ -27,7 +27,7 @@ export default function AccessDeniedPage({
     'Contact your system administrator to request access',
     'Check if you have the correct user role assigned',
     'Try logging in with a different account',
-    'Return to the homepage and navigate to accessible modules'
+    'Return to the homepage and navigate to accessible modules',
   ];
 
   const actions = suggestedActions.length > 0 ? suggestedActions : defaultActions;
@@ -124,9 +124,7 @@ export default function AccessDeniedPage({
         <Card>
           <CardHeader>
             <CardTitle>Need Help?</CardTitle>
-            <CardDescription>
-              Additional resources and support options
-            </CardDescription>
+            <CardDescription>Additional resources and support options</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -154,12 +152,8 @@ export default function AccessDeniedPage({
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500">
-          <p>
-            TazaCore Enterprise Authentication System v2.0.0
-          </p>
-          <p>
-            If you believe this is an error, please contact your system administrator.
-          </p>
+          <p>TazaCore Enterprise Authentication System v2.0.0</p>
+          <p>If you believe this is an error, please contact your system administrator.</p>
         </div>
       </div>
     </div>

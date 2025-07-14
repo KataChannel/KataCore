@@ -32,9 +32,7 @@ export const GameLayout = ({
   activeSpiritBeastBonuses,
   actions,
 }: GameLayoutProps) => {
-  const [activeTab, setActiveTab] = useState<'sources' | 'spirits' | 'logs'>(
-    'sources'
-  );
+  const [activeTab, setActiveTab] = useState<'sources' | 'spirits' | 'logs'>('sources');
 
   const currentMapData = gameState.maps[gameState.currentMapId];
   const isAdvancedPhase = gameState.currentMapId === GAME_PHASES.ADVANCED;
@@ -95,9 +93,7 @@ export const GameLayout = ({
             {isAdvancedPhase ? 'Advanced Exploration' : 'Initial Discovery'}
           </p>
           {gameState.unlockedTier2Upgrades && (
-            <p className="text-xs text-green-400 mt-1">
-              ✨ Tier 2 upgrades unlocked!
-            </p>
+            <p className="text-xs text-green-400 mt-1">✨ Tier 2 upgrades unlocked!</p>
           )}
         </div>
       </div>
@@ -125,7 +121,7 @@ export const GameLayout = ({
             { key: 'sources', label: 'Sources', icon: '⛏️' },
             { key: 'spirits', label: 'Spirits', icon: '🐉' },
             { key: 'logs', label: 'Logs', icon: '📜' },
-          ].map(tab => (
+          ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 
 // Middleware to check authentication
 async function authenticate(request: NextRequest) {
@@ -28,10 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Check permissions
     if (!user.role.permissions.includes('READ_ROLES')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -77,10 +74,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch roles' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to fetch roles' }, { status: 500 });
   }
 }
 
@@ -91,10 +85,7 @@ export async function POST(request: NextRequest) {
 
     // Check permissions
     if (!user.role.permissions.includes('CREATE_ROLES')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -102,10 +93,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name || !permissions || !Array.isArray(permissions)) {
-      return NextResponse.json(
-        { error: 'Name and permissions are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name and permissions are required' }, { status: 400 });
     }
 
     // Check if role already exists
@@ -114,10 +102,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingRole) {
-      return NextResponse.json(
-        { error: 'Role name already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Role name already exists' }, { status: 400 });
     }
 
     const role = await prisma.role.create({
@@ -137,9 +122,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(role, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to create role' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to create role' }, { status: 500 });
   }
 }

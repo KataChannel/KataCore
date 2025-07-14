@@ -83,7 +83,7 @@ export const UserModal: React.FC<UserModalProps> = ({
   user,
   roles,
   onSave,
-  mode
+  mode,
 }) => {
   const [formData, setFormData] = useState({
     email: '',
@@ -164,7 +164,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -174,7 +174,7 @@ export const UserModal: React.FC<UserModalProps> = ({
         delete submitData.password;
         delete submitData.confirmPassword;
       }
-      
+
       await onSave(submitData);
       onClose();
     } catch (error) {
@@ -196,10 +196,7 @@ export const UserModal: React.FC<UserModalProps> = ({
             <UserIcon className="h-5 w-5 mr-2" />
             {mode === 'create' ? 'Create User' : mode === 'edit' ? 'Edit User' : 'View User'}
           </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
@@ -207,9 +204,7 @@ export const UserModal: React.FC<UserModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Display Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Display Name *
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Display Name *</label>
             <input
               type="text"
               value={formData.displayName}
@@ -226,9 +221,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email *
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Email *</label>
             <input
               type="email"
               value={formData.email}
@@ -238,16 +231,12 @@ export const UserModal: React.FC<UserModalProps> = ({
               }`}
               disabled={isReadOnly}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Phone
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Phone</label>
             <input
               type="tel"
               value={formData.phone}
@@ -259,9 +248,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
           {/* Username */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Username</label>
             <input
               type="text"
               value={formData.username}
@@ -273,9 +260,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
           {/* Role */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Role *
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Role *</label>
             <select
               value={formData.roleId}
               onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
@@ -291,9 +276,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                 </option>
               ))}
             </select>
-            {errors.roleId && (
-              <p className="mt-1 text-sm text-red-600">{errors.roleId}</p>
-            )}
+            {errors.roleId && <p className="mt-1 text-sm text-red-600">{errors.roleId}</p>}
           </div>
 
           {/* Password */}
@@ -324,9 +307,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                     )}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               </div>
 
               <div>
@@ -412,7 +393,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
   permissions,
   modules,
   onSave,
-  mode
+  mode,
 }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -474,7 +455,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -492,12 +473,12 @@ export const RoleModal: React.FC<RoleModalProps> = ({
     if (formData.modules.includes(module)) {
       setFormData({
         ...formData,
-        modules: formData.modules.filter(m => m !== module)
+        modules: formData.modules.filter((m) => m !== module),
       });
     } else {
       setFormData({
         ...formData,
-        modules: [...formData.modules, module]
+        modules: [...formData.modules, module],
       });
     }
   };
@@ -506,19 +487,18 @@ export const RoleModal: React.FC<RoleModalProps> = ({
     if (formData.permissions.includes(permission)) {
       setFormData({
         ...formData,
-        permissions: formData.permissions.filter(p => p !== permission)
+        permissions: formData.permissions.filter((p) => p !== permission),
       });
     } else {
       setFormData({
         ...formData,
-        permissions: [...formData.permissions, permission]
+        permissions: [...formData.permissions, permission],
       });
     }
   };
 
-  const filteredPermissions = selectedModule === 'all' 
-    ? permissions 
-    : permissions.filter(p => p.module === selectedModule);
+  const filteredPermissions =
+    selectedModule === 'all' ? permissions : permissions.filter((p) => p.module === selectedModule);
 
   const isReadOnly = mode === 'view' || formData.isSystemRole;
 
@@ -532,10 +512,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             <ShieldCheckIcon className="h-5 w-5 mr-2" />
             {mode === 'create' ? 'Create Role' : mode === 'edit' ? 'Edit Role' : 'View Role'}
           </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
@@ -546,7 +523,8 @@ export const RoleModal: React.FC<RoleModalProps> = ({
               <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
               <div className="ml-3">
                 <p className="text-sm text-yellow-800">
-                  This is a system role and cannot be modified. You can view its configuration but changes are not allowed.
+                  This is a system role and cannot be modified. You can view its configuration but
+                  changes are not allowed.
                 </p>
               </div>
             </div>
@@ -558,11 +536,9 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             {/* Basic Information */}
             <div className="space-y-4">
               <h4 className="text-md font-medium text-gray-900">Basic Information</h4>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Role Name *
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Role Name *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -572,15 +548,11 @@ export const RoleModal: React.FC<RoleModalProps> = ({
                   }`}
                   disabled={isReadOnly}
                 />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                )}
+                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Description *
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Description *</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -610,9 +582,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
                   }`}
                   disabled={isReadOnly}
                 />
-                {errors.level && (
-                  <p className="mt-1 text-sm text-red-600">{errors.level}</p>
-                )}
+                {errors.level && <p className="mt-1 text-sm text-red-600">{errors.level}</p>}
                 <p className="mt-1 text-sm text-gray-500">
                   Higher levels have more permissions. Level 10 = Super Admin.
                 </p>
@@ -622,7 +592,7 @@ export const RoleModal: React.FC<RoleModalProps> = ({
             {/* Module Access */}
             <div className="space-y-4">
               <h4 className="text-md font-medium text-gray-900">Module Access</h4>
-              
+
               <div className="grid grid-cols-2 gap-2">
                 {modules.map((module) => (
                   <div key={module} className="flex items-center">
@@ -634,22 +604,23 @@ export const RoleModal: React.FC<RoleModalProps> = ({
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                       disabled={isReadOnly}
                     />
-                    <label htmlFor={`module-${module}`} className="ml-2 block text-sm text-gray-900 capitalize">
+                    <label
+                      htmlFor={`module-${module}`}
+                      className="ml-2 block text-sm text-gray-900 capitalize"
+                    >
                       {module}
                     </label>
                   </div>
                 ))}
               </div>
-              {errors.modules && (
-                <p className="mt-1 text-sm text-red-600">{errors.modules}</p>
-              )}
+              {errors.modules && <p className="mt-1 text-sm text-red-600">{errors.modules}</p>}
             </div>
           </div>
 
           {/* Permissions */}
           <div>
             <h4 className="text-md font-medium text-gray-900 mb-4">Permissions</h4>
-            
+
             {/* Module filter */}
             <div className="mb-4">
               <select
@@ -673,13 +644,20 @@ export const RoleModal: React.FC<RoleModalProps> = ({
                     <input
                       type="checkbox"
                       id={`perm-${permission.id}`}
-                      checked={formData.permissions.includes(`${permission.action}:${permission.resource}`)}
-                      onChange={() => handlePermissionToggle(`${permission.action}:${permission.resource}`)}
+                      checked={formData.permissions.includes(
+                        `${permission.action}:${permission.resource}`
+                      )}
+                      onChange={() =>
+                        handlePermissionToggle(`${permission.action}:${permission.resource}`)
+                      }
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-1"
                       disabled={isReadOnly}
                     />
                     <div className="ml-2">
-                      <label htmlFor={`perm-${permission.id}`} className="block text-sm font-medium text-gray-900">
+                      <label
+                        htmlFor={`perm-${permission.id}`}
+                        className="block text-sm font-medium text-gray-900"
+                      >
                         {permission.name}
                       </label>
                       <p className="text-xs text-gray-500">{permission.description}</p>

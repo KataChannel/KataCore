@@ -70,21 +70,21 @@ export default function Home() {
   const fetchData = async (type: string, postId = '') => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const url = `/api/social/facebook?type=${type}${postId ? `&postId=${postId}` : ''}`;
       // console.log('Fetching:', url);
-      
+
       const res = await fetch(url);
-      
+
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
       }
-      
+
       const data = await res.json();
       // console.log('Response data:', data);
-      
+
       // Check if we're using mock data (mock data has predictable IDs)
       if (data.data && data.data.length > 0 && data.data[0].id === '1') {
         setIsUsingMockData(true);
@@ -92,15 +92,15 @@ export default function Home() {
 
       if (type === 'messages') {
         const Listid = data.data.map((v: any) => v.participants);
-        const profile = Listid.map((v: any) => v.data).flat().filter((v: any)=> v.id !== '272459726955766');
+        const profile = Listid.map((v: any) => v.data)
+          .flat()
+          .filter((v: any) => v.id !== '272459726955766');
         setListProfile(profile);
-
       }
 
       // if (type === 'posts') setPosts(data.data || []);
       // if (type === 'comments') setComments(data.data || []);
       if (type === 'messages') setMessages(data.data || []);
-      
     } catch (error) {
       console.error('Error fetching data:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -120,37 +120,36 @@ export default function Home() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Facebook Page Interactions</h1>
-      {
-        listProfile.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-4">List of Participants</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              {listProfile.map((profile, index) => (
-                <li key={index} className="text-gray-800">
-                  <Link
-                    href={`https://www.facebook.com/profile.php?id=${profile.id}`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {profile.name || 'Unknown Participant'}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      }
+      {listProfile.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold mb-4">List of Participants</h2>
+          <ul className="list-disc pl-5 space-y-2">
+            {listProfile.map((profile, index) => (
+              <li key={index} className="text-gray-800">
+                <Link
+                  href={`https://www.facebook.com/profile.php?id=${profile.id}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {profile.name || 'Unknown Participant'}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Mock Data Warning */}
       {isUsingMockData && (
         <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
-          <strong>Development Mode:</strong> Using mock data. To use real Facebook data, configure FACEBOOK_PAGE_ID and FACEBOOK_ACCESS_TOKEN in your .env.local file.
+          <strong>Development Mode:</strong> Using mock data. To use real Facebook data, configure
+          FACEBOOK_PAGE_ID and FACEBOOK_ACCESS_TOKEN in your .env.local file.
         </div>
       )}
 
@@ -164,7 +163,7 @@ export default function Home() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold">Posts ({posts.length})</h2>
-          <button 
+          <button
             onClick={() => fetchData('posts')}
             disabled={loading}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
@@ -172,7 +171,7 @@ export default function Home() {
             {loading ? 'Loading...' : 'Refresh Posts'}
           </button>
         </div>
-        
+
         {loading && posts.length === 0 ? (
           <div className="text-center py-4">Loading posts...</div>
         ) : (
@@ -180,15 +179,13 @@ export default function Home() {
             {posts.map((post) => (
               <div key={post.id} className="bg-white rounded-lg shadow-md p-6 border">
                 <p className="text-gray-800 mb-3">{post.message || 'No message'}</p>
-                <div className="text-sm text-gray-600 mb-3">
-                  {formatDate(post.created_time)}
-                </div>
+                <div className="text-sm text-gray-600 mb-3">{formatDate(post.created_time)}</div>
                 <div className="flex gap-4 text-sm text-gray-600 mb-3">
                   <span>👍 {post.likes?.summary?.total_count || 0} likes</span>
                   <span>💬 {post.comments?.summary?.total_count || 0} comments</span>
                   <span>🔄 {post.shares?.count || 0} shares</span>
                 </div>
-                <button 
+                <button
                   onClick={() => fetchData('comments', post.id)}
                   disabled={loading}
                   className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
@@ -199,7 +196,10 @@ export default function Home() {
             ))}
             {posts.length === 0 && !loading && (
               <div className="text-center py-8 text-gray-500">
-                No posts found. {isUsingMockData ? 'Mock data is being used for development.' : 'Make sure your Facebook credentials are configured correctly.'}
+                No posts found.{' '}
+                {isUsingMockData
+                  ? 'Mock data is being used for development.'
+                  : 'Make sure your Facebook credentials are configured correctly.'}
               </div>
             )}
           </div>
@@ -231,7 +231,7 @@ export default function Home() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold">Messages ({messages.length})</h2>
-          <button 
+          <button
             onClick={() => fetchData('messages')}
             disabled={loading}
             className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50"
@@ -239,14 +239,13 @@ export default function Home() {
             {loading ? 'Loading...' : 'Load Messages'}
           </button>
         </div>
-        
+
         <div className="space-y-4">
           {messages.map((conversation) => (
             <div key={conversation.id} className="bg-white rounded-lg shadow-md p-6 border">
               <div className="mb-3">
-                <strong>Participants:</strong> {
-                  conversation.participants?.data?.map(p => p.name).join(', ') || 'Unknown'
-                }
+                <strong>Participants:</strong>{' '}
+                {conversation.participants?.data?.map((p) => p.name).join(', ') || 'Unknown'}
               </div>
               {conversation.messages?.data && conversation.messages.data.length > 0 && (
                 <div>

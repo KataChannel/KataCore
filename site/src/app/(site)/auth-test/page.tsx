@@ -1,21 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AuthProvider, useAuth } from '@/components/auth/ModuleGuard';
+import { AuthProvider, useAuth } from '@/components/auth/UnifiedAuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Play, 
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Play,
   RotateCcw,
   Shield,
   Database,
   Network,
-  Code
+  Code,
 } from 'lucide-react';
 
 // Test suites for different aspects of the authentication system
@@ -25,82 +25,160 @@ const TEST_SUITES = {
     icon: Shield,
     tests: [
       { id: 'login-admin', name: 'Admin Login', description: 'Test login with admin credentials' },
-      { id: 'login-manager', name: 'Manager Login', description: 'Test login with manager credentials' },
-      { id: 'login-employee', name: 'Employee Login', description: 'Test login with employee credentials' },
-      { id: 'login-viewer', name: 'Viewer Login', description: 'Test login with viewer credentials' },
+      {
+        id: 'login-manager',
+        name: 'Manager Login',
+        description: 'Test login with manager credentials',
+      },
+      {
+        id: 'login-employee',
+        name: 'Employee Login',
+        description: 'Test login with employee credentials',
+      },
+      {
+        id: 'login-viewer',
+        name: 'Viewer Login',
+        description: 'Test login with viewer credentials',
+      },
       { id: 'logout', name: 'Logout', description: 'Test logout functionality' },
-      { id: 'session-persistence', name: 'Session Persistence', description: 'Test session across page reloads' }
-    ]
+      {
+        id: 'session-persistence',
+        name: 'Session Persistence',
+        description: 'Test session across page reloads',
+      },
+    ],
   },
   permissions: {
     name: 'Permission System',
     icon: Database,
     tests: [
-      { id: 'module-access-admin', name: 'Admin Module Access', description: 'Test admin access to all modules' },
-      { id: 'module-access-manager', name: 'Manager Module Access', description: 'Test manager limited access' },
-      { id: 'module-access-employee', name: 'Employee Module Access', description: 'Test employee restricted access' },
-      { id: 'module-access-viewer', name: 'Viewer Module Access', description: 'Test viewer read-only access' },
-      { id: 'permission-read', name: 'Read Permission', description: 'Test read permission checking' },
-      { id: 'permission-write', name: 'Write Permission', description: 'Test write permission checking' },
-      { id: 'permission-manage', name: 'Manage Permission', description: 'Test manage permission checking' },
-      { id: 'permission-admin', name: 'Admin Permission', description: 'Test admin permission checking' }
-    ]
+      {
+        id: 'module-access-admin',
+        name: 'Admin Module Access',
+        description: 'Test admin access to all modules',
+      },
+      {
+        id: 'module-access-manager',
+        name: 'Manager Module Access',
+        description: 'Test manager limited access',
+      },
+      {
+        id: 'module-access-employee',
+        name: 'Employee Module Access',
+        description: 'Test employee restricted access',
+      },
+      {
+        id: 'module-access-viewer',
+        name: 'Viewer Module Access',
+        description: 'Test viewer read-only access',
+      },
+      {
+        id: 'permission-read',
+        name: 'Read Permission',
+        description: 'Test read permission checking',
+      },
+      {
+        id: 'permission-write',
+        name: 'Write Permission',
+        description: 'Test write permission checking',
+      },
+      {
+        id: 'permission-manage',
+        name: 'Manage Permission',
+        description: 'Test manage permission checking',
+      },
+      {
+        id: 'permission-admin',
+        name: 'Admin Permission',
+        description: 'Test admin permission checking',
+      },
+    ],
   },
   routing: {
     name: 'Route Protection',
     icon: Network,
     tests: [
-      { id: 'protected-routes', name: 'Protected Routes', description: 'Test access to protected routes' },
+      {
+        id: 'protected-routes',
+        name: 'Protected Routes',
+        description: 'Test access to protected routes',
+      },
       { id: 'admin-routes', name: 'Admin Routes', description: 'Test admin-only route protection' },
-      { id: 'module-routes', name: 'Module Routes', description: 'Test module-specific route protection' },
-      { id: 'redirect-unauthorized', name: 'Unauthorized Redirects', description: 'Test redirects for unauthorized access' },
-      { id: 'middleware-protection', name: 'Middleware Protection', description: 'Test middleware-level protection' }
-    ]
+      {
+        id: 'module-routes',
+        name: 'Module Routes',
+        description: 'Test module-specific route protection',
+      },
+      {
+        id: 'redirect-unauthorized',
+        name: 'Unauthorized Redirects',
+        description: 'Test redirects for unauthorized access',
+      },
+      {
+        id: 'middleware-protection',
+        name: 'Middleware Protection',
+        description: 'Test middleware-level protection',
+      },
+    ],
   },
   ui: {
     name: 'UI Components',
     icon: Code,
     tests: [
-      { id: 'module-guard', name: 'ModuleGuard Component', description: 'Test ModuleGuard HOC functionality' },
-      { id: 'auth-provider', name: 'AuthProvider Context', description: 'Test authentication context' },
+      {
+        id: 'module-guard',
+        name: 'ModuleGuard Component',
+        description: 'Test ModuleGuard HOC functionality',
+      },
+      {
+        id: 'auth-provider',
+        name: 'AuthProvider Context',
+        description: 'Test authentication context',
+      },
       { id: 'access-badges', name: 'Access Badges', description: 'Test access level indicators' },
       { id: 'login-modal', name: 'Login Modal', description: 'Test login modal component' },
-      { id: 'conditional-rendering', name: 'Conditional Rendering', description: 'Test permission-based rendering' }
-    ]
-  }
+      {
+        id: 'conditional-rendering',
+        name: 'Conditional Rendering',
+        description: 'Test permission-based rendering',
+      },
+    ],
+  },
 };
 
 function AuthTester() {
   const { user, login, logout, checkModuleAccess, checkPermission } = useAuth();
-  const [testResults, setTestResults] = useState<Record<string, 'pass' | 'fail' | 'warning' | 'pending'>>({});
+  const [testResults, setTestResults] = useState<
+    Record<string, 'pass' | 'fail' | 'warning' | 'pending'>
+  >({});
   const [runningTests, setRunningTests] = useState<string[]>([]);
 
   const runTest = async (testId: string, testFunc: () => Promise<boolean> | boolean) => {
-    setRunningTests(prev => [...prev, testId]);
-    
+    setRunningTests((prev) => [...prev, testId]);
+
     try {
       // Add delay for realistic testing experience
-      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 1000));
+
       const result = await testFunc();
-      setTestResults(prev => ({
+      setTestResults((prev) => ({
         ...prev,
-        [testId]: result ? 'pass' : 'fail'
+        [testId]: result ? 'pass' : 'fail',
       }));
     } catch (error) {
       console.error(`Test ${testId} failed:`, error);
-      setTestResults(prev => ({
+      setTestResults((prev) => ({
         ...prev,
-        [testId]: 'fail'
+        [testId]: 'fail',
       }));
     } finally {
-      setRunningTests(prev => prev.filter(id => id !== testId));
+      setRunningTests((prev) => prev.filter((id) => id !== testId));
     }
   };
 
   const runTestSuite = async (suiteKey: string) => {
     const suite = TEST_SUITES[suiteKey as keyof typeof TEST_SUITES];
-    
+
     for (const test of suite.tests) {
       await runTest(test.id, () => getTestFunction(test.id)());
     }
@@ -117,7 +195,19 @@ function AuthTester() {
           role: 'admin',
           systemRole: 10,
           permissions: ['read', 'write', 'delete', 'manage', 'admin'],
-          modules: ['sales', 'crm', 'inventory', 'finance', 'hrm', 'projects', 'manufacturing', 'marketing', 'support', 'analytics', 'ecommerce']
+          modules: [
+            'sales',
+            'crm',
+            'inventory',
+            'finance',
+            'hrm',
+            'projects',
+            'manufacturing',
+            'marketing',
+            'support',
+            'analytics',
+            'ecommerce',
+          ],
         };
         login(adminUser);
         return user?.role === 'admin';
@@ -130,7 +220,7 @@ function AuthTester() {
           role: 'manager',
           systemRole: 7,
           permissions: ['read', 'write', 'manage'],
-          modules: ['sales', 'crm', 'inventory', 'projects', 'marketing', 'analytics']
+          modules: ['sales', 'crm', 'inventory', 'projects', 'marketing', 'analytics'],
         };
         login(managerUser);
         return user?.role === 'manager';
@@ -143,7 +233,7 @@ function AuthTester() {
           role: 'employee',
           systemRole: 3,
           permissions: ['read', 'write'],
-          modules: ['sales', 'crm']
+          modules: ['sales', 'crm'],
         };
         login(employeeUser);
         return user?.role === 'employee';
@@ -156,24 +246,28 @@ function AuthTester() {
           role: 'viewer',
           systemRole: 1,
           permissions: ['read'],
-          modules: ['sales', 'analytics']
+          modules: ['sales', 'analytics'],
         };
         login(viewerUser);
         return user?.role === 'viewer';
       },
-      'logout': () => {
+      logout: () => {
         logout();
         return !user;
       },
-      
+
       // Permission tests
       'module-access-admin': () => {
         if (!user || user.role !== 'admin') return false;
-        return ['sales', 'crm', 'inventory', 'finance'].every(module => checkModuleAccess(module));
+        return ['sales', 'crm', 'inventory', 'finance'].every((module) =>
+          checkModuleAccess(module)
+        );
       },
       'module-access-manager': () => {
         if (!user || user.role !== 'manager') return false;
-        return checkModuleAccess('sales') && checkModuleAccess('crm') && !checkModuleAccess('finance');
+        return (
+          checkModuleAccess('sales') && checkModuleAccess('crm') && !checkModuleAccess('finance')
+        );
       },
       'permission-read': () => {
         return checkPermission('read', 'sales');
@@ -184,31 +278,58 @@ function AuthTester() {
       'permission-admin': () => {
         return user?.role === 'admin' ? checkPermission('admin', 'system') : true;
       },
-      
+
       // Default test for others
-      default: () => true
+      default: () => true,
     };
 
     return tests[testId] || tests.default;
   };
 
   const getTestIcon = (status: string, isRunning: boolean) => {
-    if (isRunning) return <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />;
-    
+    if (isRunning)
+      return (
+        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      );
+
     switch (status) {
-      case 'pass': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'fail': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      default: return <div className="w-4 h-4 border border-gray-300 rounded-full" />;
+      case 'pass':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'fail':
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      default:
+        return <div className="w-4 h-4 border border-gray-300 rounded-full" />;
     }
   };
 
   const getTestBadge = (status: string) => {
     switch (status) {
-      case 'pass': return <Badge variant="success" className="text-xs">PASS</Badge>;
-      case 'fail': return <Badge variant="error" className="text-xs">FAIL</Badge>;
-      case 'warning': return <Badge variant="warning" className="text-xs">WARN</Badge>;
-      default: return <Badge variant="outline" className="text-xs">PENDING</Badge>;
+      case 'pass':
+        return (
+          <Badge variant="success" className="text-xs">
+            PASS
+          </Badge>
+        );
+      case 'fail':
+        return (
+          <Badge variant="error" className="text-xs">
+            FAIL
+          </Badge>
+        );
+      case 'warning':
+        return (
+          <Badge variant="warning" className="text-xs">
+            WARN
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="text-xs">
+            PENDING
+          </Badge>
+        );
     }
   };
 
@@ -292,7 +413,7 @@ function AuthTester() {
                   {suite.tests.map((test) => {
                     const status = testResults[test.id];
                     const isRunning = runningTests.includes(test.id);
-                    
+
                     return (
                       <div
                         key={test.id}
@@ -336,10 +457,12 @@ function AuthTester() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {['pass', 'fail', 'warning', 'pending'].map((status) => {
-                const count = Object.values(testResults).filter(result => result === status).length;
+                const count = Object.values(testResults).filter(
+                  (result) => result === status
+                ).length;
                 const total = Object.keys(testResults).length;
                 const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
-                
+
                 return (
                   <div key={status} className="text-center p-4 border rounded-lg">
                     <div className="text-2xl font-bold">{count}</div>

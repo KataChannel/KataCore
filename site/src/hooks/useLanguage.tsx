@@ -2,7 +2,12 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { Language, saveLanguagePreference, loadLanguagePreference, i18nConfig } from '@/lib/config/i18n';
+import {
+  Language,
+  saveLanguagePreference,
+  loadLanguagePreference,
+  i18nConfig,
+} from '@/lib/config/i18n';
 import { useUnifiedTheme } from './useUnifiedTheme';
 
 // ============================================================================
@@ -32,10 +37,7 @@ interface LanguageProviderProps {
   defaultLanguage?: Language;
 }
 
-export function LanguageProvider({ 
-  children, 
-  defaultLanguage 
-}: LanguageProviderProps) {
+export function LanguageProvider({ children, defaultLanguage }: LanguageProviderProps) {
   const [language, setLanguageState] = useState<Language>(
     defaultLanguage || i18nConfig.defaultLocale
   );
@@ -48,25 +50,28 @@ export function LanguageProvider({
   useEffect(() => {
     const loadedLanguage = loadLanguagePreference();
     setLanguageState(loadedLanguage);
-    
+
     // Sync with unified theme
     if (unifiedTheme?.setLanguage && loadedLanguage !== unifiedTheme.config.language) {
       unifiedTheme.setLanguage(loadedLanguage);
     }
-    
+
     setIsLoading(false);
   }, [unifiedTheme]);
 
   // Handle language changes
-  const setLanguage = useCallback((newLanguage: Language) => {
-    setLanguageState(newLanguage);
-    saveLanguagePreference(newLanguage);
-    
-    // Sync with unified theme
-    if (unifiedTheme?.setLanguage) {
-      unifiedTheme.setLanguage(newLanguage);
-    }
-  }, [unifiedTheme]);
+  const setLanguage = useCallback(
+    (newLanguage: Language) => {
+      setLanguageState(newLanguage);
+      saveLanguagePreference(newLanguage);
+
+      // Sync with unified theme
+      if (unifiedTheme?.setLanguage) {
+        unifiedTheme.setLanguage(newLanguage);
+      }
+    },
+    [unifiedTheme]
+  );
 
   // Toggle between languages
   const toggleLanguage = useCallback(() => {
@@ -75,17 +80,20 @@ export function LanguageProvider({
   }, [language, setLanguage]);
 
   // Translation function
-  const t = useCallback((key: string, module: keyof typeof i18nConfig = 'common') => {
-    const keys = key.split('.');
-    const translations = i18nConfig[module] as any;
-    let value: any = translations[language];
+  const t = useCallback(
+    (key: string, module: keyof typeof i18nConfig = 'common') => {
+      const keys = key.split('.');
+      const translations = i18nConfig[module] as any;
+      let value: any = translations[language];
 
-    for (const k of keys) {
-      value = value?.[k];
-    }
+      for (const k of keys) {
+        value = value?.[k];
+      }
 
-    return value || key;
-  }, [language]);
+      return value || key;
+    },
+    [language]
+  );
 
   return (
     <LanguageContext.Provider
@@ -108,11 +116,11 @@ export function LanguageProvider({
 
 export function useLanguage() {
   const context = useContext(LanguageContext);
-  
+
   if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
-  
+
   return context;
 }
 
@@ -122,18 +130,21 @@ export function useLanguage() {
 
 export function useTranslationStandalone(language?: Language) {
   const currentLanguage = language || loadLanguagePreference();
-  
-  const t = useCallback((key: string, module: keyof typeof i18nConfig = 'common') => {
-    const keys = key.split('.');
-    const translations = i18nConfig[module] as any;
-    let value: any = translations[currentLanguage];
 
-    for (const k of keys) {
-      value = value?.[k];
-    }
+  const t = useCallback(
+    (key: string, module: keyof typeof i18nConfig = 'common') => {
+      const keys = key.split('.');
+      const translations = i18nConfig[module] as any;
+      let value: any = translations[currentLanguage];
 
-    return value || key;
-  }, [currentLanguage]);
+      for (const k of keys) {
+        value = value?.[k];
+      }
+
+      return value || key;
+    },
+    [currentLanguage]
+  );
 
   return { t, language: currentLanguage };
 }

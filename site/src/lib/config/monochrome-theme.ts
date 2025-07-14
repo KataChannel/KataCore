@@ -266,9 +266,7 @@ export function applyThemeMode(mode: ThemeMode): ThemeMode {
   let actualMode: 'light' | 'dark' = 'light';
 
   if (mode === 'auto') {
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     actualMode = prefersDark ? 'dark' : 'light';
   } else {
     actualMode = mode === 'dark' ? 'dark' : 'light';
@@ -289,12 +287,9 @@ export function saveThemePreference(mode: ThemeMode): void {
 }
 
 export function loadThemePreference(): ThemeMode {
-  if (typeof localStorage === 'undefined')
-    return monochromeThemeConfig.defaults.mode;
+  if (typeof localStorage === 'undefined') return monochromeThemeConfig.defaults.mode;
 
-  const saved = localStorage.getItem(
-    monochromeThemeConfig.storageKeys.theme
-  ) as ThemeMode;
+  const saved = localStorage.getItem(monochromeThemeConfig.storageKeys.theme) as ThemeMode;
   if (saved && ['light', 'dark', 'auto'].includes(saved)) {
     return saved;
   }
@@ -308,12 +303,9 @@ export function saveLanguagePreference(language: Language): void {
 }
 
 export function loadLanguagePreference(): Language {
-  if (typeof localStorage === 'undefined')
-    return monochromeThemeConfig.defaults.language;
+  if (typeof localStorage === 'undefined') return monochromeThemeConfig.defaults.language;
 
-  const saved = localStorage.getItem(
-    monochromeThemeConfig.storageKeys.language
-  ) as Language;
+  const saved = localStorage.getItem(monochromeThemeConfig.storageKeys.language) as Language;
   if (saved && ['vi', 'en'].includes(saved)) {
     return saved;
   }

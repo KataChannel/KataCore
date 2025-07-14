@@ -36,10 +36,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching roles:', error);
-    return NextResponse.json(
-      { error: 'Không thể tải danh sách vai trò' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tải danh sách vai trò' }, { status: 500 });
   }
 }
 
@@ -55,10 +52,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingRole) {
-      return NextResponse.json(
-        { error: 'Vai trò đã tồn tại' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Vai trò đã tồn tại' }, { status: 400 });
     }
 
     const role = await prisma.role.create({
@@ -79,9 +73,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(role, { status: 201 });
   } catch (error) {
     console.error('Error creating role:', error);
-    return NextResponse.json(
-      { error: 'Không thể tạo vai trò mới' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tạo vai trò mới' }, { status: 500 });
   }
 }

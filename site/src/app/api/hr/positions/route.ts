@@ -35,11 +35,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: [
-        { department: { name: 'asc' } },
-        { level: 'desc' },
-        { title: 'asc' },
-      ],
+      orderBy: [{ department: { name: 'asc' } }, { level: 'desc' }, { title: 'asc' }],
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -57,10 +53,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching positions:', error);
-    return NextResponse.json(
-      { error: 'Không thể tải danh sách chức vụ' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tải danh sách chức vụ' }, { status: 500 });
   }
 }
 
@@ -123,9 +116,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(position, { status: 201 });
   } catch (error) {
     console.error('Error creating position:', error);
-    return NextResponse.json(
-      { error: 'Không thể tạo chức vụ mới' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tạo chức vụ mới' }, { status: 500 });
   }
 }

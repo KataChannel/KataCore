@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 interface User {
   id: string;
@@ -152,10 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Login with OTP
-  const loginWithOTP = async (
-    phone: string,
-    otpCode: string
-  ): Promise<boolean> => {
+  const loginWithOTP = async (phone: string, otpCode: string): Promise<boolean> => {
     try {
       setLoading(true);
       const response = await fetch('/api/auth/verify-otp', {

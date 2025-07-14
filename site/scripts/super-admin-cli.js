@@ -18,7 +18,7 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
 };
 
 function log(message, color = 'reset') {
@@ -46,7 +46,7 @@ function showHelp() {
   log('\n🛡️  TazaCore Super Admin CLI Tool', 'cyan');
   log('═══════════════════════════════════', 'cyan');
   log('\nUsage: node scripts/super-admin-cli.js [command] [options]\n');
-  
+
   log('Commands:', 'bright');
   log('  init                    Initialize system with Super Admin');
   log('  check                   Check system initialization status');
@@ -54,17 +54,19 @@ function showHelp() {
   log('  run-script              Run the TypeScript creation script');
   log('  list                    List all Super Admins');
   log('  help                    Show this help message\n');
-  
+
   log('Options:', 'bright');
   log('  --email <email>         Admin email (default: admin@taza.com)');
   log('  --password <password>   Admin password (default: TazaAdmin@2024!)');
   log('  --name <name>           Display name (default: Super Administrator)');
   log('  --username <username>   Username (default: superadmin)');
   log('  --setup-key <key>       System setup key (default: TazaSetup2024)\n');
-  
+
   log('Examples:', 'bright');
   log('  node scripts/super-admin-cli.js init');
-  log('  node scripts/super-admin-cli.js init --email admin@company.com --password MySecurePass123');
+  log(
+    '  node scripts/super-admin-cli.js init --email admin@company.com --password MySecurePass123'
+  );
   log('  node scripts/super-admin-cli.js check');
   log('  node scripts/super-admin-cli.js run-script\n');
 }
@@ -74,7 +76,7 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const command = args[0];
   const options = {};
-  
+
   for (let i = 1; i < args.length; i += 2) {
     const key = args[i]?.replace('--', '');
     const value = args[i + 1];
@@ -82,7 +84,7 @@ function parseArgs() {
       options[key] = value;
     }
   }
-  
+
   return { command, options };
 }
 
@@ -93,7 +95,7 @@ function getDefaultConfig(options = {}) {
     password: options.password || 'TazaAdmin@2024!',
     displayName: options.name || 'Super Administrator',
     username: options.username || 'superadmin',
-    setupKey: options['setup-key'] || 'TazaSetup2024'
+    setupKey: options['setup-key'] || 'TazaSetup2024',
   };
 }
 
@@ -103,9 +105,9 @@ function checkProjectStructure() {
     'package.json',
     'src/lib/prisma.ts',
     'src/lib/auth',
-    'scripts/create-super-admin.ts'
+    'scripts/create-super-admin.ts',
   ];
-  
+
   for (const file of requiredFiles) {
     if (!fs.existsSync(file)) {
       error(`Required file not found: ${file}`);
@@ -119,7 +121,7 @@ function checkProjectStructure() {
 async function runCreateScript(options = {}) {
   try {
     info('Running Super Admin creation script...');
-    
+
     // Check if TypeScript is available
     try {
       execSync('npx tsx --version', { stdio: 'pipe' });
@@ -127,27 +129,26 @@ async function runCreateScript(options = {}) {
       error('TypeScript execution environment (tsx) not found. Installing...');
       execSync('npm install -g tsx', { stdio: 'inherit' });
     }
-    
+
     const config = getDefaultConfig(options);
-    
+
     // Set environment variables for the script
     process.env.ADMIN_EMAIL = config.email;
     process.env.ADMIN_PASSWORD = config.password;
     process.env.ADMIN_DISPLAY_NAME = config.displayName;
     process.env.ADMIN_USERNAME = config.username;
-    
+
     // Run the TypeScript script
-    execSync('npx tsx scripts/create-super-admin.ts', { 
+    execSync('npx tsx scripts/create-super-admin.ts', {
       stdio: 'inherit',
-      env: process.env
+      env: process.env,
     });
-    
+
     success('Super Admin creation script completed successfully!');
     info(`Super Admin credentials:`);
     info(`  Email: ${config.email}`);
     info(`  Password: ${config.password}`);
     warning('Please change the default password after first login!');
-    
   } catch (error) {
     error('Failed to run creation script: ' + error.message);
     process.exit(1);
@@ -158,14 +159,14 @@ async function runCreateScript(options = {}) {
 async function checkSystemStatus() {
   try {
     info('Checking system initialization status...');
-    
+
     // Try to start the development server temporarily to check API
     const fetch = (await import('node-fetch')).default;
-    
+
     try {
       const response = await fetch('http://localhost:3000/api/admin/initialize');
       const data = await response.json();
-      
+
       if (data.initialized) {
         success('System is already initialized');
         info(`Super Admin exists: ${data.superAdmin.exists}`);
@@ -181,12 +182,11 @@ async function checkSystemStatus() {
     } catch (apiError) {
       warning('Could not connect to API server. System may not be running.');
       info('Try starting the development server with "npm run dev" first.');
-      
+
       // Fall back to database check
       info('Attempting direct database check...');
       await runDatabaseCheck();
     }
-    
   } catch (error) {
     error('Failed to check system status: ' + error.message);
     process.exit(1);
@@ -231,16 +231,15 @@ async function runDatabaseCheck() {
       
       check();
     `;
-    
+
     // Write temporary check script
     fs.writeFileSync('/tmp/check-super-admin.ts', checkScript);
-    
+
     // Run the check
     execSync('npx tsx /tmp/check-super-admin.ts', { stdio: 'inherit' });
-    
+
     // Clean up
     fs.unlinkSync('/tmp/check-super-admin.ts');
-    
   } catch (error) {
     error('Database check failed: ' + error.message);
   }
@@ -250,15 +249,15 @@ async function runDatabaseCheck() {
 async function initializeSystem(options = {}) {
   try {
     info('Initializing TazaCore system...');
-    
+
     const config = getDefaultConfig(options);
     const fetch = (await import('node-fetch')).default;
-    
+
     try {
       const response = await fetch('http://localhost:3000/api/admin/initialize', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           setupKey: config.setupKey,
@@ -266,13 +265,13 @@ async function initializeSystem(options = {}) {
             email: config.email,
             password: config.password,
             displayName: config.displayName,
-            username: config.username
-          }
-        })
+            username: config.username,
+          },
+        }),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
         success('System initialized successfully!');
         info('Super Admin created with the following credentials:');
@@ -281,7 +280,7 @@ async function initializeSystem(options = {}) {
         warning(result.data.credentials.warning);
       } else {
         error('Initialization failed: ' + result.error);
-        
+
         if (result.error.includes('already initialized')) {
           info('System is already set up. Use "check" command to view status.');
         }
@@ -290,7 +289,6 @@ async function initializeSystem(options = {}) {
       warning('Could not connect to API server. Falling back to script method...');
       await runCreateScript(options);
     }
-    
   } catch (error) {
     error('Failed to initialize system: ' + error.message);
     process.exit(1);
@@ -301,7 +299,7 @@ async function initializeSystem(options = {}) {
 async function listSuperAdmins() {
   try {
     info('Listing all Super Administrators...');
-    
+
     const listScript = `
       import { prisma } from './src/lib/prisma';
       
@@ -353,16 +351,15 @@ async function listSuperAdmins() {
       
       listSuperAdmins();
     `;
-    
+
     // Write temporary list script
     fs.writeFileSync('/tmp/list-super-admins.ts', listScript);
-    
+
     // Run the script
     execSync('npx tsx /tmp/list-super-admins.ts', { stdio: 'inherit' });
-    
+
     // Clean up
     fs.unlinkSync('/tmp/list-super-admins.ts');
-    
   } catch (error) {
     error('Failed to list Super Admins: ' + error.message);
     process.exit(1);
@@ -372,39 +369,39 @@ async function listSuperAdmins() {
 // Main execution
 async function main() {
   const { command, options } = parseArgs();
-  
+
   // Check project structure
   checkProjectStructure();
-  
+
   log('\n🛡️  TazaCore Super Admin CLI', 'cyan');
   log('═══════════════════════════════', 'cyan');
-  
+
   switch (command) {
     case 'init':
     case 'initialize':
       await initializeSystem(options);
       break;
-      
+
     case 'check':
     case 'status':
       await checkSystemStatus();
       break;
-      
+
     case 'create':
     case 'run-script':
       await runCreateScript(options);
       break;
-      
+
     case 'list':
       await listSuperAdmins();
       break;
-      
+
     case 'help':
     case '--help':
     case '-h':
       showHelp();
       break;
-      
+
     default:
       if (command) {
         error(`Unknown command: ${command}`);
@@ -414,7 +411,7 @@ async function main() {
       log('\nUse "help" to see available commands\n');
       process.exit(1);
   }
-  
+
   log('');
 }
 

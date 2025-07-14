@@ -7,9 +7,7 @@ export async function middleware(request: NextRequest) {
 
   // Define protected routes
   const protectedRoutes = ['/admin', '/dashboard', '/profile'];
-  const isProtectedRoute = protectedRoutes.some(route =>
-    path.startsWith(route)
-  );
+  const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route));
 
   if (isProtectedRoute) {
     const session = await auth();

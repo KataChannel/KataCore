@@ -47,7 +47,7 @@ const PopularProducts: React.FC = () => {
         Popular Products
       </h2>
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-        {popularProducts.map(product => (
+        {popularProducts.map((product) => (
           <div
             key={product.id}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col items-center transition duration-300 hover:shadow-xl"
@@ -59,9 +59,7 @@ const PopularProducts: React.FC = () => {
               height={200}
               className="w-full h-40 object-cover mb-4 rounded"
             />
-            <h3 className="text-xl text-gray-700 dark:text-gray-200">
-              {product.title}
-            </h3>
+            <h3 className="text-xl text-gray-700 dark:text-gray-200">{product.title}</h3>
           </div>
         ))}
       </div>

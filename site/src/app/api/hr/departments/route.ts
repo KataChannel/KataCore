@@ -66,10 +66,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching departments:', error);
-    return NextResponse.json(
-      { error: 'Không thể tải danh sách phòng ban' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tải danh sách phòng ban' }, { status: 500 });
   }
 }
 
@@ -98,10 +95,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingDepartment) {
-      return NextResponse.json(
-        { error: 'Tên hoặc mã phòng ban đã tồn tại' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Tên hoặc mã phòng ban đã tồn tại' }, { status: 400 });
     }
 
     const department = await prisma.department.create({
@@ -144,9 +138,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(department, { status: 201 });
   } catch (error) {
     console.error('Error creating department:', error);
-    return NextResponse.json(
-      { error: 'Không thể tạo phòng ban mới' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Không thể tạo phòng ban mới' }, { status: 500 });
   }
 }

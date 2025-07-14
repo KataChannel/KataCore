@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import authService from '@/lib/auth/authService';
+import { authService } from '@/lib/auth/unified-auth.service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,9 +22,6 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Logout failed' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: error.message || 'Logout failed' }, { status: 400 });
   }
 }

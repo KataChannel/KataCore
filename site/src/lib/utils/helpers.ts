@@ -56,7 +56,7 @@ export function truncate(str: string, length: number): string {
  * Sleep utility for delays
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**

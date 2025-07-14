@@ -116,16 +116,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      employeeId,
-      date,
-      timeIn,
-      timeOut,
-      breakStart,
-      breakEnd,
-      status,
-      notes,
-    } = body;
+    const { employeeId, date, timeIn, timeOut, breakStart, breakEnd, status, notes } = body;
 
     if (!employeeId || !date) {
       return NextResponse.json(
@@ -171,16 +162,13 @@ export async function POST(request: NextRequest) {
       const timeInDate = new Date(`${date}T${timeIn}`);
       const timeOutDate = new Date(`${date}T${timeOut}`);
 
-      let workingHours =
-        (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
+      let workingHours = (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
 
       // Trừ thời gian nghỉ trưa
       if (breakStart && breakEnd) {
         const breakStartDate = new Date(`${date}T${breakStart}`);
         const breakEndDate = new Date(`${date}T${breakEnd}`);
-        const breakHours =
-          (breakEndDate.getTime() - breakStartDate.getTime()) /
-          (1000 * 60 * 60);
+        const breakHours = (breakEndDate.getTime() - breakStartDate.getTime()) / (1000 * 60 * 60);
         workingHours -= breakHours;
       }
 
@@ -246,10 +234,7 @@ export async function PUT(request: NextRequest) {
     const { id, timeIn, timeOut, breakStart, breakEnd, status, notes } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Thiếu ID bản ghi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Thiếu ID bản ghi' }, { status: 400 });
     }
 
     const existingAttendance = await prisma.attendance.findUnique({
@@ -272,16 +257,13 @@ export async function PUT(request: NextRequest) {
       const timeInDate = new Date(`${date}T${timeIn}`);
       const timeOutDate = new Date(`${date}T${timeOut}`);
 
-      let workingHours =
-        (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
+      let workingHours = (timeOutDate.getTime() - timeInDate.getTime()) / (1000 * 60 * 60);
 
       // Trừ thời gian nghỉ trưa
       if (breakStart && breakEnd) {
         const breakStartDate = new Date(`${date}T${breakStart}`);
         const breakEndDate = new Date(`${date}T${breakEnd}`);
-        const breakHours =
-          (breakEndDate.getTime() - breakStartDate.getTime()) /
-          (1000 * 60 * 60);
+        const breakHours = (breakEndDate.getTime() - breakStartDate.getTime()) / (1000 * 60 * 60);
         workingHours -= breakHours;
       }
 
@@ -346,10 +328,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Thiếu ID bản ghi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Thiếu ID bản ghi' }, { status: 400 });
     }
 
     const existingAttendance = await prisma.attendance.findUnique({

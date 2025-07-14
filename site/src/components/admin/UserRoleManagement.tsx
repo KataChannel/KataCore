@@ -94,26 +94,30 @@ export default function UserRoleManagement() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [modules, setModules] = useState<string[]>([]);
-  
+
   // Loading and error states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filters and search
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
   const [moduleFilter, setModuleFilter] = useState('all');
   const [levelFilter, setLevelFilter] = useState('all');
-  
+
   // Modal states
   const [showUserModal, setShowUserModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: 'user' | 'role'; id: string; name: string } | null>(null);
-  
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: 'user' | 'role';
+    id: string;
+    name: string;
+  } | null>(null);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -140,7 +144,7 @@ export default function UserRoleManagement() {
 
       const response = await fetch(`/api/admin/users?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
 
@@ -170,7 +174,7 @@ export default function UserRoleManagement() {
 
       const response = await fetch(`/api/admin/roles?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
 
@@ -188,38 +192,35 @@ export default function UserRoleManagement() {
   };
 
   // Filter users based on current filters
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
       user.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesStatus = 
+
+    const matchesStatus =
       statusFilter === 'all' ||
       (statusFilter === 'active' && user.isActive) ||
       (statusFilter === 'inactive' && !user.isActive);
-    
-    const matchesRole = 
-      roleFilter === 'all' || user.role.id === roleFilter;
-    
-    const matchesModule = 
-      moduleFilter === 'all' || 
-      (user.systemRole && user.systemRole.modules.includes(moduleFilter));
+
+    const matchesRole = roleFilter === 'all' || user.role.id === roleFilter;
+
+    const matchesModule =
+      moduleFilter === 'all' || (user.systemRole && user.systemRole.modules.includes(moduleFilter));
 
     return matchesSearch && matchesStatus && matchesRole && matchesModule;
   });
 
   // Filter roles based on current filters
-  const filteredRoles = roles.filter(role => {
-    const matchesSearch = 
+  const filteredRoles = roles.filter((role) => {
+    const matchesSearch =
       role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       role.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesModule = 
-      moduleFilter === 'all' || role.modules.includes(moduleFilter);
-    
-    const matchesLevel = 
-      levelFilter === 'all' || 
+
+    const matchesModule = moduleFilter === 'all' || role.modules.includes(moduleFilter);
+
+    const matchesLevel =
+      levelFilter === 'all' ||
       (levelFilter === 'low' && role.level <= 3) ||
       (levelFilter === 'medium' && role.level > 3 && role.level <= 7) ||
       (levelFilter === 'high' && role.level > 7);
@@ -264,14 +265,15 @@ export default function UserRoleManagement() {
     if (!deleteTarget) return;
 
     try {
-      const endpoint = deleteTarget.type === 'user' 
-        ? `/api/admin/users?userId=${deleteTarget.id}`
-        : `/api/admin/roles?roleId=${deleteTarget.id}`;
+      const endpoint =
+        deleteTarget.type === 'user'
+          ? `/api/admin/users?userId=${deleteTarget.id}`
+          : `/api/admin/roles?roleId=${deleteTarget.id}`;
 
       const response = await fetch(endpoint, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
 
@@ -437,7 +439,7 @@ export default function UserRoleManagement() {
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 >
                   <option value="all">All Modules</option>
-                  {modules.map(module => (
+                  {modules.map((module) => (
                     <option key={module} value={module}>
                       {module.charAt(0).toUpperCase() + module.slice(1)}
                     </option>
@@ -454,7 +456,7 @@ export default function UserRoleManagement() {
                     className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   >
                     <option value="all">All Roles</option>
-                    {roles.map(role => (
+                    {roles.map((role) => (
                       <option key={role.id} value={role.id}>
                         {role.name}
                       </option>
@@ -554,7 +556,16 @@ const UsersTable: React.FC<{
   getModuleBadgeColor: (module: string) => string;
   getRoleLevelBadge: (level: number) => string;
   getRoleLevelText: (level: number) => string;
-}> = ({ users, roles, loading, onEdit, onDelete, getModuleBadgeColor, getRoleLevelBadge, getRoleLevelText }) => {
+}> = ({
+  users,
+  roles,
+  loading,
+  onEdit,
+  onDelete,
+  getModuleBadgeColor,
+  getRoleLevelBadge,
+  getRoleLevelText,
+}) => {
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg">
@@ -622,7 +633,9 @@ const UsersTable: React.FC<{
                   <div>
                     <div className="text-sm font-medium text-gray-900">{user.role.name}</div>
                     {user.systemRole && (
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRoleLevelBadge(user.systemRole.level)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRoleLevelBadge(user.systemRole.level)}`}
+                      >
                         Level {user.systemRole.level} - {getRoleLevelText(user.systemRole.level)}
                       </span>
                     )}
@@ -647,9 +660,11 @@ const UsersTable: React.FC<{
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex flex-col gap-1">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {user.isActive ? 'Active' : 'Inactive'}
                     </span>
                     {user.isVerified && (
@@ -663,7 +678,9 @@ const UsersTable: React.FC<{
                 <td className="px-6 py-4 whitespace-nowrap">
                   {user.employee?.department ? (
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{user.employee.department.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.employee.department.name}
+                      </div>
                       {user.employee.position && (
                         <div className="text-sm text-gray-500">{user.employee.position.title}</div>
                       )}
@@ -698,9 +715,7 @@ const UsersTable: React.FC<{
         <div className="text-center py-12">
           <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Get started by creating a new user.
-          </p>
+          <p className="mt-1 text-sm text-gray-500">Get started by creating a new user.</p>
         </div>
       )}
     </div>
@@ -716,7 +731,15 @@ const RolesTable: React.FC<{
   getModuleBadgeColor: (module: string) => string;
   getRoleLevelBadge: (level: number) => string;
   getRoleLevelText: (level: number) => string;
-}> = ({ roles, loading, onEdit, onDelete, getModuleBadgeColor, getRoleLevelBadge, getRoleLevelText }) => {
+}> = ({
+  roles,
+  loading,
+  onEdit,
+  onDelete,
+  getModuleBadgeColor,
+  getRoleLevelBadge,
+  getRoleLevelText,
+}) => {
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg">
@@ -768,12 +791,18 @@ const RolesTable: React.FC<{
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex flex-col gap-1">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRoleLevelBadge(role.level)}`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRoleLevelBadge(role.level)}`}
+                    >
                       Level {role.level} - {getRoleLevelText(role.level)}
                     </span>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      role.isSystemRole ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        role.isSystemRole
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {role.isSystemRole ? 'System Role' : 'Custom Role'}
                     </span>
                   </div>
@@ -796,9 +825,7 @@ const RolesTable: React.FC<{
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {role.permissions.length} permissions
-                  </div>
+                  <div className="text-sm text-gray-900">{role.permissions.length} permissions</div>
                   <div className="text-sm text-gray-500">
                     {role.systemRole?.permissions.length || role.permissions.length} total
                   </div>
@@ -836,9 +863,7 @@ const RolesTable: React.FC<{
         <div className="text-center py-12">
           <ShieldCheckIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No roles found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Get started by creating a new role.
-          </p>
+          <p className="mt-1 text-sm text-gray-500">Get started by creating a new role.</p>
         </div>
       )}
     </div>
@@ -853,17 +878,19 @@ const PermissionsTable: React.FC<{
 }> = ({ permissions, modules, getModuleBadgeColor }) => {
   const [selectedModule, setSelectedModule] = useState<string>('all');
 
-  const filteredPermissions = selectedModule === 'all' 
-    ? permissions 
-    : permissions.filter(p => p.module === selectedModule);
+  const filteredPermissions =
+    selectedModule === 'all' ? permissions : permissions.filter((p) => p.module === selectedModule);
 
-  const groupedPermissions = filteredPermissions.reduce((acc, permission) => {
-    if (!acc[permission.module]) {
-      acc[permission.module] = [];
-    }
-    acc[permission.module].push(permission);
-    return acc;
-  }, {} as Record<string, Permission[]>);
+  const groupedPermissions = filteredPermissions.reduce(
+    (acc, permission) => {
+      if (!acc[permission.module]) {
+        acc[permission.module] = [];
+      }
+      acc[permission.module].push(permission);
+      return acc;
+    },
+    {} as Record<string, Permission[]>
+  );
 
   return (
     <div className="space-y-6">
@@ -880,8 +907,8 @@ const PermissionsTable: React.FC<{
           >
             All Modules ({permissions.length})
           </button>
-          {modules.map(module => {
-            const count = permissions.filter(p => p.module === module).length;
+          {modules.map((module) => {
+            const count = permissions.filter((p) => p.module === module).length;
             return (
               <button
                 key={module}
@@ -904,7 +931,9 @@ const PermissionsTable: React.FC<{
         <div key={module} className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getModuleBadgeColor(module)}`}>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getModuleBadgeColor(module)}`}
+              >
                 {module.charAt(0).toUpperCase() + module.slice(1)}
               </span>
               <span className="ml-3 text-sm text-gray-500">
@@ -963,7 +992,9 @@ const DeleteConfirmationModal: React.FC<{
           <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+          &#8203;
+        </span>
 
         <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -977,7 +1008,8 @@ const DeleteConfirmationModal: React.FC<{
                 </h3>
                 <div className="mt-2">
                   <p className="text-sm text-gray-500">
-                    Are you sure you want to delete the {target.type} "{target.name}"? This action cannot be undone.
+                    Are you sure you want to delete the {target.type} "{target.name}"? This action
+                    cannot be undone.
                   </p>
                 </div>
               </div>

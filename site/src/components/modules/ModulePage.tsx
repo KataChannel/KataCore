@@ -7,7 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Search, Filter, Download, Upload, Eye, Edit, Trash2, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ModuleConfig {
   name: string;
@@ -46,7 +52,7 @@ export function ModulePage({ config, userPermissions, userModules }: ModulePageP
 
   // Check specific permissions
   const checkPermission = (action: string, resource: string) => {
-    return userPermissions.some(permission => {
+    return userPermissions.some((permission) => {
       if (typeof permission === 'string') {
         const [permAction, permResource] = permission.split(':');
         return permAction === action && permResource === resource;
@@ -63,8 +69,8 @@ export function ModulePage({ config, userPermissions, userModules }: ModulePageP
     try {
       // Here you would fetch actual data from your API
       // For now, we'll simulate loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Mock data
       setData([
         { id: 1, name: 'Sample Record 1', status: 'active', createdAt: new Date().toISOString() },
@@ -101,7 +107,7 @@ export function ModulePage({ config, userPermissions, userModules }: ModulePageP
     );
   }
 
-  const activeSection = config.sections.find(section => section.id === activeTab);
+  const activeSection = config.sections.find((section) => section.id === activeTab);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -109,9 +115,7 @@ export function ModulePage({ config, userPermissions, userModules }: ModulePageP
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className={`p-3 rounded-lg ${config.color}`}>
-              {config.icon}
-            </div>
+            <div className={`p-3 rounded-lg ${config.color}`}>{config.icon}</div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{config.title}</h1>
               <p className="text-gray-600">{config.description}</p>
@@ -258,7 +262,11 @@ export function ModulePage({ config, userPermissions, userModules }: ModulePageP
                                   </Button>
                                 )}
                                 {section.permissions.delete && (
-                                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700"
+                                  >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 )}

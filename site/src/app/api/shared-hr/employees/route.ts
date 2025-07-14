@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { EmployeeFilters, ApiResponse, EmployeeWithRelations } from '../../../shared/types/database';
+import {
+  EmployeeFilters,
+  ApiResponse,
+  EmployeeWithRelations,
+} from '../../../shared/types/database';
 
 // GET /api/hr/employees - Lấy danh sách nhân viên
 export async function GET(request: NextRequest) {
@@ -143,7 +147,7 @@ export async function POST(request: NextRequest) {
       if (email) {
         // Find employee role
         const employeeRole = await tx.role.findFirst({
-          where: { name: 'EMPLOYEE' }
+          where: { name: 'EMPLOYEE' },
         });
 
         if (employeeRole) {
@@ -237,7 +241,7 @@ export async function PUT(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const id = url.pathname.split('/').pop();
-    
+
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'ID nhân viên không hợp lệ' },
@@ -364,7 +368,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const id = url.pathname.split('/').pop();
-    
+
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'ID nhân viên không hợp lệ' },
@@ -421,9 +425,11 @@ export async function DELETE(request: NextRequest) {
           },
         });
 
-        if (userRelations && 
-            userRelations.managedDepartments.length === 0 && 
-            userRelations.approvedLeaveRequests.length === 0) {
+        if (
+          userRelations &&
+          userRelations.managedDepartments.length === 0 &&
+          userRelations.approvedLeaveRequests.length === 0
+        ) {
           await tx.user.delete({
             where: { id: employee.userId },
           });
