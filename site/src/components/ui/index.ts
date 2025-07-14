@@ -1,9 +1,11 @@
 // UI Components barrel exports
-export { default as Button } from './Button';
-export { default as Input } from './Input';
+export { Button } from './button';
+export { Input } from './input';
 export { default as Dialog } from './Dialog';
-export { default as Card } from './Card';
-export * from './Button';
-export * from './Input';
+export * from './button';
+export * from './input';
 export * from './Dialog';
-export * from './Card';
+export * from './card';
+export * from './badge';
+export * from './tabs';
+export * from './select';

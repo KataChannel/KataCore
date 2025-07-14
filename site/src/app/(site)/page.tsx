@@ -16,12 +16,18 @@ import {
   ComputerDesktopIcon,
   SunIcon,
   MoonIcon,
+  LockClosedIcon,
+  KeyIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 import ThemeManager, { ColorSchemeToggle } from '@/components/ThemeManager';
+import { AuthProvider, useAuth, LoginModal, ModuleAccessBadge } from '@/components/auth/ModuleGuard';
 
-export default function HomePage() {
+function HomePageContent() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { user, loading, checkModuleAccess, logout } = useAuth();
 
   // Load theme from localStorage on component mount
   useEffect(() => {
@@ -45,7 +51,7 @@ export default function HomePage() {
     setIsDarkMode(!isDarkMode);
   };
 
-  // Define the software modules with their titles, descriptions, icons, and links
+  // Enhanced modules with access control integration
   const modules = [
     {
       title: 'Quản lý Bán hàng',
@@ -55,6 +61,8 @@ export default function HomePage() {
       icon: ChartBarIcon,
       href: '/sales',
       color: 'from-blue-500 to-cyan-500',
+      module: 'sales',
+      permissions: ['read:order', 'create:order', 'manage:pipeline'],
     },
     {
       title: 'Quản lý Khách hàng',
@@ -64,6 +72,8 @@ export default function HomePage() {
       icon: UsersIcon,
       href: '/admin/crm',
       color: 'from-green-500 to-emerald-500',
+      module: 'crm',
+      permissions: ['read:customer', 'read:lead', 'manage:campaign'],
     },
     {
       title: 'Quản lý Kho',
@@ -73,6 +83,8 @@ export default function HomePage() {
       icon: CubeIcon,
       href: '/inventory',
       color: 'from-orange-500 to-red-500',
+      module: 'inventory',
+      permissions: ['read:product', 'read:stock', 'manage:warehouse'],
     },
     {
       title: 'Quản lý Tài chính',
@@ -82,6 +94,8 @@ export default function HomePage() {
       icon: CurrencyDollarIcon,
       href: '/finance',
       color: 'from-yellow-500 to-orange-500',
+      module: 'finance',
+      permissions: ['read:invoice', 'read:payment', 'read:financial_reports'],
     },
     {
       title: 'Quản lý Nhân sự',
@@ -91,6 +105,8 @@ export default function HomePage() {
       icon: UserGroupIcon,
       href: '/hrm',
       color: 'from-purple-500 to-pink-500',
+      module: 'hrm',
+      permissions: ['read:employee', 'read:attendance', 'read:payroll'],
     },
     {
       title: 'Quản lý Dự án',
@@ -100,6 +116,8 @@ export default function HomePage() {
       icon: ClipboardDocumentListIcon,
       href: '/projects',
       color: 'from-indigo-500 to-purple-500',
+      module: 'projects',
+      permissions: ['read:project', 'read:task', 'manage:team'],
     },
     {
       title: 'Quản lý Sản xuất',
@@ -109,6 +127,8 @@ export default function HomePage() {
       icon: CogIcon,
       href: '/manufacturing',
       color: 'from-gray-500 to-slate-500',
+      module: 'manufacturing',
+      permissions: ['read:production_plan', 'read:work_order', 'manage:quality_control'],
     },
     {
       title: 'Marketing',
@@ -118,6 +138,8 @@ export default function HomePage() {
       icon: MegaphoneIcon,
       href: '/marketing',
       color: 'from-pink-500 to-rose-500',
+      module: 'marketing',
+      permissions: ['read:campaign', 'create:content', 'manage:social_media'],
     },
     {
       title: 'Chăm sóc Khách hàng',
@@ -126,6 +148,8 @@ export default function HomePage() {
       icon: ChatBubbleLeftRightIcon,
       href: '/support',
       color: 'from-teal-500 to-cyan-500',
+      module: 'support',
+      permissions: ['read:ticket', 'create:ticket', 'read:knowledge_base'],
     },
     {
       title: 'Báo cáo & Phân tích',
@@ -135,6 +159,8 @@ export default function HomePage() {
       icon: DocumentChartBarIcon,
       href: '/analytics',
       color: 'from-violet-500 to-purple-500',
+      module: 'analytics',
+      permissions: ['read:dashboard', 'read:report', 'read:business_intelligence'],
     },
     {
       title: 'Thương mại Điện tử',
@@ -144,8 +170,26 @@ export default function HomePage() {
       icon: ComputerDesktopIcon,
       href: '/ecommerce',
       color: 'from-emerald-500 to-teal-500',
+      module: 'ecommerce',
+      permissions: ['read:catalog', 'read:online_order', 'manage:website'],
     },
   ];
+
+  const handleModuleClick = (module: any, e: React.MouseEvent) => {
+    // If user is not logged in, show login modal
+    if (!user) {
+      e.preventDefault();
+      setShowLoginModal(true);
+      return;
+    }
+
+    // If user doesn't have access to this module, prevent navigation
+    if (!checkModuleAccess(module.module)) {
+      e.preventDefault();
+      alert(`Access denied. You don't have permission to access ${module.title}`);
+      return;
+    }
+  };
 
   if (!mounted) {
     return null; // Prevent hydration mismatch
@@ -188,10 +232,39 @@ export default function HomePage() {
           showLabel={false}
           className="hidden sm:flex items-center gap-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105" 
         />
+
+        {/* User Auth Status */}
+        {user ? (
+          <div className={`flex flex-col items-center gap-2 p-3 rounded-lg backdrop-blur-md transition-all duration-300 ${
+            isDarkMode
+              ? 'bg-white/10 border border-white/20'
+              : 'bg-black/10 border border-black/20'
+          }`}>
+            <div className="flex items-center gap-2">
+              <UserIcon className="w-4 h-4" />
+              <span className="text-xs font-medium">{user.displayName}</span>
+            </div>
+            <button
+              onClick={logout}
+              className="text-xs text-red-400 hover:text-red-300 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowLoginModal(true)}
+            className={`flex items-center gap-2 p-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+              isDarkMode
+                ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                : 'bg-black/10 text-black hover:bg-black/20 border border-black/20'
+            }`}
+          >
+            <KeyIcon className="w-4 h-4" />
+            <span className="text-xs font-medium">Login</span>
+          </button>
+        )}
       </div>
-
-
-     
 
       {/* Services Section */}
       <section id="modules" className="py-12 sm:py-20 px-4 sm:px-6">
@@ -211,16 +284,32 @@ export default function HomePage() {
                   : 'bg-gradient-to-r from-transparent via-black to-transparent'
               }`}
             ></div>
+            
+            {user && (
+              <div className="mt-8">
+                <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Welcome back, <span className="font-semibold">{user.displayName}</span>
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {modules.map((module, index) => {
               const IconComponent = module.icon;
+              const hasAccess = user ? checkModuleAccess(module.module) : false;
+              const isDisabled = user && !hasAccess;
+              
               return (
                 <Link
                   key={index}
                   href={module.href}
-                  className={`group border rounded-xl p-6 sm:p-8 transition-all duration-700 hover:scale-[1.05] hover:-translate-y-2 cursor-pointer block relative overflow-hidden ${
+                  onClick={(e) => handleModuleClick(module, e)}
+                  className={`group border rounded-xl p-6 sm:p-8 transition-all duration-700 cursor-pointer block relative overflow-hidden ${
+                    isDisabled 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : 'hover:scale-[1.05] hover:-translate-y-2'
+                  } ${
                     isDarkMode
                       ? 'border-gray-800 hover:border-gray-600 bg-gray-900/50 hover:bg-gray-800/70 backdrop-blur-sm'
                       : 'border-gray-200 hover:border-gray-400 bg-white/70 hover:bg-white/90 backdrop-blur-sm'
@@ -232,9 +321,18 @@ export default function HomePage() {
                   {/* Gradient overlay on hover */}
                   <div className={`absolute inset-0 bg-gradient-to-r ${module.color} opacity-0 group-hover:opacity-10 transition-opacity duration-700`}></div>
                   
+                  {/* Lock overlay for disabled modules */}
+                  {isDisabled && (
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10">
+                      <LockClosedIcon className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  
                   <div className="relative z-10">
                     <div className="mb-6">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-r ${module.color} p-2.5 sm:p-3 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6`}>
+                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-r ${module.color} p-2.5 sm:p-3 transition-all duration-500 ${
+                        !isDisabled ? 'group-hover:scale-110 group-hover:rotate-6' : ''
+                      }`}>
                         <IconComponent className="w-full h-full text-white" />
                       </div>
                     </div>
@@ -244,6 +342,7 @@ export default function HomePage() {
                     }`}>
                       {module.title}
                     </h4>
+                    
                     <p
                       className={`text-xs sm:text-sm font-medium mb-4 uppercase tracking-wider transition-colors duration-500 ${
                         isDarkMode ? 'text-gray-400 group-hover:text-gray-300' : 'text-gray-500 group-hover:text-gray-600'
@@ -251,13 +350,33 @@ export default function HomePage() {
                     >
                       {module.subtitle}
                     </p>
+                    
                     <p
-                      className={`text-sm leading-relaxed transition-colors duration-500 ${
+                      className={`text-sm leading-relaxed mb-4 transition-colors duration-500 ${
                         isDarkMode ? 'text-gray-300 group-hover:text-gray-200' : 'text-gray-600 group-hover:text-gray-700'
                       }`}
                     >
                       {module.description}
                     </p>
+
+                    {/* Access Control Information */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {user ? (
+                        <ModuleAccessBadge module={module.module} />
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Login Required
+                        </span>
+                      )}
+                      
+                      {/* Show required permissions for admins or developers */}
+                      {user && (user.role?.name === 'Super Administrator' || user.role?.name === 'ADMIN') && (
+                        <div className="text-xs text-gray-500 mt-2">
+                          Required: {module.permissions.slice(0, 2).join(', ')}
+                          {module.permissions.length > 2 && ` +${module.permissions.length - 2} more`}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Link>
               );
@@ -282,8 +401,26 @@ export default function HomePage() {
           >
             © 2024 Taza Group. All rights reserved.
           </p>
+          {user && (
+            <p className={`text-xs mt-2 transition-colors duration-500 ${
+              isDarkMode ? 'text-gray-500' : 'text-gray-400'
+            }`}>
+              Logged in as {user.displayName} | Role: {user.role?.name}
+            </p>
+          )}
         </div>
       </footer>
+
+      {/* Login Modal */}
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <AuthProvider>
+      <HomePageContent />
+    </AuthProvider>
   );
 }
