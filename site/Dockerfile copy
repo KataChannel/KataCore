@@ -55,6 +55,9 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NEXT_PUBLIC_MINIO_ENDPOINT=${NEXT_PUBLIC_MINIO_ENDPOINT}
 
+# Provide a fallback DATABASE_URL for build-time Prisma operations
+ENV DATABASE_URL="file:./dev.db"
+
 # Verify Prisma client is available
 RUN echo "Verifying Prisma setup..." && \
     ls -la shared/node_modules/.prisma/ || echo "Prisma client not found in shared" && \
@@ -145,6 +148,11 @@ ENV HOSTNAME="0.0.0.0"
 # Copy public files if they exist
 RUN mkdir -p public
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Create necessary directories and set permissions
+RUN mkdir -p .next && \
+    mkdir -p logs && \
+    chown -R nextjs:nodejs .next logs
 
 # Copy build output and dependencies
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
