@@ -1041,3 +1041,4 @@ dark mode, light mode, reponsive,minimalist black and white design, modern Next-
 sudo ln -s /etc/nginx/sites-available/hrm.tazagroup.vn  /etc/nginx/sites-enabled/
 sudo certbot --nginx -d hrm.tazagroup.vn
 sudo tail -f /var/log/nginx/error.log
+
