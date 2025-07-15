@@ -44,11 +44,12 @@ RUN cd shared && \
 FROM shared-setup AS builder
 WORKDIR /app
 
-# Remove any existing prisma directory to avoid conflicts
-RUN rm -rf prisma
-
 # Copy source code (use . for all contents, not site specifically) 
 COPY site/ .
+
+# Remove any prisma symlink and directory to avoid conflicts
+RUN rm -rf prisma && \
+    echo "Prisma symlink/directory removed"
 
 # Set build environment
 ENV NEXT_TELEMETRY_DISABLED=1
