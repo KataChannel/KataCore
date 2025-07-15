@@ -71,7 +71,7 @@
     "// ========== WORKFLOW ==========": "",
     "precommit": "npm run lint:fix && npm run format && npm run type-check",
     "prebuild": "npm run db:generate",
-    "postbuild": "npm run analyze",
+    "analyze": "ANALYZE=true next build",
     "ci": "npm run lint && npm run type-check && npm run test:ci && npm run build",
     "dev:full": "npm run db:generate && npm run dev",
     "fresh": "npm run clean:all && npm install && npm run db:generate && npm run dev"
