@@ -44,7 +44,7 @@ RUN cd shared && \
 FROM shared-setup AS builder
 WORKDIR /app
 
-# Copy source code
+# Copy source code 
 COPY site .
 
 # Set build environment
