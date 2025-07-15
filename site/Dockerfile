@@ -44,6 +44,9 @@ RUN cd shared && \
 FROM shared-setup AS builder
 WORKDIR /app
 
+# Remove any existing prisma directory to avoid conflicts
+RUN rm -rf prisma
+
 # Copy source code 
 COPY site .
 
