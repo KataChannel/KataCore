@@ -107,5 +107,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=5 \
   CMD curl -f http://localhost:3001/health || curl -f http://localhost:3001/ || exit 1
 
 # Use dumb-init for proper signal handling
-ENTRYPOINT ["dumb-init", "--"]
 CMD ["bun", "run", "start:prod"]
