@@ -47,8 +47,8 @@ WORKDIR /app
 # Remove any existing prisma directory to avoid conflicts
 RUN rm -rf prisma
 
-# Copy source code 
-COPY site .
+# Copy source code (use . for all contents, not site specifically) 
+COPY site/ .
 
 # Set build environment
 ENV NEXT_TELEMETRY_DISABLED=1
