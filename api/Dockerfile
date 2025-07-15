@@ -30,7 +30,7 @@ COPY shared ./shared
 # Install shared dependencies and generate Prisma client
 RUN echo "Setting up shared Prisma for API..." && \
     cd shared && \
-    bun install --frozen-lockfile && \
+    bun install --no-cache && \
     echo "Generating Prisma client..." && \
     bunx prisma generate && \
     echo "Prisma client generated successfully" && \

@@ -27,7 +27,7 @@ COPY shared ./shared
 
 # Install shared dependencies and generate Prisma client
 RUN cd shared && \
-    bun install --frozen-lockfile && \
+    bun install --no-cache && \
     bunx prisma generate && \
     cd .. && \
     # Also generate in the main app directory for Next.js build
