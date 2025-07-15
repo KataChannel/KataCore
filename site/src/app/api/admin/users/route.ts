@@ -1,4 +1,4 @@
-// API Route for User Management with Module Permissions
+// API Route for User Management with Enhanced Permissions
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { authService } from '@/lib/auth/unified-auth.service';
@@ -14,7 +14,7 @@ async function authenticate(request: NextRequest) {
     throw new Error('Token not found');
   }
 
-  const decoded = authService.verifyToken(token);
+  const decoded = await authService.verifyToken(token);
   const user = await authService.getUserById(decoded.userId);
 
   if (!user) {
@@ -24,35 +24,102 @@ async function authenticate(request: NextRequest) {
   return user;
 }
 
+// Middleware to check admin permissions
+async function checkAdminPermissions(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    const token = authHeader?.replace('Bearer ', '');
+
+    if (!token) {
+      throw new Error('No token provided');
+    }
+
+    const decoded = await authService.verifyToken(token);
+    const user = await authService.getUserById(decoded.userId);
+
+    if (!user || !user.role) {
+      throw new Error('User not found');
+    }
+
+    // Check if user has admin permissions or is super admin
+    const isSuperAdmin = user.role.name === 'Super Administrator';
+    
+    // Get permissions array from user object or role permissions
+    let userPermissions: string[] = [];
+    if (Array.isArray(user.permissions)) {
+      userPermissions = user.permissions;
+    } else if (user.role && user.role.permissions) {
+      try {
+        // If permissions is stored as JSON string, parse it
+        const rolePermissions = typeof user.role.permissions === 'string' 
+          ? JSON.parse(user.role.permissions) 
+          : user.role.permissions;
+        
+        if (typeof rolePermissions === 'object' && Array.isArray(rolePermissions.permissions)) {
+          userPermissions = rolePermissions.permissions;
+        } else if (Array.isArray(rolePermissions)) {
+          userPermissions = rolePermissions;
+        }
+      } catch (error) {
+        console.error('Error parsing role permissions:', error);
+        userPermissions = [];
+      }
+    }
+    
+    const hasAdminPermission = userPermissions.includes('admin:system') || 
+                              userPermissions.includes('read:permissions') ||
+                              userPermissions.includes('system:admin') ||
+                              userPermissions.includes('admin:*') ||
+                              userPermissions.includes('read:user') ||
+                              userPermissions.includes('manage:user');
+
+    if (!isSuperAdmin && !hasAdminPermission) {
+      throw new Error('Insufficient permissions');
+    }
+
+    return user;
+  } catch (error: any) {
+    throw new Error(`Authentication failed: ${error.message}`);
+  }
+}
+
+// Enhanced permission checking
+async function checkUserManagementPermissions(user: any, action: string) {
+  const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
+  
+  if (!userRole) {
+    throw new Error('User role not found');
+  }
+
+  // Super Administrator has all permissions
+  if (userRole.level >= 10) {
+    return true;
+  }
+
+  // Check specific permission
+  const hasPermission = userRole.permissions.some(
+    (p) => (p.action === action || p.action === 'manage') && (p.resource === 'users' || p.resource === '*')
+  );
+
+  if (!hasPermission && userRole.level < 8) {
+    throw new Error(`Insufficient permissions for ${action} users`);
+  }
+
+  return true;
+}
+
 // GET - List all users with their roles and permissions
 export async function GET(request: NextRequest) {
   try {
-    const user = await authenticate(request);
+    // Check permissions
+    await checkAdminPermissions(request);
 
-    // Check permissions - need to be admin or have user management permission
-    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
-    const canManageUsers = userRole?.permissions.some(
-      (p) =>
-        (p.action === 'read' && p.resource === 'users') ||
-        (p.action === 'manage' && p.resource === 'users')
-    );
-
-    if (!canManageUsers && userRole?.level < 8) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions to view users' },
-        { status: 403 }
-      );
-    }
-
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || '';
-    const roleFilter = searchParams.get('role') || '';
-    const statusFilter = searchParams.get('status') || '';
-    const moduleFilter = searchParams.get('module') || '';
-
-    const skip = (page - 1) * limit;
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const search = url.searchParams.get('search') || '';
+    const roleFilter = url.searchParams.get('role') || '';
+    const statusFilter = url.searchParams.get('status') || '';
 
     // Build where clause
     const where: any = {};
@@ -75,7 +142,7 @@ export async function GET(request: NextRequest) {
       where.isActive = false;
     }
 
-    // Get users with their roles
+    // Get users with pagination
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
@@ -88,85 +155,52 @@ export async function GET(request: NextRequest) {
               permissions: true,
             },
           },
-          employee: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              department: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-              position: {
-                select: {
-                  id: true,
-                  title: true,
-                },
-              },
-            },
-          },
         },
-        skip,
-        take: limit,
         orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
       }),
       prisma.user.count({ where }),
     ]);
 
-    // Enhance users with system role information
-    const enhancedUsers = users.map((user) => {
-      const systemRole = SYSTEM_ROLES.find(
-        (role) => role.id === user.role?.name?.toLowerCase().replace(/ /g, '_')
-      );
+    // Transform users data
+    const transformedUsers = users.map((user) => {
+      let roleLevel = 1;
+      let rolePermissions: string[] = [];
+
+      try {
+        if (user.role && user.role.permissions) {
+          const permissionsData = JSON.parse(user.role.permissions as string);
+          roleLevel = permissionsData.level || 1;
+          rolePermissions = Array.isArray(permissionsData.permissions) 
+            ? permissionsData.permissions 
+            : permissionsData;
+        }
+      } catch (error) {
+        console.error('Error parsing role permissions:', error);
+      }
 
       return {
         id: user.id,
         email: user.email,
-        phone: user.phone,
-        username: user.username,
         displayName: user.displayName,
-        avatar: user.avatar,
+        username: user.username,
         isActive: user.isActive,
         isVerified: user.isVerified,
-        lastLoginAt: user.lastLoginAt,
+        lastLoginAt: user.lastSeen,
         createdAt: user.createdAt,
         role: {
-          id: user.role?.id,
-          name: user.role?.name,
-          description: user.role?.description,
-          permissions: user.role?.permissions ? JSON.parse(user.role.permissions as string) : [],
+          id: user.role?.id || 'unknown',
+          name: user.role?.name || 'No Role',
+          level: roleLevel,
+          permissions: rolePermissions,
         },
-        systemRole: systemRole
-          ? {
-              id: systemRole.id,
-              name: systemRole.name,
-              description: systemRole.description,
-              level: systemRole.level,
-              modules: systemRole.modules,
-              permissions: systemRole.permissions,
-            }
-          : null,
-        employee: user.employee
-          ? {
-              id: user.employee.id,
-              firstName: user.employee.firstName,
-              lastName: user.employee.lastName,
-              department: user.employee.department,
-              position: user.employee.position,
-            }
-          : null,
       };
     });
 
-    // Filter by module access if specified
-    const filteredUsers = moduleFilter
-      ? enhancedUsers.filter((user) => user.systemRole?.modules.includes(moduleFilter))
-      : enhancedUsers;
-
     return NextResponse.json({
-      users: filteredUsers,
+      success: true,
+      users: transformedUsers,
       pagination: {
         page,
         limit,
@@ -175,7 +209,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to fetch users' }, { status: 500 });
+    console.error('Error fetching users:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch users' },
+      { status: error.message.includes('Authentication') ? 401 : 500 }
+    );
   }
 }
 
@@ -190,7 +228,7 @@ export async function POST(request: NextRequest) {
       (p) => p.action === 'create' && p.resource === 'users'
     );
 
-    if (!canCreateUsers && userRole?.level < 8) {
+    if (!canCreateUsers && (!userRole || userRole.level < 8)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to create users' },
         { status: 403 }
@@ -352,7 +390,7 @@ export async function PUT(request: NextRequest) {
       (p) => p.action === 'update' && p.resource === 'users'
     );
 
-    if (!canUpdateUsers && userRole?.level < 8) {
+    if (!canUpdateUsers && (!userRole || userRole.level < 8)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to update users' },
         { status: 403 }
@@ -514,7 +552,7 @@ export async function DELETE(request: NextRequest) {
       (p) => p.action === 'delete' && p.resource === 'users'
     );
 
-    if (!canDeleteUsers && userRole?.level < 9) {
+    if (!canDeleteUsers && (!userRole || userRole.level < 9)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to delete users' },
         { status: 403 }

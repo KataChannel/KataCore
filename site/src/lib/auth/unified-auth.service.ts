@@ -290,11 +290,15 @@ export class UnifiedAuthService {
     }
 
     // Create filtered data for user creation
-    const createUserData: Partial<RegisterData & { password?: string; isVerified?: boolean }> = {
+    const createUserData: any = {
       displayName: validatedData.displayName,
       provider: validatedData.provider,
-      password: hashedPassword,
+      isVerified: validatedData.provider === 'phone',
     };
+
+    if (hashedPassword) {
+      createUserData.password = hashedPassword;
+    }
 
     if (validatedData.email) createUserData.email = validatedData.email;
     if (validatedData.phone) createUserData.phone = validatedData.phone;
@@ -564,7 +568,7 @@ export class UnifiedAuthService {
    */
   private transformPrismaUser(prismaUser: any): User {
     let permissions: string[] = [];
-    let role = undefined;
+    let role;
 
     if (prismaUser.role) {
       try {
@@ -577,11 +581,37 @@ export class UnifiedAuthService {
         permissions = [];
       }
 
+      // Determine role level based on role name
+      let roleLevel = 1; // Default level
+      switch (prismaUser.role.name) {
+        case 'Super Administrator':
+          roleLevel = 10;
+          break;
+        case 'System Administrator':
+          roleLevel = 9;
+          break;
+        case 'Sales Manager':
+        case 'HR Manager':
+        case 'Finance Manager':
+          roleLevel = 7;
+          break;
+        case 'Inventory Manager':
+        case 'Department Manager':
+          roleLevel = 6;
+          break;
+        case 'Team Lead':
+          roleLevel = 4;
+          break;
+        case 'Employee':
+          roleLevel = 2;
+          break;
+      }
+
       role = {
         id: prismaUser.role.id,
         name: prismaUser.role.name,
         permissions,
-        level: 0, // Default level, TODO: add to schema if needed
+        level: roleLevel,
       };
     }
 
@@ -594,7 +624,7 @@ export class UnifiedAuthService {
       avatar: prismaUser.avatar,
       password: prismaUser.password,
       roleId: prismaUser.roleId,
-      role,
+      role: role || undefined,
       modules: [], // TODO: Implement modules based on role
       permissions,
       isActive: prismaUser.isActive,

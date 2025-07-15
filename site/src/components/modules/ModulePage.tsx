@@ -51,7 +51,7 @@ export function ModulePage({ config, userPermissions, userModules }: ModulePageP
   const hasModuleAccess = userModules.includes(config.name);
 
   // Check specific permissions
-  const checkPermission = (action: string, resource: string) => {
+  const hasPermission = (action: string, resource: string) => {
     return userPermissions.some((permission) => {
       if (typeof permission === 'string') {
         const [permAction, permResource] = permission.split(':');

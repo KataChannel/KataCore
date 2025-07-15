@@ -31,15 +31,28 @@ export default function LoginPage() {
             Authorization: `Bearer ${token}`,
           },
         })
-          .then((response) => {
+          .then(async (response) => {
             if (response.ok) {
-              router.push('/admin');
+              const userData = await response.json();
+              // Kiểm tra userData có hợp lệ không
+              if (userData && userData.user) {
+                router.push('/admin');
+              } else {
+                // Clear invalid data
+                // localStorage.removeItem('accessToken');
+                // localStorage.removeItem('authToken');
+              }
+            } else {
+              // Token invalid, clear it
+              // localStorage.removeItem('accessToken');
+              // localStorage.removeItem('authToken');
             }
           })
-          .catch(() => {
+          .catch((error) => {
+            console.warn('Auth check failed:', error);
             // Token invalid, clear it
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('authToken');
+            // localStorage.removeItem('accessToken');
+            // localStorage.removeItem('authToken');
           });
       }
     }

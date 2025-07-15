@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ThemeManager } from '../../components/ThemeManager';
 import { useUnifiedTheme } from '../../hooks/useUnifiedTheme';
+import { useUnifiedAuth } from '../../components/auth/UnifiedAuthProvider';
 import {
   SunIcon,
   MoonIcon,
@@ -31,93 +32,130 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+
+
 // Component nội bộ sử dụng theme context
 const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Remove toggleLanguage from destructuring
+  // Authentication
+  const { user, loading, logout, hasModuleAccess } = useUnifiedAuth();
+  
+  // Theme
   const { actualMode, toggleMode, isLoading } = useUnifiedTheme();
-  // Remove translation hook
-  // const { t } = useTranslation('common');
 
-  // Load user data from localStorage
+  // Mount check
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== 'undefined') {
-      const savedUserData = localStorage.getItem('admin-user-data');
-      if (savedUserData) {
-        setUserData(JSON.parse(savedUserData));
-      }
-    }
   }, []);
 
-  // Replace translation calls with static text
+  // Authentication check
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login?redirect=' + encodeURIComponent(pathname));
+    }
+  }, [user, loading, router, pathname]);
+
+  // Admin access check with enhanced security
+  useEffect(() => {
+    if (user && !loading) {
+      // Ensure permissions is always an array
+      const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
+      const hasAdminAccess = hasModuleAccess('admin') || 
+                            userPermissions.includes('admin:*') ||
+                            userPermissions.includes('admin:system') ||
+                            user.role?.name === 'Super Administrator' ||
+                            (user.role?.level && user.role.level >= 8);
+      
+      console.log('Admin access check:', {
+        hasModuleAccess: hasModuleAccess('admin'),
+        userPermissions: userPermissions,
+        userRole: user.role?.name,
+        userLevel: user.role?.level,
+        hasAdminAccess
+      });
+      
+      if (!hasAdminAccess) {
+        router.push('/?error=access-denied&reason=insufficient-permissions');
+      }
+    }
+  }, [user, loading, hasModuleAccess, router]);
+
   const hrSubMenus = [
     {
       name: 'Tổng quan',
       nameVi: 'Tổng quan',
       href: '/admin/hr',
       icon: ChartBarIcon,
+      permission: 'read:hrm',
     },
     {
       name: 'Nhân viên',
       nameVi: 'Nhân viên',
       href: '/admin/hr/employees',
       icon: UsersIcon,
+      permission: 'read:employee',
     },
     {
       name: 'Phòng ban',
       nameVi: 'Phòng ban',
       href: '/admin/hr/departments',
       icon: BuildingOfficeIcon,
+      permission: 'read:department',
     },
     {
       name: 'Vị trí',
       nameVi: 'Vị trí',
       href: '/admin/hr/positions',
       icon: BriefcaseIcon,
+      permission: 'read:position',
     },
     {
       name: 'Chấm công',
       nameVi: 'Chấm công',
       href: '/admin/hr/attendance',
       icon: ClockIcon,
+      permission: 'read:attendance',
     },
     {
       name: 'Yêu cầu nghỉ phép',
       nameVi: 'Yêu cầu nghỉ phép',
       href: '/admin/hr/leave-requests',
       icon: CalendarIcon,
+      permission: 'read:leave_request',
     },
     {
       name: 'Bảng lương',
       nameVi: 'Bảng lương',
       href: '/admin/hr/payroll',
       icon: CurrencyDollarIcon,
+      permission: 'read:payroll',
     },
     {
       name: 'Hiệu suất',
       nameVi: 'Hiệu suất',
       href: '/admin/hr/performance',
       icon: ChartBarIcon,
+      permission: 'read:performance',
     },
     {
       name: 'Báo cáo',
       nameVi: 'Báo cáo',
       href: '/admin/hr/reports',
       icon: DocumentTextIcon,
+      permission: 'read:report',
     },
     {
       name: 'Cài đặt',
       nameVi: 'Cài đặt',
       href: '/admin/hr/settings',
       icon: CogIcon,
+      permission: 'admin:hrm',
     },
   ];
 
@@ -127,59 +165,69 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       nameVi: 'Tổng quan',
       href: '/admin/crm',
       icon: ChartBarIcon,
+      permission: 'read:crm',
     },
     {
       name: 'Customers',
       nameVi: 'Khách hàng',
       href: '/admin/crm/customers',
       icon: UsersIcon,
+      permission: 'read:customer',
     },
     {
       name: 'Call Center',
       nameVi: 'Trung tâm cuộc gọi',
       href: '/admin/crm/callcenter',
       icon: BellIcon,
+      permission: 'read:call_center',
     },
   ];
+
   const socialSubMenus = [
     {
       name: 'Dashboard',
       nameVi: 'Tổng quan',
       href: '/admin/social',
       icon: ChartBarIcon,
+      permission: 'read:social',
     },
     {
       name: 'Facebook',
       nameVi: 'Facebook',
       href: '/admin/social/facebook',
       icon: ComputerDesktopIcon,
+      permission: 'manage:social',
     },
     {
       name: 'Instagram',
       nameVi: 'Instagram',
       href: '/admin/social/instagram',
       icon: UserIcon,
+      permission: 'manage:social',
     },
     {
       name: 'Twitter',
       nameVi: 'Twitter',
       href: '/admin/social/twitter',
       icon: UserIcon,
+      permission: 'manage:social',
     },
     {
       name: 'LinkedIn',
       nameVi: 'LinkedIn',
       href: '/admin/social/linkedin',
       icon: UserIcon,
+      permission: 'manage:social',
     },
   ];
-  // Replace translation calls with static text
+
   const menuItems = [
     {
       title: 'Dashboard',
       icon: HomeIcon,
       path: '/admin',
       active: pathname === '/admin',
+      permission: 'read:dashboard',
     },
     {
       title: 'Quản lý Nhân sự',
@@ -187,6 +235,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       path: '/admin/hr',
       active: pathname.startsWith('/admin/hr'),
       children: hrSubMenus,
+      permission: 'read:hrm',
     },
     {
       title: 'CRM',
@@ -194,6 +243,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       path: '/admin/crm',
       active: pathname.startsWith('/admin/crm'),
       children: crmSubMenus,
+      permission: 'read:crm',
     },
     {
       title: 'Social',
@@ -201,30 +251,42 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       path: '/admin/social',
       active: pathname.startsWith('/admin/social'),
       children: socialSubMenus,
+      permission: 'read:social',
     },
     {
       title: 'Website Management',
       icon: ComputerDesktopIcon,
       path: '/admin/website',
       active: pathname.startsWith('/admin/website'),
+      permission: 'manage:website',
     },
     {
       title: 'Analytics',
       icon: ChartBarIcon,
       path: '/admin/analytics',
       active: pathname.startsWith('/admin/analytics'),
+      permission: 'read:analytics',
+    },
+    {
+      title: 'Permission Management',
+      icon: CogIcon,
+      path: '/admin/permissions',
+      active: pathname.startsWith('/admin/permissions'),
+      permission: 'admin:system',
     },
     {
       title: 'Cài đặt',
       icon: CogIcon,
       path: '/admin/settings',
       active: pathname.startsWith('/admin/settings'),
+      permission: 'admin:system',
     },
     {
       title: 'Monochrome Demo',
       icon: SwatchIcon,
       path: '/admin/monochrome-demo',
       active: pathname.startsWith('/admin/monochrome-demo'),
+      permission: 'read:demo',
     },
   ];
 
@@ -257,10 +319,17 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin-user-data');
-    localStorage.removeItem('admin-token');
-    router.push('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if API fails
+      localStorage.removeItem('admin-user-data');
+      localStorage.removeItem('admin-token');
+      router.push('/login');
+    }
   };
 
   const toggleMenuExpansion = (path: string) => {
@@ -274,15 +343,30 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     return expandedMenus.includes(item.path) || item.active;
   };
 
-  // Prevent hydration mismatch
-  if (!mounted) {
+  // Filter menu items based on permissions
+  const filterMenuItems = (items: any[]) => {
+    return items.filter(item => {
+      if (!item.permission) return true;
+      
+      // Ensure permissions is always an array
+      const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
+      
+      const [action, resource] = item.permission.split(':');
+      return userPermissions.includes(item.permission) || 
+             hasModuleAccess(resource);
+    });
+  };
+
+  // Show loading while checking authentication
+  if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
+  // Show loading for theme
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -290,6 +374,24 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       </div>
     );
   }
+
+  // Redirect if not authenticated (this should rarely show due to useEffect redirect)
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-text-secondary">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Filter menu items based on user permissions
+  const visibleMenuItems = filterMenuItems(menuItems).map(item => ({
+    ...item,
+    children: item.children ? filterMenuItems(item.children) : undefined
+  }));
 
   return (
     <div className="min-h-screen transition-colors duration-300">
@@ -323,7 +425,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
           {/* Sidebar Menu */}
           <nav className="flex-1 p-2 space-y-2">
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <div key={item.path}>
                 <button
                   onClick={() => {
@@ -358,7 +460,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 {/* Submenu */}
                 {sidebarOpen && item.children && shouldExpand(item) && (
                   <div className="ml-6 mt-2 space-y-1">
-                    {item.children.map((subItem) => (
+                    {item.children.map((subItem:any) => (
                       <button
                         key={subItem.href}
                         onClick={() => router.push(subItem.href)}
@@ -413,7 +515,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
           {/* Mobile Menu */}
           <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <div key={item.path}>
                 <button
                   onClick={() => {
@@ -449,7 +551,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 {/* Mobile Submenu */}
                 {item.children && shouldExpand(item) && (
                   <div className="ml-6 mt-2 space-y-1">
-                    {item.children.map((subItem) => (
+                    {item.children.map((subItem:any) => (
                       <button
                         key={subItem.href}
                         onClick={() => {
@@ -549,13 +651,15 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               <div className="flex items-center space-x-3">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-medium text-primary">
-                    {userData?.name || 'Admin User'}
+                    {user?.displayName || user?.firstName + ' ' + user?.displayName || 'Admin User'}
                   </p>
-                  <p className="text-xs text-text-secondary">Administrator</p>
+                  <p className="text-xs text-text-secondary">
+                    {user?.role?.name || 'Administrator'}
+                  </p>
                 </div>
                 <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">
-                    {userData?.name?.charAt(0) || 'A'}
+                    {user?.displayName?.charAt(0) || user?.firstName?.charAt(0) || 'A'}
                   </span>
                 </div>
                 <button

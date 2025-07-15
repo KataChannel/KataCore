@@ -15,7 +15,7 @@ import {
   CalendarIcon,
   IdentificationIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Employee {
   id: string;

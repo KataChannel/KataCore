@@ -1,6 +1,9 @@
 // Comprehensive Module Permissions System
 // Defines permissions for all business modules in TazaCore
 
+// Import unified types from single source of truth
+import type { Permission, UserRole as UnifiedUserRole } from '@/types/auth';
+
 export interface ModulePermission {
   action: string;
   resource: string;
@@ -8,14 +11,13 @@ export interface ModulePermission {
   description?: string;
 }
 
-export interface UserRole {
-  id: string;
-  name: string;
+// Use unified UserRole type for consistency
+export type UserRole = UnifiedUserRole & {
   description: string;
   permissions: ModulePermission[];
   level: number; // 1-10, higher = more permissions
   modules: string[]; // Array of module names this role can access
-}
+};
 
 // ==============================================
 // MODULE PERMISSIONS DEFINITIONS

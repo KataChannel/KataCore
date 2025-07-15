@@ -13,7 +13,7 @@ async function authenticate(request: NextRequest) {
     throw new Error('Token not found');
   }
 
-  const decoded = authService.verifyToken(token);
+  const decoded = await authService.verifyToken(token);
   const user = await authService.getUserById(decoded.userId);
 
   if (!user) {

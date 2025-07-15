@@ -4,136 +4,65 @@
 // Centralized permission and module access control system
 // Follows TazaCore standards for consistency and security
 
+// Import unified types from single source of truth
+import type { 
+  Permission as UnifiedPermission, 
+  UserRole as UnifiedUserRole,
+  User as UnifiedUser 
+} from '@/types/auth';
+
+// Import unified permission constants
+import { 
+  MODULES, 
+  ACTIONS, 
+  RESOURCES, 
+  SCOPES,
+  ROLE_PERMISSION_SETS,
+  getRolePermissions,
+  getRoleModules,
+  SALES_PERMISSIONS,
+  CRM_PERMISSIONS,
+  HRM_PERMISSIONS,
+  FINANCE_PERMISSIONS,
+  INVENTORY_PERMISSIONS,
+} from './permissions-constants';
+
 // ============================================================================
-// INTERFACES & TYPES
+// INTERFACES & TYPES (Service-specific extensions)
 // ============================================================================
-export interface Permission {
-  action:
-    | 'create'
-    | 'read'
-    | 'update'
-    | 'delete'
-    | 'manage'
-    | 'approve'
-    | 'export'
-    | 'import'
-    | '*';
-  resource: string;
+export interface Permission extends UnifiedPermission {
   scope?: 'own' | 'team' | 'department' | 'all';
   conditions?: Record<string, any>;
 }
 
-export interface Role {
-  id: string;
-  name: string;
+export interface Role extends UnifiedUserRole {
   description: string;
-  level: number; // 1-10, higher = more permissions
   permissions: Permission[];
   modules: string[];
 }
 
-export interface User {
+export interface User extends UnifiedUser {
+  name: string; // For compatibility
+  departmentId?: string | undefined;
+  teamId?: string | undefined;
+  customPermissions?: Permission[] | undefined; // Additional permissions beyond role
+  role?: {
   id: string;
-  email: string;
   name: string;
-  roleId: string;
-  role?: Role;
-  departmentId?: string;
-  teamId?: string;
-  isActive: boolean;
-  customPermissions?: Permission[]; // Additional permissions beyond role
+  description?: string;
+  level: number;
+  permissions: Permission[] | string | any; // Support multiple formats
+  modules?: string[];
+} | undefined;
 }
 
 // ============================================================================
-// MODULE DEFINITIONS
+// MODULE DEFINITIONS (Re-export from constants)
 // ============================================================================
-export const MODULES = {
-  SALES: 'sales',
-  CRM: 'crm',
-  INVENTORY: 'inventory',
-  FINANCE: 'finance',
-  HRM: 'hrm',
-  PROJECTS: 'projects',
-  MANUFACTURING: 'manufacturing',
-  MARKETING: 'marketing',
-  SUPPORT: 'support',
-  ANALYTICS: 'analytics',
-  ECOMMERCE: 'ecommerce',
-  ADMIN: 'admin',
-} as const;
+export { MODULES } from './permissions-constants';
 
 // ============================================================================
-// PERMISSION DEFINITIONS BY MODULE
-// ============================================================================
-
-// Sales Module Permissions
-export const SALES_PERMISSIONS: Permission[] = [
-  { action: 'read', resource: 'order', scope: 'all' },
-  { action: 'create', resource: 'order', scope: 'all' },
-  { action: 'update', resource: 'order', scope: 'all' },
-  { action: 'delete', resource: 'order', scope: 'all' },
-  { action: 'approve', resource: 'order', scope: 'all' },
-  { action: 'manage', resource: 'pipeline', scope: 'all' },
-  { action: 'read', resource: 'revenue', scope: 'all' },
-  { action: 'read', resource: 'sales_reports', scope: 'all' },
-  { action: 'export', resource: 'sales_data', scope: 'all' },
-];
-
-// CRM Module Permissions
-export const CRM_PERMISSIONS: Permission[] = [
-  { action: 'read', resource: 'customer', scope: 'all' },
-  { action: 'create', resource: 'customer', scope: 'all' },
-  { action: 'update', resource: 'customer', scope: 'all' },
-  { action: 'delete', resource: 'customer', scope: 'all' },
-  { action: 'read', resource: 'lead', scope: 'all' },
-  { action: 'create', resource: 'lead', scope: 'all' },
-  { action: 'update', resource: 'lead', scope: 'all' },
-  { action: 'manage', resource: 'campaign', scope: 'all' },
-  { action: 'export', resource: 'customer_data', scope: 'all' },
-  { action: 'import', resource: 'customer_data', scope: 'all' },
-];
-
-// Inventory Module Permissions
-export const INVENTORY_PERMISSIONS: Permission[] = [
-  { action: 'read', resource: 'product', scope: 'all' },
-  { action: 'create', resource: 'product', scope: 'all' },
-  { action: 'update', resource: 'product', scope: 'all' },
-  { action: 'delete', resource: 'product', scope: 'all' },
-  { action: 'read', resource: 'stock', scope: 'all' },
-  { action: 'update', resource: 'stock', scope: 'all' },
-  { action: 'manage', resource: 'warehouse', scope: 'all' },
-  { action: 'export', resource: 'inventory_reports', scope: 'all' },
-];
-
-// Finance Module Permissions
-export const FINANCE_PERMISSIONS: Permission[] = [
-  { action: 'read', resource: 'invoice', scope: 'all' },
-  { action: 'create', resource: 'invoice', scope: 'all' },
-  { action: 'update', resource: 'invoice', scope: 'all' },
-  { action: 'approve', resource: 'invoice', scope: 'all' },
-  { action: 'read', resource: 'payment', scope: 'all' },
-  { action: 'create', resource: 'payment', scope: 'all' },
-  { action: 'read', resource: 'financial_reports', scope: 'all' },
-  { action: 'export', resource: 'financial_data', scope: 'all' },
-];
-
-// HRM Module Permissions
-export const HRM_PERMISSIONS: Permission[] = [
-  { action: 'read', resource: 'employee', scope: 'all' },
-  { action: 'create', resource: 'employee', scope: 'all' },
-  { action: 'update', resource: 'employee', scope: 'all' },
-  { action: 'delete', resource: 'employee', scope: 'all' },
-  { action: 'read', resource: 'attendance', scope: 'all' },
-  { action: 'update', resource: 'attendance', scope: 'all' },
-  { action: 'read', resource: 'payroll', scope: 'all' },
-  { action: 'create', resource: 'payroll', scope: 'all' },
-  { action: 'approve', resource: 'leave_request', scope: 'all' },
-  { action: 'manage', resource: 'department', scope: 'all' },
-  { action: 'export', resource: 'hr_reports', scope: 'all' },
-];
-
-// ============================================================================
-// SYSTEM ROLES WITH PERMISSIONS
+// SYSTEM ROLES WITH PERMISSIONS (Updated to use constants)
 // ============================================================================
 export const SYSTEM_ROLES: Role[] = [
   {
@@ -141,96 +70,72 @@ export const SYSTEM_ROLES: Role[] = [
     name: 'Super Administrator',
     description: 'Full system access with all permissions',
     level: 10,
-    permissions: [
-      { action: 'manage', resource: '*', scope: 'all' }, // Universal permission
-    ],
-    modules: ['*'], // Access to all modules
+    permissions: [...ROLE_PERMISSION_SETS.SUPER_ADMIN],
+    modules: Object.values(MODULES),
   },
   {
     id: 'system_admin',
     name: 'System Administrator',
     description: 'System administration and user management',
     level: 9,
-    permissions: [
-      { action: 'manage', resource: 'user', scope: 'all' },
-      { action: 'manage', resource: 'role', scope: 'all' },
-      { action: 'manage', resource: 'permission', scope: 'all' },
-      { action: 'read', resource: 'system_logs', scope: 'all' },
-      { action: 'manage', resource: 'settings', scope: 'all' },
-    ],
-    modules: [MODULES.ADMIN, MODULES.ANALYTICS],
+    permissions: [...ROLE_PERMISSION_SETS.SYSTEM_ADMIN],
+    modules: getRoleModules('SYSTEM_ADMIN'),
   },
   {
     id: 'sales_manager',
     name: 'Sales Manager',
     description: 'Sales module management and oversight',
     level: 7,
-    permissions: SALES_PERMISSIONS,
-    modules: [MODULES.SALES, MODULES.CRM, MODULES.ANALYTICS],
+    permissions: [...ROLE_PERMISSION_SETS.SALES_MANAGER],
+    modules: getRoleModules('SALES_MANAGER'),
   },
   {
     id: 'hr_manager',
     name: 'HR Manager',
     description: 'Human resources management',
     level: 7,
-    permissions: HRM_PERMISSIONS,
-    modules: [MODULES.HRM, MODULES.ANALYTICS],
+    permissions: [...ROLE_PERMISSION_SETS.HR_MANAGER],
+    modules: getRoleModules('HR_MANAGER'),
   },
   {
     id: 'finance_manager',
     name: 'Finance Manager',
     description: 'Financial operations and reporting',
     level: 7,
-    permissions: FINANCE_PERMISSIONS,
-    modules: [MODULES.FINANCE, MODULES.ANALYTICS],
+    permissions: [...ROLE_PERMISSION_SETS.FINANCE_MANAGER],
+    modules: getRoleModules('FINANCE_MANAGER'),
   },
   {
     id: 'inventory_manager',
     name: 'Inventory Manager',
     description: 'Inventory and warehouse management',
     level: 6,
-    permissions: INVENTORY_PERMISSIONS,
-    modules: [MODULES.INVENTORY, MODULES.ANALYTICS],
+    permissions: [...ROLE_PERMISSION_SETS.INVENTORY_MANAGER],
+    modules: getRoleModules('INVENTORY_MANAGER'),
   },
   {
     id: 'department_manager',
     name: 'Department Manager',
     description: 'Department-level management and oversight',
     level: 6,
-    permissions: [
-      { action: 'read', resource: 'employee', scope: 'department' },
-      { action: 'update', resource: 'employee', scope: 'department' },
-      { action: 'approve', resource: 'leave_request', scope: 'department' },
-      { action: 'read', resource: 'department_reports', scope: 'department' },
-    ],
-    modules: [MODULES.HRM],
+    permissions: [...ROLE_PERMISSION_SETS.DEPARTMENT_MANAGER],
+    modules: getRoleModules('DEPARTMENT_MANAGER'),
   },
   {
     id: 'team_lead',
     name: 'Team Lead',
     description: 'Team leadership and coordination',
     level: 4,
-    permissions: [
-      { action: 'read', resource: 'employee', scope: 'team' },
-      { action: 'read', resource: 'task', scope: 'team' },
-      { action: 'update', resource: 'task', scope: 'team' },
-      { action: 'create', resource: 'task', scope: 'team' },
-    ],
-    modules: [MODULES.PROJECTS],
+    permissions: [...ROLE_PERMISSION_SETS.TEAM_LEAD],
+    modules: getRoleModules('TEAM_LEAD'),
   },
   {
     id: 'employee',
     name: 'Employee',
     description: 'Basic employee access',
     level: 2,
-    permissions: [
-      { action: 'read', resource: 'employee', scope: 'own' },
-      { action: 'update', resource: 'employee', scope: 'own' },
-      { action: 'create', resource: 'leave_request', scope: 'own' },
-      { action: 'read', resource: 'attendance', scope: 'own' },
-      { action: 'read', resource: 'payroll', scope: 'own' },
-    ],
-    modules: [MODULES.HRM],
+    permissions: [...ROLE_PERMISSION_SETS.EMPLOYEE],
+    modules: getRoleModules('EMPLOYEE'),
   },
 ];
 
@@ -242,8 +147,67 @@ export class UnifiedPermissionService {
   private role: Role | null;
 
   constructor(user: User) {
+    console.log('🔍 [UnifiedPermissionService] Constructor called with user:', user);
     this.user = user;
-    this.role = user.role || SYSTEM_ROLES.find((r) => r.id === user.roleId) || null;
+    
+    // Convert UserRole to Role if needed
+    if (user.role) {
+      console.log('🔍 [UnifiedPermissionService] User has role object:', user.role);
+      // Kiểm tra và xử lý permissions an toàn
+      let permissions: Permission[] = [];
+      
+      if (Array.isArray(user.role.permissions)) {
+        permissions = user.role.permissions.map(p => {
+          if (typeof p === 'string') {
+            const parts = p.split(':');
+            return {
+              action: parts[0] || 'unknown',
+              resource: parts[1] || parts[0] || 'unknown',
+              scope: (parts[2] as any) || 'all',
+            };
+          }
+          return p as Permission;
+        });
+      } else if (typeof user.role.permissions === 'string') {
+        // Nếu permissions là string JSON, parse nó
+        try {
+          const parsed = JSON.parse(user.role.permissions);
+          if (Array.isArray(parsed)) {
+            permissions = parsed.map(p => {
+              if (typeof p === 'string') {
+                const parts = p.split(':');
+                return {
+                  action: parts[0] || 'unknown',
+                  resource: parts[1] || parts[0] || 'unknown',
+                  scope: (parts[2] as any) || 'all',
+                };
+              }
+              return p as Permission;
+            });
+          }
+        } catch (e) {
+          console.warn('Failed to parse user role permissions:', e);
+          permissions = [];
+        }
+      }
+
+      this.role = {
+        id: user.role.id,
+        name: user.role.name,
+        description: user.role.description || '',
+        level: user.role.level,
+        permissions: permissions,
+        modules: Array.isArray(user.role.modules) ? user.role.modules : [],
+      };
+      
+      console.log('🔍 [UnifiedPermissionService] Created role object:', this.role);
+      console.log('🔍 [UnifiedPermissionService] Role level set to:', this.role.level);
+    } else {
+      // Find role from SYSTEM_ROLES
+      console.log('🔍 [UnifiedPermissionService] No role object, looking up by roleId:', user.roleId);
+      this.role = SYSTEM_ROLES.find((r) => r.id === user.roleId) || null;
+      console.log('🔍 [UnifiedPermissionService] Found system role:', this.role);
+    }
   }
 
   // ==========================================================================
@@ -271,8 +235,13 @@ export class UnifiedPermissionService {
 
     // Check for exact permission match
     const hasExactPermission = allPermissions.some((permission) => {
+      // Universal permission patterns
       if (permission.resource === '*' && permission.action === 'manage') {
-        return true; // Universal permission
+        return true; // Universal manage permission
+      }
+      
+      if (permission.action === 'admin' && permission.resource === '*') {
+        return true; // Universal admin permission
       }
 
       if (permission.action === action && permission.resource === resource) {
@@ -303,7 +272,14 @@ export class UnifiedPermissionService {
       return true;
     }
 
-    const userModules = this.role?.modules || [];
+    // Check role modules first
+    const roleModules = this.role?.modules || [];
+    if (roleModules.includes('*') || roleModules.includes(moduleId)) {
+      return true;
+    }
+
+    // Check user-specific modules
+    const userModules = this.user.modules || [];
     return userModules.includes('*') || userModules.includes(moduleId);
   }
 
@@ -329,7 +305,20 @@ export class UnifiedPermissionService {
       return Object.values(MODULES);
     }
 
-    return this.role?.modules || [];
+    const roleModules = this.role?.modules || [];
+    const userModules = this.user.modules || [];
+    
+    // Combine and deduplicate modules
+    const allModules = roleModules.concat(userModules).filter((value, index, self) => 
+      self.indexOf(value) === index
+    );
+    
+    // If has wildcard access, return all modules
+    if (allModules.includes('*')) {
+      return Object.values(MODULES);
+    }
+    
+    return allModules;
   }
 
   // ==========================================================================
@@ -474,6 +463,65 @@ export class UnifiedPermissionService {
   }
 
   // ==========================================================================
+  // HELPER METHODS
+  // ==========================================================================
+
+  /**
+   * Checks if user has universal permissions (admin:* or manage:*)
+   */
+  private hasUniversalPermission(action: string, resource: string): boolean {
+    const rolePermissions = this.role?.permissions || [];
+    const customPermissions = this.user.customPermissions || [];
+    const allPermissions = [...rolePermissions, ...customPermissions];
+
+    return allPermissions.some((permission) => {
+      // Universal admin permission
+      if (permission.action === 'admin' && permission.resource === '*') {
+        return true;
+      }
+      
+      // Universal manage permission  
+      if (permission.action === 'manage' && permission.resource === '*') {
+        return true;
+      }
+      
+      // Specific admin permission for resource
+      if (permission.action === 'admin' && permission.resource === resource) {
+        return true;
+      }
+      
+      // Module admin permissions (admin:sales, admin:hrm, etc.)
+      if (permission.action === 'admin' && this.getResourceModule(resource) === permission.resource) {
+        return true;
+      }
+      
+      return false;
+    });
+  }
+
+  /**
+   * Gets the module for a resource
+   */
+  private getResourceModule(resource: string): string {
+    const moduleMap: Record<string, string> = {
+      'order': 'sales',
+      'customer': 'crm', 
+      'employee': 'hrm',
+      'invoice': 'finance',
+      'product': 'inventory',
+      'user': 'system',
+      'role': 'system',
+      'permission': 'system',
+      'users': 'system',
+      'roles': 'system',
+      'permissions': 'system',
+      'system': 'system',
+    };
+    
+    return moduleMap[resource] || resource;
+  }
+
+  // ==========================================================================
   // UTILITY METHODS
   // ==========================================================================
 
@@ -496,7 +544,58 @@ export class UnifiedPermissionService {
    */
   updateUser(user: User): void {
     this.user = user;
-    this.role = user.role || SYSTEM_ROLES.find((r) => r.id === user.roleId) || null;
+    
+    // Convert UserRole to Role if needed
+    if (user.role) {
+      // Kiểm tra và xử lý permissions an toàn
+      let permissions: Permission[] = [];
+      
+      if (Array.isArray(user.role.permissions)) {
+        permissions = user.role.permissions.map(p => {
+          if (typeof p === 'string') {
+            const parts = p.split(':');
+            return {
+              action: parts[0] || 'unknown',
+              resource: parts[1] || parts[0] || 'unknown',
+              scope: (parts[2] as any) || 'all',
+            };
+          }
+          return p as Permission;
+        });
+      } else if (typeof user.role.permissions === 'string') {
+        // Nếu permissions là string JSON, parse nó
+        try {
+          const parsed = JSON.parse(user.role.permissions);
+          if (Array.isArray(parsed)) {
+            permissions = parsed.map(p => {
+              if (typeof p === 'string') {
+                const parts = p.split(':');
+                return {
+                  action: parts[0] || 'unknown',
+                  resource: parts[1] || parts[0] || 'unknown',
+                  scope: (parts[2] as any) || 'all',
+                };
+              }
+              return p as Permission;
+            });
+          }
+        } catch (e) {
+          console.warn('Failed to parse user role permissions:', e);
+          permissions = [];
+        }
+      }
+
+      this.role = {
+        id: user.role.id,
+        name: user.role.name,
+        description: user.role.description || '',
+        level: user.role.level,
+        permissions: permissions,
+        modules: Array.isArray(user.role.modules) ? user.role.modules : [],
+      };
+    } else {
+      this.role = SYSTEM_ROLES.find((r) => r.id === user.roleId) || null;
+    }
   }
 
   /**
@@ -538,15 +637,61 @@ export class UnifiedPermissionService {
   }
 }
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
+/**
+ * Helper function to safely parse permissions
+ */
+function parsePermissions(permissions: any): Permission[] {
+  if (!permissions) return [];
+  
+  if (Array.isArray(permissions)) {
+    return permissions.map(p => {
+      if (typeof p === 'string') {
+        const parts = p.split(':');
+        return {
+          action: parts[0] || 'unknown',
+          resource: parts[1] || parts[0] || 'unknown',
+          scope: (parts[2] as any) || 'all',
+        };
+      }
+      return p as Permission;
+    });
+  }
+  
+  if (typeof permissions === 'string') {
+    try {
+      const parsed = JSON.parse(permissions);
+      if (Array.isArray(parsed)) {
+        return parsePermissions(parsed);
+      }
+    } catch (e) {
+      console.warn('Failed to parse permissions string:', e);
+    }
+  }
+  
+  return [];
+}
 
 /**
- * Creates permission service for user
+ * Creates permission service for user with error handling
  */
 export function createPermissionService(user: User): UnifiedPermissionService {
-  return new UnifiedPermissionService(user);
+  try {
+    return new UnifiedPermissionService(user);
+  } catch (error) {
+    console.error('Failed to create permission service:', error);
+    
+    // Fallback: create service with basic user data
+    const fallbackUser: User = {
+      ...user,
+      role: user.role ? {
+        ...user.role,
+        permissions: parsePermissions(user.role.permissions),
+        modules: Array.isArray(user.role.modules) ? user.role.modules : [],
+      } : undefined,
+    };
+    
+    return new UnifiedPermissionService(fallbackUser);
+  }
 }
 
 /**

@@ -27,7 +27,12 @@ export async function GET(request: NextRequest) {
       displayName: user.displayName,
       avatar: user.avatar,
       role: user.role,
+      roleId: user.roleId,
+      modules: user.modules,
+      permissions: user.permissions,
+      isActive: user.isActive,
       isVerified: user.isVerified,
+      provider: user.provider,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to get user' }, { status: 401 });

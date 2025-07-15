@@ -2,15 +2,14 @@
 import React from 'react';
 import { siteConfig } from '../../lib/config/site';
 import { LoginForm } from './index';
-import { AuthProvider, useAuth } from '../../hooks/useAuth';
+import { useUnifiedAuth } from '@/components/auth/UnifiedAuthProvider';
 import Loading from '@/app/loading';
-
 interface MaintenanceGuardProps {
   children: React.ReactNode;
 }
 
 const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({ children }) => {
-  const { user, login, logout, loading } = useAuth();
+  const { user, login, logout, loading } = useUnifiedAuth();
   const [showLogin, setShowLogin] = React.useState(false);
 
   if (loading) {
@@ -55,7 +54,7 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({ children }) 
   }
 
   // Nếu website offline và không có user đăng nhập
-  if (siteConfig.offline && !user?.isAuthenticated) {
+  if (siteConfig.offline && !user) {
     if (showLogin) {
       return <LoginForm onLogin={login} onBack={() => setShowLogin(false)} />;
     }
@@ -109,8 +108,8 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({ children }) 
   }
 
   // Nếu website offline nhưng user đã đăng nhập và có quyền truy cập
-  if (siteConfig.offline && user?.isAuthenticated) {
-    const hasAccess = siteConfig.maintenance.allowedUsers.includes(user.email);
+  if (siteConfig.offline && user) {
+    const hasAccess = siteConfig.maintenance.allowedUsers.includes(user.email || '');
 
     if (!hasAccess) {
       return (
@@ -156,7 +155,7 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({ children }) 
       <div>
         <div className="bg-yellow-500 text-white px-4 py-2 text-center text-sm font-medium relative">
           <span>
-            ⚠️ Website đang trong chế độ bảo trì - Bạn đang truy cập với quyền quản trị ({user.role}
+            ⚠️ Website đang trong chế độ bảo trì - Bạn đang truy cập với quyền quản trị ({user.role?.name || 'Unknown'}
             )
           </span>
           <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
@@ -178,11 +177,7 @@ const MaintenanceGuardContent: React.FC<MaintenanceGuardProps> = ({ children }) 
 };
 
 const MaintenanceGuard: React.FC<MaintenanceGuardProps> = ({ children }) => {
-  return (
-    <AuthProvider>
-      <MaintenanceGuardContent>{children}</MaintenanceGuardContent>
-    </AuthProvider>
-  );
+  return <MaintenanceGuardContent>{children}</MaintenanceGuardContent>;
 };
 
 export default MaintenanceGuard;

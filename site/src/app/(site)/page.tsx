@@ -26,10 +26,10 @@ import {
 } from '@heroicons/react/24/outline';
 import ThemeManager, { ColorSchemeToggle } from '@/components/ThemeManager';
 import {
-  AuthProvider,
-  useUnifiedAuth as useAuth,
+  useUnifiedAuth,
   LoginModal,
   AccessBadge,
+  AuthProvider,
 } from '@/components/auth/UnifiedAuthProvider';
 import { ClientOnly } from '@/components/ClientOnly';
 
@@ -39,65 +39,16 @@ function HomePageContent() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [accessCheckResults, setAccessCheckResults] = useState<Record<string, any>>({});
   
-  const { user, loading, hasModuleAccess, logout } = useAuth();
+  const { user, loading, hasModuleAccess, logout } = useUnifiedAuth();
 
-  // Load theme from localStorage on component mount
+  // Debug logging
   useEffect(() => {
-    setMounted(true);
+    console.log('🔍 [PAGE DEBUG] Auth state:', { user: !!user, loading, userDetails: user });
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+      const token = localStorage.getItem('accessToken');
+      console.log('🔍 [PAGE DEBUG] Token in localStorage:', !!token);
     }
-    
-    // Enhanced user logging with authentication details
-    if (user) {
-      console.log('=== User Authentication Status ===');
-      console.log('User:', user);
-      console.log('Role:', user.role);
-      console.log('Permissions:', user.role?.permissions);
-      console.log('Is Active:', user.isActive);
-      console.log('Is Verified:', user.isVerified);
-      console.log('=====================================');
-    }
-  }, [user]);
-
-  // Check access for all modules when user changes
-  useEffect(() => {
-    if (user && mounted) {
-      const results: Record<string, any> = {};
-      
-      modules.forEach(module => {
-        const moduleAccess = hasModuleAccess(module.module);
-        const permissionChecks = module.permissions.map(permission => ({
-          permission,
-          hasAccess: false // Set to false since checkPermission is not available
-        }));
-        
-        results[module.module] = {
-          hasModuleAccess: moduleAccess,
-          permissionChecks,
-          requiredPermissions: module.permissions,
-          accessLevel: getAccessLevel(moduleAccess, permissionChecks)
-        };
-      });
-      
-      setAccessCheckResults(results);
-      console.log('Module Access Results:', results);
-    }
-  }, [user, mounted, hasModuleAccess]);
-
-  // Save theme to localStorage when it changes
-  useEffect(() => {
-    if (mounted && typeof window !== 'undefined') {
-      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-      document.documentElement.classList.toggle('dark', isDarkMode);
-    }
-  }, [isDarkMode, mounted]);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  }, [user, loading]);
 
   // Helper function to determine access level
   const getAccessLevel = (hasModuleAccess: boolean, permissionChecks: any[]) => {
@@ -232,6 +183,64 @@ function HomePageContent() {
     },
   ];
 
+  // Load theme from localStorage on component mount
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+    }
+    
+    // Enhanced user logging with authentication details
+    if (user) {
+      console.log('=== User Authentication Status ===');
+      console.log('User:', user);
+      console.log('Role:', user.role);
+      console.log('Permissions:', user.role?.permissions);
+      console.log('Is Active:', user.isActive);
+      console.log('Is Verified:', user.isVerified);
+      console.log('=====================================');
+    }
+  }, [user]);
+
+  // Check access for all modules when user changes
+  useEffect(() => {
+    if (user && mounted) {
+      const results: Record<string, any> = {};
+      
+      modules.forEach(module => {
+        const moduleAccess = hasModuleAccess(module.module);
+        const permissionChecks = module.permissions.map(permission => ({
+          permission,
+          hasAccess: false // Set to false since hasPermission is not available
+        }));
+        
+        results[module.module] = {
+          hasModuleAccess: moduleAccess,
+          permissionChecks,
+          requiredPermissions: module.permissions,
+          accessLevel: getAccessLevel(moduleAccess, permissionChecks)
+        };
+      });
+      
+      setAccessCheckResults(results);
+      console.log('Module Access Results:', results);
+    }
+  }, [user, mounted, hasModuleAccess]);
+
+  // Save theme to localStorage when it changes
+  useEffect(() => {
+    if (mounted && typeof window !== 'undefined') {
+      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', isDarkMode);
+    }
+  }, [isDarkMode, mounted]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   // Enhanced module click handler with detailed access checking
   const handleModuleClick = (module: any, e: React.MouseEvent) => {
     console.log(`Attempting to access module: ${module.title}`);
@@ -261,6 +270,8 @@ function HomePageContent() {
 
     // Check module access
     const hasAccess = hasModuleAccess(module.module);
+    console.log(`User has access to module ${module.module}:`, hasAccess);
+    
     if (!hasAccess) {
       e.preventDefault();
       console.log(`Access denied to module: ${module.module}`);
@@ -269,21 +280,21 @@ function HomePageContent() {
     }
 
     // Check specific permissions
-    const accessResult = accessCheckResults[module.module];
-    if (accessResult) {
-      const grantedPermissions = accessResult.permissionChecks.filter((p: any) => p.hasAccess);
-      console.log(`Module: ${module.module}`);
-      console.log(`Access Level: ${accessResult.accessLevel}`);
-      console.log(`Granted Permissions:`, grantedPermissions.map((p: any) => p.permission));
+    // const accessResult = accessCheckResults[module.module];
+    // if (accessResult) {
+    //   const grantedPermissions = accessResult.permissionChecks.filter((p: any) => p.hasAccess);
+    //   console.log(`Module: ${module.module}`);
+    //   console.log(`Access Level: ${accessResult.accessLevel}`);
+    //   console.log(`Granted Permissions:`, grantedPermissions.map((p: any) => p.permission));
       
-      if (accessResult.accessLevel === 'no-access') {
-        e.preventDefault();
-        alert(`Insufficient permissions for ${module.title}. Required: ${module.permissions.join(', ')}`);
-        return;
-      }
-    }
+    //   if (accessResult.accessLevel === 'no-access') {
+    //     e.preventDefault();
+    //     alert(`Insufficient permissions for ${module.title}. Required: ${module.permissions.join(', ')}`);
+    //     return;
+    //   }
+    // }
 
-    console.log(`Access granted to module: ${module.title}`);
+    // console.log(`Access granted to module: ${module.title}`);
   };
 
   // Function to get access badge info
@@ -297,6 +308,8 @@ function HomePageContent() {
     }
 
     const accessResult = accessCheckResults[module.module];
+    console.log(`Access result for module ${module.module}:`, accessResult);
+    
     if (!accessResult) {
       return {
         text: 'Checking...',

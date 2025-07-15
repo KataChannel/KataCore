@@ -9,64 +9,19 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { UnifiedPermissionService } from '@/lib/auth/unified-permission.service';
+import { createSafePermissionService, debugUserPermissions } from '@/lib/auth/permission-validator';
 
-// ============================================================================
-// INTERFACES & TYPES
-// ============================================================================
-interface User {
-  id: string;
-  email?: string | undefined;
-  phone?: string | undefined;
-  username?: string | undefined;
-  displayName: string;
-  avatar?: string | undefined;
-  roleId: string;
-  role?: {
-  id: string;
-  name: string;
-  permissions: string[];
-  level: number;
-} | undefined;
-  modules?: string[] | undefined;
-  permissions?: string[] | undefined;
-  isActive: boolean;
-  isVerified: boolean;
-  provider: string;
-}
-
-interface LoginCredentials {
-  email?: string;
-  phone?: string;
-  username?: string;
-  password?: string;
-  provider?: 'email' | 'phone' | 'google' | 'facebook' | 'apple';
-}
-
-interface AuthContextType {
-  // User state
-  user: User | null;
-  loading: boolean;
-
-  // Permission service
-  permissionService: UnifiedPermissionService | null;
-
-  // Core auth methods
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => void;
-  refreshAuth: () => Promise<void>;
-
-  // Permission methods
-  hasPermission: (action: string, resource: string, scope?: string) => boolean;
-  hasModuleAccess: (module: string) => boolean;
-  canAccessRoute: (route: string) => boolean;
-
-  // Role methods
-  isSuperAdmin: () => boolean;
-  isSystemAdmin: () => boolean;
-  isManager: () => boolean;
-  hasRole: (roleId: string) => boolean;
-  hasMinimumRoleLevel: (level: number) => boolean;
-}
+// Import unified types from single source of truth
+import type {
+  User,
+  UserRole,
+  LoginCredentials,
+  AuthContextType,
+  WithAuthOptions,
+  PermissionGateProps,
+  AccessBadgeProps,
+  LoginModalProps,
+} from '@/types/auth';
 
 // ============================================================================
 // CONTEXT CREATION
@@ -91,51 +46,64 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
   // ==========================================================================
 
   useEffect(() => {
+    console.log('🔍 [AUTH DEBUG] Initial useEffect triggered, setting isMounted to true');
     setIsMounted(true);
+    console.log('🔍 [AUTH DEBUG] Calling loadUserFromToken...');
     loadUserFromToken();
   }, []);
 
   useEffect(() => {
     if (user) {
       try {
-        const service = new UnifiedPermissionService({
-          id: user.id,
-          email: user.email || '',
-          name: user.displayName,
-          roleId: user.roleId,
-          role: user.role ? {
-            id: user.role.id,
-            name: user.role.name,
-            description: '',
-            level: user.role.level,
-            permissions: user.role.permissions.map((p) => {
-              const parts = p.split(':');
-              return {
-                action: parts[0] as any,
-                resource: parts[1] || parts[0],
-              };
-            }),
-            modules: user.modules || [],
-          } as any : undefined,
-          isActive: user.isActive,
-        });
-
+        console.log('🔍 [AUTH DEBUG] Creating permission service for user:', user.displayName);
+        console.log('🔍 [AUTH DEBUG] User role:', user.role);
+        console.log('🔍 [AUTH DEBUG] User role level:', user.role?.level);
+        
+        // Use safe permission service creation with validation
+        const service = createSafePermissionService(user);
+        console.log('🔍 [AUTH DEBUG] Permission service created:', !!service);
+        
         setPermissionService(service);
+        
+        if (service) {
+          console.log('🔍 [AUTH DEBUG] Permission service initialized successfully for user:', user.displayName);
+          // Debug user permissions in development
+          if (process.env.NODE_ENV === 'development') {
+            debugUserPermissions(user, service);
+          }
+        } else {
+          console.error('[AUTH] Failed to create permission service - invalid user data');
+        }
       } catch (error) {
         console.error('[AUTH] Failed to initialize permission service:', error);
         setPermissionService(null);
       }
     } else {
+      console.log('🔍 [AUTH DEBUG] No user, clearing permission service');
       setPermissionService(null);
     }
   }, [user]);
+
+  // ==========================================================================
+  // UTILITY FUNCTIONS
+  // ==========================================================================
+
+  const clearAuthCookies = useCallback(() => {
+    const cookies = ['accessToken', 'refreshToken', 'token'];
+    cookies.forEach((cookie) => {
+      document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+      document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    });
+  }, []);
 
   // ==========================================================================
   // AUTH METHODS
   // ==========================================================================
 
   const loadUserFromToken = useCallback(async () => {
-    if (!isMounted) return;
+    console.log('🔍 [AUTH DEBUG] loadUserFromToken called, isMounted:', isMounted);
+    // Remove isMounted check temporarily for debugging
+    // if (!isMounted) return;
     
     try {
       let token = null;
@@ -147,11 +115,14 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
             ?.split('=')[1];
       }
 
+      console.log('🔍 [AUTH DEBUG] Token found:', !!token);
       if (!token) {
+        console.log('🔍 [AUTH DEBUG] No token found, setting loading to false');
         setLoading(false);
         return;
       }
 
+      console.log('🔍 [AUTH DEBUG] Making request to /api/auth/me');
       const response = await fetch('/api/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -159,8 +130,10 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
         },
       });
 
+      console.log('🔍 [AUTH DEBUG] Response status:', response.status);
       if (response.ok) {
         const userData = await response.json();
+        console.log('🔍 [AUTH DEBUG] User data received:', userData);
         // Fix: Ensure userData structure matches our User interface
         if (userData && userData.id) {
           const transformedUser: User = {
@@ -168,9 +141,9 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
             email: userData.email,
             phone: userData.phone,
             username: userData.username,
-            displayName: userData.displayName,
+            displayName: userData.displayName || userData.name || 'User',
             avatar: userData.avatar,
-            roleId: userData.role?.id || userData.roleId,
+            roleId: userData.role?.id || userData.roleId || 'default',
             role: userData.role ? {
               id: userData.role.id,
               name: userData.role.name,
@@ -183,6 +156,7 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
             isVerified: userData.isVerified ?? false,
             provider: userData.provider || 'email',
           };
+          console.log('🔍 [AUTH DEBUG] Setting user:', transformedUser);
           setUser(transformedUser);
         } else {
           console.warn('[AUTH] Invalid user data received');
@@ -190,6 +164,7 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
           clearAuthCookies();
         }
       } else {
+        console.log('🔍 [AUTH DEBUG] Response not ok, clearing tokens');
         // Token is invalid, clear it
         localStorage.removeItem('accessToken');
         clearAuthCookies();
@@ -201,7 +176,7 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
     } finally {
       setLoading(false);
     }
-  }, [isMounted]);
+  }, [isMounted, clearAuthCookies]);
 
   const login = useCallback(
     async (credentials: LoginCredentials) => {
@@ -224,7 +199,9 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
         }
 
         // Store access token
+        console.log('🔍 [AUTH DEBUG] Storing token in localStorage:', data.accessToken ? 'YES' : 'NO');
         localStorage.setItem('accessToken', data.accessToken);
+        console.log('🔍 [AUTH DEBUG] Token stored, verifying:', localStorage.getItem('accessToken') ? 'FOUND' : 'NOT FOUND');
 
         // Transform and set user data to match our interface
         const transformedUser: User = {
@@ -232,9 +209,9 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
           email: data.user.email,
           phone: data.user.phone,
           username: data.user.username,
-          displayName: data.user.displayName,
+          displayName: data.user.displayName || data.user.name || 'User',
           avatar: data.user.avatar,
-          roleId: data.user.role?.id || data.user.roleId,
+          roleId: data.user.role?.id || data.user.roleId || 'default',
           role: data.user.role ? {
             id: data.user.role.id,
             name: data.user.role.name,
@@ -248,12 +225,26 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
           provider: data.user.provider || credentials.provider || 'email',
         };
 
+        console.log('🔍 [AUTH DEBUG] Setting user after login:', transformedUser.displayName);
         setUser(transformedUser);
+        
+        // Ensure auth state is properly updated
+        setLoading(false);
+        
+        // Force a complete auth refresh to ensure state consistency
+        setTimeout(async () => {
+          await loadUserFromToken();
+        }, 500);
 
-        // Redirect to dashboard or intended page
-        const redirectTo =
-          new URLSearchParams(window.location.search).get('redirect') || '/dashboard';
-        router.push(redirectTo);
+        // Only redirect if we're not already on the home page
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '') {
+          // Redirect to dashboard or intended page
+          const redirectTo =
+            new URLSearchParams(window.location.search).get('redirect') || '/dashboard';
+          router.push(redirectTo);
+        }
+        // If we're on the home page, just stay here and show authenticated content
       } catch (error) {
         console.error('[AUTH] Login error:', error);
         setError(error instanceof Error ? error.message : 'Login failed');
@@ -262,7 +253,7 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
         setLoading(false);
       }
     },
-    [router]
+    [router, clearAuthCookies]
   );
 
   const logout = useCallback(async () => {
@@ -398,10 +389,34 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
 
   const hasMinimumRoleLevel = useCallback(
     (level: number): boolean => {
-      if (!permissionService) return false;
-      return permissionService.hasMinimumRoleLevel(level);
+      console.log('🔍 [AUTH DEBUG] hasMinimumRoleLevel called with level:', level);
+      console.log('🔍 [AUTH DEBUG] permissionService:', !!permissionService);
+      console.log('🔍 [AUTH DEBUG] user:', user ? `${user.displayName} (roleLevel: ${user.role?.level})` : 'null');
+      
+      // If no permission service, try direct check from user data
+      if (!permissionService) {
+        console.log('🔍 [AUTH DEBUG] No permission service, trying direct user check');
+        if (user?.role?.level) {
+          const directResult = user.role.level >= level;
+          console.log('🔍 [AUTH DEBUG] Direct user role level check:', directResult, `(${user.role.level} >= ${level})`);
+          return directResult;
+        }
+        
+        // Fallback: Check if user is super admin by roleId
+        if (user?.roleId === 'super_admin' || user?.role?.name === 'Super Administrator') {
+          console.log('🔍 [AUTH DEBUG] User is super admin, granting access');
+          return true;
+        }
+        
+        console.log('🔍 [AUTH DEBUG] No permission service and no direct role level, returning false');
+        return false;
+      }
+      
+      const result = permissionService.hasMinimumRoleLevel(level);
+      console.log('🔍 [AUTH DEBUG] permissionService.hasMinimumRoleLevel result:', result);
+      return result;
     },
-    [permissionService]
+    [permissionService, user]
   );
 
   // ==========================================================================
@@ -421,18 +436,6 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
 
     return () => clearInterval(refreshInterval);
   }, [user, refreshToken]);
-
-  // ==========================================================================
-  // IMPROVED UTILITY FUNCTIONS
-  // ==========================================================================
-
-  const clearAuthCookies = useCallback(() => {
-    const cookies = ['accessToken', 'refreshToken', 'token'];
-    cookies.forEach((cookie) => {
-      document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
-      document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    });
-  }, []);
 
   // ==========================================================================
   // CONTEXT VALUE
@@ -534,26 +537,6 @@ function useUnifiedRoles() {
 // ============================================================================
 // HOC FOR ROUTE PROTECTION
 // ============================================================================
-
-interface WithAuthOptions {
-  requireAuth?: boolean;
-  requireModule?: string;
-  requirePermission?: { action: string; resource: string };
-  requireRole?: string;
-  requireMinLevel?: number;
-  redirectTo?: string;
-  fallback?: React.ComponentType;
-}
-
-interface PermissionGateProps {
-  children: React.ReactNode;
-  action?: string;
-  resource?: string;
-  module?: string;
-  role?: string;
-  minLevel?: number;
-  fallback?: React.ReactNode;
-}
 
 /**
  * Higher-order component for protecting routes
@@ -688,12 +671,6 @@ export function PermissionGate({
 /**
  * Access badge component
  */
-interface AccessBadgeProps {
-  module?: string;
-  permission?: { action: string; resource: string };
-  className?: string;
-}
-
 export function AccessBadge({ module, permission, className = '' }: AccessBadgeProps) {
   const { hasModuleAccess, hasPermission, user, loading } = useUnifiedAuth();
 
@@ -760,11 +737,6 @@ export function AccessBadge({ module, permission, className = '' }: AccessBadgeP
 /**
  * Login modal component
  */
-interface LoginModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
@@ -782,7 +754,16 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     try {
       await login(credentials);
+      // Clear form
+      setCredentials({ email: '', password: '', provider: 'email' });
+      // Close modal after successful login
       onClose();
+      // Small delay to ensure state updates, then force a refresh if on home page
+      setTimeout(() => {
+        if (window.location.pathname === '/' || window.location.pathname === '') {
+          window.location.reload();
+        }
+      }, 300);
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
@@ -865,12 +846,4 @@ export {
   useUnifiedRoles,
 };
 
-export type {
-  User,
-  LoginCredentials,
-  AuthContextType,
-  WithAuthOptions,
-  PermissionGateProps,
-  AccessBadgeProps,
-  LoginModalProps,
-};
+// Note: withAuth, PermissionGate, AccessBadge, and LoginModal are already exported above

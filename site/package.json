@@ -58,8 +58,6 @@
     "clean": "rm -rf .next node_modules/.cache",
     "clean:all": "rm -rf .next node_modules .turbo tsconfig.tsbuildinfo",
     "clean:cache": "rm -rf .next/cache node_modules/.cache",
-    "analyze": "ANALYZE=true npm run build",
-    "bundle-analyzer": "ANALYZE=true npm run build",
     "// ========== SECURITY & MONITORING ==========": "",
     "audit": "npm audit",
     "audit:fix": "npm audit fix",
