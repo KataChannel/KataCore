@@ -69,9 +69,11 @@ ENV DATABASE_URL="file:./dev.db"
 # Ensure Prisma client is available and regenerate if needed
 RUN echo "Setting up Prisma client for Next.js build..." && \
     echo "Current working directory: $(pwd)" && \
+    echo "Directory contents:" && \
+    ls -la && \
     echo "Copying Prisma schema to site directory..." && \
-    cp shared/prisma/schema.prisma prisma/schema.prisma 2>/dev/null || \
-    (mkdir -p prisma && cp shared/prisma/schema.prisma prisma/schema.prisma) && \
+    mkdir -p prisma && \
+    cp shared/prisma/schema.prisma prisma/schema.prisma && \
     echo "Generating Prisma client directly in site..." && \
     bunx prisma generate && \
     echo "Verifying Prisma client generation:" && \
