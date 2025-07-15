@@ -49,8 +49,10 @@ RUN ln -sf ../shared/prisma ./prisma
 # Set build environment
 ENV NODE_ENV=production
 
-# Verify Prisma setup and ensure client is accessible
-RUN echo "Verifying Prisma setup before build..." && \
+# Clean any existing dist directory and verify Prisma setup
+RUN echo "Cleaning previous builds..." && \
+    rm -rf dist && \
+    echo "Verifying Prisma setup before build..." && \
     ls -la shared/ && \
     ls -la shared/node_modules/.prisma/ || echo "Shared Prisma client check" && \
     echo "Copying Prisma client to API node_modules..." && \
