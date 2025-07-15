@@ -20,6 +20,9 @@ import {
   XCircleIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
+import ResizableTable from '@/components/ui/shared/Table';
+import AdvancedTable from '@/components/ui/shared/katatable';
+import { Table, TableDemo } from '@/components/ui/shared/table';
 
 
 interface Employee {
@@ -397,6 +400,10 @@ const EmployeeManagement: React.FC = () => {
         </div>
       </div>
 
+
+
+      {/* Advanced Table */}
+     <Table />
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex flex-col md:flex-row gap-4">
@@ -602,7 +609,7 @@ const EmployeeManagement: React.FC = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">

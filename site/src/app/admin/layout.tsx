@@ -492,16 +492,16 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
         {/* Mobile Sidebar */}
         <aside
           className={`
-          fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
+          bg-white fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           bg-surface
         `}
         >
           {/* Mobile Sidebar Header */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-border">
+            <div className="flex items-center justify-between h-16 px-4 border-b border-border">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
+              <div className="w-8 h-8 bg-accent flex items-center justify-center">
+              <span className="text-white font-bold text-sm">T</span>
               </div>
               <span className="text-lg font-semibold text-primary">TazaCore</span>
             </div>
@@ -511,68 +511,64 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
             >
               <XMarkIcon className="h-5 w-5 text-text-secondary" />
             </button>
-          </div>
+            </div>
 
           {/* Mobile Menu */}
           <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
             {visibleMenuItems.map((item) => (
               <div key={item.path}>
-                <button
-                  onClick={() => {
-                    if (item.children) {
-                      toggleMenuExpansion(item.path);
-                    } else {
-                      router.push(item.path);
-                      setMobileMenuOpen(false);
-                    }
-                  }}
-                  className={`
-                    w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors
-                    ${
-                      item.active
-                        ? 'bg-accent text-white'
-                        : 'text-text-secondary hover:bg-hover hover:text-primary'
-                    }
-                  `}
-                >
-                  <div className="flex items-center space-x-3">
-                    <item.icon className="h-5 w-5" />
-                    <span className="font-medium">{item.title}</span>
-                  </div>
-                  {item.children && (
-                    <ChevronDownIcon
-                      className={`h-4 w-4 transition-transform ${
-                        shouldExpand(item) ? 'rotate-180' : ''
-                      }`}
-                    />
-                  )}
-                </button>
+          <button
+            onClick={() => {
+              if (item.children) {
+                toggleMenuExpansion(item.path);
+              } else {
+                router.push(item.path);
+                setMobileMenuOpen(false);
+              }
+            }}
+            className={`
+              hover:bg-gray-300 w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors
+              ${item.active? 'bg-gray-300': 'text-text-secondary hover:bg-hover hover:text-primary'}
+            `}
+          >
+            <div className="flex items-center space-x-3">
+              <item.icon className="h-5 w-5" />
+              <span className="font-medium">{item.title}</span>
+            </div>
+            {item.children && (
+              <ChevronDownIcon
+                className={`h-4 w-4 transition-transform ${
+            shouldExpand(item) ? 'rotate-180' : ''
+                }`}
+              />
+            )}
+          </button>
 
-                {/* Mobile Submenu */}
-                {item.children && shouldExpand(item) && (
-                  <div className="ml-6 mt-2 space-y-1">
-                    {item.children.map((subItem:any) => (
-                      <button
-                        key={subItem.href}
-                        onClick={() => {
-                          router.push(subItem.href);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`
-                          w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
-                          ${
-                            pathname === subItem.href
-                              ? 'bg-accent/10 text-accent'
-                              : 'text-text-secondary hover:bg-hover hover:text-primary'
-                          }
-                        `}
-                      >
-                        <subItem.icon className="h-4 w-4" />
-                        <span>{subItem.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+          {/* Mobile Submenu */}
+          {item.children && shouldExpand(item) && (
+            <div className="ml-6 mt-2 space-y-1">
+              {item.children.map((subItem:any) => (
+                <button
+            key={subItem.href}
+            onClick={() => {
+              router.push(subItem.href);
+              setMobileMenuOpen(false);
+            }}
+            className={`
+             hover:bg-gray-300 w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
+              ${
+                pathname === subItem.href
+                  ? 'bg-gray-300'
+                  : 'text-text-secondary hover:bg-hover hover:text-primary'
+              }
+            `}
+                >
+            <subItem.icon className="h-4 w-4" />
+            <span>{subItem.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
               </div>
             ))}
           </nav>
