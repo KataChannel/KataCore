@@ -304,11 +304,11 @@ export function ColorSchemeToggle({
   const getSchemeIcon = () => {
     switch (config.colorScheme) {
       case 'monochrome':
-        return '⚫';
+        return '🎨';
       case 'colorful':
         return '🎨';
       default:
-        return '⚫';
+        return '🎨';
     }
   };
 
@@ -330,7 +330,7 @@ export function ColorSchemeToggle({
   return (
     <button
       onClick={toggleColorScheme}
-      className={`p-3 rounded border border-border hover:bg-hover transition-colors ${className}`}
+      className={`${className}`}
       aria-label={config.language === 'vi' ? 'Chuyển phong cách màu' : 'Toggle color scheme'}
       title={`${config.language === 'vi' ? 'Phong cách hiện tại' : 'Current scheme'}: ${getSchemeLabel()}`}
     >

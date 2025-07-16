@@ -38,7 +38,7 @@ function HomePageContent() {
   const [mounted, setMounted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [accessCheckResults, setAccessCheckResults] = useState<Record<string, any>>({});
-  
+
   const { user, loading, hasModuleAccess, logout } = useUnifiedAuth();
 
   // Debug logging
@@ -53,10 +53,10 @@ function HomePageContent() {
   // Helper function to determine access level
   const getAccessLevel = (hasModuleAccess: boolean, permissionChecks: any[]) => {
     if (!hasModuleAccess) return 'no-access';
-    
-    const grantedPermissions = permissionChecks.filter(p => p.hasAccess).length;
+
+    const grantedPermissions = permissionChecks.filter((p) => p.hasAccess).length;
     const totalPermissions = permissionChecks.length;
-    
+
     if (grantedPermissions === totalPermissions) return 'full-access';
     if (grantedPermissions > 0) return 'partial-access';
     return 'no-access';
@@ -191,7 +191,7 @@ function HomePageContent() {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
     }
-    
+
     // Enhanced user logging with authentication details
     if (user) {
       console.log('=== User Authentication Status ===');
@@ -208,22 +208,22 @@ function HomePageContent() {
   useEffect(() => {
     if (user && mounted) {
       const results: Record<string, any> = {};
-      
-      modules.forEach(module => {
+
+      modules.forEach((module) => {
         const moduleAccess = hasModuleAccess(module.module);
-        const permissionChecks = module.permissions.map(permission => ({
+        const permissionChecks = module.permissions.map((permission) => ({
           permission,
-          hasAccess: false // Set to false since hasPermission is not available
+          hasAccess: false, // Set to false since hasPermission is not available
         }));
-        
+
         results[module.module] = {
           hasModuleAccess: moduleAccess,
           permissionChecks,
           requiredPermissions: module.permissions,
-          accessLevel: getAccessLevel(moduleAccess, permissionChecks)
+          accessLevel: getAccessLevel(moduleAccess, permissionChecks),
         };
       });
-      
+
       setAccessCheckResults(results);
       console.log('Module Access Results:', results);
     }
@@ -244,7 +244,7 @@ function HomePageContent() {
   // Enhanced module click handler with detailed access checking
   const handleModuleClick = (module: any, e: React.MouseEvent) => {
     console.log(`Attempting to access module: ${module.title}`);
-    
+
     // Check if user is authenticated
     if (!user) {
       e.preventDefault();
@@ -271,7 +271,7 @@ function HomePageContent() {
     // Check module access
     const hasAccess = hasModuleAccess(module.module);
     console.log(`User has access to module ${module.module}:`, hasAccess);
-    
+
     if (!hasAccess) {
       e.preventDefault();
       console.log(`Access denied to module: ${module.module}`);
@@ -286,7 +286,7 @@ function HomePageContent() {
     //   console.log(`Module: ${module.module}`);
     //   console.log(`Access Level: ${accessResult.accessLevel}`);
     //   console.log(`Granted Permissions:`, grantedPermissions.map((p: any) => p.permission));
-      
+
     //   if (accessResult.accessLevel === 'no-access') {
     //     e.preventDefault();
     //     alert(`Insufficient permissions for ${module.title}. Required: ${module.permissions.join(', ')}`);
@@ -303,18 +303,18 @@ function HomePageContent() {
       return {
         text: 'Login Required',
         className: 'bg-yellow-100 text-yellow-800',
-        icon: KeyIcon
+        icon: KeyIcon,
       };
     }
 
     const accessResult = accessCheckResults[module.module];
     console.log(`Access result for module ${module.module}:`, accessResult);
-    
+
     if (!accessResult) {
       return {
         text: 'Checking...',
         className: 'bg-gray-100 text-gray-800',
-        icon: ExclamationTriangleIcon
+        icon: ExclamationTriangleIcon,
       };
     }
 
@@ -323,25 +323,25 @@ function HomePageContent() {
         return {
           text: 'Full Access',
           className: 'bg-green-100 text-green-800',
-          icon: CheckCircleIcon
+          icon: CheckCircleIcon,
         };
       case 'partial-access':
         return {
           text: 'Limited Access',
           className: 'bg-orange-100 text-orange-800',
-          icon: ExclamationTriangleIcon
+          icon: ExclamationTriangleIcon,
         };
       case 'no-access':
         return {
           text: 'Access Denied',
           className: 'bg-red-100 text-red-800',
-          icon: XCircleIcon
+          icon: XCircleIcon,
         };
       default:
         return {
           text: 'Unknown',
           className: 'bg-gray-100 text-gray-800',
-          icon: ExclamationTriangleIcon
+          icon: ExclamationTriangleIcon,
         };
     }
   };
@@ -358,92 +358,9 @@ function HomePageContent() {
           : 'bg-gradient-to-br from-gray-50 via-white to-gray-100 text-black'
       }`}
     >
-
-
       {/* Services Section */}
-      <section id="modules" className="py-12 sm:py-20 px-4 sm:px-6">
+      <section id="modules" className="py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-      {/* Theme Toggle Button */}
-      <div className="fixed top-0 right-0 z-50 flex flex-row items-center gap-3">
-        <button
-          onClick={toggleTheme}
-          className={`p-3 rounded-full backdrop-blur-md transition-all duration-500 hover:scale-110 group ${
-            isDarkMode
-              ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 shadow-lg shadow-white/5'
-              : 'bg-black/10 text-black hover:bg-black/20 border border-black/20 shadow-lg shadow-black/5'
-          }`}
-          aria-label="Toggle theme"
-        >
-          <div className="relative w-5 h-5 sm:w-6 sm:h-6">
-            <SunIcon
-              className={`w-full h-full transition-all duration-500 absolute inset-0 ${
-                isDarkMode ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'
-              }`}
-            />
-            <MoonIcon
-              className={`w-full h-full transition-all duration-500 absolute inset-0 ${
-                isDarkMode ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-180 scale-0'
-              }`}
-            />
-          </div>
-        </button>
-
-        <ClientOnly>
-          <ColorSchemeToggle
-            showLabel={false}
-            className="sm:flex items-center gap-2 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105"
-          />
-        </ClientOnly>
-
-        {/* Enhanced User Auth Status */}
-        {user ? (
-          <div
-            className={`flex flex-col items-center gap-2 p-3 rounded-lg backdrop-blur-md transition-all duration-300 min-w-[200px] ${
-              isDarkMode
-                ? 'bg-white/10 border border-white/20'
-                : 'bg-black/10 border border-black/20'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <UserIcon className="w-4 h-4" />
-              <span className="text-xs font-medium">{user.displayName}</span>
-              {user.isVerified && (
-                <ShieldCheckIcon className="w-3 h-3 text-green-400" title="Verified" />
-              )}
-            </div>
-            
-            <div className="text-center">
-              <div className="text-xs text-gray-400">
-                {user.role?.name}
-              </div>
-              <div className={`text-xs mt-1 ${user.isActive ? 'text-green-400' : 'text-red-400'}`}>
-                {user.isActive ? 'Active' : 'Inactive'}
-              </div>
-            </div>
-            
-            <button
-              onClick={logout}
-              className="text-xs text-red-400 hover:text-red-300 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowLoginModal(true)}
-            className={`flex items-center gap-2 p-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-              isDarkMode
-                ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                : 'bg-black/10 text-black hover:bg-black/20 border border-black/20'
-            }`}
-          >
-            <KeyIcon className="w-4 h-4" />
-            <span className="text-xs font-medium">
-              {loading ? 'Loading...' : 'Login'}
-            </span>
-          </button>
-        )}
-      </div>
           <div className="text-center mb-12 sm:mb-20">
             <h3
               className={`text-3xl sm:text-4xl lg:text-6xl font-black mb-4 sm:mb-6 tracking-tighter transition-all duration-700 ${
@@ -461,7 +378,69 @@ function HomePageContent() {
                   : 'bg-gradient-to-r from-transparent via-black to-transparent'
               }`}
             ></div>
+            <div className="flex flex-row space-x-2 items-center justify-center mt-4">
+              <button
+              onClick={toggleTheme}
+              className={`h-11 px-3 rounded-lg backdrop-blur-md transition-all duration-500 hover:scale-110 group flex items-center justify-center ${
+                isDarkMode
+                ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 shadow-lg shadow-white/5'
+                : 'bg-black/10 text-black hover:bg-black/20 border border-black/20 shadow-lg shadow-black/5'
+              }`}
+              aria-label="Toggle theme"
+              >
+              <div className="relative w-5 h-5 sm:w-6 sm:h-6">
+                <SunIcon
+                className={`w-full h-full transition-all duration-500 absolute inset-0 ${
+                  isDarkMode ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'
+                }`}
+                />
+                <MoonIcon
+                className={`w-full h-full transition-all duration-500 absolute inset-0 ${
+                  isDarkMode
+                  ? 'opacity-100 rotate-0 scale-100'
+                  : 'opacity-0 -rotate-180 scale-0'
+                }`}
+                />
+              </div>
+              </button>
 
+              <ClientOnly>
+              <ColorSchemeToggle
+                showLabel={false}
+                className={`h-11 px-2 rounded-lg transition-all duration-500 hover:scale-110 group flex items-center justify-center ${
+                isDarkMode
+                  ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 shadow-lg shadow-white/5'
+                  : 'bg-black/10 text-black hover:bg-black/20 border border-black/20 shadow-lg shadow-black/5'
+                }`}
+              />
+              </ClientOnly>
+              {user ? (
+              <button
+                onClick={logout}
+                className={`h-11 flex items-center gap-2 px-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                isDarkMode
+                  ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30'
+                  : 'bg-red-500/20 text-red-600 hover:bg-red-500/30 border border-red-500/30'
+                }`}
+              >
+                <UserIcon className="w-4 h-4" />
+                <span className="text-xs font-medium">Logout</span>
+              </button>
+              ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className={`h-11 flex items-center gap-2 px-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                isDarkMode
+                  ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                  : 'bg-black/10 text-black hover:bg-black/20 border border-black/20'
+                }`}
+              >
+                <KeyIcon className="w-4 h-4" />
+                <span className="text-xs font-medium">{loading ? 'Loading...' : 'Login'}</span>
+              </button>
+              )}
+            </div>
+           
             {user && (
               <div className="mt-8">
                 <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -474,9 +453,7 @@ function HomePageContent() {
                   <span className={`${user.isActive ? 'text-green-400' : 'text-red-400'}`}>
                     {user.isActive ? '● Active' : '● Inactive'}
                   </span>
-                  {user.isVerified && (
-                    <span className="text-green-400">✓ Verified</span>
-                  )}
+                  {user.isVerified && <span className="text-green-400">✓ Verified</span>}
                 </div>
               </div>
             )}
@@ -565,14 +542,17 @@ function HomePageContent() {
                     {/* Enhanced Access Control Information */}
                     <div className="flex flex-wrap gap-2 mt-4">
                       {/* Access Status Badge */}
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${badgeInfo.className}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${badgeInfo.className}`}
+                      >
                         <BadgeIcon className="w-3 h-3" />
                         {badgeInfo.text}
                       </span>
 
                       {/* Permission Details for Admins */}
                       {user &&
-                        (user.role?.name === 'Super Administrator' || user.role?.name === 'ADMIN') && 
+                        (user.role?.name === 'Super Administrator' ||
+                          user.role?.name === 'ADMIN') &&
                         accessResult && (
                           <div className="w-full mt-2">
                             <div className="text-xs text-gray-500 mb-1">Permissions:</div>
@@ -628,9 +608,8 @@ function HomePageContent() {
                 isDarkMode ? 'text-gray-500' : 'text-gray-400'
               }`}
             >
-              Logged in as {user.displayName} | Role: {user.role?.name} | 
-              Status: {user.isActive ? 'Active' : 'Inactive'} | 
-              {user.isVerified ? 'Verified' : 'Unverified'}
+              Logged in as {user.displayName} | Role: {user.role?.name} | Status:{' '}
+              {user.isActive ? 'Active' : 'Inactive'} |{user.isVerified ? 'Verified' : 'Unverified'}
             </p>
           )}
         </div>

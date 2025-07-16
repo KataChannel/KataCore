@@ -142,8 +142,8 @@ export default function LoginPage() {
 
   const fillSuperAdminCredentials = () => {
     setFormData({
-      email: 'superadmin@tazacore.com',
-      password: 'SuperAdmin@2024',
+      email: 'it@tazagroup.vn',
+      password: '123456',
     });
     setError(null);
     setMessage('Đã điền thông tin tài khoản Super Admin');
@@ -170,10 +170,10 @@ export default function LoginPage() {
             <h3 className="text-sm font-medium text-blue-800">Tài khoản Super Admin mặc định</h3>
             <div className="mt-2 text-sm text-blue-700">
               <p>
-                <strong>Email:</strong> superadmin@tazacore.com
+                <strong>Email:</strong> it@tazagroup.vn
               </p>
               <p>
-                <strong>Mật khẩu:</strong> SuperAdmin@2024
+                <strong>Mật khẩu:</strong> ******** (đã được mã hóa)
               </p>
             </div>
             <div className="mt-3">
