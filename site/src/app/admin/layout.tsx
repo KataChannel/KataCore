@@ -220,6 +220,22 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       permission: 'manage:social',
     },
   ];
+  const websiteSubMenus = [
+    {
+      name: 'Dashboard',
+      nameVi: 'Tổng quan',
+      href: '/admin/website',
+      icon: ChartBarIcon,
+      permission: 'read:website',
+    },
+    {
+      name: 'Builder',
+      nameVi: 'Builder',
+      href: '/admin/website/builder',
+      icon: ComputerDesktopIcon,
+      permission: 'manage:website',
+    },
+  ];
 
   const menuItems = [
     {
@@ -258,6 +274,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       icon: ComputerDesktopIcon,
       path: '/admin/website',
       active: pathname.startsWith('/admin/website'),
+      children: websiteSubMenus,
       permission: 'manage:website',
     },
     {
@@ -268,7 +285,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       permission: 'read:analytics',
     },
     {
-      title: 'Permission Management',
+      title: 'Phân Quyền',
       icon: CogIcon,
       path: '/admin/permissions',
       active: pathname.startsWith('/admin/permissions'),
@@ -411,7 +428,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                   <div className="w-8 h-8 bg-accent flex items-center justify-center">
                     <span className="text-white font-bold text-sm">T</span>
                   </div>
-                  <span className="text-lg font-semibold text-primary">TazaCore</span>
+                  <span className="text-lg font-semibold text-primary">Taza Group</span>
                 </>
               )}
             </div>
@@ -503,7 +520,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               <div className="w-8 h-8 bg-accent flex items-center justify-center">
               <span className="text-white font-bold text-sm">T</span>
               </div>
-              <span className="text-lg font-semibold text-primary">TazaCore</span>
+              <span className="text-lg font-semibold text-primary">Taza Group</span>
             </div>
             <button
               onClick={toggleMobileMenu}

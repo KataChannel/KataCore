@@ -46,40 +46,40 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
   // ==========================================================================
 
   useEffect(() => {
-    console.log('🔍 [AUTH DEBUG] Initial useEffect triggered, setting isMounted to true');
+    // console.log('🔍 [AUTH DEBUG] Initial useEffect triggered, setting isMounted to true');
     setIsMounted(true);
-    console.log('🔍 [AUTH DEBUG] Calling loadUserFromToken...');
+    // console.log('🔍 [AUTH DEBUG] Calling loadUserFromToken...');
     loadUserFromToken();
   }, []);
 
   useEffect(() => {
     if (user) {
       try {
-        console.log('🔍 [AUTH DEBUG] Creating permission service for user:', user.displayName);
-        console.log('🔍 [AUTH DEBUG] User role:', user.role);
-        console.log('🔍 [AUTH DEBUG] User role level:', user.role?.level);
+       // console.log('🔍 [AUTH DEBUG] Creating permission service for user:', user.displayName);
+       //  console.log('🔍 [AUTH DEBUG] User role:', user.role);
+       // console.log('🔍 [AUTH DEBUG] User role level:', user.role?.level);
         
         // Use safe permission service creation with validation
         const service = createSafePermissionService(user);
-        console.log('🔍 [AUTH DEBUG] Permission service created:', !!service);
+      //  console.log('🔍 [AUTH DEBUG] Permission service created:', !!service);
         
         setPermissionService(service);
         
         if (service) {
-          console.log('🔍 [AUTH DEBUG] Permission service initialized successfully for user:', user.displayName);
+        //  console.log('🔍 [AUTH DEBUG] Permission service initialized successfully for user:', user.displayName);
           // Debug user permissions in development
           if (process.env.NODE_ENV === 'development') {
             debugUserPermissions(user, service);
           }
         } else {
-          console.error('[AUTH] Failed to create permission service - invalid user data');
+       //   console.error('[AUTH] Failed to create permission service - invalid user data');
         }
       } catch (error) {
-        console.error('[AUTH] Failed to initialize permission service:', error);
+      //  console.error('[AUTH] Failed to initialize permission service:', error);
         setPermissionService(null);
       }
     } else {
-      console.log('🔍 [AUTH DEBUG] No user, clearing permission service');
+     // console.log('🔍 [AUTH DEBUG] No user, clearing permission service');
       setPermissionService(null);
     }
   }, [user]);
@@ -101,7 +101,7 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
   // ==========================================================================
 
   const loadUserFromToken = useCallback(async () => {
-    console.log('🔍 [AUTH DEBUG] loadUserFromToken called, isMounted:', isMounted);
+   // console.log('🔍 [AUTH DEBUG] loadUserFromToken called, isMounted:', isMounted);
     // Remove isMounted check temporarily for debugging
     // if (!isMounted) return;
     
@@ -115,14 +115,14 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
             ?.split('=')[1];
       }
 
-      console.log('🔍 [AUTH DEBUG] Token found:', !!token);
+     // console.log('🔍 [AUTH DEBUG] Token found:', !!token);
       if (!token) {
-        console.log('🔍 [AUTH DEBUG] No token found, setting loading to false');
+     //   console.log('🔍 [AUTH DEBUG] No token found, setting loading to false');
         setLoading(false);
         return;
       }
 
-      console.log('🔍 [AUTH DEBUG] Making request to /api/auth/me');
+    //  console.log('🔍 [AUTH DEBUG] Making request to /api/auth/me');
       const response = await fetch('/api/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -130,10 +130,10 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
         },
       });
 
-      console.log('🔍 [AUTH DEBUG] Response status:', response.status);
+     // console.log('🔍 [AUTH DEBUG] Response status:', response.status);
       if (response.ok) {
         const userData = await response.json();
-        console.log('🔍 [AUTH DEBUG] User data received:', userData);
+     //   console.log('🔍 [AUTH DEBUG] User data received:', userData);
         // Fix: Ensure userData structure matches our User interface
         if (userData && userData.id) {
           const transformedUser: User = {
@@ -156,21 +156,21 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
             isVerified: userData.isVerified ?? false,
             provider: userData.provider || 'email',
           };
-          console.log('🔍 [AUTH DEBUG] Setting user:', transformedUser);
+        //  console.log('🔍 [AUTH DEBUG] Setting user:', transformedUser);
           setUser(transformedUser);
         } else {
-          console.warn('[AUTH] Invalid user data received');
+       //   console.warn('[AUTH] Invalid user data received');
           localStorage.removeItem('accessToken');
           clearAuthCookies();
         }
       } else {
-        console.log('🔍 [AUTH DEBUG] Response not ok, clearing tokens');
+      //  console.log('🔍 [AUTH DEBUG] Response not ok, clearing tokens');
         // Token is invalid, clear it
         localStorage.removeItem('accessToken');
         clearAuthCookies();
       }
     } catch (error) {
-      console.error('[AUTH] Failed to load user:', error);
+    //  console.error('[AUTH] Failed to load user:', error);
       localStorage.removeItem('accessToken');
       clearAuthCookies();
     } finally {
@@ -199,9 +199,9 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
         }
 
         // Store access token
-        console.log('🔍 [AUTH DEBUG] Storing token in localStorage:', data.accessToken ? 'YES' : 'NO');
+      //  console.log('🔍 [AUTH DEBUG] Storing token in localStorage:', data.accessToken ? 'YES' : 'NO');
         localStorage.setItem('accessToken', data.accessToken);
-        console.log('🔍 [AUTH DEBUG] Token stored, verifying:', localStorage.getItem('accessToken') ? 'FOUND' : 'NOT FOUND');
+      //  console.log('🔍 [AUTH DEBUG] Token stored, verifying:', localStorage.getItem('accessToken') ? 'FOUND' : 'NOT FOUND');
 
         // Transform and set user data to match our interface
         const transformedUser: User = {
@@ -225,7 +225,7 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
           provider: data.user.provider || credentials.provider || 'email',
         };
 
-        console.log('🔍 [AUTH DEBUG] Setting user after login:', transformedUser.displayName);
+        // console.log('🔍 [AUTH DEBUG] Setting user after login:', transformedUser.displayName);
         setUser(transformedUser);
         
         // Ensure auth state is properly updated

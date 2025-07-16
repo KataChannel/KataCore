@@ -35,24 +35,26 @@ export default function LoginPage() {
             if (response.ok) {
               const userData = await response.json();
               // Kiểm tra userData có hợp lệ không
-              if (userData && userData.user) {
+              console.log('User data:', userData);
+
+              if (userData && userData.role.level > 2) {
                 router.push('/admin');
               } else {
                 // Clear invalid data
-                // localStorage.removeItem('accessToken');
-                // localStorage.removeItem('authToken');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('authToken');
               }
             } else {
               // Token invalid, clear it
-              // localStorage.removeItem('accessToken');
-              // localStorage.removeItem('authToken');
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('authToken');
             }
           })
           .catch((error) => {
             console.warn('Auth check failed:', error);
             // Token invalid, clear it
-            // localStorage.removeItem('accessToken');
-            // localStorage.removeItem('authToken');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('authToken');
           });
       }
     }
@@ -97,7 +99,8 @@ export default function LoginPage() {
       }
 
       setMessage('Login successful! Redirecting...');
-
+      console.log('Login successful:', data);
+      
       // Check if user is Super Admin
       if (data.user?.role?.name === 'Super Administrator') {
         setTimeout(() => router.push('/admin/super-admin'), 1000);

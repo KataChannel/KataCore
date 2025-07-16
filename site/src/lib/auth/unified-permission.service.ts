@@ -147,12 +147,12 @@ export class UnifiedPermissionService {
   private role: Role | null;
 
   constructor(user: User) {
-    console.log('🔍 [UnifiedPermissionService] Constructor called with user:', user);
+    // console.log('🔍 [UnifiedPermissionService] Constructor called with user:', user);
     this.user = user;
     
     // Convert UserRole to Role if needed
     if (user.role) {
-      console.log('🔍 [UnifiedPermissionService] User has role object:', user.role);
+      // console.log('🔍 [UnifiedPermissionService] User has role object:', user.role);
       // Kiểm tra và xử lý permissions an toàn
       let permissions: Permission[] = [];
       
@@ -200,13 +200,13 @@ export class UnifiedPermissionService {
         modules: Array.isArray(user.role.modules) ? user.role.modules : [],
       };
       
-      console.log('🔍 [UnifiedPermissionService] Created role object:', this.role);
-      console.log('🔍 [UnifiedPermissionService] Role level set to:', this.role.level);
+     // console.log('🔍 [UnifiedPermissionService] Created role object:', this.role);
+     // console.log('🔍 [UnifiedPermissionService] Role level set to:', this.role.level);
     } else {
       // Find role from SYSTEM_ROLES
-      console.log('🔍 [UnifiedPermissionService] No role object, looking up by roleId:', user.roleId);
+     // console.log('🔍 [UnifiedPermissionService] No role object, looking up by roleId:', user.roleId);
       this.role = SYSTEM_ROLES.find((r) => r.id === user.roleId) || null;
-      console.log('🔍 [UnifiedPermissionService] Found system role:', this.role);
+     // console.log('🔍 [UnifiedPermissionService] Found system role:', this.role);
     }
   }
 

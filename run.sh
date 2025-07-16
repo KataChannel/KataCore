@@ -51,6 +51,7 @@ show_help() {
     echo "  lint         - Check code quality"
     echo "  db           - Database operations"
     echo "  docker       - Docker operations"
+    echo "  git          - Git operations"
     echo "  deploy       - Deployment operations"
     echo "  clean        - Clean build artifacts"
     echo ""
@@ -64,6 +65,14 @@ show_help() {
     echo "  docker:up    - Start containers"
     echo "  docker:down  - Stop containers"
     echo "  docker:logs  - View logs"
+    echo ""
+    print_color $YELLOW "Git Commands:"
+    echo "  git:status   - Show status"
+    echo "  git:add      - Add changes"
+    echo "  git:commit   - Commit changes"
+    echo "  git:push     - Push to remote"
+    echo "  git:pull     - Pull from remote"
+    echo "  git:branch   - Branch operations"
     echo ""
     print_color $BLUE "Usage: ./run.sh [command] or run interactively"
     echo ""
@@ -82,13 +91,14 @@ interactive_menu() {
         echo "5) Check code quality"
         echo "6) Database operations"
         echo "7) Docker operations"
-        echo "8) Deploy"
-        echo "9) Clean artifacts"
-        echo "10) Health check"
+        echo "8) Git operations"
+        echo "9) Deploy"
+        echo "10) Clean artifacts"
+        echo "11) Health check"
         echo "0) Exit"
         echo ""
         
-        get_user_input "Select an option (0-10):" choice
+        get_user_input "Select an option (0-11):" choice
         
         case $choice in
             1)
@@ -122,15 +132,18 @@ interactive_menu() {
                 docker_menu
                 ;;
             8)
-                deploy_menu
+                git_menu
                 ;;
             9)
+                deploy_menu
+                ;;
+            10)
                 if confirm_action "Clean build artifacts?"; then
                     print_color $GREEN "🧹 Cleaning build artifacts..."
                     bun run clean
                 fi
                 ;;
-            10)
+            11)
                 print_color $GREEN "🏥 Checking application health..."
                 bun run health
                 ;;
@@ -212,6 +225,142 @@ docker_menu() {
         3)
             print_color $GREEN "📋 Viewing Docker logs..."
             bun run docker:logs
+            ;;
+        0)
+            return
+            ;;
+        *)
+            print_color $RED "❌ Invalid option."
+            ;;
+    esac
+}
+
+# Git submenu
+git_menu() {
+    echo ""
+    print_color $CYAN "🔧 Git Operations"
+    echo "=================="
+    echo "1) Show status"
+    echo "2) Add all changes"
+    echo "3) Commit changes"
+    echo "4) Push to remote"
+    echo "5) Pull from remote"
+    echo "6) Branch operations"
+    echo "7) Quick commit (add + commit + push)"
+    echo "0) Back to main menu"
+    echo ""
+    
+    get_user_input "Select git option (0-7):" git_choice
+    
+    case $git_choice in
+        1)
+            print_color $GREEN "📊 Checking git status..."
+            git status
+            ;;
+        2)
+            print_color $GREEN "➕ Adding all changes..."
+            git add .
+            git status
+            ;;
+        3)
+            get_user_input "Enter commit message:" commit_msg
+            if [ -n "$commit_msg" ]; then
+                print_color $GREEN "💾 Committing changes..."
+                git commit -m "$commit_msg"
+            else
+                print_color $RED "❌ Commit message required."
+            fi
+            ;;
+        4)
+            print_color $GREEN "🚀 Pushing to remote..."
+            git push
+            ;;
+        5)
+            print_color $GREEN "⬇️ Pulling from remote..."
+            git pull
+            ;;
+        6)
+            git_branch_menu
+            ;;
+        7)
+            get_user_input "Enter commit message:" commit_msg
+            if [ -n "$commit_msg" ]; then
+                print_color $GREEN "🚀 Quick commit: add + commit + push..."
+                git add .
+                git commit -m "$commit_msg"
+                git push
+            else
+                print_color $RED "❌ Commit message required."
+            fi
+            ;;
+        0)
+            return
+            ;;
+        *)
+            print_color $RED "❌ Invalid option."
+            ;;
+    esac
+}
+
+# Git branch submenu
+git_branch_menu() {
+    echo ""
+    print_color $CYAN "🌿 Branch Operations"
+    echo "===================="
+    echo "1) List branches"
+    echo "2) Create new branch"
+    echo "3) Switch branch"
+    echo "4) Delete branch"
+    echo "5) Merge branch"
+    echo "0) Back to git menu"
+    echo ""
+    
+    get_user_input "Select branch option (0-5):" branch_choice
+    
+    case $branch_choice in
+        1)
+            print_color $GREEN "📋 Listing branches..."
+            git branch -a
+            ;;
+        2)
+            get_user_input "Enter new branch name:" branch_name
+            if [ -n "$branch_name" ]; then
+                print_color $GREEN "🌿 Creating and switching to branch: $branch_name"
+                git checkout -b "$branch_name"
+            else
+                print_color $RED "❌ Branch name required."
+            fi
+            ;;
+        3)
+            get_user_input "Enter branch name to switch to:" branch_name
+            if [ -n "$branch_name" ]; then
+                print_color $GREEN "🔄 Switching to branch: $branch_name"
+                git checkout "$branch_name"
+            else
+                print_color $RED "❌ Branch name required."
+            fi
+            ;;
+        4)
+            get_user_input "Enter branch name to delete:" branch_name
+            if [ -n "$branch_name" ]; then
+                if confirm_action "Delete branch '$branch_name'?"; then
+                    print_color $GREEN "🗑️ Deleting branch: $branch_name"
+                    git branch -d "$branch_name"
+                fi
+            else
+                print_color $RED "❌ Branch name required."
+            fi
+            ;;
+        5)
+            get_user_input "Enter branch name to merge:" branch_name
+            if [ -n "$branch_name" ]; then
+                if confirm_action "Merge branch '$branch_name' into current branch?"; then
+                    print_color $GREEN "🔀 Merging branch: $branch_name"
+                    git merge "$branch_name"
+                fi
+            else
+                print_color $RED "❌ Branch name required."
+            fi
             ;;
         0)
             return
@@ -327,6 +476,38 @@ else
                 *)
                     print_color $RED "❌ Unknown docker command: $2"
                     echo "Available: up, down, logs"
+                    ;;
+            esac
+            ;;
+        "git")
+            case $2 in
+                "status")
+                    print_color $GREEN "📊 Checking git status..."
+                    git status
+                    ;;
+                "add")
+                    print_color $GREEN "➕ Adding all changes..."
+                    git add .
+                    ;;
+                "commit")
+                    if [ -n "$3" ]; then
+                        print_color $GREEN "💾 Committing changes..."
+                        git commit -m "$3"
+                    else
+                        print_color $RED "❌ Commit message required: ./run.sh git commit \"message\""
+                    fi
+                    ;;
+                "push")
+                    print_color $GREEN "🚀 Pushing to remote..."
+                    git push
+                    ;;
+                "pull")
+                    print_color $GREEN "⬇️ Pulling from remote..."
+                    git pull
+                    ;;
+                *)
+                    print_color $RED "❌ Unknown git command: $2"
+                    echo "Available: status, add, commit, push, pull"
                     ;;
             esac
             ;;
