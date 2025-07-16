@@ -528,7 +528,8 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
             }}
             className={`
               hover:bg-gray-300 w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors
-              ${item.active? 'bg-gray-300': 'text-text-secondary hover:bg-hover hover:text-primary'}
+              ${item.active? 'bg-gray-300': 'text-text-secondary hover:bg-hover hover:text-primary'
+              }
             `}
           >
             <div className="flex items-center space-x-3">

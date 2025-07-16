@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useUnifiedAuth } from '@/components/auth/UnifiedAuthProvider';
 // Temporary debug import
@@ -304,15 +303,15 @@ const PermissionManagementPage: React.FC = () => {
     }
   };
 
-  const resetRoleForm = () => {
-    setRoleForm({
-      name: '',
-      description: '',
-      permissions: [],
-      modules: [],
-      level: 1,
-    });
-  };
+    const resetRoleForm = () => {
+      setRoleForm({
+        name: '',
+        description: '',
+        permissions: [], // Ensure this is an array
+        modules: [],     // Ensure this is an array
+        level: 1,
+      });
+    };
 
   const resetUserForm = () => {
     setUserForm({
@@ -836,8 +835,19 @@ const RoleModal: React.FC<RoleModalProps> = ({
   permissions, 
   modules 
 }) => {
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(form.permissions || []);
-  const [selectedModules, setSelectedModules] = useState<string[]>(form.modules || []);
+  // Ensure selectedPermissions is always an array
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(
+    Array.isArray(form.permissions) ? form.permissions : []
+  );
+  const [selectedModules, setSelectedModules] = useState<string[]>(
+    Array.isArray(form.modules) ? form.modules : []
+  );
+
+  // Update state when form changes externally
+  useEffect(() => {
+    setSelectedPermissions(Array.isArray(form.permissions) ? form.permissions : []);
+    setSelectedModules(Array.isArray(form.modules) ? form.modules : []);
+  }, [form.permissions, form.modules]);
 
   const handlePermissionToggle = (permissionId: string) => {
     const newPermissions = selectedPermissions.includes(permissionId)

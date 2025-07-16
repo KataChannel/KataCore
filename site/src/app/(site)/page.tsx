@@ -358,8 +358,13 @@ function HomePageContent() {
           : 'bg-gradient-to-br from-gray-50 via-white to-gray-100 text-black'
       }`}
     >
+
+
+      {/* Services Section */}
+      <section id="modules" className="py-12 sm:py-20 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto">
       {/* Theme Toggle Button */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col items-center gap-3">
+      <div className="fixed top-0 right-0 z-50 flex flex-row items-center gap-3">
         <button
           onClick={toggleTheme}
           className={`p-3 rounded-full backdrop-blur-md transition-all duration-500 hover:scale-110 group ${
@@ -439,10 +444,6 @@ function HomePageContent() {
           </button>
         )}
       </div>
-
-      {/* Services Section */}
-      <section id="modules" className="py-12 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-20">
             <h3
               className={`text-3xl sm:text-4xl lg:text-6xl font-black mb-4 sm:mb-6 tracking-tighter transition-all duration-700 ${

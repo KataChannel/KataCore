@@ -77,7 +77,7 @@ export default function HomePage() {
               </h4>
               <ol className="list-decimal list-inside space-y-2 pl-4 text-gray-700 dark:text-gray-300">
                 <li>
-                  Đăng nhập vào tài khoản của bạn trên tazaoffical qua trang web tazaoffical.online
+                  Đăng nhập vào tài khoản của bạn trên tazaoffical qua trang web tazagroup.vn
                   hoặc ứng dụng di động.
                 </li>
                 <li>
@@ -106,7 +106,7 @@ export default function HomePage() {
                   <strong className="text-gray-900 dark:text-white">
                     Bảng điều khiển quản trị
                   </strong>{' '}
-                  tazaoffical.online.
+                  tazagroup.vn.
                 </li>
                 <li>
                   Truy cập mục{' '}
@@ -187,7 +187,7 @@ export default function HomePage() {
               <li>Yêu cầu chỉnh sửa hoặc xóa dữ liệu.</li>
               <li>Từ chối một số hình thức thu thập dữ liệu (ví dụ: cookie không bắt buộc).</li>
               <li>
-                Liên hệ với chúng tôi để được hỗ trợ qua tazachanneloffical@gmail.com hoặc
+                Liên hệ với chúng tôi để được hỗ trợ qua it@tazagroup.vn hoặc
                 0906447889.
               </li>
             </ul>
@@ -203,14 +203,14 @@ export default function HomePage() {
             <ul className="list-disc list-inside space-y-2 pl-4 text-gray-700 dark:text-gray-300">
               <li>
                 <strong className="text-gray-900 dark:text-white">Email:</strong>{' '}
-                tazachanneloffical@gmail.com
+                it@tazagroup.vn
               </li>
               <li>
                 <strong className="text-gray-900 dark:text-white">Điện thoại:</strong> 0906447889
               </li>
               <li>
                 <strong className="text-gray-900 dark:text-white">Trang hỗ trợ:</strong>{' '}
-                https://tazaoffical.online/support
+                https://tazagroup.vn/support
               </li>
             </ul>
           </div>
