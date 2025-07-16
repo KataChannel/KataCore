@@ -177,7 +177,8 @@ smart_deploy_services() {
                     echo \"🔄 Building and starting service: \$service with NO CACHE...\"
                     # COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose build --no-cache \$service
                     # COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --force-recreate \$service
-                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --build \$service
+                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose -f 'docker-compose.yml' up -d --build \$service
+
                     # Wait a bit for the service to start
                     sleep 5
                     
