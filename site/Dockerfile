@@ -88,7 +88,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME="0.0.0.0"
 
 # Copy public files
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public/ 2>/dev/null || \ echo "No public directory found"
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public/
 
 # Create necessary directories
 RUN mkdir -p .next logs && \
