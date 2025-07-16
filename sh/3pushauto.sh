@@ -174,8 +174,9 @@ smart_deploy_services() {
                 
                 # Start only the failed/missing services
                 for service in $failed_services; do
-                    echo \"Starting service: \$service\"
-                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --build --force-recreate \$service
+                    echo \"🔄 Building and starting service: \$service with NO CACHE...\"
+                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose build --no-cache \$service
+                    COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose up -d --force-recreate \$service
                     
                     # Wait a bit for the service to start
                     sleep 5
