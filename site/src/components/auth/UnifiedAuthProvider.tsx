@@ -389,31 +389,31 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
 
   const hasMinimumRoleLevel = useCallback(
     (level: number): boolean => {
-      console.log('🔍 [AUTH DEBUG] hasMinimumRoleLevel called with level:', level);
-      console.log('🔍 [AUTH DEBUG] permissionService:', !!permissionService);
-      console.log('🔍 [AUTH DEBUG] user:', user ? `${user.displayName} (roleLevel: ${user.role?.level})` : 'null');
+     //   console.log('🔍 [AUTH DEBUG] hasMinimumRoleLevel called with level:', level);
+     //   console.log('🔍 [AUTH DEBUG] permissionService:', !!permissionService);
+     // console.log('🔍 [AUTH DEBUG] user:', user ? `${user.displayName} (roleLevel: ${user.role?.level})` : 'null');
       
       // If no permission service, try direct check from user data
       if (!permissionService) {
-        console.log('🔍 [AUTH DEBUG] No permission service, trying direct user check');
+      //  console.log('🔍 [AUTH DEBUG] No permission service, trying direct user check');
         if (user?.role?.level) {
           const directResult = user.role.level >= level;
-          console.log('🔍 [AUTH DEBUG] Direct user role level check:', directResult, `(${user.role.level} >= ${level})`);
+         // console.log('🔍 [AUTH DEBUG] Direct user role level check:', directResult, `(${user.role.level} >= ${level})`);
           return directResult;
         }
         
         // Fallback: Check if user is super admin by roleId
         if (user?.roleId === 'super_admin' || user?.role?.name === 'Super Administrator') {
-          console.log('🔍 [AUTH DEBUG] User is super admin, granting access');
+          //console.log('🔍 [AUTH DEBUG] User is super admin, granting access');
           return true;
         }
         
-        console.log('🔍 [AUTH DEBUG] No permission service and no direct role level, returning false');
+       // console.log('🔍 [AUTH DEBUG] No permission service and no direct role level, returning false');
         return false;
       }
       
       const result = permissionService.hasMinimumRoleLevel(level);
-      console.log('🔍 [AUTH DEBUG] permissionService.hasMinimumRoleLevel result:', result);
+      //console.log('🔍 [AUTH DEBUG] permissionService.hasMinimumRoleLevel result:', result);
       return result;
     },
     [permissionService, user]

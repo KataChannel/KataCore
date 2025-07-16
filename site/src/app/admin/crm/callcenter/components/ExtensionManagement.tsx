@@ -58,15 +58,15 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
     const newErrors: Record<string, string> = {};
 
     if (!formData.extCode.trim()) {
-      newErrors.extCode = 'Extension code is required';
+      newErrors.extCode = 'Mã extension là bắt buộc';
     } else if (!/^\d{3,6}$/.test(formData.extCode)) {
-      newErrors.extCode = 'Extension code must be 3-6 digits';
+      newErrors.extCode = 'Mã extension phải từ 3-6 chữ số';
     }
 
     if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Mật khẩu là bắt buộc';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
 
     setErrors(newErrors);
@@ -82,7 +82,7 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
       await onSave(formData);
       onClose();
     } catch (error) {
-      console.error('Error saving extension:', error);
+      console.error('Lỗi khi lưu extension:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,16 +100,16 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          {extension ? 'Edit Extension' : 'Create Extension'}
+          {extension ? 'Chỉnh sửa Extension' : 'Tạo Extension mới'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Extension Code *
+              Mã Extension *
             </label>
             <input
               type="text"
@@ -118,7 +118,7 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.extCode ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
               } dark:bg-gray-700 dark:text-white`}
-              placeholder="e.g., 1001"
+              placeholder="vd: 1001"
             />
             {errors.extCode && (
               <p className="text-red-500 text-sm mt-1">{errors.extCode}</p>
@@ -127,7 +127,7 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Password *
+              Mật khẩu *
             </label>
             <div className="relative">
               <input
@@ -137,14 +137,14 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
                 className={`w-full px-3 py-2 pr-24 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                 } dark:bg-gray-700 dark:text-white`}
-                placeholder="Enter password"
+                placeholder="Nhập mật khẩu"
               />
               <button
                 type="button"
                 onClick={generatePassword}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
               >
-                Generate
+                Tạo tự động
               </button>
             </div>
             {errors.password && (
@@ -154,14 +154,14 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Assign to User
+              Gán cho người dùng
             </label>
             <select
               value={formData.userId}
               onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Select a user</option>
+              <option value="">Chọn người dùng</option>
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
                   {user.displayName} ({user.email || user.phone})
@@ -172,28 +172,28 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
+              Mô tả
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               rows={3}
-              placeholder="Optional description"
+              placeholder="Mô tả tùy chọn"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Status
+              Trạng thái
             </label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
             </select>
           </div>
 
@@ -203,14 +203,14 @@ function ExtensionModal({ isOpen, onClose, extension, onSave, users }: Extension
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Saving...' : (extension ? 'Update' : 'Create')}
+              {isSubmitting ? 'Đang lưu...' : (extension ? 'Cập nhật' : 'Tạo mới')}
             </button>
           </div>
         </form>
@@ -236,7 +236,7 @@ export default function ExtensionManagement() {
       const userData = await CallCenterAPIService.getUsers();
       setUsers(userData);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Lỗi khi tải danh sách người dùng:', error);
     }
   };
 
@@ -251,11 +251,11 @@ export default function ExtensionManagement() {
   };
 
   const handleDeleteExtension = async (extension: Extension) => {
-    if (window.confirm(`Are you sure you want to delete extension ${extension.extCode}?`)) {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa extension ${extension.extCode}?`)) {
       try {
         await deleteExtension(extension.id);
       } catch (error) {
-        console.error('Error deleting extension:', error);
+        console.error('Lỗi khi xóa extension:', error);
       }
     }
   };
@@ -268,15 +268,16 @@ export default function ExtensionManagement() {
     }
   };
 
-  const filteredExtensions = extensions.filter(extension => {
-    const matchesSearch = extension.extCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         extension.user?.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         extension.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredExtensions:any = extensions
+  // const filteredExtensions:any = extensions.filter((extension:any) => {
+  // const matchesSearch = extension.extCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //                        extension.user?.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //                        extension.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || extension.status === statusFilter;
+  //   const matchesStatus = statusFilter === 'all' || extension.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
-  });
+  //   return matchesSearch && matchesStatus;
+  // });
 
   const getStatusBadge = (status: string) => {
     const baseClasses = "px-2 py-1 text-xs font-medium rounded-full";
@@ -285,20 +286,24 @@ export default function ExtensionManagement() {
       : `${baseClasses} bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200`;
   };
 
+  const getStatusText = (status: string) => {
+    return status === 'active' ? 'Hoạt động' : 'Không hoạt động';
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Extension Management</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage SIP extensions and user assignments</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Quản lý Extension</h1>
+          <p className="text-gray-600 dark:text-gray-400">Quản lý extension SIP và phân công người dùng</p>
         </div>
         <button
           onClick={handleCreateExtension}
           className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
         >
           <PlusIcon className="h-5 w-5" />
-          <span>Add Extension</span>
+          <span>Thêm Extension</span>
         </button>
       </div>
 
@@ -309,7 +314,7 @@ export default function ExtensionManagement() {
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search extensions..."
+              placeholder="Tìm kiếm extension..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -321,13 +326,13 @@ export default function ExtensionManagement() {
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Không hoạt động</option>
           </select>
           
           <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-            Total: {filteredExtensions.length} extensions
+            Tổng cộng: {filteredExtensions.length} extension
           </div>
         </div>
       </div>
@@ -344,7 +349,7 @@ export default function ExtensionManagement() {
         {loading ? (
           <div className="p-8 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading extensions...</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Đang tải extension...</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -355,24 +360,24 @@ export default function ExtensionManagement() {
                     Extension
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Assigned User
+                    Người dùng được gán
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
+                    Trạng thái
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Description
+                    Mô tả
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Created
+                    Ngày tạo
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
+                    Hành động
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredExtensions.map((extension) => (
+                {filteredExtensions.map((extension:any) => (
                   <tr key={extension.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -396,31 +401,33 @@ export default function ExtensionManagement() {
                           </div>
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-500 dark:text-gray-400">Not assigned</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Chưa được gán</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={getStatusBadge(extension.status)}>
-                        {extension.status}
+                        {getStatusText(extension.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {extension.description || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(extension.createdAt).toLocaleDateString()}
+                      {new Date(extension.createdAt).toLocaleDateString('vi-VN')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <button
                           onClick={() => handleEditExtension(extension)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          title="Chỉnh sửa"
                         >
                           <PencilIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteExtension(extension)}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                          title="Xóa"
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>
@@ -433,7 +440,7 @@ export default function ExtensionManagement() {
             
             {filteredExtensions.length === 0 && !loading && (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                No extensions found. Create your first extension to get started.
+                Không tìm thấy extension nào. Tạo extension đầu tiên để bắt đầu.
               </div>
             )}
           </div>

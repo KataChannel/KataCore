@@ -98,24 +98,24 @@ const PermissionManagementPage: React.FC = () => {
   const hasManagePermissions = hasPermission('manage', 'permissions');
   const hasMinRoleLevel = hasMinimumRoleLevel(5);
   
-  console.log('🔍 [PERMISSIONS DEBUG] User:', user);
-  console.log('🔍 [PERMISSIONS DEBUG] hasPermission("manage", "permissions"):', hasManagePermissions);
-  console.log('🔍 [PERMISSIONS DEBUG] hasMinimumRoleLevel(5):', hasMinRoleLevel);
-  console.log('🔍 [PERMISSIONS DEBUG] User role level:', user?.role?.level);
+  //console.log('🔍 [PERMISSIONS DEBUG] User:', user);
+  //console.log('🔍 [PERMISSIONS DEBUG] hasPermission("manage", "permissions"):', hasManagePermissions);
+  //console.log('🔍 [PERMISSIONS DEBUG] hasMinimumRoleLevel(5):', hasMinRoleLevel);
+  //console.log('🔍 [PERMISSIONS DEBUG] User role level:', user?.role?.level);
   
   // Test direct permission service creation with user data
   useEffect(() => {
     if (user) {
-      console.log('🔍 [PERMISSIONS DEBUG] Testing direct permission service creation...');
+      //console.log('🔍 [PERMISSIONS DEBUG] Testing direct permission service creation...');
       try {
         const testService = require('@/lib/auth/permission-validator').createSafePermissionService(user);
-        console.log('🔍 [PERMISSIONS DEBUG] Direct service creation result:', !!testService);
+      //  console.log('🔍 [PERMISSIONS DEBUG] Direct service creation result:', !!testService);
         if (testService) {
-          console.log('🔍 [PERMISSIONS DEBUG] Direct hasMinimumRoleLevel(5):', testService.hasMinimumRoleLevel(5));
-          console.log('🔍 [PERMISSIONS DEBUG] Direct role level:', testService.getUserRole()?.level);
+       //   console.log('🔍 [PERMISSIONS DEBUG] Direct hasMinimumRoleLevel(5):', testService.hasMinimumRoleLevel(5));
+       //   console.log('🔍 [PERMISSIONS DEBUG] Direct role level:', testService.getUserRole()?.level);
         }
       } catch (error) {
-        console.error('🔍 [PERMISSIONS DEBUG] Direct service creation failed:', error);
+      //  console.error('🔍 [PERMISSIONS DEBUG] Direct service creation failed:', error);
       }
     }
   }, [user]);
@@ -124,7 +124,7 @@ const PermissionManagementPage: React.FC = () => {
   const canManageRoles = hasPermission('manage', 'roles') || hasMinimumRoleLevel(5);
   const canManageUsers = hasPermission('manage', 'users') || hasMinimumRoleLevel(5);
   
-  console.log('🔍 [PERMISSIONS DEBUG] canManagePermissions:', canManagePermissions);
+  //console.log('🔍 [PERMISSIONS DEBUG] canManagePermissions:', canManagePermissions);
 
   // Load data
   useEffect(() => {

@@ -1,8 +1,5 @@
 import { SIPConfig } from '../types/callcenter.types';
-
-declare global {
-  var JsSIP: any;
-}
+import * as JsSIP from 'jssip';
 
 export class SIPService {
   private userAgent: any = null;
@@ -29,12 +26,8 @@ export class SIPService {
 
   async initialize(): Promise<void> {
     try {
-      // Check if JsSIP is available
-      if (typeof window === 'undefined' || !window.JsSIP) {
-        throw new Error('JsSIP library not loaded');
-      }
-
-      const socket = new window.JsSIP.WebSocketInterface(this.config.ws_servers);
+      // Use the imported JsSIP package directly
+      const socket = new JsSIP.WebSocketInterface(this.config.ws_servers);
       const configuration: any = {
         sockets: [socket],
         uri: this.config.uri,
@@ -48,7 +41,7 @@ export class SIPService {
         configuration.display_name = this.config.display_name;
       }
 
-      this.userAgent = new window.JsSIP.UA(configuration);
+      this.userAgent = new JsSIP.UA(configuration);
 
       // Set up event handlers
       this.userAgent.on('registered', () => {

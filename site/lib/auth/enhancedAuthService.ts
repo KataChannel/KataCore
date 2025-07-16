@@ -67,10 +67,16 @@ class EnhancedAuthService {
         userId: user.id,
         email: user.email,
         phone: user.phone,
+        username: user.username,
+        displayName: user.displayName,
         roleId: user.roleId,
-        permissions: user.role.permissions,
-        themePreferences: user.themePreferences,
-        preferredLanguage: user.preferredLanguage,
+        roleName: user.role?.name,
+        roleLevel: user.role?.level,
+        isActive: user.isActive,
+        isVerified: user.isVerified,
+        provider: user.provider,
+        // Note: Removed large arrays (permissions) and theme data to reduce token size
+        // These will be fetched server-side when needed
       },
       this.JWT_SECRET,
       { expiresIn: '15m' }

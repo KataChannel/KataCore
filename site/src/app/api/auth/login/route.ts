@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    // Set access token as cookie for middleware
+    // Set access token as cookie for middleware (with shorter value to prevent 431 errors)
     response.cookies.set('token', result.tokens.accessToken, {
       httpOnly: false, // Allow client-side access
       secure: process.env.NODE_ENV === 'production',
@@ -54,13 +54,8 @@ export async function POST(request: NextRequest) {
       maxAge: 15 * 60, // 15 minutes (same as JWT expiry)
     });
 
-    // Also set accessToken cookie for compatibility
-    response.cookies.set('accessToken', result.tokens.accessToken, {
-      httpOnly: false, // Allow client-side access
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60, // 15 minutes (same as JWT expiry)
-    });
+    // REMOVED: accessToken cookie to prevent header size issues
+    // The accessToken is already in the response body and 'token' cookie
 
     return response;
   } catch (error: any) {

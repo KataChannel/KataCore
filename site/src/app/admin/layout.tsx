@@ -44,7 +44,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const pathname = usePathname();
 
   // Authentication
-  const { user, loading, logout, hasModuleAccess } = useUnifiedAuth();
+  const { user, loading, logout, hasModuleAccess, refreshAuth } = useUnifiedAuth();
   
   // Theme
   const { actualMode, toggleMode, isLoading } = useUnifiedTheme();
@@ -56,10 +56,42 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
   // Authentication check
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login?redirect=' + encodeURIComponent(pathname));
+    
+    // Only check for redirect if loading is complete
+    if (!loading) {
+      if (!user) {
+        // Check if user just logged in
+        const isAuthenticated = sessionStorage.getItem('user-authenticated');
+        const hasToken = localStorage.getItem('accessToken');
+        
+        if (isAuthenticated && hasToken) {
+          
+          // Force refresh auth context
+          refreshAuth().then(() => {
+          });
+          
+          // Give more time for context to update
+          const timeoutId = setTimeout(() => {
+            if (!user) {
+              sessionStorage.removeItem('user-authenticated');
+              router.push('/login?redirect=' + encodeURIComponent(pathname));
+            }
+          }, 3000);
+
+          return () => clearTimeout(timeoutId);
+        } else {
+          // No token or not recently authenticated - redirect immediately
+          router.push('/login?redirect=' + encodeURIComponent(pathname));
+        }
+      } else {
+        // User loaded successfully - clear authentication flag
+        sessionStorage.removeItem('user-authenticated');
+      }
     }
-  }, [user, loading, router, pathname]);
+    
+    // Return undefined for other cases (required by linter)
+    return undefined;
+  }, [user, loading, router, pathname, refreshAuth]);
 
   // Admin access check with enhanced security
   useEffect(() => {
@@ -71,15 +103,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                             userPermissions.includes('admin:system') ||
                             user.role?.name === 'Super Administrator' ||
                             (user.role?.level && user.role.level >= 8);
-      
-      console.log('Admin access check:', {
-        hasModuleAccess: hasModuleAccess('admin'),
-        userPermissions: userPermissions,
-        userRole: user.role?.name,
-        userLevel: user.role?.level,
-        hasAdminAccess
-      });
-      
+            
       if (!hasAdminAccess) {
         router.push('/?error=access-denied&reason=insufficient-permissions');
       }

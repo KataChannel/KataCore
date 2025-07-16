@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Shield, AlertCircle, CheckCircle } from 'lucide-react';
@@ -25,6 +24,12 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
       if (token) {
+        // Set a flag to prevent immediate redirect during token verification
+        const isVerifying = sessionStorage.getItem('token-verifying');
+        if (isVerifying) return;
+        
+        sessionStorage.setItem('token-verifying', 'true');
+        
         // Verify token is still valid
         fetch('/api/auth/me', {
           headers: {
@@ -34,15 +39,18 @@ export default function LoginPage() {
           .then(async (response) => {
             if (response.ok) {
               const userData = await response.json();
-              // Kiểm tra userData có hợp lệ không
               console.log('User data:', userData);
-
-              if (userData && userData.role.level > 2) {
-                router.push('/admin');
+              if (userData && userData.role?.level >= 3) {
+                // Set a flag to prevent admin layout from redirecting back
+                sessionStorage.setItem('user-authenticated', 'true');
+                // Add a small delay to ensure auth context is ready
+                setTimeout(() => {
+                  router.push('/admin');
+                }, 100);
               } else {
-                // Clear invalid data
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('authToken');
+                console.log('User role level insufficient for admin access:', userData?.role?.level);
               }
             } else {
               // Token invalid, clear it
@@ -55,6 +63,9 @@ export default function LoginPage() {
             // Token invalid, clear it
             localStorage.removeItem('accessToken');
             localStorage.removeItem('authToken');
+          })
+          .finally(() => {
+            sessionStorage.removeItem('token-verifying');
           });
       }
     }
@@ -67,7 +78,7 @@ export default function LoginPage() {
     setLoading(true);
 
     if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
+      setError('Vui lòng điền đầy đủ thông tin');
       setLoading(false);
       return;
     }
@@ -89,7 +100,7 @@ export default function LoginPage() {
       console.log('Login response:', data);
       
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || 'Đăng nhập thất bại');
       }
 
       // Store tokens
@@ -98,18 +109,24 @@ export default function LoginPage() {
         localStorage.setItem('refreshToken', data.refreshToken);
       }
 
-      setMessage('Login successful! Redirecting...');
+      // Set authentication flag before navigation
+      sessionStorage.setItem('user-authenticated', 'true');
+
+      setMessage('Đăng nhập thành công! Đang chuyển hướng...');
       console.log('Login successful:', data);
       
-      // Check if user is Super Admin
-      if (data.user?.role?.name === 'Super Administrator') {
+      // Check if user is Super Admin (level 10) or Admin (level >= 3)
+      if (data.user?.role?.level === 10) {
         setTimeout(() => router.push('/admin/super-admin'), 1000);
-      } else {
+      } else if (data.user?.role?.level >= 3) {
         setTimeout(() => router.push('/admin'), 1000);
+      } else {
+        // For users below admin level, redirect to appropriate page
+        setTimeout(() => router.push('/dashboard'), 1000);
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || 'An error occurred during login');
+      setError(err.message || 'Đã xảy ra lỗi trong quá trình đăng nhập');
     } finally {
       setLoading(false);
     }
@@ -129,7 +146,7 @@ export default function LoginPage() {
       password: 'SuperAdmin@2024',
     });
     setError(null);
-    setMessage('Super Admin credentials filled');
+    setMessage('Đã điền thông tin tài khoản Super Admin');
   };
 
   return (
@@ -139,8 +156,8 @@ export default function LoginPage() {
         <div className="mx-auto h-16 w-16 bg-red-600 rounded-full flex items-center justify-center mb-4">
           <Shield className="h-8 w-8 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Welcome to TazaCore</h1>
-        <p className="text-gray-600 mt-2">Sign in to your account</p>
+        <h1 className="text-2xl font-bold text-gray-900">Chào mừng đến với TazaCore</h1>
+        <p className="text-gray-600 mt-2">Đăng nhập vào tài khoản của bạn</p>
       </div>
 
       {/* Default Credentials Banner */}
@@ -150,13 +167,13 @@ export default function LoginPage() {
             <CheckCircle className="h-5 w-5 text-blue-600" />
           </div>
           <div className="ml-3 flex-1">
-            <h3 className="text-sm font-medium text-blue-800">Default Super Admin Account</h3>
+            <h3 className="text-sm font-medium text-blue-800">Tài khoản Super Admin mặc định</h3>
             <div className="mt-2 text-sm text-blue-700">
               <p>
                 <strong>Email:</strong> superadmin@tazacore.com
               </p>
               <p>
-                <strong>Password:</strong> SuperAdmin@2024
+                <strong>Mật khẩu:</strong> SuperAdmin@2024
               </p>
             </div>
             <div className="mt-3">
@@ -165,7 +182,7 @@ export default function LoginPage() {
                 onClick={fillSuperAdminCredentials}
                 className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
               >
-                Use These Credentials
+                Sử dụng thông tin này
               </button>
             </div>
           </div>
@@ -195,7 +212,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address
+            Địa chỉ Email
           </label>
           <input
             type="email"
@@ -204,7 +221,7 @@ export default function LoginPage() {
             value={formData.email}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-colors"
-            placeholder="Enter your email"
+            placeholder="Nhập địa chỉ email"
             required
             disabled={loading}
           />
@@ -212,7 +229,7 @@ export default function LoginPage() {
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-            Password
+            Mật khẩu
           </label>
           <div className="relative">
             <input
@@ -222,7 +239,7 @@ export default function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-colors"
-              placeholder="Enter your password"
+              placeholder="Nhập mật khẩu"
               required
               disabled={loading}
             />
@@ -245,10 +262,10 @@ export default function LoginPage() {
           {loading ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Signing in...
+              Đang đăng nhập...
             </div>
           ) : (
-            'Sign In'
+            'Đăng nhập'
           )}
         </button>
       </form>
@@ -256,7 +273,7 @@ export default function LoginPage() {
       {/* Footer */}
       <div className="mt-8 text-center">
         <div className="text-sm text-gray-500">
-          <p>Need help? Contact your system administrator</p>
+          <p>Cần hỗ trợ? Liên hệ quản trị viên hệ thống</p>
         </div>
         <div className="mt-4 pt-4 border-t border-gray-200">
           <button
@@ -264,7 +281,7 @@ export default function LoginPage() {
             onClick={() => router.push('/')}
             className="text-sm text-red-600 hover:text-red-700"
           >
-            ← Back to Homepage
+            ← Quay về trang chủ
           </button>
         </div>
       </div>

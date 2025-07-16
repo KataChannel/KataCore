@@ -11,8 +11,6 @@ export async function GET(request: NextRequest) {
     }
 
     const decoded = await authService.verifyToken(token);
-    console.log('Decoded token:', decoded);
-    
     const user = await authService.getUserById(decoded.userId);
 
     if (!user) {
@@ -28,11 +26,17 @@ export async function GET(request: NextRequest) {
       avatar: user.avatar,
       role: user.role,
       roleId: user.roleId,
-      modules: user.modules,
-      permissions: user.permissions,
+      modules: user.modules || [],
+      permissions: user.permissions || [],
       isActive: user.isActive,
       isVerified: user.isVerified,
       provider: user.provider,
+      // Add metadata to indicate this is the full user data
+      _meta: {
+        source: 'api/auth/me',
+        tokenOptimized: true,
+        fetchedAt: new Date().toISOString()
+      }
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to get user' }, { status: 401 });

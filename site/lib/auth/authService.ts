@@ -55,8 +55,16 @@ class AuthService {
         userId: user.id,
         email: user.email,
         phone: user.phone,
+        username: user.username,
+        displayName: user.displayName,
         roleId: user.roleId,
-        permissions: user.role.permissions,
+        roleName: user.role?.name,
+        roleLevel: user.role?.level,
+        isActive: user.isActive,
+        isVerified: user.isVerified,
+        provider: user.provider,
+        // Note: Removed permissions array to reduce token size
+        // Permissions will be fetched server-side when needed
       },
       this.JWT_SECRET,
       { expiresIn: '15m' }

@@ -119,23 +119,19 @@ export class UnifiedAuthService {
   // ==========================================================================
 
   /**
-   * Generates JWT access token
+   * Generates JWT access token with minimal payload to prevent 431 header size errors
    */
   async generateAccessToken(user: User): Promise<string> {
     return await new SignJWT({
       userId: user.id,
       email: user.email,
-      phone: user.phone,
-      username: user.username,
-      displayName: user.displayName,
       roleId: user.roleId,
       roleName: user.role?.name,
       roleLevel: user.role?.level,
-      modules: user.modules || [],
-      permissions: user.permissions || [],
       isActive: user.isActive,
       isVerified: user.isVerified,
-      provider: user.provider,
+      // Minimal payload - removed all optional fields to reduce token size
+      // All other user data will be fetched via /api/auth/me when needed
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()

@@ -39,6 +39,12 @@ Tất cả tài liệu của dự án TazaCore đã được tổ chức và đ�
 - **22** - [SEED-README.md](22_SEED-README.md) - Hướng dẫn seed database
 - **23** - [TABLE-COMPONENT-README.md](23_TABLE-COMPONENT-README.md) - Component bảng UI
 
+### 📞 Tài liệu hệ thống call center (24)
+- **24** - [CALL-CENTER-SYSTEM-GUIDE.md](24_CALL-CENTER-SYSTEM-GUIDE.md) - Hệ thống quản lý tổng đài
+
+### 🔄 Tài liệu tích hợp hệ thống (25)
+- **25** - [SYSTEM-INTEGRATION-FINAL.md](25_SYSTEM-INTEGRATION-FINAL.md) - Tích hợp toàn hệ thống TazaCore
+
 ---
 
 ## 🎯 Tài liệu chính được giữ nguyên
@@ -49,7 +55,7 @@ Tất cả tài liệu của dự án TazaCore đã được tổ chức và đ�
 
 ## 📝 Ghi chú
 
-- **Tổng số tài liệu:** 23 files
+- **Tổng số tài liệu:** 25 files
 - **Thời gian tổ chức:** Tháng 7, 2025
 - **Quy tắc đặt tên:** `{số_thứ_tự}_{tên_file_gốc}.md`
 - **Sắp xếp:** Theo thứ tự thời gian tạo file (từ cũ đến mới)

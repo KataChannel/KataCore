@@ -76,7 +76,7 @@ const SuperAdminDashboard: React.FC = () => {
         setShowInitModal(true);
       }
     } catch (error: any) {
-      console.error('Error checking initialization:', error);
+     // console.error('Error checking initialization:', error);
       setError('Failed to check system status');
     }
   };
@@ -86,12 +86,12 @@ const SuperAdminDashboard: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
 
-      console.log('Loading Super Admin data with token:', token ? 'Token exists' : 'No token');
+      //console.log('Loading Super Admin data with token:', token ? 'Token exists' : 'No token');
 
       // If no token and system is initialized, redirect to login immediately
       if (!token && isInitialized) {
-        console.log('No token found, redirecting to login...');
-        window.location.href = '/login';
+        //console.log('No token found, redirecting to login...');
+       // window.location.href = '/login';
         return;
       }
 
@@ -104,7 +104,7 @@ const SuperAdminDashboard: React.FC = () => {
         headers,
       });
 
-      console.log('Response status:', response.status);
+      //console.log('Response status:', response.status);
 
       if (!response.ok) {
         // If unauthorized, redirect to login with a helpful message
@@ -124,26 +124,26 @@ const SuperAdminDashboard: React.FC = () => {
             );
 
             // Redirect to login page
-            window.location.href = '/login';
+           // window.location.href = '/login';
             return;
           } catch (jsonError) {
             // If response is not JSON, just redirect
-            window.location.href = '/login';
+            // window.location.href = '/login';
             return;
           }
         }
 
         const errorText = await response.text();
-        console.log('Error response:', errorText);
+       // console.log('Error response:', errorText);
         throw new Error(`Failed to load Super Admin data: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('Received data:', data);
+      //console.log('Received data:', data);
       setSuperAdmins(data.data.superAdmins);
       setSystemStats(data.data.systemStats);
     } catch (error: any) {
-      console.error('Error loading Super Admin data:', error);
+      //console.error('Error loading Super Admin data:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -182,9 +182,9 @@ const SuperAdminDashboard: React.FC = () => {
       );
 
       // Redirect to login page instead of loading data immediately
-      window.location.href = '/login';
+     // window.location.href = '/login';
     } catch (error: any) {
-      console.error('Error initializing system:', error);
+     // console.error('Error initializing system:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -214,7 +214,7 @@ const SuperAdminDashboard: React.FC = () => {
       await loadSuperAdminData();
       alert('Super Administrator created successfully!');
     } catch (error: any) {
-      console.error('Error creating Super Admin:', error);
+      //console.error('Error creating Super Admin:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -247,7 +247,7 @@ const SuperAdminDashboard: React.FC = () => {
       await loadSuperAdminData();
       alert('Super Administrator role granted successfully!');
     } catch (error: any) {
-      console.error('Error granting Super Admin role:', error);
+     // console.error('Error granting Super Admin role:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -284,7 +284,7 @@ const SuperAdminDashboard: React.FC = () => {
       await loadSuperAdminData();
       alert('Super Administrator role revoked successfully!');
     } catch (error: any) {
-      console.error('Error revoking Super Admin role:', error);
+     // console.error('Error revoking Super Admin role:', error);
       alert(`Error: ${error.message}`);
     }
   };

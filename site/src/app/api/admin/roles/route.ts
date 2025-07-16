@@ -7,15 +7,14 @@ import { SYSTEM_ROLES, ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permiss
 // Middleware to check authentication
 async function authenticate(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
-
+  const token = authHeader?.replace('Bearer ', ''); 
   if (!token) {
     throw new Error('Token not found');
   }
 
   const decoded = await authService.verifyToken(token);
   const user = await authService.getUserById(decoded.userId);
-
+ 
   if (!user) {
     throw new Error('User not found');
   }
@@ -26,15 +25,17 @@ async function authenticate(request: NextRequest) {
 // GET - List all roles with their permissions
 export async function GET(request: NextRequest) {
   try {
-    const user = await authenticate(request);
-
+    const user = await authenticate(request); 
+    console.log('Authenticated user:', user);
+    
     // Check permissions
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canReadRoles = userRole?.permissions.some(
-      (p) => p.action === 'read' && p.resource === 'roles'
+      (p: any) => p.action === 'read' && p.resource === 'roles'
     );
-
-    if (!canReadRoles && userRole?.level < 8) {
+    console.log('User role:', userRole);
+    console.log('Can read roles:', canReadRoles);
+    if (!canReadRoles && (!userRole || userRole.level < 8)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to view roles' },
         { status: 403 }
@@ -136,7 +137,7 @@ export async function GET(request: NextRequest) {
       name: systemRole.name,
       description: systemRole.description,
       permissions: systemRole.permissions.map(
-        (p) => `${p.action}:${p.resource}${p.scope ? `:${p.scope}` : ''}`
+        (p:any) => `${p.action}:${p.resource}${p.scope ? `:${p.scope}` : ''}`
       ),
       userCount: 0,
       isActive: true,
@@ -169,12 +170,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       roles: allRoles,
       systemRoles: SYSTEM_ROLES,
-      availablePermissions: Object.entries(ALL_MODULE_PERMISSIONS).map(([key, permission]) => ({
+      availablePermissions: Object.entries(ALL_MODULE_PERMISSIONS).map(([key, permission]:any) => ({
         id: key,
         name: key
           .replace(/_/g, ' ')
           .toLowerCase()
-          .replace(/\b\w/g, (l) => l.toUpperCase()),
+          .replace(/\b\w/g, (l:any) => l.toUpperCase()),
         action: permission.action,
         resource: permission.resource,
         description: permission.description || `${permission.action} ${permission.resource}`,
@@ -201,10 +202,10 @@ export async function POST(request: NextRequest) {
     // Check permissions
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canCreateRoles = userRole?.permissions.some(
-      (p) => p.action === 'create' && p.resource === 'roles'
+      (p:any) => p.action === 'create' && p.resource === 'roles'
     );
 
-    if (!canCreateRoles && userRole?.level < 9) {
+    if (!canCreateRoles && (!userRole || userRole.level < 9)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to create roles' },
         { status: 403 }
@@ -325,10 +326,10 @@ export async function PUT(request: NextRequest) {
     // Check permissions
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canUpdateRoles = userRole?.permissions.some(
-      (p) => p.action === 'update' && p.resource === 'roles'
+      (p:any) => p.action === 'update' && p.resource === 'roles'
     );
 
-    if (!canUpdateRoles && userRole?.level < 8) {
+    if (!canUpdateRoles && (!userRole || userRole.level < 8)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to update roles' },
         { status: 403 }
@@ -473,10 +474,10 @@ export async function DELETE(request: NextRequest) {
     // Check permissions
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canDeleteRoles = userRole?.permissions.some(
-      (p) => p.action === 'delete' && p.resource === 'roles'
+      (p:any) => p.action === 'delete' && p.resource === 'roles'
     );
 
-    if (!canDeleteRoles && userRole?.level < 9) {
+    if (!canDeleteRoles && (!userRole || userRole.level < 9)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to delete roles' },
         { status: 403 }

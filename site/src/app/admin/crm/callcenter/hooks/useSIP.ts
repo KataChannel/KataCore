@@ -5,27 +5,27 @@ import { SIPConfig } from '../types/callcenter.types';
 export function useSIP(config: SIPConfig) {
   const [isRegistered, setIsRegistered] = useState(false);
   const [currentSession, setCurrentSession] = useState<any>(null);
-  const [callStatus, setCallStatus] = useState<string>('');
+  const [callStatus, setCallStatus] = useState('');
   const [callDuration, setCallDuration] = useState(0);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const sipServiceRef = useRef<SIPService | null>(null);
-  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const startCallTimer = useCallback(() => {
-    setCallDuration(0);
-    callTimerRef.current = setInterval(() => {
+    if (timerRef.current) return;
+    
+    timerRef.current = setInterval(() => {
       setCallDuration(prev => prev + 1);
     }, 1000);
   }, []);
 
   const stopCallTimer = useCallback(() => {
-    if (callTimerRef.current) {
-      clearInterval(callTimerRef.current);
-      callTimerRef.current = null;
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+      setCallDuration(0);
     }
-    setCallDuration(0);
   }, []);
 
   const formatDuration = useCallback((seconds: number) => {
@@ -226,6 +226,6 @@ export function useSIP(config: SIPConfig) {
     sendDTMF,
     mute,
     unmute,
-    initializeSIP,
+    initializeSIP
   };
 }

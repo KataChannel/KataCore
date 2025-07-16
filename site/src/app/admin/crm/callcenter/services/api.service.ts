@@ -140,7 +140,11 @@ export class CallCenterAPIService {
   // Users for extension assignment
   static async getUsers(): Promise<any[]> {
     try {
-      const response = await fetch('/api/users');
+      const response = await fetch('/api/admin/users',{
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
       return data.data || [];
@@ -149,6 +153,8 @@ export class CallCenterAPIService {
       throw error;
     }
   }
+
+
 
   // Export calls data
   static async exportCalls(filter?: CallFilter, format: 'csv' | 'excel' = 'csv'): Promise<Blob> {
