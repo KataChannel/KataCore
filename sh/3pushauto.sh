@@ -156,7 +156,7 @@ smart_deploy_services() {
     
     # Get list of failed services
     local failed_services
-    if [ "$deployment_mode" = "selective" ]; then
+    if [ "$deployment_mode" = "all" ]; then
         failed_services=$(stop_failed_services "$services_to_deploy" | tr -s ' ' | sed 's/^ *//;s/ *$//')
     else
         failed_services="$services_to_deploy"
