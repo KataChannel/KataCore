@@ -1,0 +1,3 @@
+docker update --restart=no f9e1cf5139dd
+docker stop f9e1cf5139dd
+docker inspect f9e1cf5139dd | grep RestartPolicy
