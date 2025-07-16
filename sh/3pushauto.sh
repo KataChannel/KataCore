@@ -357,22 +357,21 @@ git_commit() {
 
 # Function to deploy files to server (shared by all deployment functions)
 deploy_files_to_server() {
-    progress "📤 Preparing project files for transfer..."
+    progress "📤 Preparing project files for full content update..."
     
     # Create temp directory
     mkdir -p "$TEMP_DIR" || error "Failed to create temp directory"
     success "Temporary directory created: $TEMP_DIR"
     
-    # Show what will be excluded
-    info "Excluding: .git, node_modules, *.log, .env*, *.md, *.sh"
+    # Show what will be excluded (only critical system files)
+    info "Excluding: .git, node_modules, *.log, *.sh"
+    info "⚠️  All other files will be overwritten on server"
     
-    # Copy all project files to temp directory (excluding sensitive files)
+    # Copy all project files to temp directory (excluding only system files, allow env files)
     rsync -av \
         --exclude='.git' \
         --exclude='node_modules' \
         --exclude='*.log' \
-        --exclude='.env*' \
-        --exclude='*.md' \
         --exclude='*.sh' \
         . "$TEMP_DIR/" || error "Failed to copy files to temp directory"
     
@@ -384,38 +383,59 @@ deploy_files_to_server() {
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/ 2>/dev/null || mkdir -p /opt/$PROJECT_NAME/
         if [ -f .env ]; then
-            cp .env .env.backup
-            echo '✅ PROJECT environment file backed up as .env.backup'
+            cp .env .env.server.backup
+            echo '✅ PROJECT environment file backed up as .env.server.backup'
         else
             echo '⚠️  No existing PROJECT .env file found to backup'
         fi
     " || warning "Could not backup PROJECT environment file"
 
-    progress "🌐 Transferring updated files to PROJECT directory (excluding env files)..."
-    # Use --exclude to prevent overwriting .env files during transfer
-    rsync -avz --progress --exclude='.env*' "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    progress "🌐 Transferring and OVERWRITING all project files on server..."
+    progress "🔄 This will update all content, data files, and configurations..."
     
-    progress "🔧 Restoring preserved PROJECT environment configuration..."
+    # Transfer ALL files (including .env* files) to completely update server content
+    rsync -avz --progress --delete "$TEMP_DIR/" "$SSH_USER@$SERVER_IP:/opt/$PROJECT_NAME/" || error "Failed to transfer files to remote server"
+    
+    progress "🔧 Managing PROJECT environment configuration..."
     ssh "$SSH_USER@$SERVER_IP" "
         cd /opt/$PROJECT_NAME/
-        if [ -f .env.backup ]; then
-            mv .env.backup .env
-            echo '✅ Original PROJECT environment file restored and preserved'
-            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+        
+        # Check what environment files we have after transfer
+        echo '📋 Environment files after transfer:'
+        ls -la .env* 2>/dev/null || echo 'No .env files found'
+        
+        # Prioritize environment file selection
+        if [ -f .env.prod ]; then
+            cp .env.prod .env
+            echo '✅ Using .env.prod as active PROJECT environment'
+        elif [ -f .env.server.backup ]; then
+            cp .env.server.backup .env
+            echo '✅ Restored original server PROJECT environment from backup'
+        elif [ -f .env.local ]; then
+            cp .env.local .env
+            echo '✅ Using .env.local as active PROJECT environment'
         else
-            echo '⚠️  No backup file found to restore'
-            if [ -f .env.prod ]; then
-                cp .env.prod .env
-                echo '📝 Using .env.prod as fallback PROJECT environment'
-            else
-                echo '❌ No PROJECT environment file available'
+            echo '⚠️  No suitable environment file found'
+            if [ -f .env.server.backup ]; then
+                cp .env.server.backup .env
+                echo '📝 Using server backup as fallback'
             fi
         fi
-    " || warning "Could not restore PROJECT environment file"
+        
+        if [ -f .env ]; then
+            echo 'PROJECT environment variables count:' \$(grep -c '=' .env 2>/dev/null || echo '0')
+            echo '✅ PROJECT environment file is ready'
+        else
+            echo '❌ No PROJECT environment file available after setup'
+        fi
+    " || warning "Could not manage PROJECT environment file"
     
     # Cleanup temp directory
     rm -rf "$TEMP_DIR"
     success "Local cleanup completed"
+    success "🎉 Project files completely updated on server with latest local content"
+    info "✅ All project data, content, and configuration files overwritten"
+    info "✅ Server now has the latest version of all project files"
 }
 
 # Function: Smart Deploy Site only
