@@ -70,6 +70,44 @@ export function useCalls() {
     fetchCalls();
   }, [fetchCalls]);
 
+  const syncCalls = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Tạo payload từ filter hiện tại
+      const syncPayload = {
+        from: filter.dateFrom ? `${filter.dateFrom} 00:00:00` : undefined,
+        to: filter.dateTo ? `${filter.dateTo} 23:59:59` : undefined,
+        caller_id_number: filter.extCode || undefined,
+        domain: "tazaspa102019" // Có thể đưa vào config
+      };
+      console.log('Synchronizing calls with payload:', syncPayload);
+      
+      // Gọi API sync
+      const syncResponse = await fetch('/api/callcenter/calls/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(syncPayload),
+      });
+
+      if (!syncResponse.ok) {
+        console.log('syncResponse:', syncResponse);
+        
+        throw new Error('Failed to sync calls');
+      }
+
+      // Sau khi sync xong, refresh dữ liệu
+      await refreshCalls();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while syncing calls');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchCalls();
   }, []);
@@ -85,5 +123,6 @@ export function useCalls() {
     exportCalls,
     updateFilter,
     refreshCalls,
+    syncCalls,
   };
 }

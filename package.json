@@ -172,6 +172,9 @@
     "@prisma/client": "^6.11.1",
     "@types/jssip": "^3.5.4",
     "@types/minimatch": "^6.0.0",
-    "jssip": "^3.10.1"
+    "@types/xlsx": "^0.0.36",
+    "jssip": "^3.10.1",
+    "node-cron": "^4.2.1",
+    "xlsx": "^0.18.5"
   }
 }

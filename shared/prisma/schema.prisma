@@ -70,6 +70,7 @@ model User {
   users_UserFriends_B    User[]              @relation("UserFriends")
 
   @@map("users")
+  CallExtensionUser CallExtensionUser[]
 }
 
 model Conversation {
@@ -454,4 +455,50 @@ enum AttendanceStatus {
   LATE
   HALF_DAY
   WORK_FROM_HOME
+}
+
+ model CallHistoryOverview {
+   id                        String    @id @default(uuid())
+   cdrId                      String    @unique
+   direction                 String
+   callerIdNumber            String?
+   outboundCallerIdNumber    String?
+   destinationNumber         String?
+   startEpoch                String?
+   endEpoch                  String?
+   answerEpoch               String?
+   duration                  String?
+   billsec                   String?
+   sipHangupDisposition      String?
+   recordPath                String?
+   callStatus                String?
+   createdAt                 DateTime  @default(now())
+   updatedAt                 DateTime  @updatedAt
+   @@map("call_history_overview")
+}
+
+model CallExtension {
+  id          String   @id @default(uuid())
+  extCode     String   @unique
+  password    String?
+  name        String
+  description String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       CallExtensionUser[]
+  @@map("call_extensions")
+}
+
+model CallExtensionUser {
+  id              String        @id @default(uuid())
+  userId          String
+  callExtensionId String
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id])
+  callExtension   CallExtension @relation(fields: [callExtensionId], references: [id])
+  @@unique([userId, callExtensionId])
+  @@map("call_extension_users")
 }

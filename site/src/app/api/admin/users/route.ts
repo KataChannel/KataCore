@@ -20,7 +20,6 @@ async function authenticate(request: NextRequest) {
   if (!user) {
     throw new Error('User not found');
   }
-
   return user;
 }
 

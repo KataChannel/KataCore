@@ -1,43 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // Types
 interface Extension {
     id: string;
-    extcode: string;
-    password: string;
+    extCode: string;
+    password?: string | null;
     name: string;
-    description?: string;
-    status: 'active' | 'inactive';
-    userId?: string | null;
+    description?: string | null;
+    status: string;
     createdAt: Date;
     updatedAt: Date;
 }
-
-// Mock data - in production, this would come from a database
-let extensions: Extension[] = [
-    {
-        id: '1',
-        extcode: '2001',
-        password: 'pass123',
-        name: 'Agent 001',
-        description: 'Customer Service Agent',
-        status: 'active',
-        userId: 'user1',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-    },
-    {
-        id: '2',
-        extcode: '2002',
-        password: 'pass456',
-        name: 'Agent 002',
-        description: 'Technical Support Agent',
-        status: 'inactive',
-        userId: 'user2',
-        createdAt: new Date('2024-01-02'),
-        updatedAt: new Date('2024-01-02')
-    }
-];
 
 export async function GET(request: NextRequest) {
     try {
@@ -47,34 +23,42 @@ export async function GET(request: NextRequest) {
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
 
-        let filteredExtensions = extensions;
-
-        // Apply search filter
+        // Build where clause
+        const where: any = {};
+        
         if (search) {
-            filteredExtensions = filteredExtensions.filter(ext =>
-                ext.name.toLowerCase().includes(search.toLowerCase()) ||
-                ext.extcode.includes(search) ||
-                ext.description?.toLowerCase().includes(search.toLowerCase())
-            );
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { extCode: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } }
+            ];
         }
 
-        // Apply status filter
         if (status && status !== 'all') {
-            filteredExtensions = filteredExtensions.filter(ext => ext.status === status);
+            where.status = status;
         }
 
-        // Apply pagination
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedExtensions = filteredExtensions.slice(startIndex, endIndex);
+        // Get total count for pagination
+        const total = await prisma.callExtension.count({ where });
+
+        // Get paginated extensions
+        const extensions = await prisma.callExtension.findMany({
+            where,
+            skip: (page - 1) * limit,
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                users: true
+            }
+        });
 
         return NextResponse.json({
-            data: paginatedExtensions,
+            data: extensions,
             pagination: {
                 page,
                 limit,
-                total: filteredExtensions.length,
-                totalPages: Math.ceil(filteredExtensions.length / limit)
+                total,
+                totalPages: Math.ceil(total / limit)
             }
         });
     } catch (error) {
@@ -83,25 +67,29 @@ export async function GET(request: NextRequest) {
             { error: 'Failed to fetch extensions' },
             { status: 500 }
         );
+    } finally {
+        await prisma.$disconnect();
     }
 }
-
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { extcode, password, name, description, userId } = body;
+        const { extCode, password, name, description } = body;
 
         // Validate required fields
-        if (!extcode || !password || !name) {
+        if (!extCode || !name) {
             return NextResponse.json(
-                { error: 'Missing required fields: extcode, password, name' },
+                { error: 'Missing required fields: extCode, name' },
                 { status: 400 }
             );
         }
 
         // Check if extension code already exists
-        const existingExtension = extensions.find(ext => ext.extcode === extcode);
+        const existingExtension = await prisma.callExtension.findUnique({
+            where: { extCode }
+        });
+
         if (existingExtension) {
             return NextResponse.json(
                 { error: 'Extension code already exists' },
@@ -110,19 +98,18 @@ export async function POST(request: NextRequest) {
         }
 
         // Create new extension
-        const newExtension: Extension = {
-            id: Date.now().toString(),
-            extcode,
-            password,
-            name,
-            description: description || '',
-            status: 'active',
-            userId: userId || null,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
-
-        extensions.push(newExtension);
+        const newExtension = await prisma.callExtension.create({
+            data: {
+                extCode,
+                password: password || null,
+                name,
+                description: description || null,
+                status: 'active'
+            },
+            include: {
+                users: true
+            }
+        });
 
         return NextResponse.json(newExtension, { status: 201 });
     } catch (error) {
@@ -131,13 +118,15 @@ export async function POST(request: NextRequest) {
             { error: 'Failed to create extension' },
             { status: 500 }
         );
+    } finally {
+        await prisma.$disconnect();
     }
 }
 
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
-        const { id, extcode, password, name, description, status, userId } = body;
+        const { id, extCode, password, name, description, status } = body;
 
         if (!id) {
             return NextResponse.json(
@@ -146,8 +135,12 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        const extensionIndex = extensions.findIndex(ext => ext.id === id);
-        if (extensionIndex === -1) {
+        // Check if extension exists
+        const existingExtension = await prisma.callExtension.findUnique({
+            where: { id }
+        });
+
+        if (!existingExtension) {
             return NextResponse.json(
                 { error: 'Extension not found' },
                 { status: 404 }
@@ -155,9 +148,12 @@ export async function PUT(request: NextRequest) {
         }
 
         // Check if new extension code conflicts with existing ones (excluding current)
-        if (extcode) {
-            const existingExtension = extensions.find(ext => ext.extcode === extcode && ext.id !== id);
-            if (existingExtension) {
+        if (extCode && extCode !== existingExtension.extCode) {
+            const conflictingExtension = await prisma.callExtension.findUnique({
+                where: { extCode }
+            });
+            
+            if (conflictingExtension) {
                 return NextResponse.json(
                     { error: 'Extension code already exists' },
                     { status: 409 }
@@ -166,18 +162,19 @@ export async function PUT(request: NextRequest) {
         }
 
         // Update extension
-        const updatedExtension = {
-            ...extensions[extensionIndex],
-            ...(extcode && { extcode }),
-            ...(password && { password }),
-            ...(name && { name }),
-            ...(description !== undefined && { description }),
-            ...(status && { status }),
-            ...(userId !== undefined && { userId }),
-            updatedAt: new Date()
-        };
-
-        extensions[extensionIndex] = updatedExtension;
+        const updatedExtension = await prisma.callExtension.update({
+            where: { id },
+            data: {
+                ...(extCode && { extCode }),
+                ...(password !== undefined && { password }),
+                ...(name && { name }),
+                ...(description !== undefined && { description }),
+                ...(status && { status })
+            },
+            include: {
+                users: true
+            }
+        });
 
         return NextResponse.json(updatedExtension);
     } catch (error) {
@@ -186,6 +183,8 @@ export async function PUT(request: NextRequest) {
             { error: 'Failed to update extension' },
             { status: 500 }
         );
+    } finally {
+        await prisma.$disconnect();
     }
 }
 
@@ -201,15 +200,28 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        const extensionIndex = extensions.findIndex(ext => ext.id === id);
-        if (extensionIndex === -1) {
+        // Check if extension exists
+        const existingExtension = await prisma.callExtension.findUnique({
+            where: { id },
+            include: {
+                users: true
+            }
+        });
+
+        if (!existingExtension) {
             return NextResponse.json(
                 { error: 'Extension not found' },
                 { status: 404 }
             );
         }
 
-        const deletedExtension = extensions.splice(extensionIndex, 1)[0];
+        // Delete the extension
+        const deletedExtension = await prisma.callExtension.delete({
+            where: { id },
+            include: {
+                users: true
+            }
+        });
 
         return NextResponse.json({
             message: 'Extension deleted successfully',
@@ -221,5 +233,7 @@ export async function DELETE(request: NextRequest) {
             { error: 'Failed to delete extension' },
             { status: 500 }
         );
+    } finally {
+        await prisma.$disconnect();
     }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   PhoneIcon,
   PhoneXMarkIcon,
   PhoneArrowUpRightIcon,
@@ -11,7 +11,7 @@ import {
   FunnelIcon,
   DocumentArrowDownIcon,
   ArrowPathIcon,
-  PlayIcon
+  PlayIcon,
 } from '@heroicons/react/24/outline';
 import { Call, CallFilter, CallSummary } from '../types/callcenter.types';
 import { useCalls } from '../hooks/useCalls';
@@ -21,16 +21,24 @@ interface CallFilterPanelProps {
   onFilterChange: (filter: CallFilter) => void;
   onExport: (format: 'csv' | 'excel') => void;
   onRefresh: () => void;
+  onSync: () => void; // Thêm prop mới
   isLoading: boolean;
 }
 
-function CallFilterPanel({ filter, onFilterChange, onExport, onRefresh, isLoading }: CallFilterPanelProps) {
+function CallFilterPanel({
+  filter,
+  onFilterChange,
+  onExport,
+  onRefresh,
+  onSync,
+  isLoading,
+}: CallFilterPanelProps) {
   const [showFilters, setShowFilters] = useState(false);
 
   const handleFilterChange = (key: keyof CallFilter, value: string) => {
     onFilterChange({
       ...filter,
-      [key]: value || undefined
+      [key]: value || undefined,
     });
   };
 
@@ -49,7 +57,7 @@ function CallFilterPanel({ filter, onFilterChange, onExport, onRefresh, isLoadin
             <FunnelIcon className="h-5 w-5" />
             <span>Filters</span>
           </button>
-          
+
           <button
             onClick={onRefresh}
             disabled={isLoading}
@@ -61,20 +69,28 @@ function CallFilterPanel({ filter, onFilterChange, onExport, onRefresh, isLoadin
         </div>
 
         <div className="flex items-center space-x-2">
-          <button
+          {/* <button
             onClick={() => onExport('csv')}
             className="flex items-center space-x-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 text-sm"
           >
             <DocumentArrowDownIcon className="h-4 w-4" />
             <span>Export CSV</span>
-          </button>
-          
+          </button> */}
+
           <button
             onClick={() => onExport('excel')}
             className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 text-sm"
           >
             <DocumentArrowDownIcon className="h-4 w-4" />
             <span>Export Excel</span>
+          </button>
+          <button
+            onClick={onSync}
+            disabled={isLoading}
+            className="flex items-center space-x-2 bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm"
+          >
+            <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Sync Calls</span>
           </button>
         </div>
       </div>
@@ -207,7 +223,8 @@ function CallSummaryCards({ summary, loading }: CallSummaryCardsProps) {
     return hours > 0 ? `${hours}h ${minutes}m ${secs}s` : `${minutes}m ${secs}s`;
   };
 
-  const answerRate = summary.totalCalls > 0 ? ((summary.answeredCalls / summary.totalCalls) * 100).toFixed(1) : 0;
+  const answerRate =
+    summary.totalCalls > 0 ? ((summary.answeredCalls / summary.totalCalls) * 100).toFixed(1) : 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -236,7 +253,9 @@ function CallSummaryCards({ summary, loading }: CallSummaryCardsProps) {
           <ClockIcon className="h-8 w-8 text-purple-600" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Duration</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatDuration(summary.totalDuration)}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatDuration(summary.totalDuration)}
+            </p>
           </div>
         </div>
       </div>
@@ -246,7 +265,9 @@ function CallSummaryCards({ summary, loading }: CallSummaryCardsProps) {
           <ClockIcon className="h-8 w-8 text-orange-600" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Duration</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatDuration(summary.averageDuration)}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatDuration(summary.averageDuration)}
+            </p>
           </div>
         </div>
       </div>
@@ -290,16 +311,17 @@ function CallNotesModal({ isOpen, onClose, call, onSave }: CallNotesModalProps) 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Call Notes
-        </h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Call Notes</h2>
+
         <div className="mb-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             <strong>Phone:</strong> {call.phoneNumber}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            <strong>Duration:</strong> {call.duration ? `${Math.floor(call.duration / 60)}:${(call.duration % 60).toString().padStart(2, '0')}` : 'N/A'}
+            <strong>Duration:</strong>{' '}
+            {call.duration
+              ? `${Math.floor(call.duration / 60)}:${(call.duration % 60).toString().padStart(2, '0')}`
+              : 'N/A'}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             <strong>Time:</strong> {new Date(call.timestamp).toLocaleString()}
@@ -340,7 +362,18 @@ function CallNotesModal({ isOpen, onClose, call, onSave }: CallNotesModalProps) 
 }
 
 export default function CallHistoryOverview() {
-  const { calls, summary, loading, error, updateCallNotes, exportCalls, updateFilter, filter, refreshCalls } = useCalls();
+  const {
+    calls,
+    summary,
+    loading,
+    error,
+    updateCallNotes,
+    exportCalls,
+    updateFilter,
+    filter,
+    refreshCalls,
+    syncCalls,
+  } = useCalls();
   const [selectedCall, setSelectedCall] = useState<Call | null>(null);
   const [showNotesModal, setShowNotesModal] = useState(false);
 
@@ -353,7 +386,7 @@ export default function CallHistoryOverview() {
   };
 
   const getStatusBadge = (status: string) => {
-    const baseClasses = "px-2 py-1 text-xs font-medium rounded-full";
+    const baseClasses = 'px-2 py-1 text-xs font-medium rounded-full';
     switch (status) {
       case 'completed':
       case 'answered':
@@ -387,7 +420,9 @@ export default function CallHistoryOverview() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Call History & Overview</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Call History & Overview
+        </h1>
         <p className="text-gray-600 dark:text-gray-400">Monitor and analyze call activity</p>
       </div>
 
@@ -400,6 +435,7 @@ export default function CallHistoryOverview() {
         onFilterChange={updateFilter}
         onExport={exportCalls}
         onRefresh={refreshCalls}
+        onSync={syncCalls} // Thêm prop sync
         isLoading={loading}
       />
 
@@ -481,9 +517,7 @@ export default function CallHistoryOverview() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={getStatusBadge(call.status)}>
-                        {call.status}
-                      </span>
+                      <span className={getStatusBadge(call.status)}>{call.status}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {new Date(call.timestamp).toLocaleString()}
@@ -512,7 +546,7 @@ export default function CallHistoryOverview() {
                 ))}
               </tbody>
             </table>
-            
+
             {calls.length === 0 && !loading && (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                 No calls found for the selected criteria.

@@ -1,55 +1,89 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
-    const mockData = {
-        totalCalls: 1247,
-        answeredCalls: 1089,
-        missedCalls: 158,
-        averageCallDuration: "4:32",
-        totalCallTime: "82:15:24",
-        callsByHour: [
-            { hour: "00:00", calls: 12 },
-            { hour: "01:00", calls: 8 },
-            { hour: "02:00", calls: 5 },
-            { hour: "03:00", calls: 3 },
-            { hour: "04:00", calls: 7 },
-            { hour: "05:00", calls: 15 },
-            { hour: "06:00", calls: 28 },
-            { hour: "07:00", calls: 45 },
-            { hour: "08:00", calls: 89 },
-            { hour: "09:00", calls: 156 },
-            { hour: "10:00", calls: 203 },
-            { hour: "11:00", calls: 187 },
-            { hour: "12:00", calls: 145 },
-            { hour: "13:00", calls: 134 },
-            { hour: "14:00", calls: 167 },
-            { hour: "15:00", calls: 189 },
-            { hour: "16:00", calls: 165 },
-            { hour: "17:00", calls: 123 },
-            { hour: "18:00", calls: 87 },
-            { hour: "19:00", calls: 65 },
-            { hour: "20:00", calls: 43 },
-            { hour: "21:00", calls: 32 },
-            { hour: "22:00", calls: 25 },
-            { hour: "23:00", calls: 18 }
-        ],
-        agents: {
-            active: 24,
-            available: 18,
-            busy: 6,
-            offline: 12
-        },
-        callTypes: [
-            { type: "Inbound", count: 892, percentage: 71.5 },
-            { type: "Outbound", count: 355, percentage: 28.5 }
-        ],
-        departments: [
-            { name: "Sales", calls: 456, avgDuration: "5:24" },
-            { name: "Support", calls: 378, avgDuration: "6:12" },
-            { name: "Billing", calls: 234, avgDuration: "3:45" },
-            { name: "Technical", calls: 179, avgDuration: "8:33" }
-        ]
-    };
+    try {
+        // Get all call history data
+        const callHistory = await prisma.callHistoryOverview.findMany();
+        
+        // Calculate summary statistics
+        const totalCalls = callHistory.length;
+        const answeredCalls = callHistory.filter(call => call.callStatus === 'answered').length;
+        const missedCalls = totalCalls - answeredCalls;
+        
+        // Calculate average call duration
+        const totalDuration = callHistory
+            .filter(call => call.duration)
+            .reduce((sum, call) => sum + parseInt(call.duration || '0'), 0);
+        const avgDurationSeconds = totalCalls > 0 ? Math.floor(totalDuration / totalCalls) : 0;
+        const averageCallDuration = `${Math.floor(avgDurationSeconds / 60)}:${(avgDurationSeconds % 60).toString().padStart(2, '0')}`;
+        
+        // Calculate total call time
+        const totalSeconds = totalDuration;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const totalCallTime = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Group calls by hour
+        const callsByHour = Array.from({ length: 24 }, (_, i) => ({
+            hour: `${i.toString().padStart(2, '0')}:00`,
+            calls: 0
+        }));
+        
+        callHistory.forEach(call => {
+            if (call.startEpoch) {
+                const hour = new Date(parseInt(call.startEpoch) * 1000).getHours();
+                if (callsByHour[hour]) {
+                    callsByHour[hour].calls++;
+                }
+            }
+        });
+        
+        // Call types based on direction
+        const inboundCalls = callHistory.filter(call => call.direction === 'inbound').length;
+        const outboundCalls = callHistory.filter(call => call.direction === 'outbound').length;
+        
+        const callTypes = [
+            { 
+                type: "Inbound", 
+                count: inboundCalls, 
+                percentage: totalCalls > 0 ? Math.round((inboundCalls / totalCalls) * 100 * 10) / 10 : 0 
+            },
+            { 
+                type: "Outbound", 
+                count: outboundCalls, 
+                percentage: totalCalls > 0 ? Math.round((outboundCalls / totalCalls) * 100 * 10) / 10 : 0 
+            }
+        ];
+        
+        const summaryData = {
+            totalCalls,
+            answeredCalls,
+            missedCalls,
+            averageCallDuration,
+            totalCallTime,
+            callsByHour,
+            agents: {
+                active: 0, // This would need additional agent data
+                available: 0,
+                busy: 0,
+                offline: 0
+            },
+            callTypes,
+            departments: [] // This would need additional department mapping
+        };
 
-    return NextResponse.json(mockData);
+        return NextResponse.json(summaryData);
+    } catch (error) {
+        console.error('Error fetching call summary:', error);
+        return NextResponse.json(
+            { error: 'Failed to fetch call summary' },
+            { status: 500 }
+        );
+    } finally {
+        await prisma.$disconnect();
+    }
 }
