@@ -4,24 +4,40 @@ import { authService } from '@/lib/auth/unified-auth.service';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, phone, username, password, provider = 'email' } = body;
+    const { email, phone, username, password, provider = 'email', otpCode } = body;
 
-    // Validate required fields
-    if (!password && provider !== 'phone') {
-      return NextResponse.json({ error: 'Password is required' }, { status: 400 });
+    // Validate required fields based on provider and OTP
+    if (provider === 'phone' && otpCode) {
+      // OTP login
+      if (!phone || !otpCode) {
+        return NextResponse.json({ error: 'Phone number and OTP code are required' }, { status: 400 });
+      }
+    } else {
+      // Regular login
+      if (!password && provider !== 'phone') {
+        return NextResponse.json({ error: 'Password is required' }, { status: 400 });
+      }
+
+      if (!email && !phone && !username) {
+        return NextResponse.json({ error: 'Email, phone, or username is required' }, { status: 400 });
+      }
     }
 
-    if (!email && !phone && !username) {
-      return NextResponse.json({ error: 'Email, phone, or username is required' }, { status: 400 });
-    }
+    let result;
 
-    const result = await authService.login({
-      email,
-      phone,
-      username,
-      password,
-      provider,
-    });
+    if (provider === 'phone' && otpCode) {
+      // Use OTP verification
+      result = await authService.loginWithOTP(phone, otpCode);
+    } else {
+      // Use regular login
+      result = await authService.login({
+        email,
+        phone,
+        username,
+        password,
+        provider,
+      });
+    }
 
     // Set HTTP-only cookie for refresh token
     const response = NextResponse.json({

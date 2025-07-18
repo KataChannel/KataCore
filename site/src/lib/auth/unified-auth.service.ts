@@ -407,6 +407,13 @@ export class UnifiedAuthService {
     };
   }
 
+  /**
+   * Login with OTP (alias for verifyOTP for backward compatibility)
+   */
+  async loginWithOTP(phone: string, otpCode: string): Promise<AuthResult> {
+    return this.verifyOTP(phone, otpCode);
+  }
+
   // ==========================================================================
   // USER MANAGEMENT
   // ==========================================================================
