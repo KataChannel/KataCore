@@ -68,6 +68,7 @@ model User {
   conversationsJoined    Conversation[]      @relation("ConversationParticipants")
   users_UserFriends_A    User[]              @relation("UserFriends")
   users_UserFriends_B    User[]              @relation("UserFriends")
+  affiliate              Affiliate?          // Affiliate relation
 
   @@map("users")
   CallExtensionUser CallExtensionUser[]
@@ -501,4 +502,335 @@ model CallExtensionUser {
   callExtension   CallExtension @relation(fields: [callExtensionId], references: [id])
   @@unique([userId, callExtensionId])
   @@map("call_extension_users")
+}
+
+// ============================================================================
+// AFFILIATE SYSTEM MODELS
+// ============================================================================
+
+model Affiliate {
+  id                    String                @id @default(uuid())
+  userId                String                @unique
+  code                  String                @unique
+  status                AffiliateStatus       @default(PENDING)
+  tier                  AffiliateTier         @default(BRONZE)
+  joinedAt              DateTime              @default(now())
+  lastActiveAt          DateTime?
+  totalEarnings         Float                 @default(0)
+  pendingEarnings       Float                 @default(0)
+  totalReferrals        Int                   @default(0)
+  totalClicks           Int                   @default(0)
+  conversionRate        Float                 @default(0)
+  notes                 String?
+  customCommissionRate  Float?
+  paymentMethod         AffiliatePaymentMethod?
+  bankDetails           Json?
+  taxInformation        Json?
+  socialMedia           Json?
+  website               String?
+  marketingExperience   String?
+  preferredCategories   String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  // Relations
+  user                  User                  @relation(fields: [userId], references: [id])
+  referrals             AffiliateReferral[]
+  commissions           AffiliateCommission[]
+  withdrawals           AffiliateWithdrawal[]
+  links                 AffiliateLink[]
+  campaignParticipants  AffiliateCampaignParticipant[]
+  analytics             AffiliateAnalytics[]
+
+  @@map("affiliates")
+}
+
+model AffiliateReferral {
+  id              String                @id @default(uuid())
+  affiliateId     String
+  email           String
+  firstName       String?
+  lastName        String?
+  phone           String?
+  status          AffiliateReferralStatus @default(PENDING)
+  source          String?
+  campaignId      String?
+  linkId          String?
+  ipAddress       String?
+  userAgent       String?
+  utmParams       Json?
+  customData      Json?
+  registeredAt    DateTime?
+  convertedAt     DateTime?
+  totalOrders     Int                   @default(0)
+  totalOrderValue Float                 @default(0)
+  commissionEarned Float                @default(0)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  // Relations
+  affiliate       Affiliate             @relation(fields: [affiliateId], references: [id])
+  commissions     AffiliateCommission[]
+  campaign        AffiliateCampaign?    @relation(fields: [campaignId], references: [id])
+  link            AffiliateLink?        @relation(fields: [linkId], references: [id])
+
+  @@map("affiliate_referrals")
+}
+
+model AffiliateCommission {
+  id              String              @id @default(uuid())
+  affiliateId     String
+  referralId      String?
+  orderId         String?
+  amount          Float
+  currency        String              @default("USD")
+  type            AffiliateCommissionType
+  rate            Float?
+  orderValue      Float?
+  status          AffiliateCommissionStatus @default(PENDING)
+  description     String?
+  metadata        Json?
+  earnedAt        DateTime            @default(now())
+  paidAt          DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  // Relations
+  affiliate       Affiliate           @relation(fields: [affiliateId], references: [id])
+  referral        AffiliateReferral?  @relation(fields: [referralId], references: [id])
+  withdrawal      AffiliateWithdrawal? @relation(fields: [withdrawalId], references: [id])
+  withdrawalId    String?
+
+  @@map("affiliate_commissions")
+}
+
+model AffiliateWithdrawal {
+  id              String                 @id @default(uuid())
+  affiliateId     String
+  amount          Float
+  currency        String                 @default("USD")
+  method          AffiliatePaymentMethod
+  status          AffiliateWithdrawalStatus @default(PENDING)
+  bankDetails     Json?
+  paypalEmail     String?
+  cryptoAddress   String?
+  description     String?
+  netAmount       Float?
+  processingFee   Float?
+  exchangeRate    Float?
+  requestedAt     DateTime               @default(now())
+  processedAt     DateTime?
+  completedAt     DateTime?
+  failedAt        DateTime?
+  failureReason   String?
+  transactionId   String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  // Relations
+  affiliate       Affiliate              @relation(fields: [affiliateId], references: [id])
+  commissions     AffiliateCommission[]
+
+  @@map("affiliate_withdrawals")
+}
+
+model AffiliateLink {
+  id              String              @id @default(uuid())
+  affiliateId     String
+  campaignId      String?
+  title           String
+  description     String?
+  originalUrl     String
+  shortCode       String              @unique
+  fullUrl         String
+  isActive        Boolean             @default(true)
+  clicks          Int                 @default(0)
+  conversions     Int                 @default(0)
+  lastClickAt     DateTime?
+  expiresAt       DateTime?
+  customParams    Json?
+  utmParams       Json?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  // Relations
+  affiliate       Affiliate           @relation(fields: [affiliateId], references: [id])
+  campaign        AffiliateCampaign?  @relation(fields: [campaignId], references: [id])
+  referrals       AffiliateReferral[]
+  analytics       AffiliateLinkAnalytics[]
+
+  @@map("affiliate_links")
+}
+
+model AffiliateCampaign {
+  id              String                        @id @default(uuid())
+  name            String
+  description     String?
+  status          AffiliateCampaignStatus       @default(DRAFT)
+  startDate       DateTime?
+  endDate         DateTime?
+  commissionType  AffiliateCommissionType
+  commissionValue Float
+  targetAudience  String?
+  budget          Float?
+  maxParticipants Int?
+  currentParticipants Int                       @default(0)
+  totalClicks     Int                           @default(0)
+  totalConversions Int                          @default(0)
+  totalCommissions Float                        @default(0)
+  requiresApproval Boolean                      @default(false)
+  terms           String?
+  materials       Json?
+  restrictions    Json?
+  createdAt       DateTime                      @default(now())
+  updatedAt       DateTime                      @updatedAt
+
+  // Relations
+  participants    AffiliateCampaignParticipant[]
+  links           AffiliateLink[]
+  referrals       AffiliateReferral[]
+
+  @@map("affiliate_campaigns")
+}
+
+model AffiliateCampaignParticipant {
+  id              String                @id @default(uuid())
+  campaignId      String
+  affiliateId     String
+  status          AffiliateCampaignParticipantStatus @default(PENDING)
+  joinedAt        DateTime              @default(now())
+  customCommissionRate Float?
+  notes           String?
+  performance     Json?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  // Relations
+  campaign        AffiliateCampaign     @relation(fields: [campaignId], references: [id])
+  affiliate       Affiliate             @relation(fields: [affiliateId], references: [id])
+
+  @@unique([campaignId, affiliateId])
+  @@map("affiliate_campaign_participants")
+}
+
+model AffiliateAnalytics {
+  id              String    @id @default(uuid())
+  affiliateId     String
+  date            DateTime  @db.Date
+  clicks          Int       @default(0)
+  conversions     Int       @default(0)
+  commissions     Float     @default(0)
+  impressions     Int       @default(0)
+  revenue         Float     @default(0)
+  uniqueVisitors  Int       @default(0)
+  bounceRate      Float?
+  avgSessionDuration Float?
+  topSources      Json?
+  topPages        Json?
+  deviceBreakdown Json?
+  geoData         Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  affiliate       Affiliate @relation(fields: [affiliateId], references: [id])
+
+  @@unique([affiliateId, date])
+  @@map("affiliate_analytics")
+}
+
+model AffiliateLinkAnalytics {
+  id              String        @id @default(uuid())
+  linkId          String
+  date            DateTime      @db.Date
+  clicks          Int           @default(0)
+  conversions     Int           @default(0)
+  uniqueClicks    Int           @default(0)
+  sources         Json?
+  devices         Json?
+  locations       Json?
+  referrers       Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  link            AffiliateLink @relation(fields: [linkId], references: [id])
+
+  @@unique([linkId, date])
+  @@map("affiliate_link_analytics")
+}
+
+// ============================================================================
+// AFFILIATE SYSTEM ENUMS
+// ============================================================================
+
+enum AffiliateStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  BANNED
+  INACTIVE
+}
+
+enum AffiliateTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}
+
+enum AffiliatePaymentMethod {
+  BANK_TRANSFER
+  PAYPAL
+  CRYPTOCURRENCY
+  CHECK
+  WIRE_TRANSFER
+}
+
+enum AffiliateReferralStatus {
+  PENDING
+  REGISTERED
+  CONVERTED
+  EXPIRED
+  CANCELLED
+}
+
+enum AffiliateCommissionType {
+  PERCENTAGE
+  FIXED
+  TIERED
+  HYBRID
+}
+
+enum AffiliateCommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
+  DISPUTED
+}
+
+enum AffiliateWithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AffiliateCampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum AffiliateCampaignParticipantStatus {
+  PENDING
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  REMOVED
 }
