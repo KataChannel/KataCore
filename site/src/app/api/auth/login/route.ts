@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       httpOnly: false, // Allow client-side access
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 15 * 60, // 15 minutes (same as JWT expiry)
+      maxAge: 24 * 60 * 60, // 1 day
     });
 
     // REMOVED: accessToken cookie to prevent header size issues

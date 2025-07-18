@@ -4,9 +4,19 @@ export class CallCenterAPIService {
   private static baseUrl = '/api/callcenter';
 
   // Extensions CRUD operations
-  static async getExtensions(): Promise<Extension[]> {
+  static async getExtensions(params?: Record<string, any>): Promise<Extension[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/extensions`);
+      const searchParams = new URLSearchParams();
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            searchParams.append(key, value.toString());
+          }
+        });
+      }
+
+      const url = `${this.baseUrl}/extensions${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch extensions');
       const data = await response.json();
       return data.data || [];

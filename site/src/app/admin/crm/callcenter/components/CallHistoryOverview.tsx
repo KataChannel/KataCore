@@ -35,6 +35,17 @@ function CallFilterPanel({
 }: CallFilterPanelProps) {
   const [showFilters, setShowFilters] = useState(false);
 
+  useEffect(() => {
+    // Set default filter to today's date and default extension when component mounts
+    const today = new Date().toISOString().split('T')[0];
+    onFilterChange({
+      ...filter,
+      dateFrom: today as string,
+      dateTo: today as string,
+      extCode: '9999',
+    });
+  }, []); // Remove onFilterChange from dependencies to avoid infinite re-renders
+
   const handleFilterChange = (key: keyof CallFilter, value: string) => {
     onFilterChange({
       ...filter,
@@ -482,7 +493,7 @@ export default function CallHistoryOverview() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {calls.map((call) => (
+                {calls.map((call:any) => (
                   <tr key={call.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -521,6 +532,14 @@ export default function CallHistoryOverview() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {new Date(call.timestamp).toLocaleString()}
+                        <div>
+                        <div>{new Date(call.startEpoch * 1000).toLocaleString()}</div>
+                        {call.endEpoch && (
+                          <div className="text-xs text-gray-400">
+                          End: {new Date(call.endEpoch * 1000).toLocaleString()}
+                          </div>
+                        )}
+                        </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">

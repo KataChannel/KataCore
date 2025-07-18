@@ -33,6 +33,8 @@ export interface Call {
   callDirection: 'inbound' | 'outbound';
   recordingUrl?: string;
   hangupCause?: string;
+  startEpoch?: number;
+  endEpoch?: number;
   extCode?: string;
   userId?: string;
   user?: User;

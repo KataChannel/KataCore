@@ -27,6 +27,39 @@ interface CDRResponse {
     offset: number;
 }
 
+// Helper function to fetch CDR data from API
+async function fetchCDRData(apiUrl: URL): Promise<CDRResponse> {
+    const response = await fetch(apiUrl.toString(), {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            // Add authentication headers if required
+            // 'Authorization': `Bearer ${process.env.PBX_API_TOKEN}`,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    
+    // Handle case where API returns success with total: 0 but no data array
+    if (!result.data) {
+        if (result.status === 'success' && result.total === 0) {
+            result.data = [];
+        } else {
+            throw new Error('Invalid response format from CDR API');
+        }
+    }
+    
+    if (!Array.isArray(result.data)) {
+        throw new Error('Invalid response format from CDR API');
+    }
+
+    return result;
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -36,7 +69,7 @@ export async function POST(request: NextRequest) {
             from,
             to,
             caller_id_number,
-            offset = 0
+            offset: initialOffset = 0
         } = body;
 
         // Validate required parameters
@@ -47,120 +80,166 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Build API URL
-        const apiUrl = new URL('https://pbx01.onepos.vn:8080/api/v2/cdrs');
-        apiUrl.searchParams.set('domain', domain);
-        apiUrl.searchParams.set('limit', limit.toString());
-        apiUrl.searchParams.set('from', from);
-        apiUrl.searchParams.set('to', to);
-        apiUrl.searchParams.set('offset', offset.toString());
-        
-        if (caller_id_number) {
-            apiUrl.searchParams.set('caller_id_number', caller_id_number);
+        let allCDRRecords: any[] = [];
+        let currentOffset = initialOffset;
+        let totalFetched = 0;
+        let hasMoreData = true;
+
+        // Fetch data in batches if needed
+        while (hasMoreData) {
+            // Build API URL
+            const apiUrl = new URL('https://pbx01.onepos.vn:8080/api/v2/cdrs');
+            apiUrl.searchParams.set('domain', domain);
+            apiUrl.searchParams.set('limit', limit.toString());
+            apiUrl.searchParams.set('from', from);
+            apiUrl.searchParams.set('to', to);
+            apiUrl.searchParams.set('offset', currentOffset.toString());
+            
+            if (caller_id_number) {
+                apiUrl.searchParams.set('caller_id_number', caller_id_number);
+            }
+            
+            console.log(`Fetching CDR data from (offset: ${currentOffset}):`, apiUrl.toString());
+
+            const result = await fetchCDRData(apiUrl);
+            
+            console.log(`Received ${result.data.length} CDR records (offset: ${currentOffset})`);
+            
+            // Add records to our collection
+            allCDRRecords = allCDRRecords.concat(result.data);
+            totalFetched += result.data.length;
+
+            // Check if we need to continue fetching
+            if (result.data.length >= 200) {
+                currentOffset += 200;
+                console.log(`Data length > 200, continuing with offset: ${currentOffset}`);
+            } else {
+                hasMoreData = false;
+                console.log(`Data length <= 200, stopping fetch loop`);
+            }
+
+            // Safety check to prevent infinite loops
+            if (currentOffset > 100000) {
+                console.warn('Reached maximum offset limit, stopping fetch');
+                break;
+            }
         }
 
-        console.log('Fetching CDR data from:', apiUrl.toString());
-
-        // Fetch data from third-party API
-        const response = await fetch(apiUrl.toString(), {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                // Add authentication headers if required
-                // 'Authorization': `Bearer ${process.env.PBX_API_TOKEN}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        if (!result.data || !Array.isArray(result.data)) {
-            throw new Error('Invalid response format from CDR API');
-        }
-
-        console.log(`Received ${result.data.length} CDR records`);
+        console.log(`\x1b[33mTotal CDR records fetched: ${totalFetched}\x1b[0m`);
 
         // Process and save data to database
         const savedRecords = [];
         const errors = [];
 
-        for (const record of result.data) {
+        // Prepare data for batch insert
+        const recordsToInsert = [];
+        const duplicateRecords = [];
+
+        // First, check for existing records in batch
+        const cdrIds = allCDRRecords.map((record:any) => record.uuid).filter(Boolean);
+        const existingRecords = await prisma.callHistoryOverview.findMany({
+            where: {
+            cdrId: {
+                in: cdrIds
+            }
+            },
+            select: { cdrId: true }
+        });
+
+        const existingCdrIds = new Set(existingRecords.map(record => record.cdrId));
+
+        // Prepare records for batch insert
+        for (const record of allCDRRecords) {
             try {
-                // Check if record already exists
-                const existingRecord = await prisma.callHistoryOverview.findUnique({
-                    where: { cdrId: record.uuid }
-                });
+            // Skip if record already exists
+            if (existingCdrIds.has(record.uuid)) {
+                duplicateRecords.push(record.uuid);
+                continue;
+            }
 
-                if (existingRecord) {
-                    console.log(`Record ${record.uuid} already exists, skipping...`);
-                    continue;
+            // Use epoch values directly from the record
+            const startEpoch = record.start_epoch || null;
+            const endEpoch = record.end_epoch || null;
+            const answerEpoch = record.answer_epoch !== "0" ? record.answer_epoch : null;
+
+            // Use call_status from record or determine from sip_hangup_disposition
+            let callStatus = record.call_status?.toLowerCase() || 'unknown';
+            if (!record.call_status) {
+                if (record.sip_hangup_disposition === 'NO_ANSWER' || record.sip_hangup_disposition === 'USER_NOT_REGISTERED') {
+                callStatus = 'missed';
+                } else if (record.sip_hangup_disposition === 'USER_BUSY') {
+                callStatus = 'busy';
+                } else if (record.sip_hangup_disposition === 'CALL_REJECTED') {
+                callStatus = 'rejected';
+                } else {
+                callStatus = 'completed';
                 }
+            }
 
-                // Convert timestamps to epoch
-                const startTime = new Date(record.start_stamp);
-                const answerTime = record.answer_stamp ? new Date(record.answer_stamp) : null;
-                const endTime = new Date(record.end_stamp);
-                
-                const startEpoch = Math.floor(startTime.getTime() / 1000).toString();
-                const endEpoch = Math.floor(endTime.getTime() / 1000).toString();
-                const answerEpoch = answerTime ? Math.floor(answerTime.getTime() / 1000).toString() : null;
-
-                // Determine call status
-                let callStatus = 'completed';
-                if (record.hangup_cause === 'NO_ANSWER' || record.hangup_cause === 'USER_NOT_REGISTERED') {
-                    callStatus = 'missed';
-                } else if (record.hangup_cause === 'USER_BUSY') {
-                    callStatus = 'busy';
-                } else if (record.hangup_cause === 'CALL_REJECTED') {
-                    callStatus = 'rejected';
-                }
-
-                // Save to database
-                const savedRecord = await prisma.callHistoryOverview.create({
-                    data: {
-                        cdrId: record.uuid,
-                        direction: record.direction || 'unknown',
-                        callerIdNumber: record.caller_id_number || null,
-                        outboundCallerIdNumber: null, // Set based on your business logic
-                        destinationNumber: record.destination_number || null,
-                        startEpoch: startEpoch,
-                        endEpoch: endEpoch,
-                        answerEpoch: answerEpoch,
-                        duration: record.duration?.toString() || null,
-                        billsec: record.billsec?.toString() || null,
-                        sipHangupDisposition: record.hangup_cause || null,
-                        recordPath: record.recording_file || null,
-                        callStatus: callStatus,
-                    }
-                });
-
-                savedRecords.push(savedRecord);
-                
+            recordsToInsert.push({
+                cdrId: record.uuid,
+                direction: record.direction || 'unknown',
+                callerIdNumber: record.caller_id_number || null,
+                outboundCallerIdNumber: record.outbound_caller_id_number || null,
+                destinationNumber: record.destination_number || null,
+                startEpoch: startEpoch,
+                endEpoch: endEpoch,
+                answerEpoch: answerEpoch,
+                duration: record.duration || null,
+                billsec: record.billsec || null,
+                sipHangupDisposition: record.sip_hangup_disposition || null,
+                recordPath: record.record_path || null,
+                callStatus: callStatus,
+            });
+            
             } catch (recordError) {
-                console.error(`Error processing record ${record.id}:`, recordError);
-                errors.push({
-                    recordId: record.id,
-                    error: recordError instanceof Error ? recordError.message : 'Unknown error'
-                });
+            console.error(`Error processing record ${record.id}:`, recordError);
+            errors.push({
+                recordId: record.id,
+                error: recordError instanceof Error ? recordError.message : 'Unknown error'
+            });
             }
         }
+
+        // Batch insert records in chunks to avoid database limits
+        const BATCH_SIZE = 1000;
+        let totalInserted = 0;
+
+        for (let i = 0; i < recordsToInsert.length; i += BATCH_SIZE) {
+            const chunk = recordsToInsert.slice(i, i + BATCH_SIZE);
+            try {
+            const insertResult = await prisma.callHistoryOverview.createMany({
+                data: chunk,
+                skipDuplicates: true
+            });
+            totalInserted += insertResult.count;
+            console.log(`Inserted batch ${Math.floor(i/BATCH_SIZE) + 1}: ${insertResult.count} records`);
+            } catch (batchError) {
+            console.error(`Error inserting batch ${Math.floor(i/BATCH_SIZE) + 1}:`, batchError);
+            errors.push({
+                batch: Math.floor(i/BATCH_SIZE) + 1,
+                error: batchError instanceof Error ? batchError.message : 'Unknown batch error'
+            });
+            }
+        }
+
+        console.log(`Batch insert completed: ${totalInserted} records inserted, ${duplicateRecords.length} duplicates skipped`);
+        savedRecords.push({ count: totalInserted, duplicates: duplicateRecords.length });
 
         // Update summary statistics if needed
         await updateCallSummaryStats(from, to);
 
         return NextResponse.json({
             success: true,
-            message: `Successfully processed ${result.data.length} CDR records`,
-            saved: savedRecords.length,
+            message: `Successfully processed ${totalFetched} CDR records`,
+            saved: totalInserted,
             errors: errors.length,
             errorDetails: errors.length > 0 ? errors : undefined,
             summary: {
-                totalFetched: result.data.length,
-                totalSaved: savedRecords.length,
+                totalFetched: totalFetched,
+                totalSaved: totalInserted,
                 totalErrors: errors.length,
+                duplicatesSkipped: duplicateRecords.length,
                 dateRange: { from, to }
             }
         });
@@ -279,7 +358,7 @@ async function updateCallSummaryStats(from: string, to: string) {
         });
 
         // You can save these stats to a separate summary table if needed
-        console.log('Call summary stats for', from, 'to', to, ':', callStats);
+        // console.log('Call summary stats for', from, 'to', to, ':', callStats);
 
     } catch (error) {
         console.error('Error updating call summary stats:', error);
