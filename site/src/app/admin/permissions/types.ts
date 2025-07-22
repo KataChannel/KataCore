@@ -13,10 +13,14 @@ export interface Role {
 }
 
 export interface User {
+  avatar: string;
+  username: any;
+  isVerified: any;
   id: string;
   email: string;
   displayName: string;
   role: {
+    permissions: any;
     id: string;
     name: string;
     level: number;
