@@ -233,8 +233,15 @@ export default function LoginForm({ onLogin, onBack, loading = false }: LoginFor
       const { google } = window;
       
       // Initialize Google Sign-In
+      const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      
+      if (!googleClientId) {
+        setError('Google client ID is not configured');
+        return;
+      }
+
       google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        client_id: googleClientId,
         callback: async (response: any) => {
           try {
             const result = await fetch('/api/auth/google', {
@@ -328,8 +335,8 @@ export default function LoginForm({ onLogin, onBack, loading = false }: LoginFor
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-md w-full mx-4">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full mx-4">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">Chào mừng trở lại</h2>
@@ -374,7 +381,7 @@ export default function LoginForm({ onLogin, onBack, loading = false }: LoginFor
               }`}
             >
               <PhoneIcon className="h-4 w-4 mr-2" />
-              Số điện thoại
+              Phone
             </button>
             <button
               type="button"
@@ -390,7 +397,7 @@ export default function LoginForm({ onLogin, onBack, loading = false }: LoginFor
               }`}
             >
               <UserIcon className="h-4 w-4 mr-2" />
-              Tên đăng nhập
+              Username
             </button>
           </div>
 

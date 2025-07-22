@@ -51,7 +51,7 @@ export default function SocialLoginButton({
     script.defer = true;
     script.onload = () => {
       window.google?.accounts.id.initialize({
-        client_id: config.clientId,
+        client_id: 'clientId' in config ? config.clientId! : '',
         callback: handleGoogleResponse,
       });
     };
@@ -63,10 +63,10 @@ export default function SocialLoginButton({
 
     window.fbAsyncInit = function() {
       window.FB?.init({
-        appId: config.appId!,
+        appId: 'appId' in config ? config.appId! : '',
         cookie: true,
         xfbml: true,
-        version: config.version || 'v18.0',
+        version: 'version' in config ? config.version : 'v18.0',
       });
     };
 
@@ -86,9 +86,9 @@ export default function SocialLoginButton({
     script.async = true;
     script.onload = () => {
       window.AppleID?.auth.init({
-        clientId: config.clientId!,
+        clientId: 'clientId' in config ? config.clientId! : '',
         scope: config.scopes?.join(' ') || 'email name',
-        redirectURI: config.redirectUri!,
+        redirectURI: 'redirectUri' in config ? config.redirectUri! : '',
         usePopup: true,
       });
     };
@@ -330,7 +330,7 @@ export function SocialLoginPanel({
             onError={onError}
             disabled={disabled}
             size={size}
-            variant={variant}
+            variant={variant === 'buttons' ? 'button' : 'icon'}
           />
         ))}
       </div>

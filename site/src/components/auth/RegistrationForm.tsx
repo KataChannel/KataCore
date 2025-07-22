@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUnifiedAuth } from '@/auth';
-import { SocialLoginButton } from './SocialLoginButton';
-import { validateEmail, validatePhone, validatePassword, validateUsername } from '@/lib/auth/auth-config';
+import SocialLoginButton from './SocialLoginButton';
+import { validateEmail, validatePhone, validatePassword, validateUsername } from '@/lib/auth/validators';
 
 interface RegistrationFormProps {
   onClose?: () => void;

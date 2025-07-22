@@ -19,6 +19,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
+import { FilterControls } from './components';
 
 interface Role {
   id: string;
@@ -98,24 +99,12 @@ const PermissionManagementPage: React.FC = () => {
   const hasManagePermissions = hasPermission('manage', 'permissions');
   const hasMinRoleLevel = hasMinimumRoleLevel(5);
   
-  //console.log('🔍 [PERMISSIONS DEBUG] User:', user);
-  //console.log('🔍 [PERMISSIONS DEBUG] hasPermission("manage", "permissions"):', hasManagePermissions);
-  //console.log('🔍 [PERMISSIONS DEBUG] hasMinimumRoleLevel(5):', hasMinRoleLevel);
-  //console.log('🔍 [PERMISSIONS DEBUG] User role level:', user?.role?.level);
-  
   // Test direct permission service creation with user data
   useEffect(() => {
     if (user) {
-      //console.log('🔍 [PERMISSIONS DEBUG] Testing direct permission service creation...');
       try {
         const testService = require('@/lib/auth/permission-validator').createSafePermissionService(user);
-      //  console.log('🔍 [PERMISSIONS DEBUG] Direct service creation result:', !!testService);
-        if (testService) {
-       //   console.log('🔍 [PERMISSIONS DEBUG] Direct hasMinimumRoleLevel(5):', testService.hasMinimumRoleLevel(5));
-       //   console.log('🔍 [PERMISSIONS DEBUG] Direct role level:', testService.getUserRole()?.level);
-        }
       } catch (error) {
-      //  console.error('🔍 [PERMISSIONS DEBUG] Direct service creation failed:', error);
       }
     }
   }, [user]);
@@ -123,8 +112,6 @@ const PermissionManagementPage: React.FC = () => {
   const canManagePermissions = hasManagePermissions || hasMinRoleLevel;
   const canManageRoles = hasPermission('manage', 'roles') || hasMinimumRoleLevel(5);
   const canManageUsers = hasPermission('manage', 'users') || hasMinimumRoleLevel(5);
-  
-  //console.log('🔍 [PERMISSIONS DEBUG] canManagePermissions:', canManagePermissions);
 
   // Load data
   useEffect(() => {
@@ -303,15 +290,15 @@ const PermissionManagementPage: React.FC = () => {
     }
   };
 
-    const resetRoleForm = () => {
-      setRoleForm({
-        name: '',
-        description: '',
-        permissions: [], // Ensure this is an array
-        modules: [],     // Ensure this is an array
-        level: 1,
-      });
-    };
+  const resetRoleForm = () => {
+    setRoleForm({
+      name: '',
+      description: '',
+      permissions: [],
+      modules: [],
+      level: 1,
+    });
+  };
 
   const resetUserForm = () => {
     setUserForm({
@@ -451,49 +438,20 @@ const PermissionManagementPage: React.FC = () => {
 
           {/* Filters */}
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder={`Search ${activeTab}...`}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  />
-                </div>
-              </div>
-              
-              {(activeTab === 'roles' || activeTab === 'permissions') && (
-                <div className="sm:w-48">
-                  <select
-                    value={moduleFilter}
-                    onChange={(e) => setModuleFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value="">All Modules</option>
-                    {availableModules.map((module) => (
-                      <option key={module} value={module}>
-                        {module.charAt(0).toUpperCase() + module.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="sm:w-32">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
+            <FilterControls
+              activeTab={activeTab}
+              searchTerm={searchTerm}
+              moduleFilter={moduleFilter}
+              statusFilter={statusFilter}
+              availableModules={availableModules}
+              onSearchChange={setSearchTerm}
+              onModuleFilterChange={setModuleFilter}
+              onStatusFilterChange={setStatusFilter}
+              onCreateUser={() => setShowUserModal(true)}
+              onCreateRole={() => openRoleModal()}
+              onCreatePermission={() => {}}
+              canManage={activeTab === 'roles' ? canManageRoles : activeTab === 'users' ? canManageUsers : canManagePermissions}
+            />
           </div>
 
           {/* Content */}
