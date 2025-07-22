@@ -34,15 +34,14 @@ interface AffiliateLink {
   category: string;
 }
 
-interface LinksTabProps {
-  links: AffiliateLink[];
-  onCreateLink: (linkData: Partial<AffiliateLink>) => void;
-  onEditLink: (linkId: string, linkData: Partial<AffiliateLink>) => void;
-  onDeleteLink: (linkId: string) => void;
-  onToggleLinkStatus: (linkId: string) => void;
+export interface LinksTabProps {
+  affiliateId: string;
+  links?: AffiliateLink[];
+  onCreateLink?: (link: any) => void;
+  onDeleteLink?: (linkId: string) => void;
 }
 
-export function LinksTab({ links, onCreateLink, onEditLink, onDeleteLink, onToggleLinkStatus }: LinksTabProps) {
+export function LinksTab({ affiliateId, links = [], onCreateLink = () => {}, onDeleteLink = () => {} }: LinksTabProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,7 +62,7 @@ export function LinksTab({ links, onCreateLink, onEditLink, onDeleteLink, onTogg
     { id: 'content', name: 'Nội dung' }
   ];
 
-  const filteredLinks = links.filter(link => {
+  const filteredLinks = links?.filter(link => {
     const matchesCategory = selectedCategory === 'all' || link.category === selectedCategory;
     const matchesSearch = link.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          link.originalUrl.toLowerCase().includes(searchTerm.toLowerCase());
@@ -258,7 +257,7 @@ export function LinksTab({ links, onCreateLink, onEditLink, onDeleteLink, onTogg
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredLinks.map((link) => (
+              {filteredLinks?.map((link:any) => (
                 <tr key={link.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">

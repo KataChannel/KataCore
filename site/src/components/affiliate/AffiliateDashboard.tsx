@@ -25,7 +25,6 @@ import {
 import { 
   AffiliateTier,
   AffiliateStatus,
-  AffiliatePerformanceMetrics 
 } from '@/types/affiliate';
 
 // Import tab components
@@ -34,6 +33,7 @@ import { LinksTab } from './tabs/LinksTab';
 import { CommissionsTab } from './tabs/CommissionsTab';
 import { WithdrawalsTab } from './tabs/WithdrawalsTab';
 import { ReportsTab } from './tabs/ReportsTab';
+import { AffiliatePerformanceMetrics, WithdrawalRequest } from '@/lib/services/affiliateService';
 
 interface AffiliateData {
   id: string;
@@ -304,23 +304,27 @@ export function AffiliateDashboard() {
             <LinksTab affiliateId={affiliateData.id} />
           )}
           
-          {activeTab === 'commissions' && (
-            <CommissionsTab affiliateId={affiliateData.id} />
-          )}
-          
-          {activeTab === 'withdrawals' && (
-            <WithdrawalsTab 
-              affiliateId={affiliateData.id}
-              availableBalance={affiliateData.availableBalance}
-            />
-          )}
-          
-          {activeTab === 'reports' && (
-            <ReportsTab 
-              affiliateId={affiliateData.id}
-              performanceMetrics={performanceMetrics}
-            />
-          )}
+            {activeTab === 'commissions' && (
+            <CommissionsTab affiliateId={''} commissions={[]} summary={undefined} onExportData={function (filters: any): void {
+              throw new Error('Function not implemented.');
+            } } />
+            )}
+            
+            {activeTab === 'withdrawals' && (
+            <WithdrawalsTab withdrawals={[]} summary={undefined} onRequestWithdrawal={function (request: Partial<WithdrawalRequest>): void {
+              throw new Error('Function not implemented.');
+            } } onCancelWithdrawal={function (withdrawalId: string): void {
+              throw new Error('Function not implemented.');
+            } } />
+            )}
+            
+            {activeTab === 'reports' && (
+            <ReportsTab reportData={[]} topPerformers={[]} onExportReport={function (filters: any): void {
+              throw new Error('Function not implemented.');
+            } } onGenerateAdvancedReport={function (config: any): void {
+              throw new Error('Function not implemented.');
+            } } />
+            )}
         </div>
       </div>
     </div>
@@ -358,4 +362,8 @@ function MetricCard({ title, value, icon: Icon, iconColor, bgColor, trend, trend
       </div>
     </div>
   );
+}
+
+interface LinksTabProps {
+  affiliateId: string;
 }

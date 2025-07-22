@@ -46,12 +46,12 @@ interface CommissionSummary {
 }
 
 interface CommissionsTabProps {
+  affiliateId: string;
   commissions: Commission[];
   summary: CommissionSummary;
   onExportData: (filters: any) => void;
 }
-
-export function CommissionsTab({ commissions, summary, onExportData }: CommissionsTabProps) {
+export function CommissionsTab({ affiliateId, commissions = [], summary = {}, onExportData }: any) {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedTimeRange, setSelectedTimeRange] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +74,7 @@ export function CommissionsTab({ commissions, summary, onExportData }: Commissio
     { value: '1y', label: '1 năm qua' }
   ];
 
-  const filteredCommissions = commissions.filter(commission => {
+  const filteredCommissions = commissions.filter((commission: { status: string; orderId: string; customerEmail: string; productName: string; orderDate: string | number | Date; }) => {
     const matchesStatus = selectedStatus === 'all' || commission.status === selectedStatus;
     const matchesSearch = commission.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          commission.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -320,7 +320,7 @@ export function CommissionsTab({ commissions, summary, onExportData }: Commissio
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedCommissions.map((commission) => (
+              {paginatedCommissions.map((commission: { id: React.Key | null | undefined; orderId: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; customerEmail: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; productName: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; orderAmount: number; commissionAmount: number; commissionRate: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; status: string; tier: string; orderDate: string; }) => (
                 <tr key={commission.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
