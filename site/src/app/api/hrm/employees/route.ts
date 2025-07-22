@@ -1,42 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { AuthMiddleware, withAuth } from '@/lib/auth/auth-middleware';
 import { authService } from '@/lib/auth/unified-auth.service';
 
-// Middleware to check authentication
-async function authenticate(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
+// ============================================================================
+// ROUTE HANDLERS WITH ENHANCED MIDDLEWARE
+// ============================================================================
 
-  if (!token) {
-    throw new Error('Token not found');
-  }
-
-  const decoded = authService.verifyToken(token);
-  const user = await authService.getUserById(decoded.userId);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  return user;
-}
-
-// GET - List all employees
-export async function GET(request: NextRequest) {
+// GET - List all employees with enhanced permission checking
+async function handleGET(request: NextRequest, user: any) {
   try {
-    const user = await authenticate(request);
-
-    // Check permissions
-    if (!user.role.permissions.includes('READ_EMPLOYEES')) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
-    }
-
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const department = searchParams.get('department') || '';
-    const status = searchParams.get('status') || '';
 
     const skip = (page - 1) * limit;
 
@@ -44,19 +22,15 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { employeeId: { contains: search, mode: 'insensitive' } },
+        { user: { displayName: { contains: search, mode: 'insensitive' } } },
         { user: { email: { contains: search, mode: 'insensitive' } } },
+        { employeeId: { contains: search, mode: 'insensitive' } },
+        { position: { contains: search, mode: 'insensitive' } },
       ];
     }
 
     if (department) {
-      where.departmentId = department;
-    }
-
-    if (status) {
-      where.status = status;
+      where.department = { id: department };
     }
 
     const [employees, total] = await Promise.all([
@@ -66,6 +40,7 @@ export async function GET(request: NextRequest) {
           user: {
             select: {
               id: true,
+              displayName: true,
               email: true,
               phone: true,
               avatar: true,
@@ -76,121 +51,75 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               name: true,
-              code: true,
-            },
-          },
-          position: {
-            select: {
-              id: true,
-              title: true,
-              level: true,
             },
           },
         },
+        orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
       }),
       prisma.employee.count({ where }),
     ]);
 
     return NextResponse.json({
-      employees,
+      data: employees,
       pagination: {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit),
+        pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch employees' },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// POST - Create new employee
-export async function POST(request: NextRequest) {
+// POST - Create new employee with enhanced validation
+async function handlePOST(request: NextRequest, user: any) {
   try {
-    const user = await authenticate(request);
-
-    // Check permissions
-    if (!user.role.permissions.includes('CREATE_EMPLOYEES')) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
-    }
-
     const body = await request.json();
-    const {
-      employeeId,
-      firstName,
-      lastName,
-      email,
-      phone,
-      departmentId,
-      positionId,
-      hireDate,
-      salary,
-      contractType,
-      status,
-      dateOfBirth,
-      gender,
-      nationality,
-      idNumber,
-      address,
-      emergencyContact,
-      notes,
-    } = body;
+    const { userId, employeeId, position, departmentId, salary, startDate, status } = body;
 
     // Validate required fields
-    if (!employeeId || !firstName || !lastName || !email || !departmentId || !positionId) {
-      return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
+    if (!userId || !employeeId || !position || !departmentId) {
+      return NextResponse.json(
+        { error: 'Required fields: userId, employeeId, position, departmentId' },
+        { status: 400 }
+      );
     }
 
-    // Check if employee ID already exists
-    const existingEmployee = await prisma.employee.findUnique({
-      where: { employeeId },
+    // Check if employee already exists
+    const existingEmployee = await prisma.employee.findFirst({
+      where: {
+        OR: [{ userId }, { employeeId }],
+      },
     });
 
     if (existingEmployee) {
-      return NextResponse.json({ error: 'Employee ID already exists' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Employee already exists with this user or employee ID' },
+        { status: 400 }
+      );
     }
 
-    // Create user account first
-    const newUser = await authService.register({
-      email,
-      phone,
-      displayName: `${firstName} ${lastName}`,
-      provider: 'email',
-    });
-
-    // Create employee record
+    // Create employee
     const employee = await prisma.employee.create({
       data: {
+        userId,
         employeeId,
-        firstName,
-        lastName,
-        fullName: `${firstName} ${lastName}`,
-        userId: newUser.id,
+        position,
         departmentId,
-        positionId,
-        hireDate: new Date(hireDate),
         salary: salary ? parseFloat(salary) : null,
-        contractType: contractType || 'FULL_TIME',
+        startDate: startDate ? new Date(startDate) : new Date(),
         status: status || 'ACTIVE',
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
-        gender,
-        nationality,
-        idNumber,
-        address,
-        emergencyContact,
-        notes,
       },
       include: {
         user: {
           select: {
             id: true,
+            displayName: true,
             email: true,
             phone: true,
             avatar: true,
@@ -201,24 +130,34 @@ export async function POST(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            code: true,
-          },
-        },
-        position: {
-          select: {
-            id: true,
-            title: true,
-            level: true,
           },
         },
       },
     });
 
-    return NextResponse.json(employee, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to create employee' },
-      { status: 500 }
-    );
+    // Log the action
+    AuthMiddleware.logAuthEvent('employee_created', user.id, request, {
+      employeeId: employee.id,
+      targetUserId: userId,
+    });
+
+    return NextResponse.json({ data: employee }, { status: 201 });
+  } catch (error) {
+    console.error('Error creating employee:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+// ============================================================================
+// EXPORT PROTECTED ROUTES
+// ============================================================================
+export const GET = withAuth(handleGET, {
+  requiredPermission: 'read:employees',
+  rateLimit: 'general',
+});
+
+export const POST = withAuth(handlePOST, {
+  requiredPermission: 'create:employees',
+  requireManager: true,
+  rateLimit: 'general',
+});

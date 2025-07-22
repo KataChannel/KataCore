@@ -1,36 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { authService } from '@/lib/auth/unified-auth.service';
+import { AuthMiddleware, withAuth } from '@/lib/auth/auth-middleware';
 
-// Middleware to check authentication
-async function authenticate(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
+// ============================================================================
+// ROUTE HANDLERS WITH ENHANCED MIDDLEWARE
+// ============================================================================
 
-  if (!token) {
-    throw new Error('Token not found');
-  }
-
-  const decoded = authService.verifyToken(token);
-  const user = await authService.getUserById(decoded.userId);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  return user;
-}
-
-// GET - List all departments
-export async function GET(request: NextRequest) {
+// GET - List all departments with enhanced permission checking
+async function handleGET(request: NextRequest, user: any) {
   try {
-    const user = await authenticate(request);
-
-    // Check permissions
-    if (!user.role.permissions.includes('READ_DEPARTMENTS')) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
-    }
-
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -51,85 +29,49 @@ export async function GET(request: NextRequest) {
       prisma.department.findMany({
         where,
         include: {
-          manager: {
-            select: {
-              id: true,
-              displayName: true,
-              email: true,
-            },
-          },
-          parent: {
-            select: {
-              id: true,
-              name: true,
-              code: true,
-            },
-          },
-          children: {
-            select: {
-              id: true,
-              name: true,
-              code: true,
-            },
-          },
-          employees: {
-            select: {
-              id: true,
-              employeeId: true,
-              firstName: true,
-              lastName: true,
-              status: true,
-            },
-          },
           _count: {
             select: {
               employees: true,
             },
           },
         },
+        orderBy: { name: 'asc' },
         skip,
         take: limit,
-        orderBy: { name: 'asc' },
       }),
       prisma.department.count({ where }),
     ]);
 
     return NextResponse.json({
-      departments,
+      data: departments,
       pagination: {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit),
+        pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch departments' },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Error fetching departments:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// POST - Create new department
-export async function POST(request: NextRequest) {
+// POST - Create new department with enhanced validation
+async function handlePOST(request: NextRequest, user: any) {
   try {
-    const user = await authenticate(request);
-
-    // Check permissions
-    if (!user.role.permissions.includes('CREATE_DEPARTMENTS')) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
-    }
-
     const body = await request.json();
-    const { name, code, description, managerId, parentId, budget, location, phone, email } = body;
+    const { name, code, description, managerId } = body;
 
     // Validate required fields
     if (!name || !code) {
-      return NextResponse.json({ error: 'Name and code are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Required fields: name, code' },
+        { status: 400 }
+      );
     }
 
-    // Check if department code already exists
+    // Check if department already exists
     const existingDepartment = await prisma.department.findFirst({
       where: {
         OR: [{ name }, { code }],
@@ -138,38 +80,20 @@ export async function POST(request: NextRequest) {
 
     if (existingDepartment) {
       return NextResponse.json(
-        { error: 'Department name or code already exists' },
+        { error: 'Department already exists with this name or code' },
         { status: 400 }
       );
     }
 
+    // Create department
     const department = await prisma.department.create({
       data: {
         name,
         code,
         description,
         managerId,
-        parentId,
-        budget: budget ? parseFloat(budget) : null,
-        location,
-        phone,
-        email,
       },
       include: {
-        manager: {
-          select: {
-            id: true,
-            displayName: true,
-            email: true,
-          },
-        },
-        parent: {
-          select: {
-            id: true,
-            name: true,
-            code: true,
-          },
-        },
         _count: {
           select: {
             employees: true,
@@ -178,11 +102,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(department, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to create department' },
-      { status: 500 }
-    );
+    // Log the action
+    AuthMiddleware.logAuthEvent('department_created', user.id, request, {
+      departmentId: department.id,
+      departmentName: name,
+    });
+
+    return NextResponse.json({ data: department }, { status: 201 });
+  } catch (error) {
+    console.error('Error creating department:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+// ============================================================================
+// EXPORT PROTECTED ROUTES
+// ============================================================================
+export const GET = withAuth(handleGET, {
+  requiredPermission: 'read:departments',
+  rateLimit: 'general',
+});
+
+export const POST = withAuth(handlePOST, {
+  requiredPermission: 'create:departments',
+  requireManager: true,
+  rateLimit: 'general',
+});

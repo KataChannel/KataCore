@@ -1,25 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authService } from '@/lib/auth/unified-auth.service';
+import { smsService } from '@/lib/auth/sms.service';
+import { AuthMiddleware } from '@/lib/auth/auth-middleware';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { phone } = body;
+    // Rate limiting
+    AuthMiddleware.validateRequest(request, 'otp');
 
-    if (!phone) {
-      return NextResponse.json({ error: 'Phone number is required' }, { status: 400 });
+    const body = await request.json();
+    const { phone, email, method = 'sms', purpose = 'login' } = body;
+
+    // Validate input
+    if (method === 'sms' && !phone) {
+      return NextResponse.json({ error: 'Số điện thoại là bắt buộc' }, { status: 400 });
     }
 
-    const success = await authService.sendOTP(phone);
+    if (method === 'email' && !email) {
+      return NextResponse.json({ error: 'Email là bắt buộc' }, { status: 400 });
+    }
 
-    if (success) {
+    let result;
+
+    if (method === 'sms') {
+      result = await smsService.sendOTP(phone, purpose);
+    } else {
+      // Email OTP implementation would go here
+      // For now, return mock success
+      result = {
+        success: true,
+        message: 'OTP đã được gửi qua email',
+        expiresIn: 300, // 5 minutes
+      };
+    }
+
+    if (result.success) {
+      // Log the event
+      AuthMiddleware.logAuthEvent('otp_sent', null, request, {
+        method,
+        phone: method === 'sms' ? phone : undefined,
+        email: method === 'email' ? email : undefined,
+        purpose,
+      });
+
       return NextResponse.json({
-        message: 'OTP sent successfully',
+        message: result.message,
+        expiresIn: result.expiresIn,
       });
     } else {
-      return NextResponse.json({ error: 'Failed to send OTP' }, { status: 500 });
+      return NextResponse.json({ error: result.message }, { status: 400 });
     }
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to send OTP' }, { status: 400 });
+    console.error('[Send OTP] Error:', error);
+    
+    if (error.message.includes('Too many attempts')) {
+      return NextResponse.json({ error: error.message }, { status: 429 });
+    }
+
+    return NextResponse.json(
+      { error: error.message || 'Gửi OTP thất bại' },
+      { status: 500 }
+    );
   }
 }

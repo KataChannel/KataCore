@@ -26,7 +26,7 @@ interface User {
     name: string;
     permissions: string[];
     level: number;
-  };
+  } | undefined;
   modules?: string[];
   permissions?: string[];
   isActive: boolean;
@@ -708,6 +708,112 @@ export class UnifiedAuthService {
   isSuperAdmin(user: User): boolean {
     const superAdminRoles = ['super_admin', 'Super Administrator'];
     return superAdminRoles.includes(user.roleId) || superAdminRoles.includes(user.role?.name || '');
+  }
+
+  // ==========================================================================
+  // SOCIAL LOGIN METHODS
+  // ==========================================================================
+
+  /**
+   * Social login for Google, Facebook, Apple, Microsoft
+   */
+  async socialLogin(
+    provider: 'google' | 'facebook' | 'apple' | 'microsoft',
+    socialId: string,
+    email?: string,
+    displayName?: string,
+    avatar?: string
+  ): Promise<AuthResult> {
+    // Look for existing user by social ID or email
+    const socialIdField = `${provider}Id`;
+    let user = await this.findUserBySocialId(provider, socialId, email);
+
+    if (!user) {
+      // Create new user for social login
+      const createData: Partial<RegisterData> = {
+        email,
+        displayName: displayName || email || `${provider} User`,
+        provider: provider as any,
+        avatar,
+        isVerified: true, // Social accounts are pre-verified
+      };
+
+      // Set the appropriate social ID
+      (createData as any)[socialIdField] = socialId;
+
+      user = await this.createUser(createData);
+    } else if (!(user as any)[socialIdField]) {
+      // Link social account to existing user
+      await this.linkSocialAccount(user.id, provider, socialId);
+      user = await this.getUserById(user.id);
+    }
+
+    if (!user) {
+      throw new Error('Failed to create or find user');
+    }
+
+    // Update last seen
+    await this.updateLastLogin(user.id);
+
+    // Generate tokens
+    const tokens = await this.generateTokens(user);
+
+    return {
+      user: this.sanitizeUser(user),
+      tokens,
+    };
+  }
+
+  /**
+   * Find user by social ID or email
+   */
+  private async findUserBySocialId(
+    provider: 'google' | 'facebook' | 'apple' | 'microsoft',
+    socialId: string,
+    email?: string
+  ): Promise<User | null> {
+    try {
+      const socialIdField = `${provider}Id`;
+      const whereConditions: any[] = [{ [socialIdField]: socialId }];
+      
+      if (email) {
+        whereConditions.push({ email });
+      }
+
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: whereConditions,
+        },
+        include: {
+          role: true,
+        },
+      });
+
+      return user ? this.transformPrismaUser(user) : null;
+    } catch (error) {
+      console.error('Error finding user by social ID:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Link social account to existing user
+   */
+  private async linkSocialAccount(
+    userId: string,
+    provider: 'google' | 'facebook' | 'apple' | 'microsoft',
+    socialId: string
+  ): Promise<void> {
+    try {
+      const socialIdField = `${provider}Id`;
+      await prisma.user.update({
+        where: { id: userId },
+        data: { [socialIdField]: socialId },
+      });
+    } catch (error) {
+      console.error('Error linking social account:', error);
+      throw new Error('Failed to link social account');
+    }
   }
 }
 
