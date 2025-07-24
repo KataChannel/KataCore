@@ -69,6 +69,7 @@ export interface LoginCredentials {
   password?: string;
   provider?: AuthProvider;
   rememberMe?: boolean;
+  otpCode?: string; // For OTP login
 }
 
 /**
@@ -79,6 +80,7 @@ export interface RegisterCredentials {
   phone?: string;
   username?: string;
   password?: string;
+  confirmPassword?: string;
   displayName: string;
   provider?: AuthProvider;
   acceptTerms?: boolean;
@@ -111,6 +113,9 @@ export interface AuthContextType {
   
   // Core auth methods
   login: (credentials: LoginCredentials) => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<void>;
+  loginWithOTP: (phone: string, otpCode: string) => Promise<void>;
+  sendOTP: (phone: string) => Promise<boolean>;
   logout: () => void;
   refreshAuth: () => Promise<void>;
   
@@ -125,6 +130,12 @@ export interface AuthContextType {
   isManager: () => boolean;
   hasRole: (roleId: string) => boolean;
   hasMinimumRoleLevel: (level: number) => boolean;
+  
+  // Social auth methods
+  loginWithGoogle: () => Promise<void>;
+  loginWithFacebook: () => Promise<void>;
+  loginWithApple: () => Promise<void>;
+  loginWithMicrosoft: () => Promise<void>;
 }
 
 /**
@@ -213,7 +224,21 @@ export function isValidLoginCredentials(obj: any): obj is LoginCredentials {
     obj &&
     typeof obj === 'object' &&
     (obj.email || obj.phone || obj.username) &&
-    typeof obj.password === 'string'
+    (obj.password || obj.otpCode) // Allow OTP login without password
+  );
+}
+
+/**
+ * Type guard to check if object is valid RegisterCredentials
+ */
+export function isValidRegisterCredentials(obj: any): obj is RegisterCredentials {
+  return (
+    obj &&
+    typeof obj === 'object' &&
+    typeof obj.displayName === 'string' &&
+    (obj.email || obj.phone) && // Either email or phone required
+    (obj.password || obj.provider !== 'email') && // Password required for email, optional for phone/social
+    typeof obj.acceptTerms === 'boolean'
   );
 }
 
@@ -248,11 +273,14 @@ export interface AuthUser {
  * @deprecated Use RegisterCredentials instead
  */
 export interface RegisterData {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  name: string;
-  agreeToTerms: boolean;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+  displayName: string;
+  username?: string;
+  provider?: 'email' | 'phone' | 'google' | 'facebook' | 'apple';
+  acceptTerms?: boolean;
 }
 
 /**

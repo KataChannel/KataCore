@@ -21,6 +21,7 @@ import type {
   PermissionGateProps,
   AccessBadgeProps,
   LoginModalProps,
+  RegisterCredentials,
 } from '@/types/auth';
 
 // ============================================================================
@@ -465,6 +466,27 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
     isManager,
     hasRole,
     hasMinimumRoleLevel,
+    register: function (credentials: RegisterCredentials): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    loginWithOTP: function (phone: string, otpCode: string): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    sendOTP: function (phone: string): Promise<boolean> {
+      throw new Error('Function not implemented.');
+    },
+    loginWithGoogle: function (): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    loginWithFacebook: function (): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    loginWithApple: function (): Promise<void> {
+      throw new Error('Function not implemented.');
+    },
+    loginWithMicrosoft: function (): Promise<void> {
+      throw new Error('Function not implemented.');
+    }
   };
 
   // Show error state if needed

@@ -52,4 +52,4 @@ export interface UserForm {
   permissions: string[];
 }
 
-export type TabType = 'roles' | 'users' | 'permissions';
+export type TabType = 'roles' | 'users' | 'permissions' | 'sync';

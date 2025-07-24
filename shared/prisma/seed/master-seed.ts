@@ -652,7 +652,7 @@ async function seedHRAndDepartmentUsers(roles: any, departments: any, positions:
 async function seedEmployees(roles: any, departments: any, positions: any, managers: any, systemUsers: any) {
   log('👥 Creating employee users...');
   
-  const employees = [];
+  const employees: any[] = [];
   
   // IT Department employees
   const itEmployees = await Promise.all([
@@ -794,7 +794,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
 async function createEmployeeRecords(users: any, departments: any, positions: any) {
   log('📋 Creating employee records...');
   
-  const employeeRecords = [];
+  const employeeRecords: any[] = [];
   
   // CEO
   const ceoEmployee = await prisma.employee.create({

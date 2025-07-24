@@ -18,8 +18,10 @@ import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { FilterControls } from './components';
+import PermissionSyncManager from './components/PermissionSyncManager';
 
 interface Role {
   id: string;
@@ -61,7 +63,7 @@ interface Permission {
 
 const PermissionManagementPage: React.FC = () => {
   const { user, hasPermission, hasMinimumRoleLevel } = useUnifiedAuth();
-  const [activeTab, setActiveTab] = useState<'roles' | 'users' | 'permissions'>('roles');
+  const [activeTab, setActiveTab] = useState<'roles' | 'users' | 'permissions' | 'sync'>('roles');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -417,7 +419,7 @@ const PermissionManagementPage: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="-mb-px flex space-x-8 px-6">
-              {['roles', 'users', 'permissions'].map((tab) => (
+              {['roles', 'users', 'permissions', 'sync'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
@@ -430,6 +432,7 @@ const PermissionManagementPage: React.FC = () => {
                   {tab === 'roles' && <UserGroupIcon className="h-5 w-5 inline mr-2" />}
                   {tab === 'users' && <UsersIcon className="h-5 w-5 inline mr-2" />}
                   {tab === 'permissions' && <KeyIcon className="h-5 w-5 inline mr-2" />}
+                  {tab === 'sync' && <ArrowPathIcon className="h-5 w-5 inline mr-2" />}
                   {tab}
                 </button>
               ))}
@@ -437,22 +440,24 @@ const PermissionManagementPage: React.FC = () => {
           </div>
 
           {/* Filters */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <FilterControls
-              activeTab={activeTab}
-              searchTerm={searchTerm}
-              moduleFilter={moduleFilter}
-              statusFilter={statusFilter}
-              availableModules={availableModules}
-              onSearchChange={setSearchTerm}
-              onModuleFilterChange={setModuleFilter}
-              onStatusFilterChange={setStatusFilter}
-              onCreateUser={() => setShowUserModal(true)}
-              onCreateRole={() => openRoleModal()}
-              onCreatePermission={() => {}}
-              canManage={activeTab === 'roles' ? canManageRoles : activeTab === 'users' ? canManageUsers : canManagePermissions}
-            />
-          </div>
+          {activeTab !== 'sync' && (
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <FilterControls
+                activeTab={activeTab}
+                searchTerm={searchTerm}
+                moduleFilter={moduleFilter}
+                statusFilter={statusFilter}
+                availableModules={availableModules}
+                onSearchChange={setSearchTerm}
+                onModuleFilterChange={setModuleFilter}
+                onStatusFilterChange={setStatusFilter}
+                onCreateUser={() => setShowUserModal(true)}
+                onCreateRole={() => openRoleModal()}
+                onCreatePermission={() => {}}
+                canManage={activeTab === 'roles' ? canManageRoles : activeTab === 'users' ? canManageUsers : canManagePermissions}
+              />
+            </div>
+          )}
 
           {/* Content */}
           <div className="p-6">
@@ -492,6 +497,7 @@ const PermissionManagementPage: React.FC = () => {
                 {activeTab === 'permissions' && <PermissionsTab 
                   permissions={filteredPermissions}
                 />}
+                {activeTab === 'sync' && <PermissionSyncManager />}
               </>
             )}
           </div>

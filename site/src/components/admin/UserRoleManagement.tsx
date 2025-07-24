@@ -886,7 +886,7 @@ const PermissionsTable: React.FC<{
       if (!acc[permission.module]) {
         acc[permission.module] = [];
       }
-      acc[permission.module].push(permission);
+      acc[permission.module]!.push(permission);
       return acc;
     },
     {} as Record<string, Permission[]>

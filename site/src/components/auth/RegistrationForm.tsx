@@ -3,8 +3,15 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUnifiedAuth } from '@/auth';
-import SocialLoginButton from './SocialLoginButton';
-import { validateEmail, validatePhone, validatePassword, validateUsername } from '@/lib/auth/validators';
+import { SocialLoginPanel } from './SocialLoginButton';
+import { 
+  EyeIcon, 
+  EyeSlashIcon,
+  PhoneIcon,
+  UserIcon,
+  EnvelopeIcon,
+  CheckIcon
+} from '@heroicons/react/24/outline';
 
 interface RegistrationFormProps {
   onClose?: () => void;
@@ -38,10 +45,53 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
-
-  const { register } = useUnifiedAuth();
   const router = useRouter();
+  const { register } = useUnifiedAuth();
+
+  // Validation functions
+  const validateEmail = (email: string): { isValid: boolean; message: string } => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { isValid: false, message: 'Email không hợp lệ' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validatePhone = (phone: string): { isValid: boolean; message: string } => {
+    const phoneRegex = /^(0|\+84)[0-9]{9,10}$/;
+    if (!phoneRegex.test(phone)) {
+      return { isValid: false, message: 'Số điện thoại không hợp lệ' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validateUsername = (username: string): { isValid: boolean; message: string } => {
+    if (username.length < 3) {
+      return { isValid: false, message: 'Tên đăng nhập phải có ít nhất 3 ký tự' };
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return { isValid: false, message: 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validatePassword = (password: string): { isValid: boolean; message: string; score?: number } => {
+    let score = 0;
+    
+    if (password.length < 6) {
+      return { isValid: false, message: 'Mật khẩu phải có ít nhất 6 ký tự', score: 0 };
+    }
+    
+    if (password.length >= 8) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+    
+    return { isValid: true, message: '', score: Math.min(score, 4) };
+  };
 
   // Real-time validation
   const validateField = (name: string, value: string) => {
@@ -80,6 +130,8 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
           error = 'Tên hiển thị là bắt buộc';
         } else if (value.trim().length < 2) {
           error = 'Tên hiển thị phải có ít nhất 2 ký tự';
+        } else if (value.trim().length > 50) {
+          error = 'Tên hiển thị không được quá 50 ký tự';
         }
         break;
 
@@ -89,7 +141,7 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
           if (!passwordValidation.isValid) {
             error = passwordValidation.message;
           }
-          setPasswordStrength(passwordValidation.score);
+          setPasswordStrength(passwordValidation.score || 0);
         }
         break;
 
@@ -118,12 +170,20 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
     }));
 
     if (type !== 'checkbox') {
-      validateField(name, value);
+      // Clear error when user starts typing
+      if (errors[name]) {
+        setErrors(prev => ({ ...prev, [name]: '' }));
+      }
+      
+      // Validate field on blur or after user stops typing
+      setTimeout(() => {
+        validateField(name, value);
+      }, 300);
     }
   };
 
   const handleProviderChange = (provider: 'email' | 'phone') => {
-    setFormData(prev => ({
+    setFormData((prev:any) => ({
       ...prev,
       provider,
       email: provider === 'email' ? prev.email : '',
@@ -132,11 +192,32 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
     setErrors({});
   };
 
+  const handleSocialSuccess = async (userData: any) => {
+    try {
+      if (onClose) {
+        onClose();
+      } else {
+        router.push(redirectTo);
+      }
+    } catch (error) {
+      console.error('Social registration error:', error);
+    }
+  };
+
+  const handleSocialError = (error: any) => {
+    setErrors({
+      general: error.message || 'Đăng ký bằng mạng xã hội thất bại',
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Clear previous errors
+      setErrors({});
+
       // Validate all fields
       const requiredFields = ['displayName', 'password', 'confirmPassword'];
       if (formData.provider === 'email') {
@@ -148,7 +229,13 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
       let hasErrors = false;
       requiredFields.forEach(field => {
         const value = formData[field as keyof RegistrationData] as string;
-        if (!validateField(field, value)) {
+        if (!value || !value.trim()) {
+          setErrors(prev => ({
+            ...prev,
+            [field]: 'Trường này là bắt buộc',
+          }));
+          hasErrors = true;
+        } else if (!validateField(field, value)) {
           hasErrors = true;
         }
       });
@@ -167,14 +254,22 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
       }
 
       // Prepare registration data
-      const registrationData = {
+      const registrationData: any = {
         displayName: formData.displayName.trim(),
         password: formData.password,
         provider: formData.provider,
         acceptTerms: formData.acceptTerms,
-        ...(formData.provider === 'email' ? { email: formData.email } : { phone: formData.phone }),
-        ...(formData.username && { username: formData.username }),
       };
+
+      if (formData.provider === 'email' && formData.email) {
+        registrationData.email = formData.email.trim();
+      } else if (formData.provider === 'phone' && formData.phone) {
+        registrationData.phone = formData.phone.trim();
+      }
+
+      if (formData.username?.trim()) {
+        registrationData.username = formData.username.trim();
+      }
 
       await register(registrationData);
       
@@ -221,7 +316,14 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
 
       {/* Social Login Options */}
       <div className="mb-6">
-        <SocialLoginButton mode="register" />
+        <SocialLoginPanel
+          onSuccess={handleSocialSuccess}
+          onError={handleSocialError}
+          disabled={loading}
+          title="Đăng ký nhanh bằng"
+          variant="buttons"
+          size="medium"
+        />
       </div>
 
       <div className="flex items-center mb-6">
@@ -237,26 +339,28 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
             Phương thức đăng ký
           </label>
           <div className="flex gap-4">
-            <label className="flex items-center">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
                 name="provider"
                 value="email"
                 checked={formData.provider === 'email'}
                 onChange={() => handleProviderChange('email')}
-                className="mr-2"
+                className="mr-2 text-accent focus:ring-accent"
               />
+              <EnvelopeIcon className="w-4 h-4 mr-1" />
               Email
             </label>
-            <label className="flex items-center">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
                 name="provider"
                 value="phone"
                 checked={formData.provider === 'phone'}
                 onChange={() => handleProviderChange('phone')}
-                className="mr-2"
+                className="mr-2 text-accent focus:ring-accent"
               />
+              <PhoneIcon className="w-4 h-4 mr-1" />
               Số điện thoại
             </label>
           </div>
@@ -268,16 +372,20 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
             <label htmlFor="email" className="block text-sm font-medium text-text-primary">
               Địa chỉ email *
             </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`unified-input ${errors.email ? 'border-error' : ''}`}
-              placeholder="your.email@example.com"
-              required
-            />
+            <div className="relative">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email || ''}
+                onChange={handleInputChange}
+                className={`unified-input pl-10 ${errors.email ? 'border-error' : ''}`}
+                placeholder="your.email@example.com"
+                required
+                autoComplete="email"
+              />
+              <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-secondary" />
+            </div>
             {errors.email && (
               <p className="text-error text-sm">{errors.email}</p>
             )}
@@ -287,16 +395,20 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
             <label htmlFor="phone" className="block text-sm font-medium text-text-primary">
               Số điện thoại *
             </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className={`unified-input ${errors.phone ? 'border-error' : ''}`}
-              placeholder="0123456789"
-              required
-            />
+            <div className="relative">
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone || ''}
+                onChange={handleInputChange}
+                className={`unified-input pl-10 ${errors.phone ? 'border-error' : ''}`}
+                placeholder="0123456789"
+                required
+                autoComplete="tel"
+              />
+              <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-secondary" />
+            </div>
             {errors.phone && (
               <p className="text-error text-sm">{errors.phone}</p>
             )}
@@ -308,15 +420,19 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
           <label htmlFor="username" className="block text-sm font-medium text-text-primary">
             Tên đăng nhập (tùy chọn)
           </label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleInputChange}
-            className={`unified-input ${errors.username ? 'border-error' : ''}`}
-            placeholder="username123"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username || ''}
+              onChange={handleInputChange}
+              className={`unified-input pl-10 ${errors.username ? 'border-error' : ''}`}
+              placeholder="username123"
+              autoComplete="username"
+            />
+            <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-secondary" />
+          </div>
           {errors.username && (
             <p className="text-error text-sm">{errors.username}</p>
           )}
@@ -327,16 +443,20 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
           <label htmlFor="displayName" className="block text-sm font-medium text-text-primary">
             Tên hiển thị *
           </label>
-          <input
-            type="text"
-            id="displayName"
-            name="displayName"
-            value={formData.displayName}
-            onChange={handleInputChange}
-            className={`unified-input ${errors.displayName ? 'border-error' : ''}`}
-            placeholder="Nguyen Van A"
-            required
-          />
+          <div className="relative">
+            <input
+              type="text"
+              id="displayName"
+              name="displayName"
+              value={formData.displayName}
+              onChange={handleInputChange}
+              className={`unified-input pl-10 ${errors.displayName ? 'border-error' : ''}`}
+              placeholder="Nguyen Van A"
+              required
+              autoComplete="name"
+            />
+            <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-secondary" />
+          </div>
           {errors.displayName && (
             <p className="text-error text-sm">{errors.displayName}</p>
           )}
@@ -357,13 +477,18 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
               className={`unified-input pr-10 ${errors.password ? 'border-error' : ''}`}
               placeholder="••••••••"
               required
+              autoComplete="new-password"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary"
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? (
+                <EyeSlashIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
             </button>
           </div>
           {formData.password && (
@@ -391,16 +516,30 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-primary">
             Xác nhận mật khẩu *
           </label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            className={`unified-input ${errors.confirmPassword ? 'border-error' : ''}`}
-            placeholder="••••••••"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className={`unified-input pr-10 ${errors.confirmPassword ? 'border-error' : ''}`}
+              placeholder="••••••••"
+              required
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary"
+            >
+              {showConfirmPassword ? (
+                <EyeSlashIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
+            </button>
+          </div>
           {errors.confirmPassword && (
             <p className="text-error text-sm">{errors.confirmPassword}</p>
           )}
@@ -408,22 +547,32 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
 
         {/* Terms Acceptance */}
         <div className="space-y-1">
-          <label className="flex items-start gap-2">
+          <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
               name="acceptTerms"
               checked={formData.acceptTerms}
               onChange={handleInputChange}
-              className="mt-1"
+              className="mt-1 text-accent focus:ring-accent"
               required
             />
             <span className="text-sm text-text-secondary">
               Tôi đồng ý với{' '}
-              <a href="/terms" className="text-accent hover:underline">
+              <a 
+                href="/terms" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent hover:underline"
+              >
                 Điều khoản sử dụng
               </a>{' '}
               và{' '}
-              <a href="/privacy" className="text-accent hover:underline">
+              <a 
+                href="/privacy" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent hover:underline"
+              >
                 Chính sách bảo mật
               </a>
             </span>
@@ -437,7 +586,7 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
         <button
           type="submit"
           disabled={loading}
-          className="unified-button accent w-full"
+          className="unified-button accent w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="flex items-center justify-center gap-2">
@@ -445,7 +594,10 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
               Đang đăng ký...
             </div>
           ) : (
-            'Đăng ký'
+            <div className="flex items-center justify-center gap-2">
+              <CheckIcon className="w-5 h-5" />
+              Đăng ký
+            </div>
           )}
         </button>
       </form>
@@ -457,11 +609,25 @@ export function RegistrationForm({ onClose, redirectTo = '/', className = '' }: 
           <button
             onClick={() => router.push('/login')}
             className="text-accent hover:underline font-medium"
+            type="button"
           >
-            Đăng nhập
+            Đăng nhập ngay
           </button>
         </p>
       </div>
+
+      {/* Back Button */}
+      {onClose && (
+        <div className="text-center mt-4">
+          <button
+            onClick={onClose}
+            className="text-text-secondary hover:text-text-primary text-sm"
+            type="button"
+          >
+            ← Quay lại
+          </button>
+        </div>
+      )}
     </div>
   );
 }
