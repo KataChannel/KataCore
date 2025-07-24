@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ChartBarIcon, TrendingUpIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
 import { DashboardWidget } from '@/types/information-hub';
 
 interface AnalyticsWidgetProps {
@@ -29,7 +29,7 @@ export function AnalyticsWidget({ widget, isEditMode }: AnalyticsWidgetProps) {
       <span className={`flex items-center text-xs ${
         isPositive ? 'text-green-600' : 'text-red-600'
       }`}>
-        <TrendingUpIcon className={`h-3 w-3 mr-1 ${
+        <ArrowTrendingUpIcon className={`h-3 w-3 mr-1 ${
           isPositive ? '' : 'transform rotate-180'
         }`} />
         {Math.abs(growth)}%

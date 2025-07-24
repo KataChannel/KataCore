@@ -4,7 +4,7 @@
 // Migrates data from modules-permissions.ts to database
 // Senior level implementation with comprehensive role management
 
-import { prisma } from '../../lib/prisma';
+import { prisma } from '../../src/lib/prisma';
 import bcrypt from 'bcrypt';
 import { 
   SYSTEM_ROLES, 
@@ -20,7 +20,7 @@ import {
   SUPPORT_PERMISSIONS,
   ANALYTICS_PERMISSIONS,
   ECOMMERCE_PERMISSIONS
-} from '../../../site/src/lib/auth/modules-permissions';
+} from '../../src/lib/auth/modules-permissions';
 
 // ============================================================================
 // UTILITY FUNCTIONS
