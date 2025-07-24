@@ -10,7 +10,7 @@ import {
   ALL_MODULE_PERMISSIONS,
   type UserRole as ModuleUserRole,
   type ModulePermission
-} from '../../site/src/lib/auth/modules-permissions';
+} from './auth/modules-permissions';
 
 // ============================================================================
 // TYPES

@@ -1,20 +1,23 @@
 services:
-  api:
+  site:
     build:
       context: .
-      dockerfile: ./api/Dockerfile
+      dockerfile: ./site/Dockerfile
       args:
         NODE_ENV: production
-        # Pass build-time environment variables
-        DATABASE_URL: ${DATABASE_URL}
-    image: tazacore/api:${API_VERSION}
-    container_name: tazacore-api
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
+    image: tazacore/site:${SITE_VERSION}
+    container_name: tazacore-site
     restart: ${RESTART_POLICY}
     ports:
-      - "${API_PORT}:3001"
+      - "${SITE_PORT}:3000"
     environment:
       NODE_ENV: production
-      API_PORT: 3001
+      PORT: 3000
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
+      # Database connection for API routes
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
       JWT_SECRET: ${JWT_SECRET}
@@ -26,8 +29,6 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_USE_SSL: ${MINIO_USE_SSL}
-      # Prisma-specific configurations
-      PRISMA_QUERY_ENGINE_LIBRARY: /app/shared/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
     networks:
       - tazacore-network
     depends_on:
@@ -38,60 +39,11 @@ services:
       minio:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 60s
-    volumes:
-      - api_logs:/app/logs
-      # Mount shared directory for runtime access
-      - ./shared:/app/shared:ro
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-        max-file: "3"
-
-  site:
-    build:
-      context: .
-      dockerfile: ./site/Dockerfile
-      args:
-        NODE_ENV: production
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-        NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
-    image: tazacore/site:${SITE_VERSION}
-    container_name: tazacore-site
-    restart: ${RESTART_POLICY}
-    ports:
-      - "${SITE_PORT}:3000"
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-      NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
-      INTERNAL_API_URL: ${INTERNAL_API_URL}
-      # Database connection for API routes
-      DATABASE_URL: ${DATABASE_URL}
-    networks:
-      - tazacore-network
-    depends_on:
-      api:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s
       timeout: 15s
       retries: 5
       start_period: 60s
-    volumes:
-      # Mount shared directory for runtime access
-      - ./shared:/app/shared:ro
     logging:
       driver: json-file
       options:
@@ -215,5 +167,3 @@ volumes:
     name: tazacore-minio-data
   pgadmin_data:
     name: tazacore-pgadmin-data
-  api_logs:
-    name: tazacore-api-logs

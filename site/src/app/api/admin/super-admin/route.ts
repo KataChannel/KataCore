@@ -5,7 +5,6 @@ import { join } from 'path';
 
 // Load environment variables explicitly
 config({ path: join(process.cwd(), '.env') });
-config({ path: join(process.cwd(), '../shared/.env') });
 
 import { prisma } from '@/lib/prisma';
 import { authService } from '@/lib/auth/unified-auth.service';

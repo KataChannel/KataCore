@@ -3,7 +3,7 @@
 // ============================================================================
 // Automatically syncs permissions on application startup
 
-import { PermissionSyncService } from '../../../../shared/lib/permission-sync.service';
+import { PermissionSyncService } from '@/lib/permission-sync.service';
 
 // ============================================================================
 // STARTUP PERMISSION SYNC

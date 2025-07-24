@@ -4,7 +4,7 @@
 // API endpoints for permission synchronization management
 
 import { NextRequest, NextResponse } from 'next/server';
-import PermissionSyncService, { getPermissionStats } from '../../../../../../shared/lib/permission-sync.service';
+import PermissionSyncService, { getPermissionStats } from '@/lib/permission-sync.service';
 
 /**
  * GET /api/admin/sync-permissions

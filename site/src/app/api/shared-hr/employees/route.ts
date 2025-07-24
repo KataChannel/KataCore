@@ -4,7 +4,7 @@ import {
   EmployeeFilters,
   ApiResponse,
   EmployeeWithRelations,
-} from '../../../shared/types/database';
+} from '@/types/shared/database';
 
 // GET /api/hr/employees - Lấy danh sách nhân viên
 export async function GET(request: NextRequest) {

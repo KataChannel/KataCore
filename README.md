@@ -6,9 +6,9 @@
 
 **Enterprise-grade Full-Stack Platform with Smart Deployment**
 
-[![Next.js](https://img.shields.io/badge/Next.js-14+-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![NestJS](https://img.shields.io/badge/NestJS-10+-red?style=flat-square&logo=nestjs)](https://nestjs.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15+-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6+-darkblue?style=flat-square&logo=prisma)](https://prisma.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)](https://www.docker.com/)
 [![Bun](https://img.shields.io/badge/Bun-1.0+-orange?style=flat-square&logo=bun)](https://bun.sh/)
 
@@ -21,9 +21,9 @@
 ## ✨ Tính năng nổi bật
 
 ### 🏗️ **Architecture & Technology**
-- **Next.js 14+** - Modern React framework với App Router
-- **NestJS** - Scalable Node.js backend framework
-- **TypeScript** - Type-safe development
+- **Next.js 15+** - Modern React fullstack framework with App Router & API Routes
+- **TypeScript** - Type-safe development across frontend and backend
+- **Prisma** - Modern database toolkit with PostgreSQL
 - **PostgreSQL** - Robust relational database
 - **Redis** - High-performance caching
 - **MinIO** - S3-compatible object storage
@@ -69,12 +69,16 @@ cp .env.example .env.prod
 
 ### 2. 🏃 Local Development
 ```bash
-# Start development mode
+# Start development mode (Next.js fullstack)
 bun run dev
 
-# Or start specific services
-bun run dev:api    # Backend only
-bun run dev:site   # Frontend only
+# Generate Prisma client and start development
+bun run dev:full
+
+# Database operations
+bun run db:generate      # Generate Prisma client
+bun run db:migrate       # Run migrations
+bun run db:studio        # Open Prisma Studio
 ```
 
 ### 3. 🚀 Production Deployment
@@ -121,22 +125,19 @@ chmod +x sh/3pushauto.sh
 ### 📁 **Project Structure**
 ```
 TazaCore/
-├── 📂 api/                    # NestJS Backend
+├── 📂 site/                   # Next.js Fullstack Application
 │   ├── src/
-│   │   ├── auth/             # Authentication module
-│   │   ├── hrm/              # HR Management module
-│   │   ├── common/           # Shared utilities
-│   │   └── main.ts           # Application entry
-│   ├── Dockerfile
-│   └── package.json
-├── 📂 site/                   # Next.js Frontend
-│   ├── src/
-│   │   ├── app/              # App Router pages
+│   │   ├── app/              # App router & API routes
 │   │   ├── components/       # Reusable components
 │   │   ├── lib/              # Utilities & configs
-│   │   └── styles/           # Global styles
+│   │   └── types/            # TypeScript definitions
+│   ├── prisma/               # Database schema & migrations
 │   ├── Dockerfile
 │   └── package.json
+├── 📂 scripts/               # Deployment & Utility Scripts
+│   ├── deploy-production.sh  # Production deployment
+│   ├── generate-security.sh  # Security configuration
+│   └── migrate-permissions-to-db.sh # Database migrations
 ├── 📂 sh/                     # Deployment Scripts
 │   ├── 3pushauto.sh          # Smart deployment tool
 │   └── 2envauto.sh           # Environment setup
@@ -147,19 +148,22 @@ TazaCore/
 ### 🛠️ **Available Scripts**
 ```bash
 # Development
-bun run dev              # Start all services
-bun run dev:api          # Backend only
-bun run dev:site         # Frontend only
+bun run dev              # Start Next.js fullstack app
+bun run dev:full         # Generate Prisma client and start dev
 
 # Building
-bun run build            # Build all
-bun run build:api        # Build backend
-bun run build:site       # Build frontend
+bun run build            # Build Next.js application
+bun run build:check     # Type-check, lint, and build
 
 # Testing
 bun run test             # Run all tests
-bun run test:api         # Backend tests
-bun run test:site        # Frontend tests
+bun run test:e2e         # End-to-end tests
+
+# Database
+bun run db:generate      # Generate Prisma client
+bun run db:migrate       # Run database migrations
+bun run db:studio        # Open Prisma Studio
+bun run db:seed:master   # Seed database with initial data
 
 # Deployment
 ./sh/3pushauto.sh        # Smart deployment
