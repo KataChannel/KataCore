@@ -440,7 +440,7 @@ model CallExtensionUser {
   callExtensionId String
   isActive        Boolean       @default(true)
   createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  updatedAt       DateTime      @default(now())
   callExtension   CallExtension @relation(fields: [callExtensionId], references: [id])
   user            User          @relation(fields: [userId], references: [id])
 
@@ -471,7 +471,7 @@ model AffiliateReferral {
   commission  Float     @default(0)
   status      String    @default("PENDING")
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @default(now())
   affiliate   Affiliate @relation(fields: [affiliateId], references: [id])
   user        User      @relation(fields: [userId], references: [id])
 
@@ -536,4 +536,50 @@ enum AttendanceStatus {
   LATE
   HALF_DAY
   WORK_FROM_HOME
+}
+
+// Facebook Social Media Models
+model FacebookPage {
+  id              String   @id @default(uuid())
+  facebookPageId  String   @unique
+  name            String
+  category        String?
+  fanCount        Int      @default(0)
+  followersCount  Int      @default(0)
+  link            String?
+  about           String?
+  phone           String?
+  website         String?
+  accessToken     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  interactions    FacebookInteraction[]
+
+  @@map("facebook_pages")
+}
+
+model FacebookInteraction {
+  id                     String       @id @default(uuid())
+  facebookInteractionId  String       @unique
+  facebookPageId         String
+  type                   InteractionType
+  userName               String
+  userId                 String
+  message                String?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  
+  // Relations
+  facebookPage           FacebookPage @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
+
+  @@map("facebook_interactions")
+}
+
+enum InteractionType {
+  COMMENT
+  MESSAGE
+  LIKE
+  SHARE
 }

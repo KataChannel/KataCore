@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const {
             domain = 'tazaspa102019',
-            limit = 10000,
+            limit = 10000000,
             from,
             to,
             caller_id_number,
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
             }
 
             // Safety check to prevent infinite loops
-            if (currentOffset > 100000) {
+            if (currentOffset > 10000000) {
                 console.warn('Reached maximum offset limit, stopping fetch');
                 break;
             }
