@@ -14,7 +14,7 @@
 /coverage
 
 # next.js
-/.next/
+# /.next/  # Commented out to allow Next.js build folder in git
 /out/
 
 # production
