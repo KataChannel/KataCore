@@ -12,7 +12,7 @@ COPY site/package.json site/bun.lockb* ./
 
 # Install dependencies without devDependencies
 RUN --mount=type=cache,target=/root/.bun \
-    bun install --frozen-lockfile --production=false
+    bun install
 
 # Copy prisma schema after dependencies
 COPY site/prisma ./prisma
