@@ -1,88 +1,68 @@
 FROM oven/bun:1-alpine AS base
 
-# Install security updates and necessary packages
-RUN apk update && apk upgrade && \
-    apk add --no-cache libc6-compat curl wget dumb-init && \
-    rm -rf /var/cache/apk/*
+# Install only essential packages
+RUN apk add --no-cache libc6-compat dumb-init
 
-# Dependencies stage  
+# Dependencies stage with better caching
 FROM base AS deps
 WORKDIR /app
 
-# Copy package files
+# Copy only package files first for better layer caching
 COPY site/package.json site/bun.lockb* ./
-COPY site/prisma ./prisma
 
-# Install dependencies with better caching
+# Install dependencies without devDependencies
 RUN --mount=type=cache,target=/root/.bun \
-    bun install --frozen-lockfile && \
-    bunx prisma generate
+    bun install --frozen-lockfile --production=false
+
+# Copy prisma schema after dependencies
+COPY site/prisma ./prisma
+RUN bunx prisma generate
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
 
-# Copy dependencies from deps stage
+# Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/prisma ./prisma
 COPY site/ .
-
-# Set build environment
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
-ENV DOCKER_BUILD=true
 
 # Build arguments
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 ARG NEXT_PUBLIC_MINIO_ENDPOINT=http://localhost:9000
+
+# Build with optimizations
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV DOCKER_BUILD=true
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NEXT_PUBLIC_MINIO_ENDPOINT=${NEXT_PUBLIC_MINIO_ENDPOINT}
 
-# Optimize Next.js build with standalone output
-RUN echo "module.exports = { output: 'standalone' }" > next.config.standalone.js && \
-    bun run build
+# Build with standalone output and optimize
+RUN bun run build && \
+    rm -rf .next/cache
 
-# Production stage - Minimal image
-FROM base AS production
+# Production stage - Ultra minimal
+FROM oven/bun:1-distroless AS production
 WORKDIR /app
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs --ingroup nodejs
+# Copy only necessary files
+COPY --from=base /usr/bin/dumb-init /usr/bin/dumb-init
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
-# Set environment variables
+# Copy Prisma runtime files only
+COPY --from=deps /app/node_modules/.prisma/client ./node_modules/.prisma/client
+COPY --from=builder /app/prisma ./prisma
+
+# Environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME="0.0.0.0"
 
-# Copy standalone build
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-
-# Copy Prisma files
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-
-# PWA files
-COPY --from=builder --chown=nextjs:nodejs /app/public/sw.js* ./public/
-COPY --from=builder --chown=nextjs:nodejs /app/public/workbox-*.js* ./public/
-COPY --from=builder --chown=nextjs:nodejs /app/public/manifest.json* ./public/
-
-# Create necessary directories
-RUN mkdir -p logs && \
-    chown -R nextjs:nodejs .
-
-USER nextjs
-
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=5 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
-
-# Use dumb-init for proper signal handling
-ENTRYPOINT ["dumb-init", "--"]
+# Use dumb-init for signal handling
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["bun", "run", "server.js"]

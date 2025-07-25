@@ -18,7 +18,7 @@
 /out/
 
 # production
-/build
+# /build  # Commented out to allow build folder in git
 
 # misc
 .DS_Store

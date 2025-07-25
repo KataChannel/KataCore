@@ -3,7 +3,7 @@
 // ============================================================================
 // Root layout following TazaCore unified standards
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
@@ -15,12 +15,12 @@ import '@/styles/unified-theme.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
+// Fix: Loại bỏ viewport khỏi metadata
 export const metadata: Metadata = {
   title: 'TazaCore - Unified Business Management',
   description: 'Complete business management solution with unified modules',
   manifest: '/manifest.json',
-  themeColor: '#4F46E5',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover',
+  // Loại bỏ viewport từ đây
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -39,6 +39,16 @@ export const metadata: Metadata = {
     ],
   },
 };
+
+// Fix: Gộp viewport config vào một export duy nhất
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#000000',
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

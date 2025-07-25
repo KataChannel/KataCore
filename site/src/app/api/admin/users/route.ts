@@ -97,7 +97,7 @@ async function checkUserManagementPermissions(user: any, action: string) {
 
   // Check specific permission
   const hasPermission = userRole.permissions.some(
-    (p) => (p.action === action || p.action === 'manage') && (p.resource === 'users' || p.resource === '*')
+    (p:any) => (p.action === action || p.action === 'manage') && (p.resource === 'users' || p.resource === '*')
   );
 
   if (!hasPermission && userRole.level < 8) {
@@ -143,10 +143,10 @@ export async function GET(request: NextRequest) {
 
     // Get users with pagination
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         where,
         include: {
-          role: {
+          roles: {
             select: {
               id: true,
               name: true,
