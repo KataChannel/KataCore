@@ -26,6 +26,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 # Copy prisma generated files from deps stage
 COPY --from=deps /app/prisma ./prisma
+# Copy node_modules/.bin for prisma CLI
+COPY --from=deps /app/node_modules/.bin ./node_modules/.bin
 COPY site/ .
 
 # Build arguments
