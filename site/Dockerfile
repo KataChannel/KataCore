@@ -50,12 +50,17 @@ RUN --mount=type=cache,target=/app/.next/cache \
     rm -rf node_modules/@next/swc-* && \
     rm -rf node_modules/.cache
 
-# Production stage - Ultra minimal
-FROM oven/bun:1-distroless AS production
+# Production stage - Use alpine for system libraries
+FROM oven/bun:1-alpine AS production
 WORKDIR /app
 
+# Install runtime dependencies for Prisma
+RUN apk add --no-cache \
+    libgcc \
+    libstdc++ \
+    dumb-init
+
 # Copy only necessary files
-COPY --from=base /usr/bin/dumb-init /usr/bin/dumb-init
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
