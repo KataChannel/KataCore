@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TazaCore - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        .offline-container {
+            max-width: 500px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .offline-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .retry-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .features {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .features h3 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features li {
+            padding: 0.5rem 0;
+            opacity: 0.8;
+        }
+
+        .features li:before {
+            content: "✓ ";
+            color: #4ade80;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .offline-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📱</div>
+        <h1>TazaCore</h1>
+        <p>
+            Bạn hiện đang offline. Ứng dụng vẫn có thể hoạt động với các tính năng đã lưu trong bộ nhớ đệm.
+        </p>
+        
+        <button class="retry-btn" onclick="location.reload()">
+            Thử lại kết nối
+        </button>
+
+        <div class="features">
+            <h3>Tính năng offline có sẵn:</h3>
+            <ul>
+                <li>Xem thông tin đã lưu</li>
+                <li>Sử dụng tính năng cơ bản</li>
+                <li>Dữ liệu sẽ đồng bộ khi có kết nối</li>
+                <li>Giao diện hoạt động mượt mà</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Check for network connectivity
+        function checkConnection() {
+            if (navigator.onLine) {
+                location.reload();
+            }
+        }
+
+        // Listen for online events
+        window.addEventListener('online', checkConnection);
+        
+        // Retry every 30 seconds
+        setInterval(checkConnection, 30000);
+
+        // Visual feedback for retry button
+        document.querySelector('.retry-btn').addEventListener('click', function() {
+            this.textContent = 'Đang thử lại...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                this.textContent = 'Thử lại kết nối';
+                this.disabled = false;
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

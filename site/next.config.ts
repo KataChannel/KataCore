@@ -5,6 +5,12 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development', // Disable PWA in development to reduce warnings
+  sw: 'sw.js',
+  publicExcludes: ['!noprecache/**/*', '!robots.txt'],
+  buildExcludes: ['app-build-manifest.json'],
+  fallbacks: {
+    document: '/offline.html', // if you want to fallback to a custom page rather than /_offline
+  },
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -147,17 +153,159 @@ const withPWA = require('next-pwa')({
 });
 
 const nextConfig: NextConfig = {
+  // ✨ Performance optimizations cho startup speed
+  experimental: {
+    // Tối ưu import packages
+    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lucide-react'],
+    // Tối ưu bundling
+    optimizeServerReact: true,
+    // Tăng tốc độ render
+    optimisticClientCache: true,
+  },
+
+  // 🚀 No turbo config for now - using stable features only
+
   // Only use standalone output for Docker builds
   ...(process.env.NODE_ENV === 'production' && process.env.DOCKER_BUILD === 'true'
     ? { output: 'standalone' }
     : {}),
+
+  // ⚡ Optimize webpack for faster builds and startup
+  webpack: (config, { dev, isServer }) => {
+    // Production optimizations
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+              enforce: true,
+              priority: 10,
+            },
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              enforce: true,
+              priority: 5,
+            },
+            // Tách riêng các packages nặng
+            mui: {
+              test: /[\\/]node_modules[\\/]@mui[\\/]/,
+              name: 'mui',
+              chunks: 'all',
+              priority: 20,
+            },
+            prisma: {
+              test: /[\\/]node_modules[\\/]@prisma[\\/]/,
+              name: 'prisma',
+              chunks: 'all',
+              priority: 15,
+            },
+          },
+        },
+        // Giảm thời gian resolve modules
+        moduleIds: 'deterministic',
+        chunkIds: 'deterministic',
+      };
+    }
+
+    // 🔧 Faster compilation và module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, './src'),
+    };
+
+    // Tối ưu module resolution
+    config.resolve.modules = ['node_modules'];
+    config.resolve.symlinks = false;
+
+    // Cache configuration cho faster builds
+    config.cache = {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename]
+      }
+    };
+
+    return config;
+  },
+
+  // ⚡ Enable compression for faster transfer
+  compress: true,
+
+  // 🖼️ Optimize images với aggressive caching
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 3600, // 1 hour cache
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Tối ưu image loading
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+
+  // 🚀 Disable source maps in production for faster builds
+  productionBrowserSourceMaps: false,
+
+  // 📦 Optimize bundling với tree shaking
+  modularizeImports: {
+    '@mui/material': {
+      transform: '@mui/material/{{member}}',
+    },
+    '@mui/icons-material': {
+      transform: '@mui/icons-material/{{member}}',
+    },
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+  },
+
+  // ⚡ Startup optimizations
+  poweredByHeader: false, // Remove X-Powered-By header
+  generateEtags: false, // Disable ETag generation for faster responses
+  
+  // 🔧 Build optimizations
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ['@prisma/client'],
+  
+  // 📦 External packages để giảm bundle size
+  serverExternalPackages: ['@prisma/client', 'bcrypt', 'bcryptjs'],
+
+  // 🚀 Headers optimization cho caching
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          }
+        ]
+      }
+    ]
+  },
 };
 
 export default withPWA(nextConfig);

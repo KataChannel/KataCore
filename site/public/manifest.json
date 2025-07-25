@@ -1,12 +1,12 @@
 {
-  "name": "TazaCore HR Management System",
-  "short_name": "TazaCore HR",
-  "description": "Professional HR management system for employee, department, and attendance management",
+  "name": "TazaCore - Unified Business Management",
+  "short_name": "TazaCore",
+  "description": "Complete business management solution with unified modules",
   "theme_color": "#4F46E5",
   "background_color": "#ffffff",
   "display": "standalone",
   "scope": "/",
-  "start_url": "/hr",
+  "start_url": "/",
   "orientation": "portrait-primary",
   "icons": [
     {
