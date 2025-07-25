@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if system is already initialized
-    const existingSuperAdmin = await prisma.user.findFirst({
+    const existingSuperAdmin = await prisma.users.findFirst({
       where: {
-        role: {
+        roles: {
           name: {
             in: ['Super Administrator', 'super_administrator'],
           },
@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
 // GET - Check system initialization status
 export async function GET(request: NextRequest) {
   try {
-    const superAdminExists = await prisma.user.findFirst({
+    const superAdminExists = await prisma.users.findFirst({
       where: {
-        role: {
+        roles: {
           name: {
             in: ['Super Administrator', 'super_administrator'],
           },
@@ -180,13 +180,14 @@ async function createSystemRoles(tx: any) {
   ];
 
   // Create Super Administrator Role
-  const superAdminRole = await tx.role.upsert({
+  const superAdminRole = await tx.roles.upsert({
     where: { name: 'Super Administrator' },
     update: {
       description: 'Super Administrator with full system access and control',
       permissions: JSON.stringify(allPermissions),
       isSystemRole: true,
       level: 10,
+      updatedAt: new Date().toISOString(),
     },
     create: {
       id: 'super_administrator',
@@ -195,6 +196,8 @@ async function createSystemRoles(tx: any) {
       permissions: JSON.stringify(allPermissions),
       isSystemRole: true,
       level: 10,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
   });
 
@@ -436,10 +439,10 @@ async function createSystemConfiguration(tx: any) {
 async function getInitializationStats() {
   try {
     const [userCount, roleCount, departmentCount, positionCount] = await Promise.all([
-      prisma.user.count(),
-      prisma.role.count(),
-      prisma.department.count(),
-      prisma.position.count(),
+      prisma.users.count(),
+      prisma.roles.count(),
+      prisma.departments.count(),
+      prisma.positions.count(),
     ]);
 
     return {

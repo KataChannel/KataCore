@@ -425,10 +425,10 @@ export class UnifiedAuthService {
    */
   async getUserById(userId: string): Promise<User | null> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: userId },
         include: {
-          role: true,
+          roles: true,
         },
       });
       // console.log('Fetched user by ID:', user);
@@ -463,10 +463,10 @@ export class UnifiedAuthService {
         return null;
       }
 
-      const user = await prisma.user.findFirst({
+      const user = await prisma.users.findFirst({
         where,
         include: {
-          role: true,
+          roles: true,
         },
       });
 
@@ -475,7 +475,7 @@ export class UnifiedAuthService {
         return null;
       }
 
-      console.log('User found:', { id: user.id, email: user.email, role: user.role?.name });
+      console.log('User found:', { id: user.id, email: user.email, role: user.roles?.name });
       return this.transformPrismaUser(user);
     } catch (error) {
       console.error('Error finding user:', error);
@@ -493,7 +493,7 @@ export class UnifiedAuthService {
       console.log('Creating user:', data);
 
       // Get default role (employee)
-      const defaultRole = await prisma.role.findFirst({
+      const defaultRole = await prisma.roles.findFirst({
         where: { name: 'Employee' },
       });
 
@@ -517,10 +517,10 @@ export class UnifiedAuthService {
       if (data.facebookId) userData.facebookId = data.facebookId;
       if (data.appleId) userData.appleId = data.appleId;
 
-      const newUser = await prisma.user.create({
+      const newUser = await prisma.users.create({
         data: userData,
         include: {
-          role: true,
+          roles: true,
         },
       });
 
@@ -536,7 +536,7 @@ export class UnifiedAuthService {
    */
   private async updateLastLogin(userId: string): Promise<void> {
     try {
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: userId },
         data: { lastSeen: new Date() },
       });
@@ -552,7 +552,7 @@ export class UnifiedAuthService {
   private async invalidateUserTokens(userId: string): Promise<void> {
     try {
       // Delete all sessions for the user
-      await prisma.session.deleteMany({
+      await prisma.sessions.deleteMany({
         where: { userId },
       });
       console.log(`Invalidated tokens for user: ${userId}`);
@@ -576,22 +576,22 @@ export class UnifiedAuthService {
     let permissions: string[] = [];
     let role;
 
-    if (prismaUser.role) {
+    if (prismaUser.roles) {
       try {
         // Parse permissions from JSON string
-        permissions = typeof prismaUser.role.permissions === 'string' 
-          ? JSON.parse(prismaUser.role.permissions) 
-          : (prismaUser.role.permissions || []);
+        permissions = typeof prismaUser.roles.permissions === 'string' 
+          ? JSON.parse(prismaUser.roles.permissions) 
+          : (prismaUser.roles.permissions || []);
       } catch (error) {
         console.error('Error parsing role permissions:', error);
         permissions = [];
       }
 
       role = {
-        id: prismaUser.role.id,
-        name: prismaUser.role.name,
+        id: prismaUser.roles.id,
+        name: prismaUser.roles.name,
         permissions,
-        level: prismaUser.role.level || 1,
+        level: prismaUser.roles.level || 1,
       };
     }
 
@@ -759,12 +759,12 @@ export class UnifiedAuthService {
         whereConditions.push({ email });
       }
 
-      const user = await prisma.user.findFirst({
+      const user = await prisma.users.findFirst({
         where: {
           OR: whereConditions,
         },
         include: {
-          role: true,
+          roles: true,
         },
       });
 
@@ -785,7 +785,7 @@ export class UnifiedAuthService {
   ): Promise<void> {
     try {
       const socialIdField = `${provider}Id`;
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: userId },
         data: { [socialIdField]: socialId },
       });
