@@ -123,10 +123,13 @@ echo -e "${GREEN}═════════════════════
 echo
 
 # Execute the script with error handling
-if ! bash "$selected_file"; then
+bash "$selected_file"
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
     echo
     echo -e "${RED}═══════════════════════════════════════════${NC}"
-    error "Script thực thi thất bại với mã lỗi: $?"
+    error "Script thực thi thất bại với mã lỗi: $exit_code"
 fi
 
 echo

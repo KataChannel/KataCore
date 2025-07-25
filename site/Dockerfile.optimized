@@ -1,0 +1,90 @@
+# Multi-stage optimized Dockerfile for TazaCore Site
+FROM oven/bun:1-alpine AS base
+
+# Install system dependencies
+RUN apk update && apk upgrade && \
+    apk add --no-cache libc6-compat curl wget dumb-init && \
+    rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+# Dependencies stage
+FROM base AS deps
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile
+
+# Build stage
+FROM deps AS builder
+COPY . .
+
+# Set stable build environment
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV DOCKER_BUILD=true
+
+# Provide fallback values to prevent build issues
+ENV DATABASE_URL="file:./dev.db"
+ENV NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Generate Prisma client safely
+RUN if [ -f "prisma/schema.prisma" ]; then \
+        echo "Generating Prisma client..." && \
+        bunx prisma generate && \
+        echo "Prisma client generated successfully"; \
+    else \
+        echo "No Prisma schema found, skipping generation"; \
+    fi
+
+# Build with comprehensive error handling
+RUN echo "Starting Next.js build..." && \
+    bun run build 2>&1 | tee /tmp/build.log && \
+    echo "Build completed, validating output..." && \
+    if [ ! -d ".next" ]; then \
+        echo "ERROR: .next directory not found after build"; \
+        cat /tmp/build.log; \
+        exit 1; \
+    fi && \
+    if [ ! -f ".next/BUILD_ID" ]; then \
+        echo "ERROR: BUILD_ID not found, build may be incomplete"; \
+        cat /tmp/build.log; \
+        exit 1; \
+    fi && \
+    echo "Build validation successful"
+
+# Production stage
+FROM base AS production
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs --ingroup nodejs
+
+# Set production environment
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME="0.0.0.0"
+
+# Copy application files
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+# Copy dependencies
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Copy Prisma if exists
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
+# Switch to non-root user
+USER nextjs
+
+EXPOSE 3000
+
+# Enhanced health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || curl -f http://localhost:3000/ || exit 1
+
+# Start application with proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["bun", "run", "start"]

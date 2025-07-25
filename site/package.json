@@ -19,6 +19,7 @@
     "build:production": "NODE_ENV=production next build",
     "build:check": "npm run type-check && npm run lint && npm run build",
     "start": "next start",
+    "start:safe": "rm -rf .next && next build && next start",
     "start:fast": "NODE_OPTIONS='--max-old-space-size=2048' NEXT_TELEMETRY_DISABLED=1 next start",
     "start:optimized": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=2048 --max-semi-space-size=1024' next start",
     "start:turbo": "next start --turbo",
