@@ -122,16 +122,16 @@ class AffiliateService {
   async registerAffiliate(data: AffiliateRegistrationData) {
     try {
       // Validate user exists and isn't already an affiliate
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: data.userId },
-        include: { affiliate: true }
+        include: { affiliates: true }
       });
 
       if (!user) {
         throw new Error('User not found');
       }
 
-      if (user.affiliate) {
+      if (user.affiliates) {
         throw new Error('User is already an affiliate');
       }
 
@@ -142,7 +142,7 @@ class AffiliateService {
       const settings = await this.getAffiliateSettings();
 
       // Create affiliate record
-      const affiliate = await prisma.affiliate.create({
+      const affiliate = await prisma.affiliates.create({
         data: {
           userId: data.userId,
           affiliateCode,
@@ -155,7 +155,7 @@ class AffiliateService {
           approvedAt: settings.autoApproval ? new Date() : null,
         },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               email: true,
@@ -173,7 +173,7 @@ class AffiliateService {
       await this.sendWelcomeEmail(affiliate);
 
       return affiliate;
-    } catch (error) {
+    } catch (error:any) {
       throw new Error(`Failed to register affiliate: ${error.message}`);
     }
   }

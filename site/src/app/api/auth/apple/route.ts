@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/lib/auth/unified-auth.service';
+import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
+
+interface AppleTokenPayload extends jwt.JwtPayload {
+  email?: string;
+  name?: {
+    firstName?: string;
+    lastName?: string;
+  };
+  sub: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +28,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid Apple ID token' }, { status: 401 });
     }
 
-    const { email, name, sub: appleId } = appleUser;
+    const { email, name, sub: appleId } = appleUser as AppleTokenPayload;
+    
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required for Apple authentication' }, { status: 400 });
+    }
+    
     const displayName = name ? `${name.firstName} ${name.lastName}`.trim() : email;
 
     if (action === 'register') {
@@ -96,9 +112,6 @@ export async function POST(request: NextRequest) {
 // Function to verify Apple ID token
 async function verifyAppleToken(token: string) {
   try {
-    const jwt = require('jsonwebtoken');
-    const jwksClient = require('jwks-rsa');
-
     // Create JWKS client for Apple's public keys
     const client = jwksClient({
       jwksUri: 'https://appleid.apple.com/auth/keys',

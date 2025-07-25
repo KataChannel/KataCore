@@ -20,7 +20,8 @@ import {
   Cog6ToothIcon,
   InformationCircleIcon,
   PlusIcon,
-  ShareIcon
+  ShareIcon,
+  CursorArrowRaysIcon
 } from '@heroicons/react/24/outline';
 import { 
   AffiliateTier,
@@ -304,27 +305,58 @@ export function AffiliateDashboard() {
             <LinksTab affiliateId={affiliateData.id} />
           )}
           
-            {activeTab === 'commissions' && (
-            <CommissionsTab affiliateId={''} commissions={[]} summary={undefined} onExportData={function (filters: any): void {
-              throw new Error('Function not implemented.');
-            } } />
-            )}
-            
-            {activeTab === 'withdrawals' && (
-            <WithdrawalsTab withdrawals={[]} summary={undefined} onRequestWithdrawal={function (request: Partial<WithdrawalRequest>): void {
-              throw new Error('Function not implemented.');
-            } } onCancelWithdrawal={function (withdrawalId: string): void {
-              throw new Error('Function not implemented.');
-            } } />
-            )}
-            
-            {activeTab === 'reports' && (
-            <ReportsTab reportData={[]} topPerformers={[]} onExportReport={function (filters: any): void {
-              throw new Error('Function not implemented.');
-            } } onGenerateAdvancedReport={function (config: any): void {
-              throw new Error('Function not implemented.');
-            } } />
-            )}
+          {activeTab === 'commissions' && (
+            <CommissionsTab 
+              affiliateId={affiliateData.id} 
+              commissions={[]} 
+              summary={{
+                totalEarned: affiliateData.totalEarnings,
+                pendingCommissions: performanceMetrics.pendingCommissions,
+                approvedCommissions: 0,
+                paidCommissions: affiliateData.totalWithdrawn,
+                thisMonthEarnings: 0,
+                lastMonthEarnings: 0,
+                averageCommissionRate: affiliateData.commissionRate,
+                totalOrders: affiliateData.referralCount
+              }} 
+              onExportData={(filters: any) => {
+                console.log('Export data:', filters);
+              }} 
+            />
+          )}
+          
+          {activeTab === 'withdrawals' && (
+            <WithdrawalsTab 
+              withdrawals={[]} 
+              summary={{
+                availableBalance: affiliateData.availableBalance,
+                pendingWithdrawals: 0,
+                totalWithdrawn: affiliateData.totalWithdrawn,
+                minimumWithdrawal: 100,
+                withdrawalFeeRate: 2.5,
+                processingTime: '3-5 business days'
+              }} 
+              onRequestWithdrawal={(request: Partial<WithdrawalRequest>) => {
+                console.log('Request withdrawal:', request);
+              }} 
+              onCancelWithdrawal={(withdrawalId: string) => {
+                console.log('Cancel withdrawal:', withdrawalId);
+              }} 
+            />
+          )}
+          
+          {activeTab === 'reports' && (
+            <ReportsTab 
+              reportData={[]} 
+              topPerformers={[]} 
+              onExportReport={(filters: any) => {
+                console.log('Export report:', filters);
+              }} 
+              onGenerateAdvancedReport={(config: any) => {
+                console.log('Generate advanced report:', config);
+              }} 
+            />
+          )}
         </div>
       </div>
     </div>

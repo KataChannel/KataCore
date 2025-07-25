@@ -51,7 +51,16 @@ interface CommissionsTabProps {
   summary: CommissionSummary;
   onExportData: (filters: any) => void;
 }
-export function CommissionsTab({ affiliateId, commissions = [], summary = {}, onExportData }: any) {
+export function CommissionsTab({ affiliateId, commissions = [], summary = {
+  totalEarned: 0,
+  pendingCommissions: 0,
+  approvedCommissions: 0,
+  paidCommissions: 0,
+  thisMonthEarnings: 0,
+  lastMonthEarnings: 0,
+  averageCommissionRate: 0,
+  totalOrders: 0
+}, onExportData }: CommissionsTabProps) {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedTimeRange, setSelectedTimeRange] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');

@@ -10,7 +10,7 @@ const FACEBOOK_API_VERSION = process.env.NEXT_PUBLIC_FACEBOOK_API_VERSION || 'v1
 // Helper function to get page access token
 async function getPageAccessToken(pageId: string): Promise<string | null> {
   try {
-    const page = await prisma.facebookPage.findUnique({
+    const page = await prisma.facebook_pages.findUnique({
       where: { facebookPageId: pageId },
     });
     return page?.accessToken || FACEBOOK_ACCESS_TOKEN || null;
@@ -40,6 +40,8 @@ export async function GET(request: NextRequest) {
     // Check if credentials are configured
     const hasCredentials = FACEBOOK_PAGE_ID && FACEBOOK_ACCESS_TOKEN;
 
+    // console.log(FACEBOOK_ACCESS_TOKEN, FACEBOOK_PAGE_ID, FACEBOOK_API_VERSION);
+    
     if (!hasCredentials && type !== 'interactions') {
       console.log('Facebook credentials not configured');
       return NextResponse.json({
@@ -75,7 +77,7 @@ export async function GET(request: NextRequest) {
         // Store pages in database
         if (data.data) {
           for (const page of data.data) {
-            await prisma.facebookPage.upsert({
+            await prisma.facebook_pages.upsert({
               where: { facebookPageId: page.id },
               update: {
                 name: page.name,
@@ -100,6 +102,7 @@ export async function GET(request: NextRequest) {
                 phone: page.phone,
                 website: page.website,
                 accessToken: page.access_token,
+                updatedAt: new Date(),
               },
             });
           }
@@ -167,7 +170,7 @@ export async function GET(request: NextRequest) {
             if (comment.from) {
               const phone = extractPhoneFromText(comment.message || '');
               
-              await prisma.facebookInteraction.upsert({
+              await prisma.facebook_interactions.upsert({
                 where: { facebookInteractionId: comment.id },
                 update: {
                   message: comment.message,
@@ -181,6 +184,7 @@ export async function GET(request: NextRequest) {
                   userId: comment.from.id,
                   message: comment.message,
                   createdAt: new Date(comment.created_time),
+                  updatedAt: new Date(),
                 },
               });
             }
@@ -237,7 +241,7 @@ export async function GET(request: NextRequest) {
                 if (message.from && message.from.id !== pageId) {
                   const phone = extractPhoneFromText(message.message || '');
                   
-                  await prisma.facebookInteraction.upsert({
+                  await prisma.facebook_interactions.upsert({
                     where: { facebookInteractionId: message.id },
                     update: {
                       message: message.message,
@@ -251,6 +255,7 @@ export async function GET(request: NextRequest) {
                       userId: message.from.id,
                       message: message.message,
                       createdAt: new Date(message.created_time),
+                      updatedAt: new Date(),
                     },
                   });
                 }
@@ -288,10 +293,10 @@ export async function GET(request: NextRequest) {
         }
 
         const [interactions, total] = await Promise.all([
-          prisma.facebookInteraction.findMany({
+          prisma.facebook_interactions.findMany({
             where,
             include: {
-              facebookPage: {
+              facebook_pages: {
                 select: {
                   name: true,
                   phone: true,
@@ -303,7 +308,7 @@ export async function GET(request: NextRequest) {
             skip,
             take: limit,
           }),
-          prisma.facebookInteraction.count({ where }),
+          prisma.facebook_interactions.count({ where }),
         ]);
 
         // Group interactions by user to get first and last interaction dates
@@ -313,7 +318,7 @@ export async function GET(request: NextRequest) {
           const key = `${interaction.userId}_${interaction.facebookPageId}`;
           if (!userInteractions[key]) {
             userInteractions[key] = {
-              fanpage: interaction.facebookPage?.name || 'Unknown Page',
+              fanpage: interaction.facebook_pages?.name || 'Unknown Page',
               fullName: interaction.userName,
               phoneNumber: extractPhoneFromText(interaction.message || '') || 'N/A',
               facebookLink: `https://www.facebook.com/profile.php?id=${interaction.userId}`,

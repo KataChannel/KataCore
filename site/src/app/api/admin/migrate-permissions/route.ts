@@ -4,7 +4,7 @@
 // API endpoint to migrate modules-permissions.ts data to database
 
 import { NextRequest, NextResponse } from 'next/server';
-import runModulesPermissionsMigration from '../../../../../prisma/seed/modules-permissions-migration';
+import runModulesPermissionsMigration from '../../../../../prisma/seed/archive/modules-permissions-migration';
 
 export async function GET() {
   try {

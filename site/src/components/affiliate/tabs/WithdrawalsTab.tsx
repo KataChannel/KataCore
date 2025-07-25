@@ -49,7 +49,7 @@ interface WithdrawalsTabProps {
   onCancelWithdrawal: (withdrawalId: string) => void;
 }
 
-export function WithdrawalsTab({ withdrawals, summary, onRequestWithdrawal, onCancelWithdrawal }: any) {
+export function WithdrawalsTab({ withdrawals, summary, onRequestWithdrawal, onCancelWithdrawal }: WithdrawalsTabProps) {
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [withdrawalForm, setWithdrawalForm] = useState({
@@ -403,7 +403,7 @@ export function WithdrawalsTab({ withdrawals, summary, onRequestWithdrawal, onCa
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredWithdrawals.map((withdrawal: { id: React.Key | null | undefined; amount: number; fees: number; netAmount: number; method: string; status: string; requestDate: string; accountInfo: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; notes: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; rejectionReason: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => (
+              {filteredWithdrawals.map((withdrawal: WithdrawalRequest) => (
                 <tr key={withdrawal.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>

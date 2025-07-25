@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
         // First, check for existing records in batch
         const cdrIds = allCDRRecords.map((record:any) => record.uuid).filter(Boolean);
-        const existingRecords = await prisma.callHistoryOverview.findMany({
+        const existingRecords = await prisma.call_history_overview.findMany({
             where: {
             cdrId: {
                 in: cdrIds
@@ -151,53 +151,55 @@ export async function POST(request: NextRequest) {
         // Prepare records for batch insert
         for (const record of allCDRRecords) {
             try {
-            // Skip if record already exists
-            if (existingCdrIds.has(record.uuid)) {
-                duplicateRecords.push(record.uuid);
-                continue;
-            }
-
-            // Use epoch values directly from the record
-            const startEpoch = record.start_epoch || null;
-            const endEpoch = record.end_epoch || null;
-            const answerEpoch = record.answer_epoch !== "0" ? record.answer_epoch : null;
-
-            // Use call_status from record or determine from sip_hangup_disposition
-            let callStatus = record.call_status?.toLowerCase() || 'unknown';
-            if (!record.call_status) {
-                if (record.sip_hangup_disposition === 'NO_ANSWER' || record.sip_hangup_disposition === 'USER_NOT_REGISTERED') {
-                callStatus = 'missed';
-                } else if (record.sip_hangup_disposition === 'USER_BUSY') {
-                callStatus = 'busy';
-                } else if (record.sip_hangup_disposition === 'CALL_REJECTED') {
-                callStatus = 'rejected';
-                } else {
-                callStatus = 'completed';
+                // Skip if record already exists
+                if (existingCdrIds.has(record.uuid)) {
+                    duplicateRecords.push(record.uuid);
+                    continue;
                 }
-            }
 
-            recordsToInsert.push({
-                cdrId: record.uuid,
-                direction: record.direction || 'unknown',
-                callerIdNumber: record.caller_id_number || null,
-                outboundCallerIdNumber: record.outbound_caller_id_number || null,
-                destinationNumber: record.destination_number || null,
-                startEpoch: startEpoch,
-                endEpoch: endEpoch,
-                answerEpoch: answerEpoch,
-                duration: record.duration || null,
-                billsec: record.billsec || null,
-                sipHangupDisposition: record.sip_hangup_disposition || null,
-                recordPath: record.record_path || null,
-                callStatus: callStatus,
-            });
-            
+                // Use epoch values directly from the record
+                const startEpoch = record.start_epoch || null;
+                const endEpoch = record.end_epoch || null;
+                const answerEpoch = record.answer_epoch !== "0" ? record.answer_epoch : null;
+
+                // Use call_status from record or determine from sip_hangup_disposition
+                let callStatus = record.call_status?.toLowerCase() || 'unknown';
+                if (!record.call_status) {
+                    if (record.sip_hangup_disposition === 'NO_ANSWER' || record.sip_hangup_disposition === 'USER_NOT_REGISTERED') {
+                        callStatus = 'missed';
+                    } else if (record.sip_hangup_disposition === 'USER_BUSY') {
+                        callStatus = 'busy';
+                    } else if (record.sip_hangup_disposition === 'CALL_REJECTED') {
+                        callStatus = 'rejected';
+                    } else {
+                        callStatus = 'completed';
+                    }
+                }
+
+                recordsToInsert.push({
+                    cdrId: record.uuid,
+                    direction: record.direction || 'unknown',
+                    callerIdNumber: record.caller_id_number || null,
+                    outboundCallerIdNumber: record.outbound_caller_id_number || null,
+                    destinationNumber: record.destination_number || null,
+                    startEpoch: startEpoch,
+                    endEpoch: endEpoch,
+                    answerEpoch: answerEpoch,
+                    duration: record.duration || null,
+                    billsec: record.billsec || null,
+                    sipHangupDisposition: record.sip_hangup_disposition || null,
+                    recordPath: record.record_path || null,
+                    callStatus: callStatus,
+                    createdAt: new Date(), // Add this line if createdAt is required
+                    updatedAt: new Date(),
+                });
+                
             } catch (recordError) {
-            console.error(`Error processing record ${record.id}:`, recordError);
-            errors.push({
-                recordId: record.id,
-                error: recordError instanceof Error ? recordError.message : 'Unknown error'
-            });
+                console.error(`Error processing record ${record.id}:`, recordError);
+                errors.push({
+                    recordId: record.id,
+                    error: recordError instanceof Error ? recordError.message : 'Unknown error'
+                });
             }
         }
 
@@ -208,7 +210,7 @@ export async function POST(request: NextRequest) {
         for (let i = 0; i < recordsToInsert.length; i += BATCH_SIZE) {
             const chunk = recordsToInsert.slice(i, i + BATCH_SIZE);
             try {
-            const insertResult = await prisma.callHistoryOverview.createMany({
+            const insertResult = await prisma.call_history_overview.createMany({
                 data: chunk,
                 skipDuplicates: true
             });
@@ -267,7 +269,7 @@ export async function GET(request: NextRequest) {
 
         if (action === 'status') {
             // Return sync status and recent records
-            const recentRecords = await prisma.callHistoryOverview.findMany({
+            const recentRecords = await prisma.call_history_overview.findMany({
                 take: 10,
                 orderBy: { createdAt: 'desc' },
                 select: {
@@ -283,13 +285,13 @@ export async function GET(request: NextRequest) {
                 }
             });
 
-            const totalRecords = await prisma.callHistoryOverview.count();
+            const totalRecords = await prisma.call_history_overview.count();
             
             const todayStart = new Date();
             todayStart.setHours(0, 0, 0, 0);
             const todayStartEpoch = Math.floor(todayStart.getTime() / 1000).toString();
             
-            const todayRecords = await prisma.callHistoryOverview.count({
+            const todayRecords = await prisma.call_history_overview.count({
                 where: {
                     startEpoch: {
                         gte: todayStartEpoch
@@ -344,7 +346,7 @@ async function updateCallSummaryStats(from: string, to: string) {
         const toEpoch = Math.floor(toDate.getTime() / 1000).toString();
 
         // Calculate summary statistics for the date range
-        const callStats = await prisma.callHistoryOverview.groupBy({
+        const callStats = await prisma.call_history_overview.groupBy({
             by: ['callStatus'],
             where: {
                 startEpoch: {

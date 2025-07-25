@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
             }
 
             // Fetch data from database
-            const callHistoryRecords = await prisma.callHistoryOverview.findMany({
+            const callHistoryRecords = await prisma.call_history_overview.findMany({
                 where: whereClause,
                 orderBy: { createdAt: 'desc' },
                 skip: (page - 1) * limit,
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
             });
 
             // Get total count for pagination
-            const totalCount = await prisma.callHistoryOverview.count({
+            const totalCount = await prisma.call_history_overview.count({
                 where: whereClause
             });
 
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
             }
 
             // Calculate summary statistics from all matching records (not just paginated)
-            const allMatchingRecords = await prisma.callHistoryOverview.findMany({
+            const allMatchingRecords = await prisma.call_history_overview.findMany({
                 where: whereClause
             });
             const allCalls = allMatchingRecords.map((record: any) => transformDBRecordToCall(record));

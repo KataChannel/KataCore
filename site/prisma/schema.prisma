@@ -9,7 +9,7 @@ datasource db {
 }
 
 model affiliate_referrals {
-  id          String     @id
+  id          String     @id @default(uuid())
   userId      String
   affiliateId String
   amount      Float      @default(0)
@@ -22,7 +22,7 @@ model affiliate_referrals {
 }
 
 model affiliates {
-  id                  String                @id
+  id                  String                @id @default(uuid())
   userId              String
   affiliateCode       String                @unique
   commissionRate      Float                 @default(0.1)
@@ -35,7 +35,7 @@ model affiliates {
 }
 
 model attendances {
-  id         String           @id
+  id         String           @id @default(uuid())
   date       DateTime
   timeIn     DateTime?
   timeOut    DateTime?
@@ -56,7 +56,7 @@ model attendances {
 }
 
 model audit_logs {
-  id        String   @id
+  id        String   @id @default(uuid())
   action    String
   entity    String
   entityId  String?
@@ -68,7 +68,7 @@ model audit_logs {
 }
 
 model call_extension_users {
-  id              String          @id
+  id              String          @id @default(uuid())
   userId          String
   callExtensionId String
   isActive        Boolean         @default(true)
@@ -81,7 +81,7 @@ model call_extension_users {
 }
 
 model call_extensions {
-  id                   String                 @id
+  id                   String                 @id @default(uuid())
   extCode              String                 @unique
   password             String?
   name                 String
@@ -93,7 +93,7 @@ model call_extensions {
 }
 
 model call_history_overview {
-  id                     String   @id
+  id                     String   @id @default(uuid())
   direction              String
   callerIdNumber         String?
   outboundCallerIdNumber String?
@@ -112,7 +112,7 @@ model call_history_overview {
 }
 
 model conversation_members {
-  id             String    @id
+  id             String    @id @default(uuid())
   joinedAt       DateTime  @default(now())
   leftAt         DateTime?
   role           String    @default("MEMBER")
@@ -126,7 +126,7 @@ model conversation_members {
 }
 
 model conversations {
-  id                                     String           @id
+  id                                     String           @id @default(uuid())
   title                                  String?
   description                            String?
   avatar                                 String?
@@ -143,7 +143,7 @@ model conversations {
 }
 
 model departments {
-  id                String        @id
+  id                String        @id @default(uuid())
   name              String        @unique
   description       String?
   code              String        @unique
@@ -164,7 +164,7 @@ model departments {
 }
 
 model employees {
-  id                  String                @id
+  id                  String                @id @default(uuid())
   employeeId          String                @unique
   firstName           String
   lastName            String
@@ -197,7 +197,7 @@ model employees {
 }
 
 model facebook_interactions {
-  id                    String          @id
+  id                    String          @id @default(uuid())
   facebookInteractionId String          @unique
   facebookPageId        String
   type                  InteractionType
@@ -210,7 +210,7 @@ model facebook_interactions {
 }
 
 model facebook_pages {
-  id                    String                  @id
+  id                    String                  @id @default(uuid())
   facebookPageId        String                  @unique
   name                  String
   category              String?
@@ -227,7 +227,7 @@ model facebook_pages {
 }
 
 model friend_requests {
-  id                                      String   @id
+  id                                      String   @id @default(uuid())
   status                                  String   @default("PENDING")
   createdAt                               DateTime @default(now())
   updatedAt                               DateTime
@@ -240,7 +240,7 @@ model friend_requests {
 }
 
 model leave_requests {
-  id         String      @id
+  id         String      @id @default(uuid())
   startDate  DateTime
   endDate    DateTime
   days       Int
@@ -261,7 +261,7 @@ model leave_requests {
 }
 
 model message_reactions {
-  id        String   @id
+  id        String   @id @default(uuid())
   emoji     String
   createdAt DateTime @default(now())
   messageId String
@@ -273,7 +273,7 @@ model message_reactions {
 }
 
 model messages {
-  id                String              @id
+  id                String              @id @default(uuid())
   content           String
   type              MessageType         @default(TEXT)
   fileUrl           String?
@@ -295,7 +295,7 @@ model messages {
 }
 
 model notifications {
-  id        String   @id
+  id        String   @id @default(uuid())
   title     String
   content   String
   type      String
@@ -307,7 +307,7 @@ model notifications {
 }
 
 model payrolls {
-  id          String    @id
+  id          String    @id @default(uuid())
   period      String
   basicSalary Float
   overtime    Float?    @default(0)
@@ -327,7 +327,7 @@ model payrolls {
 }
 
 model performance_reviews {
-  id                                          String    @id
+  id                                          String    @id @default(uuid())
   period                                      String
   goals                                       String?
   achievements                                String?
@@ -346,7 +346,7 @@ model performance_reviews {
 }
 
 model positions {
-  id           String      @id
+  id           String      @id @default(uuid())
   title        String
   description  String?
   level        Int         @default(1)
@@ -362,7 +362,7 @@ model positions {
 }
 
 model reports {
-  id                                  String    @id
+  id                                  String    @id @default(uuid())
   type                                String
   description                         String?
   status                              String    @default("PENDING")
@@ -377,7 +377,7 @@ model reports {
 }
 
 model roles {
-  id           String   @id
+  id           String   @id @default(uuid())
   name         String   @unique
   description  String?
   permissions  String
@@ -390,7 +390,7 @@ model roles {
 }
 
 model sessions {
-  id        String   @id
+  id        String   @id @default(uuid())
   token     String   @unique
   device    String?
   ipAddress String?
@@ -403,7 +403,7 @@ model sessions {
 }
 
 model user_settings {
-  id                  String  @id
+  id                  String  @id @default(uuid())
   theme               String  @default("LIGHT")
   language            String  @default("vi")
   notificationEnabled Boolean @default(true)
@@ -418,8 +418,8 @@ model user_settings {
 }
 
 model users {
-  id                                                        String                 @id
-  email                                                     String?                @unique
+  id                                                        String                 @id @default(uuid())
+  email                                                     String?                @unique  
   username                                                  String?                @unique
   phone                                                     String?                @unique
   displayName                                               String

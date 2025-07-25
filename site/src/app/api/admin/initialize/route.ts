@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { SYSTEM_ROLES, ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permissions';
 import bcrypt from 'bcryptjs';
+import { nanoid } from 'nanoid';
 
 // POST - Initialize system with Super Admin and default roles
 export async function POST(request: NextRequest) {
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
     const { setupKey, adminData } = body;
 
     // Basic security check - you should set this in environment variables
-    const SETUP_KEY = process.env.SYSTEM_SETUP_KEY || 'TazaSetup2024';
+    const SETUP_KEY = process.env.SYSTEM_SETUP_KEY || 'TazaGroup@2024!';
 
     if (setupKey !== SETUP_KEY) {
       return NextResponse.json({ error: 'Invalid setup key' }, { status: 401 });
@@ -84,10 +85,10 @@ export async function GET(request: NextRequest) {
 
 async function initializeSystem(adminData?: any) {
   const defaultAdminData = {
-    email: 'admin@taza.com',
-    password: 'TazaAdmin@2024!',
+    email: 'it@tazagroup.vn',
+    password: 'TazaGroup@2024!',
     displayName: 'Super Administrator',
-    username: 'superadmin',
+    username: 'chikiet88',
     firstName: 'Super',
     lastName: 'Administrator',
   };
@@ -187,22 +188,22 @@ async function createSystemRoles(tx: any) {
       permissions: JSON.stringify(allPermissions),
       isSystemRole: true,
       level: 10,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     },
     create: {
-      id: 'super_administrator',
+      id: nanoid(),
       name: 'Super Administrator',
       description: 'Super Administrator with full system access and control',
       permissions: JSON.stringify(allPermissions),
       isSystemRole: true,
       level: 10,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
   // Create Administrator Role
-  const administratorRole = await tx.role.upsert({
+  const administratorRole = await tx.roles.upsert({
     where: { name: 'Administrator' },
     update: {
       description: 'System Administrator with elevated privileges',
@@ -221,9 +222,10 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 8,
+      updatedAt: new Date(),
     },
     create: {
-      id: 'administrator',
+      id: nanoid(),
       name: 'Administrator',
       description: 'System Administrator with elevated privileges',
       permissions: JSON.stringify([
@@ -241,11 +243,13 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 8,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
   // Create Manager Role
-  const managerRole = await tx.role.upsert({
+  const managerRole = await tx.roles.upsert({
     where: { name: 'Manager' },
     update: {
       description: 'Department Manager with supervisory permissions',
@@ -260,9 +264,10 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 6,
+      updatedAt: new Date(),
     },
     create: {
-      id: 'manager',
+      id: nanoid(),
       name: 'Manager',
       description: 'Department Manager with supervisory permissions',
       permissions: JSON.stringify([
@@ -276,11 +281,13 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 6,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
   // Create Employee Role
-  const employeeRole = await tx.role.upsert({
+  const employeeRole = await tx.roles.upsert({
     where: { name: 'Employee' },
     update: {
       description: 'Standard Employee with basic access',
@@ -293,9 +300,10 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 4,
+      updatedAt: new Date(),
     },
     create: {
-      id: 'employee',
+      id: nanoid(),
       name: 'Employee',
       description: 'Standard Employee with basic access',
       permissions: JSON.stringify([
@@ -307,11 +315,13 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 4,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
   // Create Viewer Role
-  const viewerRole = await tx.role.upsert({
+  const viewerRole = await tx.roles.upsert({
     where: { name: 'Viewer' },
     update: {
       description: 'Read-only access to system',
@@ -323,9 +333,10 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 2,
+      updatedAt: new Date(),
     },
     create: {
-      id: 'viewer',
+      id: nanoid(),
       name: 'Viewer',
       description: 'Read-only access to system',
       permissions: JSON.stringify([
@@ -336,6 +347,8 @@ async function createSystemRoles(tx: any) {
       ]),
       isSystemRole: true,
       level: 2,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
@@ -355,7 +368,7 @@ async function createSuperAdministrator(tx: any, data: any, superAdminRole: any)
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
   // Create Super Admin user
-  const superAdmin = await tx.user.upsert({
+  const superAdmin = await tx.users.upsert({
     where: { email: data.email },
     update: {
       password: hashedPassword,
@@ -364,8 +377,10 @@ async function createSuperAdministrator(tx: any, data: any, superAdminRole: any)
       roleId: superAdminRole.id,
       isActive: true,
       isVerified: true,
+      updatedAt: new Date(),
     },
     create: {
+      id: nanoid(),
       email: data.email,
       password: hashedPassword,
       displayName: data.displayName,
@@ -373,6 +388,8 @@ async function createSuperAdministrator(tx: any, data: any, superAdminRole: any)
       roleId: superAdminRole.id,
       isActive: true,
       isVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
@@ -383,30 +400,39 @@ async function createOrganizationStructure(tx: any) {
   console.log('Creating organization structure...');
 
   // Create default department
-  const adminDepartment = await tx.department.upsert({
+  const adminDepartment = await tx.departments.upsert({
     where: { name: 'Administration' },
     update: {
       description: 'System Administration Department',
+      updatedAt: new Date(),
     },
     create: {
+      id: nanoid(),
       name: 'Administration',
       description: 'System Administration Department',
+      code: 'ADMIN',
       isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
   // Create default position
-  const superAdminPosition = await tx.position.upsert({
-    where: { title: 'Super Administrator' },
+  const superAdminPosition = await tx.positions.upsert({
+    where: { id: 'super_admin_position' },
     update: {
       description: 'Super Administrator Position',
       departmentId: adminDepartment.id,
+      updatedAt: new Date(),
     },
     create: {
+      id: 'super_admin_position',
       title: 'Super Administrator',
       description: 'Super Administrator Position',
       departmentId: adminDepartment.id,
       isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 

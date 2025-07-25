@@ -4,23 +4,11 @@
 // Migrates data from modules-permissions.ts to database
 // Senior level implementation with comprehensive role management
 
-import { prisma } from '../../src/lib/prisma';
-import bcrypt from 'bcrypt';
-import { 
-  SYSTEM_ROLES, 
-  ALL_MODULE_PERMISSIONS,
-  SALES_PERMISSIONS,
-  CRM_PERMISSIONS,
-  INVENTORY_PERMISSIONS,
-  FINANCE_PERMISSIONS,
-  HRM_PERMISSIONS,
-  PROJECT_PERMISSIONS,
-  MANUFACTURING_PERMISSIONS,
-  MARKETING_PERMISSIONS,
-  SUPPORT_PERMISSIONS,
-  ANALYTICS_PERMISSIONS,
-  ECOMMERCE_PERMISSIONS
-} from '../../src/lib/auth/modules-permissions';
+import { SYSTEM_ROLES, SALES_PERMISSIONS, CRM_PERMISSIONS, INVENTORY_PERMISSIONS, FINANCE_PERMISSIONS, HRM_PERMISSIONS, PROJECT_PERMISSIONS, MANUFACTURING_PERMISSIONS, MARKETING_PERMISSIONS, SUPPORT_PERMISSIONS, ANALYTICS_PERMISSIONS, ECOMMERCE_PERMISSIONS, ALL_MODULE_PERMISSIONS } from "@/lib/auth/modules-permissions";
+import bcrypt from "bcryptjs";
+import prisma from "@/lib/prisma";
+
+
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -64,42 +52,42 @@ async function clearExistingData() {
   
   try {
     // Clear in correct order to avoid foreign key constraints
-    await prisma.session.deleteMany();
-    await prisma.notification.deleteMany();
-    await prisma.auditLog.deleteMany();
+    await prisma.sessions.deleteMany();
+    await prisma.notifications.deleteMany();
+    await prisma.audit_logs.deleteMany();
     
     // Clear conversation-related data first
-    await prisma.messageReaction.deleteMany();
-    await prisma.message.deleteMany();
-    await prisma.conversationMember.deleteMany();
-    await prisma.conversation.deleteMany();
+    await prisma.message_reactions.deleteMany();
+    await prisma.messages.deleteMany();
+    await prisma.conversation_members.deleteMany();
+    await prisma.conversations.deleteMany();
     
     // Clear call center data
-    await prisma.callHistoryOverview.deleteMany();
-    await prisma.callExtensionUser.deleteMany();
-    await prisma.callExtension.deleteMany();
+    await prisma.call_history_overview.deleteMany();
+    await prisma.call_extension_users.deleteMany();
+    await prisma.call_extensions.deleteMany();
     
     // Clear friend requests
-    await prisma.friendRequest.deleteMany();
+    await prisma.friend_requests.deleteMany();
     
     // Clear user settings
-    await prisma.userSettings.deleteMany();
+    await prisma.user_settings.deleteMany();
     
     // Clear reports
-    await prisma.report.deleteMany();
+    await prisma.reports.deleteMany();
     
     // Clear HR data
-    await prisma.performanceReview.deleteMany();
-    await prisma.payroll.deleteMany();
-    await prisma.leaveRequest.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.employee.deleteMany();
-    await prisma.position.deleteMany();
-    await prisma.department.deleteMany();
+    await prisma.performance_reviews.deleteMany();
+    await prisma.payrolls.deleteMany();
+    await prisma.leave_requests.deleteMany();
+    await prisma.attendances.deleteMany();
+    await prisma.employees.deleteMany();
+    await prisma.positions.deleteMany();
+    await prisma.departments.deleteMany();
     
     // Clear users and roles last
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await prisma.users.deleteMany();
+    await prisma.roles.deleteMany();
     
     success('Existing data cleared successfully');
   } catch (err) {
@@ -129,7 +117,7 @@ async function migrateSystemRoles() {
       // Convert modules array to JSON string
       const modulesJson = JSON.stringify(systemRole.modules);
       
-      const role = await prisma.role.create({
+      const role = await prisma.roles.create({
         data: {
           id: systemRole.id,
           name: systemRole.name,
@@ -138,6 +126,7 @@ async function migrateSystemRoles() {
           level: systemRole.level,
           modules: modulesJson,
           isSystemRole: true,
+          updatedAt: new Date(),
         },
       });
       
@@ -158,7 +147,7 @@ async function migrateSystemRoles() {
         
         const modulesJson = JSON.stringify(systemRole.modules);
         
-        const updatedRole = await prisma.role.update({
+        const updatedRole = await prisma.roles.update({
           where: { name: systemRole.name },
           data: {
             description: systemRole.description,
@@ -239,13 +228,24 @@ async function createSystemUsers(roles: any[]) {
   
   for (const userData of systemUsers) {
     try {
-      const user = await prisma.user.create({
-        data: userData,
-        include: { role: true }
+      const user = await prisma.users.create({
+        data: {
+          email: userData.email,
+          username: userData.username,
+          displayName: userData.displayName,
+          password: userData.password,
+          roles: {
+            connect: { id: userData.roleId }
+          },
+          isVerified: userData.isVerified,
+          isActive: userData.isActive,
+          updatedAt: new Date(),
+        },
+        include: { roles: true }
       });
       
       createdUsers.push(user);
-      success(`✅ Created user: ${user.email} (${user.role.name})`);
+      success(`✅ Created user: ${user.email} (${user.roles.name})`);
       
     } catch (err) {
       error(`Failed to create user ${userData.email}: ${err}`);
@@ -299,8 +299,14 @@ async function createDemoDepartments(users: any[]) {
   
   for (const deptData of departments) {
     try {
-      const department = await prisma.department.create({
-        data: deptData,
+      const department = await prisma.departments.create({
+        data: {
+          name: deptData.name,
+          code: deptData.code,
+          description: deptData.description,
+          budget: deptData.budget,
+          ...(deptData.managerId && { managerId: deptData.managerId })
+        },
       });
       
       createdDepartments.push(department);
@@ -323,19 +329,19 @@ async function validateMigration() {
   
   try {
     // Check roles
-    const roleCount = await prisma.role.count();
-    const systemRoleCount = await prisma.role.count({
+    const roleCount = await prisma.roles.count();
+    const systemRoleCount = await prisma.roles.count({
       where: { isSystemRole: true }
     });
     
     // Check users
-    const userCount = await prisma.user.count();
-    const activeUserCount = await prisma.user.count({
+    const userCount = await prisma.users.count();
+    const activeUserCount = await prisma.users.count({
       where: { isActive: true }
     });
     
     // Check departments
-    const deptCount = await prisma.department.count();
+    const deptCount = await prisma.departments.count();
     
     // Validation results
     const validationResults = {
@@ -362,7 +368,7 @@ async function validateMigration() {
     console.table(validationResults);
     
     // Check specific permissions
-    const superAdminRole = await prisma.role.findUnique({
+    const superAdminRole = await prisma.roles.findUnique({
       where: { name: 'Super Administrator' }
     });
     
@@ -394,17 +400,16 @@ async function generateMigrationReport() {
   log('📋 Generating migration report...');
   
   try {
-    const roles = await prisma.role.findMany({
+    const roles = await prisma.roles.findMany({
       include: { _count: { select: { users: true } } }
     });
     
-    const users = await prisma.user.findMany({
-      include: { role: true }
+    const users = await prisma.users.findMany({
+      include: { roles: true }
     });
-    
-    const departments = await prisma.department.findMany({
-      include: { 
-        manager: true,
+
+    const departments = await prisma.departments.findMany({
+      include: {
         _count: { select: { employees: true } }
       }
     });
@@ -414,7 +419,7 @@ async function generateMigrationReport() {
     console.log('='.repeat(80));
     
     console.log('\n🏷️ ROLES CREATED:');
-    roles.forEach(role => {
+    roles.forEach((role:any) => {
       const modules = role.modules ? JSON.parse(role.modules) : [];
       console.log(`  • ${role.name} (Level ${role.level})`);
       console.log(`    - Users: ${role._count.users}`);
@@ -423,7 +428,7 @@ async function generateMigrationReport() {
     });
     
     console.log('\n👤 USERS CREATED:');
-    users.forEach(user => {
+    users.forEach((user:any) => {
       console.log(`  • ${user.displayName} (${user.email})`);
       console.log(`    - Role: ${user.role.name}`);
       console.log(`    - Active: ${user.isActive ? 'Yes' : 'No'}`);
@@ -431,13 +436,12 @@ async function generateMigrationReport() {
     });
     
     console.log('\n🏢 DEPARTMENTS CREATED:');
-    departments.forEach(dept => {
+    departments.forEach((dept:any) => {
       console.log(`  • ${dept.name}`);
-      console.log(`    - Manager: ${dept.manager?.displayName || 'None'}`);
+      console.log(`    - Manager ID: ${dept.managerId || 'None'}`);
       console.log(`    - Budget: $${dept.budget?.toLocaleString() || 'N/A'}`);
       console.log(`    - Employees: ${dept._count.employees}`);
     });
-    
     console.log('\n🔐 PERMISSION MODULES AVAILABLE:');
     const moduleList = [
       { name: 'Sales', permissions: Object.keys(SALES_PERMISSIONS).length },

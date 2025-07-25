@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
     try {
         // Get all call history data
-        const callHistory = await prisma.callHistoryOverview.findMany();
+        const callHistory = await prisma.call_history_overview.findMany();
         
         // Calculate summary statistics
         const totalCalls = callHistory.length;
