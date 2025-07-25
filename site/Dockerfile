@@ -10,13 +10,16 @@ WORKDIR /app
 # Copy only package files first for better layer caching
 COPY site/package.json site/bun.lockb* ./
 
-# Install dependencies without devDependencies
+# Install dependencies including devDependencies for build stage
 RUN --mount=type=cache,target=/root/.bun \
-    bun install
+    bun install --frozen-lockfile
 
 # Copy prisma schema after dependencies
 COPY site/prisma ./prisma
-RUN bunx prisma generate
+
+# Generate Prisma client with explicit binary path
+RUN bun add prisma @prisma/client && \
+    bunx prisma generate
 
 # Build stage
 FROM base AS builder
@@ -26,8 +29,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 # Copy prisma generated files from deps stage
 COPY --from=deps /app/prisma ./prisma
-# Copy node_modules/.bin for prisma CLI
-COPY --from=deps /app/node_modules/.bin ./node_modules/.bin
 COPY site/ .
 
 # Build arguments
@@ -41,9 +42,12 @@ ENV DOCKER_BUILD=true
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NEXT_PUBLIC_MINIO_ENDPOINT=${NEXT_PUBLIC_MINIO_ENDPOINT}
 
+# Skip Prisma generation in build since it's already done in deps stage
 # Build with standalone output and optimize
-RUN bun run build && \
-    rm -rf .next/cache
+RUN NODE_OPTIONS="--max-old-space-size=4096" bun run build:optimized && \
+    rm -rf .next/cache && \
+    rm -rf node_modules/@next/swc-* && \
+    rm -rf node_modules/.cache
 
 # Production stage - Ultra minimal
 FROM oven/bun:1-distroless AS production

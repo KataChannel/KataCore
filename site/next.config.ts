@@ -33,6 +33,8 @@ const withPWA = require('next-pwa')({
 });
 
 const nextConfig: NextConfig = {
+  // Use standalone output for Docker builds
+  ...(process.env.DOCKER_BUILD === 'true' ? { output: 'standalone' } : {}),
   eslint: {
     ignoreDuringBuilds: true,
   },

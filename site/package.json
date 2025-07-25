@@ -84,7 +84,7 @@
     "deploy:netlify": "netlify deploy --prod",
     "// ========== WORKFLOW ==========": "",
     "precommit": "npm run lint:fix && npm run format && npm run type-check",
-    "prebuild": "npm run db:generate",
+    "prebuild": "echo 'Skipping prebuild in Docker - Prisma already generated'",
     "analyze": "ANALYZE=true next build",
     "ci": "npm run lint && npm run type-check && npm run test:ci && npm run build",
     "dev:full": "npm run db:generate && npm run dev",
