@@ -84,7 +84,7 @@
     "deploy:netlify": "netlify deploy --prod",
     "// ========== WORKFLOW ==========": "",
     "precommit": "npm run lint:fix && npm run format && npm run type-check",
-    "prebuild": "bun run db:generate",
+    "prebuild": "if [ \"$DOCKER_BUILD\" != \"true\" ]; then bun run db:generate; fi",
     "analyze": "ANALYZE=true next build",
     "ci": "npm run lint && npm run type-check && npm run test:ci && npm run build",
     "dev:full": "npm run db:generate && npm run dev",
