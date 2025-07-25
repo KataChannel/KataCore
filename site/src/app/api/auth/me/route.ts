@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
 
     const decoded = await authService.verifyToken(token);
     const user = await authService.getUserById(decoded.userId);
-
+    // console.log('Fetched user:', user);
+    
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }

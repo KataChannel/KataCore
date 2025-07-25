@@ -37,7 +37,7 @@ export default function LoginPage() {
             if (response.ok) {
               const userData = await response.json();
               console.log('User data:', userData);
-              if (userData && userData.permissions?.level >= 3) {
+              if (userData && userData.role?.level >= 3) {
                 // Set a flag to prevent admin layout from redirecting back
                 sessionStorage.setItem('user-authenticated', 'true');
                 // Add a small delay to ensure auth context is ready
@@ -47,7 +47,7 @@ export default function LoginPage() {
               } else {
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('authToken');
-                console.log('User permissions level insufficient for admin access:', userData?.permissions?.level);
+                console.log('User role level insufficient for admin access:', userData?.role?.level);
               }
             } else {
               // Token invalid, clear it

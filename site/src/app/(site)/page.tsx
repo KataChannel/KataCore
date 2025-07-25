@@ -427,17 +427,17 @@ function HomePageContent() {
                 <span className="text-xs font-medium">Logout</span>
               </button>
               ) : (
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className={`h-11 flex items-center gap-2 px-3 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                <Link
+                href="/login"
+                className={`h-11 flex items-center gap-2 px-4 rounded-lg backdrop-blur-md transition-all duration-300 hover:scale-105 ${
                 isDarkMode
-                  ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                  : 'bg-black/10 text-black hover:bg-black/20 border border-black/20'
+                  ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white hover:from-blue-500/30 hover:to-purple-500/30 border border-white/20 shadow-lg shadow-blue-500/10'
+                  : 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-black hover:from-blue-500/30 hover:to-purple-500/30 border border-black/20 shadow-lg shadow-blue-500/10'
                 }`}
-              >
+                >
                 <KeyIcon className="w-4 h-4" />
-                <span className="text-xs font-medium">{loading ? 'Loading...' : 'Login'}</span>
-              </button>
+                <span className="text-sm font-semibold">{loading ? 'Loading...' : 'Đăng nhập'}</span>
+                </Link>
               )}
             </div>
            

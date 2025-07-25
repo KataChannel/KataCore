@@ -49,6 +49,8 @@ interface RegisterData extends LoginCredentials {
   googleId?: string;
   facebookId?: string;
   appleId?: string;
+  avatar?: string;
+  isVerified?: boolean; // Optional, defaults to true for social logins
 }
 
 interface AuthTokens {
@@ -429,7 +431,8 @@ export class UnifiedAuthService {
           role: true,
         },
       });
-
+      // console.log('Fetched user by ID:', user);
+      
       if (!user) return null;
 
       return this.transformPrismaUser(user);
@@ -584,37 +587,11 @@ export class UnifiedAuthService {
         permissions = [];
       }
 
-      // Determine role level based on role name
-      let roleLevel = 1; // Default level
-      switch (prismaUser.role.name) {
-        case 'Super Administrator':
-          roleLevel = 10;
-          break;
-        case 'System Administrator':
-          roleLevel = 9;
-          break;
-        case 'Sales Manager':
-        case 'HR Manager':
-        case 'Finance Manager':
-          roleLevel = 7;
-          break;
-        case 'Inventory Manager':
-        case 'Department Manager':
-          roleLevel = 6;
-          break;
-        case 'Team Lead':
-          roleLevel = 4;
-          break;
-        case 'Employee':
-          roleLevel = 2;
-          break;
-      }
-
       role = {
         id: prismaUser.role.id,
         name: prismaUser.role.name,
         permissions,
-        level: roleLevel,
+        level: prismaUser.role.level || 1,
       };
     }
 
@@ -731,12 +708,14 @@ export class UnifiedAuthService {
     if (!user) {
       // Create new user for social login
       const createData: Partial<RegisterData> = {
-        email,
         displayName: displayName || email || `${provider} User`,
         provider: provider as any,
-        avatar,
         isVerified: true, // Social accounts are pre-verified
       };
+
+      // Only add optional fields if they have values
+      if (email) createData.email = email;
+      if (avatar) createData.avatar = avatar;
 
       // Set the appropriate social ID
       (createData as any)[socialIdField] = socialId;

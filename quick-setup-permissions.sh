@@ -43,8 +43,8 @@ log "🔍 Checking project structure..."
 
 # Required files check
 REQUIRED_FILES=(
-    "shared/prisma/seed/modules-permissions-migration.ts"
-    "shared/lib/permission-sync.service.ts"
+    "site/prisma/seed/modules-permissions-migration.ts"
+    "site/lib/permission-sync.service.ts"
     "site/src/app/api/admin/migrate-permissions/route.ts"
     "site/src/app/api/admin/sync-permissions/route.ts"
     "site/src/app/admin/permissions/components/PermissionSyncManager.tsx"
@@ -94,10 +94,10 @@ if [ ! -d "node_modules" ]; then
     bun install
 fi
 
-# Install shared dependencies
-if [ ! -d "shared/node_modules" ]; then
-    log "Installing shared dependencies..."
-    cd shared
+# Install site dependencies
+if [ ! -d "site/node_modules" ]; then
+    log "Installing site dependencies..."
+    cd site
     bun install
     cd ..
 fi
@@ -115,10 +115,10 @@ success "Dependencies installed"
 # Step 3: Database setup
 log "🗄️ Setting up database..."
 
-cd shared
+cd site
 
 # Check if database is accessible
-if ! bun prisma db pull --force-reset 2>/dev/null; then
+if ! bun prisma db pull --force 2>/dev/null; then
     error "Database connection failed"
     echo ""
     warning "Please check your DATABASE_URL in .env.local"
@@ -138,7 +138,7 @@ success "Database setup complete"
 # Step 4: Run migration
 log "🚀 Running permissions migration..."
 
-cd shared
+cd site
 
 if bun run prisma/seed/modules-permissions-migration.ts; then
     success "✅ Migration completed successfully!"
@@ -153,7 +153,7 @@ cd ..
 # Step 5: Verify migration
 log "🔍 Verifying migration..."
 
-cd shared
+cd site
 
 # Get counts
 ROLES=$(bun -e "
