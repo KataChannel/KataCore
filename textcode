@@ -1,6 +1,6 @@
 docker ps -a -f "name=tazacore"
 
-docker compose -f 'docker-compose.yml' up -d --build
+docker compose -f 'docker-compose.yml' up -d --build 'site'
 
 docker builder prune -af
 docker image prune -a -f

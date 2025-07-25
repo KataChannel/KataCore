@@ -1,38 +1,45 @@
 #!/bin/bash
 
-# Make the script executable
-chmod +x ./sh/3pushauto.sh
+# Exit on error
+set -e
 
-# Check if required dependencies are installed
-check_dependencies() {
-    local missing_deps=()
-    
-    # Check for required commands
-    for cmd in ssh git docker rsync; do
-        if ! command -v "$cmd" >/dev/null 2>&1; then
-            missing_deps+=("$cmd")
-        fi
-    done
-    
-    if [ ${#missing_deps[@]} -ne 0 ]; then
-        echo "❌ Missing required dependencies: ${missing_deps[*]}"
-        echo "Please install the missing dependencies and try again."
-        
-        # Provide installation hints
-        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            echo "On Ubuntu/Debian: sudo apt-get install ${missing_deps[*]}"
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-            echo "On macOS: brew install ${missing_deps[*]}"
-        fi
-        exit 1
-    fi
+# Colors for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+echo -e "${GREEN}Starting deployment process...${NC}"
+
+# Git operations
+echo -e "${GREEN}Adding files to git...${NC}"
+git add .
+
+echo -e "${GREEN}Committing changes...${NC}"
+git commit -m "Update deployment scripts and configurations" || {
+    echo -e "${RED}No changes to commit${NC}"
 }
 
-# Check dependencies
-echo "🔍 Checking dependencies..."
-check_dependencies
-echo "✅ All dependencies are installed"
+echo -e "${GREEN}Pushing to remote...${NC}"
+git push
 
-# Run the main script
-echo "🚀 Starting deployment script..."
-./sh/3pushauto.sh
+# SSH and deploy
+echo -e "${GREEN}Connecting to server and deploying...${NC}"
+ssh root@116.118.49.243 << 'EOF'
+    set -e
+    cd /opt/taza_prod
+    
+    echo "Pulling latest changes..."
+    git pull
+    
+    echo "Cleaning Docker resources..."
+    docker builder prune -af
+    docker image prune -a -f
+    docker volume prune -a -f
+    
+    echo "Building and starting containers..."
+    docker compose -f 'docker-compose.yml' up -d --build 'site'
+    
+    echo "Deployment completed!"
+EOF
+
+echo -e "${GREEN}Deployment finished successfully!${NC}"
