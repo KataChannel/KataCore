@@ -17,8 +17,10 @@ RUN --mount=type=cache,target=/root/.bun \
 # Copy prisma schema after dependencies
 COPY site/prisma ./prisma
 
-# Generate Prisma client with explicit binary path
-RUN bun add prisma @prisma/client && \
+# Generate Prisma client with explicit binary path and cache
+RUN --mount=type=cache,target=/root/.bun \
+    --mount=type=cache,target=/app/node_modules/.cache \
+    bun add prisma @prisma/client && \
     bunx prisma generate
 
 # Build stage
@@ -42,10 +44,9 @@ ENV DOCKER_BUILD=true
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NEXT_PUBLIC_MINIO_ENDPOINT=${NEXT_PUBLIC_MINIO_ENDPOINT}
 
-# Skip Prisma generation in build since it's already done in deps stage
-# Build with standalone output and optimize
-RUN NODE_OPTIONS="--max-old-space-size=4096" bun run build:optimized && \
-    rm -rf .next/cache && \
+# Build with standalone output and optimize - Skip Prisma generation since it's already done
+RUN --mount=type=cache,target=/app/.next/cache \
+    NODE_OPTIONS="--max-old-space-size=4096" bun run build && \
     rm -rf node_modules/@next/swc-* && \
     rm -rf node_modules/.cache
 
