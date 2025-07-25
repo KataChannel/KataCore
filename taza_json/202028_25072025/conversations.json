@@ -1,0 +1,28 @@
+[
+  {
+    "id": "JYMQJLNlBNMDLPRzkhTFw",
+    "title": "TazaGroup - Thông báo công ty",
+    "description": "Kênh thông báo chính thức của TazaGroup",
+    "avatar": null,
+    "type": "CHANNEL",
+    "isPublic": true,
+    "isArchived": false,
+    "lastActivity": null,
+    "createdAt": "2025-07-25T04:14:03.093Z",
+    "updatedAt": "2025-07-25T04:14:03.093Z",
+    "createdById": "jkaV_i2PPfrz5hJbrkb9i"
+  },
+  {
+    "id": "Xv0Em983HAQvCvgDCLN11",
+    "title": "IT Team - Technical Discussion",
+    "description": "Thảo luận kỹ thuật của team IT",
+    "avatar": null,
+    "type": "GROUP",
+    "isPublic": false,
+    "isArchived": false,
+    "lastActivity": null,
+    "createdAt": "2025-07-25T04:14:03.106Z",
+    "updatedAt": "2025-07-25T04:14:03.106Z",
+    "createdById": "jkaV_i2PPfrz5hJbrkb9i"
+  }
+]

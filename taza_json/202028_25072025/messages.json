@@ -1,0 +1,47 @@
+[
+  {
+    "id": "lu0iWjTgWwXv_kGJ0j2ot",
+    "content": "Chào mừng tất cả đến với hệ thống TazaGroup! Đây là kênh thông báo chính thức của công ty.",
+    "type": "TEXT",
+    "fileUrl": null,
+    "fileName": null,
+    "fileSize": null,
+    "isEdited": false,
+    "isDeleted": false,
+    "createdAt": "2025-07-25T04:14:03.113Z",
+    "updatedAt": "2025-07-25T04:14:03.113Z",
+    "conversationId": "JYMQJLNlBNMDLPRzkhTFw",
+    "userId": "jkaV_i2PPfrz5hJbrkb9i",
+    "parentId": null
+  },
+  {
+    "id": "DySMQK__XMTabtTscEzdM",
+    "content": "Hệ thống đã được triển khai thành công với đầy đủ tính năng HR, Sales, Finance và IT management.",
+    "type": "TEXT",
+    "fileUrl": null,
+    "fileName": null,
+    "fileSize": null,
+    "isEdited": false,
+    "isDeleted": false,
+    "createdAt": "2025-07-25T04:14:03.126Z",
+    "updatedAt": "2025-07-25T04:14:03.126Z",
+    "conversationId": "JYMQJLNlBNMDLPRzkhTFw",
+    "userId": "URfJk90k8paJ0vlWAO_K5",
+    "parentId": null
+  },
+  {
+    "id": "wQi9fczjYvJVdsXXb9wH7",
+    "content": "Team IT đã hoàn thành việc setup hệ thống mới. Tất cả modules đang hoạt động ổn định.",
+    "type": "TEXT",
+    "fileUrl": null,
+    "fileName": null,
+    "fileSize": null,
+    "isEdited": false,
+    "isDeleted": false,
+    "createdAt": "2025-07-25T04:14:03.134Z",
+    "updatedAt": "2025-07-25T04:14:03.134Z",
+    "conversationId": "Xv0Em983HAQvCvgDCLN11",
+    "userId": "5jA-HufVxUZAKG0iyACn7",
+    "parentId": null
+  }
+]

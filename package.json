@@ -67,6 +67,8 @@
     "db:push": "cd site && bun prisma db push",
     "db:pull": "cd site && bun prisma db pull",
     "db:backup": "pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql",
+    "db:bkjson": "cd site && bun tsx prisma/backup.ts",
+    "db:rsjson": "cd site && bun tsx prisma/restore.ts",
     "db:restore": "psql $DATABASE_URL < backup.sql",
     "// ========== DOCKER ==========": "",
     "docker:up": "docker-compose up -d",
