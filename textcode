@@ -1,4 +1,6 @@
 docker ps -a -f "name=tazacore"
+docker ps -a -f "name=tazacore" -q | xargs docker stop
+docker ps -a -f "name=tazacore" -q | xargs docker rm -f
 
 docker compose -f 'docker-compose.yml' up -d --build 'site'
 
