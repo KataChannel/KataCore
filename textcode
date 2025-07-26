@@ -5,3 +5,5 @@ docker compose -f 'docker-compose.yml' up -d --build 'site'
 docker builder prune -af
 docker image prune -a -f
 docker volume prune -a -f
+nano /etc/nginx/nginx.conf
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=STATIC:10m max_size=10g inactive=60m use_temp_path=off;
