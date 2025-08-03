@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast'; // or your preferred toast library
 import LoginForm from '@/components/auth/LoginForm';
 
 interface LoginCredentials {
@@ -84,7 +85,8 @@ export default function LoginPage() {
       console.log('Login response:', data);
       
       if (!response.ok) {
-        throw new Error(data.error || 'Đăng nhập thất bại');
+        toast.error(data.error || 'Đăng nhập thất bại');
+        return; // Exit early instead of throwing
       }
 
       // Store tokens
@@ -97,6 +99,7 @@ export default function LoginPage() {
       sessionStorage.setItem('user-authenticated', 'true');
 
       console.log('Login successful:', data);
+      toast.success('Đăng nhập thành công!');
       
       // Check if user is Super Admin (level 10) or Admin (level >= 3)
       if (data.user?.role?.level === 10) {
@@ -109,7 +112,7 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      throw err; // Re-throw để LoginForm component xử lý hiển thị lỗi
+      toast.error('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
