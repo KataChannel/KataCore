@@ -10,12 +10,8 @@ import {
   MoonIcon,
   ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
-import { useUnifiedTheme } from '../../../hooks/useUnifiedTheme';
-import {
-  ThemeModeToggle,
-  ColorSchemeToggle,
-  LanguageToggle,
-} from '../../../components/ThemeManager';
+import { ThemeModeToggle, ColorSchemeToggle, LanguageToggle } from '@/components/ThemeManager';
+import { useUnifiedTheme } from '@/hooks';
 
 export default function ColorfulThemeDemo() {
   const { config, actualMode, setColorScheme } = useUnifiedTheme();
