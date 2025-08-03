@@ -1,18 +1,25 @@
 services:
-  api:
+  site:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./Dockerfile
       args:
         NODE_ENV: production
-    image: katacore/api:${API_VERSION}
-    container_name: katacore-api
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
+        DATABASE_URL: ${DATABASE_URL}
+        NEXTAUTH_SECRET: ${JWT_SECRET}
+    image: tazacore/site:${SITE_VERSION}
+    container_name: tazacore-site
     restart: ${RESTART_POLICY}
     ports:
-      - "${API_PORT}:3001"
+      - "${SITE_PORT:-3900}:3000"
     environment:
       NODE_ENV: production
-      API_PORT: 3001
+      PORT: 3000
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
+      # Database connection for API routes
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
       JWT_SECRET: ${JWT_SECRET}
@@ -25,53 +32,20 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_USE_SSL: ${MINIO_USE_SSL}
     networks:
-      - katacore-network
+      - tazacore-network
     depends_on:
-      - postgres
-      - redis
-      - minio
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    volumes:
-      - api_logs:/app/logs
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-        max-file: "3"
-
-  site:
-    build:
-      context: ./site
-      dockerfile: Dockerfile
-      args:
-        NODE_ENV: production
-    image: katacore/site:${SITE_VERSION}
-    container_name: katacore-site
-    restart: ${RESTART_POLICY}
-    ports:
-      - "${SITE_PORT}:3000"
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-      NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT}
-      INTERNAL_API_URL: ${INTERNAL_API_URL}
-    networks:
-      - katacore-network
-    depends_on:
-      - api
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
     logging:
       driver: json-file
       options:
@@ -80,17 +54,17 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    container_name: katacore-postgres
+    container_name: tazacore-postgres
     restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     networks:
-      - katacore-network
+      - tazacore-network
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -107,13 +81,13 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: katacore-redis
+    container_name: tazacore-redis
     restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
     networks:
-      - katacore-network
+      - tazacore-network
     volumes:
       - redis_data:/data
     healthcheck:
@@ -129,7 +103,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: katacore-minio
+    container_name: tazacore-minio
     restart: ${RESTART_POLICY}
     ports:
       - "${MINIO_PORT}:9000"
@@ -139,7 +113,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     networks:
-      - katacore-network
+      - tazacore-network
     volumes:
       - minio_data:/data
     healthcheck:
@@ -155,7 +129,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: katacore-pgadmin
+    container_name: tazacore-pgadmin
     restart: ${RESTART_POLICY}
     ports:
       - "${PGADMIN_PORT}:80"
@@ -165,7 +139,7 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     networks:
-      - katacore-network
+      - tazacore-network
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
@@ -182,18 +156,20 @@ services:
         max-file: "3"
 
 networks:
-  katacore-network:
+  tazacore-network:
     driver: bridge
-    name: katacore-network
+    name: tazacore-network
 
 volumes:
   postgres_data:
-    name: katacore-postgres-data
+    name: tazacore-postgres-data
+    external: true
   redis_data:
-    name: katacore-redis-data
+    name: tazacore-redis-data
+    external: true
   minio_data:
-    name: katacore-minio-data
+    name: tazacore-minio-data
+    external: true
   pgadmin_data:
-    name: katacore-pgadmin-data
-  api_logs:
-    name: katacore-api-logs
+    name: tazacore-pgadmin-data
+    external: true

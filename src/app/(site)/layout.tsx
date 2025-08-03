@@ -1,0 +1,10 @@
+export const metadata = {
+  title: 'Taza Offical',
+};
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div>
+      <main>{children}</main>
+    </div>
+  );
+}

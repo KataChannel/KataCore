@@ -1,77 +1,234 @@
 #!/bin/bash
 
-# Default values
-DEFAULT_SERVER_NAME="hrm.tazagroup.vn"
-DEFAULT_PROXY_IP="116.118.49.243"
-DEFAULT_PROXY_PORT="3000"
-DEFAULT_ENABLE_SSL="y"
-DEFAULT_CLOUD_IP="116.118.49.243"
-DEFAULT_CLOUD_USER="root"
+# Script cải tiến để deploy nginx config cho TazaGroup
+# Với xử lý lỗi và logging tốt hơn
 
-# Get user input with default values
-read -e -p "Enter server name [$DEFAULT_SERVER_NAME]: " -i "$DEFAULT_SERVER_NAME" SERVER_NAME
-read -e -p "Enter proxy IP address [$DEFAULT_PROXY_IP]: " -i "$DEFAULT_PROXY_IP" PROXY_IP
-read -e -p "Enter proxy port [$DEFAULT_PROXY_PORT]: " -i "$DEFAULT_PROXY_PORT" PROXY_PORT
-read -e -p "Enable SSL? (y/n) [$DEFAULT_ENABLE_SSL]: " -i "$DEFAULT_ENABLE_SSL" ENABLE_SSL
-read -e -p "Enter cloud server IP [$DEFAULT_CLOUD_IP]: " -i "$DEFAULT_CLOUD_IP" CLOUD_IP
-read -e -p "Enter cloud server username [$DEFAULT_CLOUD_USER]: " -i "$DEFAULT_CLOUD_USER" CLOUD_USER
+set -e  # Exit on any error
 
-# Use defaults if user pressed enter without input
-SERVER_NAME=${SERVER_NAME:-$DEFAULT_SERVER_NAME}
-PROXY_IP=${PROXY_IP:-$DEFAULT_PROXY_IP}
-PROXY_PORT=${PROXY_PORT:-$DEFAULT_PROXY_PORT}
-ENABLE_SSL=${ENABLE_SSL:-$DEFAULT_ENABLE_SSL}
-CLOUD_IP=${CLOUD_IP:-$DEFAULT_CLOUD_IP}
-CLOUD_USER=${CLOUD_USER:-$DEFAULT_CLOUD_USER}
+SERVER_IP="116.118.49.243"
+SERVER_USER="root"
+CONFIG_FILE="app.tazagroup.vn"
+LOG_FILE="nginx-deploy.log"
 
-# Create temporary nginx config locally
-mkdir -p /tmp/nginx-config
-cat > /tmp/nginx-config/$SERVER_NAME << EOF
-server {
-    listen 80;
-    server_name $SERVER_NAME;
-
-    location / {
-        proxy_pass http://$PROXY_IP:$PROXY_PORT;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
+# Function để log
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
 }
-EOF
 
-# Copy configuration to cloud server and apply it
-echo "Copying nginx config to cloud server..."
-scp /tmp/nginx-config/$SERVER_NAME $CLOUD_USER@$CLOUD_IP:/tmp/
+# Function để kiểm tra file
+check_config_file() {
+    if [ ! -f "./$CONFIG_FILE" ]; then
+        log "❌ Lỗi: File $CONFIG_FILE không tồn tại!"
+        exit 1
+    fi
+    log "✅ File cấu hình $CONFIG_FILE đã sẵn sàng"
+}
 
-ssh $CLOUD_USER@$CLOUD_IP << REMOTE_SCRIPT
-sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
-sudo mv /tmp/$SERVER_NAME /etc/nginx/sites-available/
-sudo rm -f /etc/nginx/sites-enabled/$SERVER_NAME
-sudo ln -s /etc/nginx/sites-available/$SERVER_NAME /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-REMOTE_SCRIPT
+# Function để kiểm tra kết nối SSH
+check_ssh_connection() {
+    log "🔍 Kiểm tra kết nối SSH tới $SERVER_USER@$SERVER_IP..."
+    
+    if timeout 10s ssh -o ConnectTimeout=5 -o BatchMode=yes "$SERVER_USER@$SERVER_IP" 'echo "SSH OK"' &>/dev/null; then
+        log "✅ Kết nối SSH thành công"
+        return 0
+    else
+        log "❌ Không thể kết nối SSH. Vui lòng kiểm tra:"
+        log "   - SSH key hoặc password"
+        log "   - Địa chỉ IP: $SERVER_IP"
+        log "   - Firewall settings"
+        return 1
+    fi
+}
 
-if [ $? -eq 0 ]; then
-    echo "Configuration applied to cloud server successfully"
+# Function để copy file
+copy_config() {
+    log "📋 Đang copy file cấu hình..."
+    
+    if scp -o ConnectTimeout=10 "./$CONFIG_FILE" "$SERVER_USER@$SERVER_IP:/tmp/"; then
+        log "✅ Copy file thành công"
+        return 0
+    else
+        log "❌ Lỗi copy file"
+        return 1
+    fi
+}
+
+# Function để cài đặt nginx
+install_nginx() {
+    log "🔧 Cài đặt và cấu hình nginx..."
+    
+    ssh "$SERVER_USER@$SERVER_IP" << 'REMOTE_SCRIPT'
+set -e
+
+# Update package list
+apt update
+
+# Install nginx if not exists
+if ! command -v nginx &> /dev/null; then
+    echo "Installing nginx..."
+    apt install -y nginx
+    systemctl enable nginx
 else
-    echo "Failed to apply configuration to cloud server"
-    exit 1
+    echo "Nginx already installed"
 fi
 
-# Configure SSL if requested
-if [[ $ENABLE_SSL == "y" || $ENABLE_SSL == "Y" ]]; then
-    echo "Installing SSL certificate on cloud server..."
-    ssh $CLOUD_USER@$CLOUD_IP "sudo certbot --nginx -d $SERVER_NAME"
-    
-    if [ $? -eq 0 ]; then
-        echo "SSL certificate installed successfully"
-        ssh $CLOUD_USER@$CLOUD_IP "sudo certbot renew --dry-run"
+# Create directories if not exist
+mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+
+# Check if config file already exists
+if [ -f "/etc/nginx/sites-available/app.tazagroup.vn" ]; then
+    echo "⚠️  File cấu hình đã tồn tại tại /etc/nginx/sites-available/app.tazagroup.vn"
+    echo "✅ Bỏ qua việc ghi đè file và tiếp tục..."
+else
+    # Move config file if not exists
+    if [ -f "/tmp/app.tazagroup.vn" ]; then
+        mv /tmp/app.tazagroup.vn /etc/nginx/sites-available/
+        echo "Config file moved successfully"
     else
-        echo "SSL certificate installation failed"
+        echo "Error: Config file not found in /tmp/"
+        exit 1
     fi
 fi
 
-# Clean up temporary file
-rm -f /tmp/nginx-config/$SERVER_NAME
+# Create symbolic link
+ln -sf /etc/nginx/sites-available/app.tazagroup.vn /etc/nginx/sites-enabled/
+
+# Remove default site
+rm -f /etc/nginx/sites-enabled/default
+
+# Test nginx config
+if nginx -t; then
+    echo "Nginx config is valid"
+else
+    echo "Nginx config is invalid!"
+    exit 1
+fi
+
+# Restart nginx
+systemctl restart nginx
+systemctl status nginx --no-pager
+
+echo "Nginx configuration completed successfully"
+REMOTE_SCRIPT
+
+    if [ $? -eq 0 ]; then
+        log "✅ Nginx cài đặt và cấu hình thành công"
+        return 0
+    else
+        log "❌ Lỗi cài đặt nginx"
+        return 1
+    fi
+}
+
+# Function để cài đặt SSL cho domain cụ thể
+install_ssl_only() {
+    local domain="${CONFIG_FILE}"
+    log "🔒 Cài đặt SSL certificate cho $domain..."
+    
+    ssh "$SERVER_USER@$SERVER_IP" << SSL_SCRIPT
+set -e
+
+# Check if nginx config exists
+if [ ! -f "/etc/nginx/sites-available/$domain" ]; then
+    echo "❌ Nginx config cho $domain không tồn tại!"
+    exit 1
+fi
+
+# Install certbot if not exists
+if ! command -v certbot &> /dev/null; then
+    echo "Installing certbot..."
+    apt update
+    apt install -y certbot python3-certbot-nginx
+else
+    echo "Certbot already installed"
+fi
+
+# Check if certificate already exists
+if certbot certificates 2>/dev/null | grep -q "$domain"; then
+    echo "⚠️  SSL certificate cho $domain đã tồn tại"
+    read -p "Bạn có muốn renew certificate? (y/n): " -r
+    if [[ \$REPLY =~ ^[Yy]$ ]]; then
+        certbot renew --cert-name $domain
+    fi
+else
+    # Install SSL certificate
+    echo "Installing SSL certificate for $domain..."
+    certbot --nginx -d $domain --non-interactive --agree-tos --email it@tazagroup.vn
+fi
+
+# Test nginx config after SSL installation
+if nginx -t; then
+    echo "✅ Nginx config is valid"
+    systemctl reload nginx
+else
+    echo "❌ Nginx config is invalid after SSL installation!"
+    exit 1
+fi
+
+echo "SSL certificate for $domain installed successfully"
+SSL_SCRIPT
+
+    if [ $? -eq 0 ]; then
+        log "✅ SSL certificate cài đặt thành công cho $domain"
+        return 0
+    else
+        log "❌ Lỗi cài đặt SSL certificate cho $domain"
+        return 1
+    fi
+}
+
+# Main execution
+main() {
+    log "🚀 Bắt đầu script cho TazaGroup"
+    
+    # Menu lựa chọn
+    echo "Chọn thao tác:"
+    echo "1. Deploy đầy đủ (nginx + config)"
+    echo "2. Chỉ cài SSL cho domain hiện tại"
+    read -p "Lựa chọn (1/2): " choice
+    
+    case $choice in
+        1)
+            # Full deployment
+            check_config_file
+            if ! check_ssh_connection; then
+                log "❌ Deploy thất bại do không thể kết nối SSH"
+                exit 1
+            fi
+            if ! copy_config; then
+                log "❌ Deploy thất bại do lỗi copy file"
+                exit 1
+            fi
+            if ! install_nginx; then
+                log "❌ Deploy thất bại do lỗi cài đặt nginx"
+                exit 1
+            fi
+            read -p "Bạn có muốn cài đặt SSL certificate? (y/n): " -r
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                install_ssl_only
+            fi
+            ;;
+        2)
+            # SSL only
+            if ! check_ssh_connection; then
+                log "❌ Không thể kết nối SSH"
+                exit 1
+            fi
+            install_ssl_only
+            ;;
+        *)
+            log "❌ Lựa chọn không hợp lệ"
+            exit 1
+            ;;
+    esac
+    
+    log "🎉 Hoàn tất thành công!"
+    log "🌐 Website: https://$CONFIG_FILE"
+    log "📋 Log file: $LOG_FILE"
+}
+
+# Trap để cleanup khi script bị interrupt
+trap 'log "❌ Script bị interrupt"; exit 1' INT TERM
+
+# Run main function
+main "$@"
