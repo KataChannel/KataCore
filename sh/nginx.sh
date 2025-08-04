@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Default values
-DEFAULT_SERVER_NAME="hrm.tazagroup.vn"
-DEFAULT_PROXY_IP="116.118.49.243"
+DEFAULT_SERVER_NAME="app.tazagroup.vn"
+DEFAULT_PROXY_IP="localhost"
 DEFAULT_PROXY_PORT="3900"
 DEFAULT_ENABLE_SSL="y"
 DEFAULT_CLOUD_IP="116.118.49.243"
@@ -30,13 +30,19 @@ cat > /tmp/nginx-config/$SERVER_NAME << EOF
 server {
     listen 80;
     server_name $SERVER_NAME;
-
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    client_max_body_size 50M;
     location / {
         proxy_pass http://$PROXY_IP:$PROXY_PORT;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_http_version 1.1;
     }
 }
 EOF
@@ -63,6 +69,18 @@ fi
 
 # Configure SSL if requested
 if [[ $ENABLE_SSL == "y" || $ENABLE_SSL == "Y" ]]; then
+    echo "Checking and installing certbot if needed..."
+    ssh $CLOUD_USER@$CLOUD_IP << 'INSTALL_CERTBOT'
+# Check if certbot is installed
+if ! command -v certbot &> /dev/null; then
+    echo "Installing certbot and python3-certbot-nginx..."
+    sudo apt update
+    sudo apt install -y certbot python3-certbot-nginx
+else
+    echo "Certbot is already installed"
+fi
+INSTALL_CERTBOT
+
     echo "Installing SSL certificate on cloud server..."
     ssh $CLOUD_USER@$CLOUD_IP "sudo certbot --nginx -d $SERVER_NAME"
     

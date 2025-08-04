@@ -1,15 +1,6 @@
-// ============================================================================
-// PERMISSION SYSTEM TEST
-// ============================================================================
-// Comprehensive test for the unified permission system
-
 import { UnifiedPermissionService, SYSTEM_ROLES } from '@/lib/auth/unified-permission.service';
 import { createSafePermissionService, debugUserPermissions } from '@/lib/auth/permission-validator';
 import { MODULES, ACTIONS, RESOURCES } from '@/lib/auth/permissions-constants';
-
-// ============================================================================
-// TEST DATA
-// ============================================================================
 
 const testUsers = {
   superAdmin: {
@@ -174,7 +165,7 @@ function testPermissionService() {
           ACTIONS.READ,
           RESOURCES.EMPLOYEE,
           'department',
-          { departmentId: userData.departmentId }
+          { departmentId: testUsers.employee.departmentId }
         );
         console.log(`  Read department employee data: ${deptAccess ? '✅' : '❌'}`);
       }
@@ -308,6 +299,5 @@ export {
   testRoleDefinitions,
   testPermissionConstants,
   testEdgeCases,
-  runPermissionTests,
   testUsers,
 };

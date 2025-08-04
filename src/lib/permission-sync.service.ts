@@ -60,7 +60,7 @@ export class PermissionSyncService {
       console.log('🔄 Starting permission synchronization...');
 
       // Get current database roles
-      const dbRoles = await prisma.role.findMany({
+      const dbRoles = await prisma.roles.findMany({
         where: { isSystemRole: true }
       });
 
@@ -92,7 +92,7 @@ export class PermissionSyncService {
       
       for (const obsoleteRole of obsoleteRoles) {
         try {
-          await prisma.role.update({
+          await prisma.roles.update({
             where: { id: obsoleteRole.id },
             data: { 
               isSystemRole: false,
@@ -134,7 +134,7 @@ export class PermissionSyncService {
 
     const modulesJson = JSON.stringify(moduleRole.modules);
 
-    await prisma.role.create({
+    await prisma.roles.create({
       data: {
         id: moduleRole.id,
         name: moduleRole.name,
@@ -143,6 +143,7 @@ export class PermissionSyncService {
         level: moduleRole.level,
         modules: modulesJson,
         isSystemRole: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -194,7 +195,7 @@ export class PermissionSyncService {
 
     // Update if there are changes
     if (hasChanges) {
-      await prisma.role.update({
+      await prisma.roles.update({
         where: { id: dbRole.id },
         data: updates,
       });
@@ -253,7 +254,7 @@ export class PermissionSyncService {
     };
   }> {
     try {
-      const dbRoles = await prisma.role.findMany({
+      const dbRoles = await prisma.roles.findMany({
         where: { isSystemRole: true }
       });
 
@@ -323,7 +324,7 @@ export class PermissionSyncService {
       throw new Error(`Role ${roleId} not found in modules-permissions.ts`);
     }
 
-    const dbRole = await prisma.role.findFirst({
+    const dbRole = await prisma.roles.findFirst({
       where: { 
         OR: [
           { id: roleId },
@@ -406,7 +407,7 @@ export class PermissionSyncService {
  * Get permission statistics
  */
 export async function getPermissionStats() {
-  const roles = await prisma.role.findMany({
+  const roles = await prisma.roles.findMany({
     where: { isSystemRole: true },
     include: { _count: { select: { users: true } } }
   });

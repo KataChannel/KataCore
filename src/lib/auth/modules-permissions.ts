@@ -777,7 +777,7 @@ export const hasPermission = (
   scope?: string
 ): boolean => {
   return userRole.permissions.some(
-    (permission) =>
+    (permission:any) =>
       permission.action === action &&
       permission.resource === resource &&
       (!scope || permission.scope === scope || permission.scope === 'all')

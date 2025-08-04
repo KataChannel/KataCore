@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.user.count({ where }),
+      prisma.users.count({ where }),
     ]);
 
     // Transform users data
@@ -168,8 +168,8 @@ export async function GET(request: NextRequest) {
       let rolePermissions: string[] = [];
 
       try {
-        if (user.role && user.role.permissions) {
-          const permissionsData = JSON.parse(user.role.permissions as string);
+        if (user.roles && user.roles.permissions) {
+          const permissionsData = JSON.parse(user.roles.permissions as string);
           roleLevel = permissionsData.level || 1;
           rolePermissions = Array.isArray(permissionsData.permissions) 
             ? permissionsData.permissions 
@@ -189,8 +189,8 @@ export async function GET(request: NextRequest) {
         lastLoginAt: user.lastSeen,
         createdAt: user.createdAt,
         role: {
-          id: user.role?.id || 'unknown',
-          name: user.role?.name || 'No Role',
+          id: user.roles?.id || 'unknown',
+          name: user.roles?.name || 'No Role',
           level: roleLevel,
           permissions: rolePermissions,
         },
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
     // Check permissions
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canCreateUsers = userRole?.permissions.some(
-      (p) => p.action === 'create' && p.resource === 'users'
+      (p:any) => p.action === 'create' && p.resource === 'users'
     );
 
     if (!canCreateUsers && (!userRole || userRole.level < 8)) {
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate role exists
-    const role = await prisma.role.findUnique({
+    const role = await prisma.roles.findUnique({
       where: { id: roleId },
     });
 
@@ -284,7 +284,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findFirst({
+    const existingUser = await prisma.users.findFirst({
       where: {
         OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
@@ -301,19 +301,24 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user
-    const newUser = await prisma.user.create({
+    const newUser = await prisma.users.create({
       data: {
         email,
         phone,
         username,
         password: hashedPassword,
         displayName,
-        roleId,
+        roles: {
+          connect: {
+            id: roleId
+          }
+        },
         isActive,
         isVerified: true, // Auto-verify admin-created users
+        updatedAt: new Date(),
       },
       include: {
-        role: {
+        roles: {
           select: {
             id: true,
             name: true,
@@ -328,14 +333,14 @@ export async function POST(request: NextRequest) {
     let employee = null;
     if (employeeData) {
       try {
-        employee = await prisma.employee.create({
+        employee = await prisma.employees.create({
           data: {
             ...employeeData,
             userId: newUser.id,
           },
           include: {
-            department: true,
-            position: true,
+            departments: true,
+            positions: true,
           },
         });
       } catch (error) {
@@ -360,11 +365,11 @@ export async function POST(request: NextRequest) {
         isActive: newUser.isActive,
         isVerified: newUser.isVerified,
         role: {
-          id: newUser.role.id,
-          name: newUser.role.name,
-          description: newUser.role.description,
-          permissions: newUser.role.permissions
-            ? JSON.parse(newUser.role.permissions as string)
+          id: newUser.roles.id,
+          name: newUser.roles.name,
+          description: newUser.roles.description,
+          permissions: newUser.roles.permissions
+            ? JSON.parse(newUser.roles.permissions as string)
             : [],
         },
         systemRole: systemRole || null,
@@ -386,7 +391,7 @@ export async function PUT(request: NextRequest) {
     // Check permissions
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canUpdateUsers = userRole?.permissions.some(
-      (p) => p.action === 'update' && p.resource === 'users'
+      (p:any) => p.action === 'update' && p.resource === 'users'
     );
 
     if (!canUpdateUsers && (!userRole || userRole.level < 8)) {
@@ -414,9 +419,9 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check if target user exists
-    const targetUser = await prisma.user.findUnique({
+    const targetUser = await prisma.users.findUnique({
       where: { id: userId },
-      include: { role: true },
+      include: { roles: true },
     });
 
     if (!targetUser) {
@@ -427,7 +432,7 @@ export async function PUT(request: NextRequest) {
     const targetSystemRole = SYSTEM_ROLES.find(
       (sr) =>
         sr.name.toLowerCase().replace(/ /g, '_') ===
-        targetUser.role?.name.toLowerCase().replace(/ /g, '_')
+        targetUser.roles?.name.toLowerCase().replace(/ /g, '_')
     );
     if (
       targetSystemRole &&
@@ -453,7 +458,7 @@ export async function PUT(request: NextRequest) {
 
     // Handle role change
     if (roleId && roleId !== targetUser.roleId) {
-      const newRole = await prisma.role.findUnique({ where: { id: roleId } });
+      const newRole = await prisma.roles.findUnique({ where: { id: roleId } });
       if (!newRole) {
         return NextResponse.json({ error: 'Invalid role specified' }, { status: 400 });
       }
@@ -478,11 +483,11 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update user
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.users.update({
       where: { id: userId },
       data: updateData,
       include: {
-        role: {
+        roles: {
           select: {
             id: true,
             name: true,
@@ -490,19 +495,19 @@ export async function PUT(request: NextRequest) {
             permissions: true,
           },
         },
-        employee: {
+        employees: {
           include: {
-            department: true,
-            position: true,
+            departments: true,
+            positions: true,
           },
         },
       },
     });
 
     // Update employee data if provided
-    if (employeeData && updatedUser.employee) {
-      await prisma.employee.update({
-        where: { id: updatedUser.employee.id },
+    if (employeeData && updatedUser.employees) {
+      await prisma.employees.update({
+        where: { id: updatedUser.employees.id },
         data: employeeData,
       });
     }
@@ -511,7 +516,7 @@ export async function PUT(request: NextRequest) {
     const systemRole = SYSTEM_ROLES.find(
       (sr) =>
         sr.name.toLowerCase().replace(/ /g, '_') ===
-        updatedUser.role?.name.toLowerCase().replace(/ /g, '_')
+        updatedUser.roles?.name.toLowerCase().replace(/ /g, '_')
     );
 
     return NextResponse.json({
@@ -523,16 +528,16 @@ export async function PUT(request: NextRequest) {
       avatar: updatedUser.avatar,
       isActive: updatedUser.isActive,
       isVerified: updatedUser.isVerified,
-      role: {
-        id: updatedUser.role?.id,
-        name: updatedUser.role?.name,
-        description: updatedUser.role?.description,
-        permissions: updatedUser.role?.permissions
-          ? JSON.parse(updatedUser.role.permissions as string)
+      roles: {
+        id: updatedUser.roles?.id,
+        name: updatedUser.roles?.name,
+        description: updatedUser.roles?.description,
+        permissions: updatedUser.roles?.permissions
+          ? JSON.parse(updatedUser.roles.permissions as string)
           : [],
       },
       systemRole: systemRole || null,
-      employee: updatedUser.employee,
+      employees: updatedUser.employees,
       updatedAt: updatedUser.updatedAt,
     });
   } catch (error: any) {
@@ -548,7 +553,7 @@ export async function DELETE(request: NextRequest) {
     // Check permissions
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
     const canDeleteUsers = userRole?.permissions.some(
-      (p) => p.action === 'delete' && p.resource === 'users'
+      (p:any) => p.action === 'delete' && p.resource === 'users'
     );
 
     if (!canDeleteUsers && (!userRole || userRole.level < 9)) {
@@ -567,9 +572,9 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check if target user exists
-    const targetUser = await prisma.user.findUnique({
+    const targetUser = await prisma.users.findUnique({
       where: { id: userId },
-      include: { role: true },
+      include: { roles: true },
     });
 
     if (!targetUser) {
@@ -585,7 +590,7 @@ export async function DELETE(request: NextRequest) {
     const targetSystemRole = SYSTEM_ROLES.find(
       (sr) =>
         sr.name.toLowerCase().replace(/ /g, '_') ===
-        targetUser.role?.name.toLowerCase().replace(/ /g, '_')
+        targetUser.roles?.name.toLowerCase().replace(/ /g, '_')
     );
     if (targetSystemRole && userRole && targetSystemRole.level >= userRole.level) {
       return NextResponse.json(
@@ -596,7 +601,7 @@ export async function DELETE(request: NextRequest) {
 
     if (hardDelete) {
       // Hard delete - remove from database
-      await prisma.user.delete({
+      await prisma.users.delete({
         where: { id: userId },
       });
 
@@ -606,7 +611,7 @@ export async function DELETE(request: NextRequest) {
       });
     } else {
       // Soft delete - deactivate user
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: userId },
         data: { isActive: false },
       });

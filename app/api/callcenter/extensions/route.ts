@@ -39,16 +39,16 @@ export async function GET(request: NextRequest) {
         }
 
         // Get total count for pagination
-        const total = await prisma.callExtension.count({ where });
+        const total = await prisma.call_extensions.count({ where });
 
         // Get paginated extensions
-        const extensions = await prisma.callExtension.findMany({
+        const extensions = await prisma.call_extensions.findMany({
             where,
             skip: (page - 1) * limit,
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                users: true
+                call_extension_users: true
             }
         });
 
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if extension code already exists
-        const existingExtension = await prisma.callExtension.findUnique({
+        const existingExtension = await prisma.call_extensions.findUnique({
             where: { extCode }
         });
 
@@ -98,16 +98,17 @@ export async function POST(request: NextRequest) {
         }
 
         // Create new extension
-        const newExtension = await prisma.callExtension.create({
+        const newExtension = await prisma.call_extensions.create({
             data: {
                 extCode,
                 password: password || null,
                 name,
                 description: description || null,
-                status: 'active'
+                status: 'active',
+                updatedAt: new Date()
             },
             include: {
-                users: true
+                call_extension_users: true
             }
         });
 
@@ -136,7 +137,7 @@ export async function PUT(request: NextRequest) {
         }
 
         // Check if extension exists
-        const existingExtension = await prisma.callExtension.findUnique({
+        const existingExtension = await prisma.call_extensions.findUnique({
             where: { id }
         });
 
@@ -149,7 +150,7 @@ export async function PUT(request: NextRequest) {
 
         // Check if new extension code conflicts with existing ones (excluding current)
         if (extCode && extCode !== existingExtension.extCode) {
-            const conflictingExtension = await prisma.callExtension.findUnique({
+            const conflictingExtension = await prisma.call_extensions.findUnique({
                 where: { extCode }
             });
             
@@ -162,7 +163,7 @@ export async function PUT(request: NextRequest) {
         }
 
         // Update extension
-        const updatedExtension = await prisma.callExtension.update({
+        const updatedExtension = await prisma.call_extensions.update({
             where: { id },
             data: {
                 ...(extCode && { extCode }),
@@ -172,7 +173,7 @@ export async function PUT(request: NextRequest) {
                 ...(status && { status })
             },
             include: {
-                users: true
+                call_extension_users: true
             }
         });
 
@@ -201,10 +202,10 @@ export async function DELETE(request: NextRequest) {
         }
 
         // Check if extension exists
-        const existingExtension = await prisma.callExtension.findUnique({
+        const existingExtension = await prisma.call_extensions.findUnique({
             where: { id },
             include: {
-                users: true
+                call_extension_users: true
             }
         });
 
@@ -216,10 +217,10 @@ export async function DELETE(request: NextRequest) {
         }
 
         // Delete the extension
-        const deletedExtension = await prisma.callExtension.delete({
+        const deletedExtension = await prisma.call_extensions.delete({
             where: { id },
             include: {
-                users: true
+                call_extension_users: true
             }
         });
 

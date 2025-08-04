@@ -29,13 +29,7 @@ export class ModulePermissionService {
     this.userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId) || null;
   }
 
-  // ==============================================
-  // CORE PERMISSION CHECKING
-  // ==============================================
 
-  /**
-   * Check if user has specific permission
-   */
   hasPermission(
     action: string,
     resource: string,
@@ -47,8 +41,8 @@ export class ModulePermissionService {
     if (!this.userRole) return false;
 
     const permission = this.userRole.permissions.find(
-      (p) => p.action === action && p.resource === resource
-    );
+      (p:any) => p.action === action && p.resource === resource
+    ) as ModulePermission | undefined;
 
     if (!permission) return false;
 
