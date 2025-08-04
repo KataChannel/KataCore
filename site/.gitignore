@@ -14,11 +14,11 @@
 /coverage
 
 # next.js
-/.next/
+/.next/  # Commented out to allow Next.js build folder in git
 /out/
 
 # production
-/build
+# /build  # Commented out to allow build folder in git
 
 # misc
 .DS_Store

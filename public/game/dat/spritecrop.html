@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Sprite Sheet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        #container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 10px;
+            max-width: 100%;
+        }
+        input, button, select {
+            margin: 5px;
+            padding: 8px;
+            font-size: 16px;
+        }
+        #preview {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #preview canvas {
+            margin: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .hidden {
+            display: none;
+        }
+        #originalCanvas {
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>Image to Sprite Sheet</h2>
+        <input type="file" id="imageInput" accept="image/*">
+        <div class="input-group">
+            <label for="mode">Mode: </label>
+            <select id="mode" onchange="toggleMode()">
+                <option value="custom">Custom (Rows & Columns)</option>
+                <option value="auto">Auto (Frame Size)</option>
+                <option value="manual">Manual (Mouse Selection)</option>
+            </select>
+        </div>
+        <div id="customInputs" class="input-group">
+            <label>Rows: </label>
+            <input type="number" id="rows" min="1" value="1">
+            <label>Columns: </label>
+            <input type="number" id="cols" min="1" value="1">
+        </div>
+        <div id="autoInputs" class="input-group hidden">
+            <label>Frame Width: </label>
+            <input type="number" id="frameWidth" min="1" value="32">
+            <label>Frame Height: </label>
+            <input type="number" id="frameHeight" min="1" value="32">
+        </div>
+        <button onclick="processImage()">Generate Sprite Sheet</button>
+        <canvas id="originalCanvas"></canvas>
+        <div id="preview"></div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const modeSelect = document.getElementById('mode');
+        const rowsInput = document.getElementById('rows');
+        const colsInput = document.getElementById('cols');
+        const frameWidthInput = document.getElementById('frameWidth');
+        const frameHeightInput = document.getElementById('frameHeight');
+        const customInputs = document.getElementById('customInputs');
+        const autoInputs = document.getElementById('autoInputs');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const previewDiv = document.getElementById('preview');
+        const ctx = originalCanvas.getContext('2d');
+
+        let img, isDrawing = false, startX, startY, endX, endY;
+
+        function toggleMode() {
+            customInputs.classList.add('hidden');
+            autoInputs.classList.add('hidden');
+            if (modeSelect.value === 'custom') {
+                customInputs.classList.remove('hidden');
+            } else if (modeSelect.value === 'auto') {
+                autoInputs.classList.remove('hidden');
+            }
+            if (modeSelect.value === 'manual' && img) {
+                redrawImage();
+            }
+        }
+
+        function redrawImage() {
+            ctx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+            ctx.drawImage(img, 0, 0);
+        }
+
+        function getCanvasCoordinates(event) {
+            const rect = originalCanvas.getBoundingClientRect();
+            const scaleX = originalCanvas.width / rect.width;
+            const scaleY = originalCanvas.height / rect.height;
+            return {
+                x: event.offsetX * scaleX,
+                y: event.offsetY * scaleY
+            };
+        }
+
+        function processImage() {
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please select an image!');
+                return;
+            }
+
+            const mode = modeSelect.value;
+            let rows, cols, frameWidth, frameHeight;
+
+            if (mode === 'custom') {
+                rows = parseInt(rowsInput.value);
+                cols = parseInt(colsInput.value);
+                if (rows < 1 || cols < 1) {
+                    alert('Rows and columns must be at least 1!');
+                    return;
+                }
+            } else if (mode === 'auto') {
+                frameWidth = parseInt(frameWidthInput.value);
+                frameHeight = parseInt(frameHeightInput.value);
+                if (frameWidth < 1 || frameHeight < 1) {
+                    alert('Frame width and height must be at least 1!');
+                    return;
+                }
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img = new Image();
+                img.onload = function() {
+                    originalCanvas.width = img.width;
+                    originalCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+
+                    previewDiv.innerHTML = '';
+
+                    if (mode !== 'manual') {
+                        if (mode === 'custom') {
+                            frameWidth = img.width / cols;
+                            frameHeight = img.height / rows;
+                        } else {
+                            rows = Math.floor(img.height / frameHeight);
+                            cols = Math.floor(img.width / frameWidth);
+                        }
+
+                        if (rows < 1 || cols < 1) {
+                            alert('Image is too small for the specified frame size!');
+                            return;
+                        }
+
+                        for (let row = 0; row < rows; row++) {
+                            for (let col = 0; col < cols; col++) {
+                                const frameCanvas = document.createElement('canvas');
+                                frameCanvas.width = frameWidth;
+                                frameCanvas.height = frameHeight;
+                                const frameCtx = frameCanvas.getContext('2d');
+
+                                frameCtx.drawImage(
+                                    img,
+                                    col * frameWidth, row * frameHeight,
+                                    frameWidth, frameHeight,
+                                    0, 0,
+                                    frameWidth, frameHeight
+                                );
+
+                                previewDiv.appendChild(frameCanvas);
+                            }
+                        }
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        originalCanvas.addEventListener('mousedown', (e) => {
+            if (modeSelect.value !== 'manual') return;
+            isDrawing = true;
+            const coords = getCanvasCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
+        });
+
+        originalCanvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || modeSelect.value !== 'manual') return;
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
+
+            redrawImage();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(
+                Math.min(startX, endX),
+                Math.min(startY, endY),
+                Math.abs(endX - startX),
+                Math.abs(endY - startY)
+            );
+        });
+
+        originalCanvas.addEventListener('mouseup', () => {
+            if (!isDrawing || modeSelect.value !== 'manual') return;
+            isDrawing = false;
+
+            const frameWidth = Math.abs(endX - startX);
+            const frameHeight = Math.abs(endY - startY);
+            const x = Math.min(startX, endX);
+            const y = Math.min(startY, endY);
+
+            if (frameWidth < 5 || frameHeight < 5) {
+                alert('Selected area is too small! Minimum size is 5x5 pixels.');
+                redrawImage();
+                return;
+            }
+
+            const frameCanvas = document.createElement('canvas');
+            frameCanvas.width = frameWidth;
+            frameCanvas.height = frameHeight;
+            const frameCtx = frameCanvas.getContext('2d');
+
+            frameCtx.drawImage(
+                img,
+                x, y,
+                frameWidth, frameHeight,
+                0, 0,
+                frameWidth, frameHeight
+            );
+
+            previewDiv.appendChild(frameCanvas);
+            redrawImage();
+        });
+
+        originalCanvas.addEventListener('mouseleave', () => {
+            if (isDrawing && modeSelect.value === 'manual') {
+                isDrawing = false;
+                redrawImage();
+            }
+        });
+    </script>
+</body>
+</html>
