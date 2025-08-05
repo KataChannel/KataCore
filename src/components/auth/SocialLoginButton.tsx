@@ -63,10 +63,10 @@ export default function SocialLoginButton({
 
     window.fbAsyncInit = function() {
       window.FB?.init({
-        appId: 'appId' in config ? config.appId! : '',
+        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '',
         cookie: true,
         xfbml: true,
-        version: 'version' in config ? config.version : 'v18.0',
+        version: process.env.NEXT_PUBLIC_FACEBOOK_API_VERSION || 'v23.0',
       });
     };
 
@@ -149,28 +149,63 @@ export default function SocialLoginButton({
       return;
     }
 
-    window.FB.login(async (response: any) => {
-      if (response.authResponse) {
-        try {
-          const result = await fetch('/api/auth/facebook', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: response.authResponse.accessToken }),
-          });
+    // Check HTTPS requirement
+    const isSecure = window.location.protocol === 'https:' || 
+                     window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.hostname.includes('taza');
 
-          const data = await result.json();
-          if (result.ok) {
-            onSuccess(data);
-          } else {
-            onError(data.error || 'Facebook login failed');
-          }
-        } catch (error) {
-          onError('Facebook login failed');
-        }
+    if (!isSecure) {
+      onError('Facebook login yêu cầu HTTPS. Vui lòng truy cập qua HTTPS hoặc localhost.');
+      return;
+    }
+
+    // Check login status first
+    window.FB.getLoginStatus((response: any) => {
+      if (response.status === 'connected') {
+        handleFacebookResponse(response);
       } else {
-        onError('Facebook login was cancelled');
+        window.FB?.login(async (loginResponse: any) => {
+          if (loginResponse.authResponse) {
+            handleFacebookResponse(loginResponse);
+          } else {
+            onError('Đăng nhập Facebook đã bị hủy hoặc thất bại');
+          }
+        }, { 
+          scope: config.scopes?.join(',') || 'email,public_profile',
+          return_scopes: true,
+          auth_type: 'rerequest'
+        });
       }
-    }, { scope: config.scopes?.join(',') || 'email' });
+    });
+  };
+
+  const handleFacebookResponse = async (response: any) => {
+    try {
+      const result = await fetch('/api/auth/facebook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          token: response.authResponse.accessToken,
+          userID: response.authResponse.userID
+        }),
+      });
+
+      const data = await result.json();
+      if (result.ok) {
+        // Store tokens in localStorage
+        if (data.accessToken) {
+          localStorage.setItem('accessToken', data.accessToken);
+        }
+        
+        onSuccess(data);
+      } else {
+        onError(data.error || 'Facebook login failed');
+      }
+    } catch (error) {
+      console.error('Facebook login error:', error);
+      onError('Facebook login failed');
+    }
   };
 
   const handleAppleLogin = async () => {

@@ -4,7 +4,7 @@ import { authService } from '@/lib/auth/unified-auth.service';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { token, userID, action = 'login' } = body;
+    const { token, action = 'login' } = body; // action can be 'login' or 'register'
 
     if (!token) {
       return NextResponse.json({ error: 'Facebook token is required' }, { status: 400 });
@@ -112,8 +112,8 @@ async function verifyFacebookToken(token: string) {
 // Function to get long-lived Facebook token
 async function getLongLivedToken(shortToken: string) {
   try {
-    const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-    const appSecret = process.env.NEXT_PUBLIC_FACEBOOK_APP_SECRET;
+    const appId = process.env.FACEBOOK_APP_ID;
+    const appSecret = process.env.FACEBOOK_APP_SECRET;
     
     if (!appId || !appSecret) {
       throw new Error('Facebook app credentials not configured');

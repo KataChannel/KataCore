@@ -1,5 +1,17 @@
 // Type declarations for social login SDKs
 
+interface FacebookAuthResponse {
+  accessToken: string;
+  expiresIn: string;
+  signedRequest: string;
+  userID: string;
+}
+
+interface FacebookLoginResponse {
+  status: 'connected' | 'not_authorized' | 'unknown';
+  authResponse?: FacebookAuthResponse;
+}
+
 declare global {
   interface Window {
     google?: {
@@ -22,16 +34,23 @@ declare global {
         version: string;
       }) => void;
       login: (
-        callback: (response: any) => void,
-        config?: { scope: string }
+        callback: (response: FacebookLoginResponse) => void,
+        config?: { 
+          scope: string;
+          return_scopes?: boolean;
+          auth_type?: string;
+        }
       ) => void;
+      getLoginStatus: (callback: (response: FacebookLoginResponse) => void) => void;
       api: (
         path: string,
         method: string,
         params: any,
         callback: (response: any) => void
       ) => void;
+      logout: (callback?: (response: any) => void) => void;
     };
+    fbAsyncInit?: () => void;
     AppleID?: {
       auth: {
         init: (config: {
@@ -45,6 +64,48 @@ declare global {
       };
     };
   }
+}
+
+// Facebook Types
+interface FacebookLoginResponse {
+  status: 'connected' | 'not_authorized' | 'unknown';
+  authResponse?: {
+    accessToken: string;
+    userID: string;
+    expiresIn: number;
+    signedRequest: string;
+  };
+}
+
+interface FacebookUser {
+  id: string;
+  name: string;
+  email?: string;
+  picture?: {
+    data: {
+      url: string;
+    };
+  };
+}
+
+// Google Types
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+// Apple Types
+interface AppleSignInResponse {
+  authorization: {
+    id_token: string;
+    code: string;
+  };
+  user?: {
+    email: string;
+    name: {
+      firstName: string;
+      lastName: string;
+    };
+  };
 }
 
 export {};

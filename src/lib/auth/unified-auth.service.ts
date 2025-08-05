@@ -18,6 +18,8 @@ interface User {
   phone?: string;
   username?: string;
   displayName: string;
+  firstName?: string;
+  lastName?: string;
   avatar?: string;
   password?: string;
   roleId: string;
@@ -32,6 +34,8 @@ interface User {
   isActive: boolean;
   isVerified: boolean;
   provider: 'email' | 'phone' | 'google' | 'facebook' | 'apple';
+  loginCount?: number;
+  lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -692,6 +696,58 @@ export class UnifiedAuthService {
   // ==========================================================================
 
   /**
+   * Find user by social ID or email
+   */
+  private async findUserBySocialId(
+    provider: 'google' | 'facebook' | 'apple' | 'microsoft',
+    socialId: string,
+    email?: string
+  ): Promise<User | null> {
+    try {
+      const socialIdField = `${provider}Id`;
+      const whereConditions: any[] = [{ [socialIdField]: socialId }];
+      
+      if (email) {
+        whereConditions.push({ email });
+      }
+
+      const user = await prisma.users.findFirst({
+        where: {
+          OR: whereConditions,
+        },
+        include: {
+          roles: true,
+        },
+      });
+
+      return user ? this.transformPrismaUser(user) : null;
+    } catch (error) {
+      console.error('Error finding user by social ID:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Link social account to existing user
+   */
+  private async linkSocialAccount(
+    userId: string,
+    provider: 'google' | 'facebook' | 'apple' | 'microsoft',
+    socialId: string
+  ): Promise<void> {
+    try {
+      const socialIdField = `${provider}Id`;
+      await prisma.users.update({
+        where: { id: userId },
+        data: { [socialIdField]: socialId },
+      });
+    } catch (error) {
+      console.error('Error linking social account:', error);
+      throw new Error('Failed to link social account');
+    }
+  }
+
+  /**
    * Social login for Google, Facebook, Apple, Microsoft
    */
   async socialLogin(
@@ -744,54 +800,135 @@ export class UnifiedAuthService {
   }
 
   /**
-   * Find user by social ID or email
+   * Social login or update for Facebook with comprehensive user management
    */
-  private async findUserBySocialId(
+  async socialLoginOrUpdate(
     provider: 'google' | 'facebook' | 'apple' | 'microsoft',
-    socialId: string,
-    email?: string
-  ): Promise<User | null> {
+    socialData: {
+      facebookId?: string;
+      googleId?: string;
+      appleId?: string;
+      microsoftId?: string;
+      email?: string;
+      displayName?: string;
+      firstName?: string;
+      lastName?: string;
+      avatar?: string;
+    }
+  ): Promise<AuthResult & { isNewUser: boolean }> {
     try {
       const socialIdField = `${provider}Id`;
-      const whereConditions: any[] = [{ [socialIdField]: socialId }];
-      
-      if (email) {
-        whereConditions.push({ email });
+      const socialId = socialData[socialIdField as keyof typeof socialData] as string;
+
+      if (!socialId) {
+        throw new Error(`${provider} ID is required`);
       }
 
-      const user = await prisma.users.findFirst({
-        where: {
-          OR: whereConditions,
-        },
-        include: {
-          roles: true,
-        },
-      });
+      // Find existing user by social ID or email
+      let user = await this.findUserBySocialId(provider, socialId, socialData.email);
+      let isNewUser = false;
 
-      return user ? this.transformPrismaUser(user) : null;
-    } catch (error) {
-      console.error('Error finding user by social ID:', error);
-      return null;
-    }
-  }
+      if (!user && socialData.email) {
+        // Check if user exists with email but no social ID
+        user = await this.findUser({ email: socialData.email });
+        
+        if (user) {
+          // Link social account to existing user
+          await this.linkSocialAccount(user.id, provider, socialId);
+          // Refresh user data
+          user = await this.getUserById(user.id);
+        }
+      }
 
-  /**
-   * Link social account to existing user
-   */
-  private async linkSocialAccount(
-    userId: string,
-    provider: 'google' | 'facebook' | 'apple' | 'microsoft',
-    socialId: string
-  ): Promise<void> {
-    try {
-      const socialIdField = `${provider}Id`;
-      await prisma.users.update({
-        where: { id: userId },
-        data: { [socialIdField]: socialId },
-      });
-    } catch (error) {
-      console.error('Error linking social account:', error);
-      throw new Error('Failed to link social account');
+      if (!user) {
+        // Create new user
+        if (!socialData.email) {
+          throw new Error('Email is required to create new account');
+        }
+
+        const createData: RegisterData = {
+          email: socialData.email,
+          displayName: socialData.displayName || socialData.email?.split('@')[0] || `${provider} User`,
+          provider: provider as any,
+          isVerified: true, // Social accounts are pre-verified
+          [socialIdField]: socialId,
+        };
+
+        // Add optional fields
+        if (socialData.firstName) (createData as any).firstName = socialData.firstName;
+        if (socialData.lastName) (createData as any).lastName = socialData.lastName;
+        if (socialData.avatar) createData.avatar = socialData.avatar;
+
+        user = await this.createUser(createData);
+        isNewUser = true;
+      } else {
+        // Update existing user with latest social info
+        const updateData: any = {
+          lastLoginAt: new Date(),
+          loginCount: (user as any).loginCount ? (user as any).loginCount + 1 : 1,
+        };
+
+        // Link social account if not already linked
+        if (!(user as any)[socialIdField]) {
+          updateData[socialIdField] = socialId;
+        }
+
+        // Update profile information if provided and current data is missing/outdated
+        if (socialData.displayName && (!user.displayName || user.displayName.includes(`${provider} User`))) {
+          updateData.displayName = socialData.displayName;
+        }
+
+        if (socialData.firstName && !(user as any).firstName) {
+          updateData.firstName = socialData.firstName;
+        }
+
+        if (socialData.lastName && !(user as any).lastName) {
+          updateData.lastName = socialData.lastName;
+        }
+
+        if (socialData.avatar && !user.avatar) {
+          updateData.avatar = socialData.avatar;
+        }
+
+        // Update email if it wasn't set before and social provides one
+        if (socialData.email && !user.email) {
+          updateData.email = socialData.email;
+          updateData.isVerified = true; // Social emails are pre-verified
+        }
+
+        // Mark as verified if not already
+        if (!user.isVerified) {
+          updateData.isVerified = true;
+        }
+
+        // Ensure provider is updated
+        updateData.provider = provider;
+
+        // Update user in database
+        await prisma.users.update({
+          where: { id: user.id },
+          data: updateData,
+        });
+
+        // Refresh user data
+        user = await this.getUserById(user.id);
+      }
+
+      if (!user) {
+        throw new Error('Failed to create or update user');
+      }
+
+      // Generate tokens
+      const tokens = await this.generateTokens(user);
+
+      return {
+        user: this.sanitizeUser(user),
+        tokens,
+        isNewUser,
+      };
+    } catch (error: any) {
+      console.error(`${provider} login/update error:`, error);
+      throw new Error(error.message || `${provider} authentication failed`);
     }
   }
 }

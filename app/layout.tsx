@@ -4,7 +4,7 @@
 // Root layout following TazaCore unified standards
 
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+// import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
 import { UnifiedAuthProvider } from '@/components/auth/UnifiedAuthProvider';
@@ -13,7 +13,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import '@/styles/unified-theme.css';
 
-const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({ subsets: ['latin'] });
 
 // Fix: Loại bỏ viewport khỏi metadata
 export const metadata: Metadata = {
@@ -71,7 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className="font-sans" suppressHydrationWarning>
         <ErrorBoundary>
           <UnifiedThemeProvider
             defaultConfig={{

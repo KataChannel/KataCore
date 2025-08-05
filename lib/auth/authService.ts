@@ -486,6 +486,8 @@ class AuthService {
         roleId: defaultRole.id,
         isVerified: true, // Social accounts are pre-verified
         [socialIdField]: socialId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       if (userData?.email) createData.email = userData.email;
@@ -495,20 +497,42 @@ class AuthService {
         data: createData,
         include: { role: true },
       });
-    } else if (!user[socialIdField as keyof typeof user]) {
-      // Link social account to existing user
+    } else {
+      // Update existing user with social account info
+      const updateData: any = {
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Link social account if not already linked
+      if (!user[socialIdField as keyof typeof user]) {
+        updateData[socialIdField] = socialId;
+      }
+
+      // Update profile information if provided and current data is empty/outdated
+      if (userData?.displayName && (!user.displayName || user.displayName.includes(`${provider} User`))) {
+        updateData.displayName = userData.displayName;
+      }
+
+      if (userData?.avatar && !user.avatar) {
+        updateData.avatar = userData.avatar;
+      }
+
+      if (userData?.email && !user.email) {
+        updateData.email = userData.email;
+      }
+
+      // Mark as verified if social login
+      if (!user.isVerified) {
+        updateData.isVerified = true;
+      }
+
       user = await prisma.user.update({
         where: { id: user.id },
-        data: { [socialIdField]: socialId },
+        data: updateData,
         include: { role: true },
       });
     }
-
-    // Update last seen
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastSeen: new Date() },
-    });
 
     const transformedUser = this.transformUserData(user);
     const tokens = this.generateTokens(transformedUser);
