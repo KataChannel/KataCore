@@ -361,6 +361,36 @@ model positions {
   departments  departments @relation(fields: [departmentId], references: [id])
 }
 
+model menu_items {
+  id              String            @id @default(uuid())
+  title           String
+  titleVi         String?
+  path            String
+  icon            String
+  permission      String?
+  parentId        String?
+  sortOrder       Int               @default(0)
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  parent          menu_items?       @relation("MenuItemParent", fields: [parentId], references: [id])
+  children        menu_items[]      @relation("MenuItemParent")
+  role_menu_items role_menu_items[]
+}
+
+model role_menu_items {
+  id         String     @id @default(uuid())
+  roleId     String
+  menuItemId String
+  canView    Boolean    @default(true)
+  canAccess  Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  role       roles      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  menuItem   menu_items @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, menuItemId])
+}
+
 model reports {
   id                                  String    @id @default(uuid())
   type                                String
@@ -377,16 +407,17 @@ model reports {
 }
 
 model roles {
-  id           String   @id @default(uuid())
-  name         String   @unique
-  description  String?
-  permissions  String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
-  isSystemRole Boolean  @default(false)
-  level        Int      @default(10)
-  modules      String?
-  users        users[]
+  id              String            @id @default(uuid())
+  name            String            @unique
+  description     String?
+  permissions     String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  isSystemRole    Boolean           @default(false)
+  level           Int               @default(10)
+  modules         String?
+  users           users[]
+  role_menu_items role_menu_items[]
 }
 
 model sessions {
