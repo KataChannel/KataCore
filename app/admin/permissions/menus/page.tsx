@@ -59,20 +59,55 @@ const RoleMenuPermissionsManager: React.FC = () => {
     try {
       setLoading(true);
 
+      // Get auth token
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
       // Load roles
-      const rolesResponse = await fetch('/api/admin/roles');
+      const rolesResponse = await fetch('/api/admin/roles', {
+        headers
+      });
+      
+      if (!rolesResponse.ok) {
+        throw new Error(`Failed to load roles: ${rolesResponse.status} ${rolesResponse.statusText}`);
+      }
+      
       const rolesData = await rolesResponse.json();
+      console.log('Loaded roles:', rolesData);
+      
       setRoles(rolesData);
 
       // Load all menu items
-      const menuResponse = await fetch('/api/admin/menu-items');
+      const menuResponse = await fetch('/api/admin/menu-items', {
+        headers
+      });
+      
+      if (!menuResponse.ok) {
+        throw new Error(`Failed to load menu items: ${menuResponse.status} ${menuResponse.statusText}`);
+      }
+      
       const menuData = await menuResponse.json();
       setMenuItems(menuData);
 
       // Load permissions for each role
       const permissionsData: Record<string, RoleMenuPermission[]> = {};
       for (const role of rolesData) {
-        const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${role.id}`);
+        const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${role.id}`, {
+          headers
+        });
+        
+        if (!permResponse.ok) {
+          throw new Error(`Failed to load permissions for role ${role.name}: ${permResponse.status} ${permResponse.statusText}`);
+        }
+        
         const permData = await permResponse.json();
         permissionsData[role.id] = permData;
       }
@@ -93,11 +128,19 @@ const RoleMenuPermissionsManager: React.FC = () => {
     try {
       setSaving(true);
 
+      // Get auth token
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+
       const currentPermission = permissions[roleId]?.find(p => p.menuItemId === menuItemId);
       
       const response = await fetch('/api/admin/role-menu-permissions', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -110,12 +153,20 @@ const RoleMenuPermissionsManager: React.FC = () => {
 
       if (response.ok) {
         // Reload permissions for this role
-        const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${roleId}`);
+        const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${roleId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        });
         const permData = await permResponse.json();
         setPermissions(prev => ({
           ...prev,
           [roleId]: permData,
         }));
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to update permission: ${response.status}`);
       }
 
     } catch (error) {

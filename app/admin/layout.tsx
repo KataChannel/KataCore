@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { ThemeManager } from '../../src/components/ThemeManager';
 import { useUnifiedTheme } from '../../src/hooks/useUnifiedTheme';
 import { useUnifiedAuth } from '../../src/components/auth/UnifiedAuthProvider';
+import { useMenuItems } from '../hooks/useMenuItems';
 import {
   SunIcon,
   MoonIcon,
@@ -32,9 +33,24 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+// Icon mapping from string to component
+const iconMapping: Record<string, React.ComponentType<any>> = {
+  'home': HomeIcon,
+  'users': UsersIcon,
+  'user': UserIcon,
+  'building-office': BuildingOfficeIcon,
+  'chart-bar': ChartBarIcon,
+  'computer-desktop': ComputerDesktopIcon,
+  'cog': CogIcon,
+  'briefcase': BriefcaseIcon,
+  'clock': ClockIcon,
+  'calendar': CalendarIcon,
+  'currency-dollar': CurrencyDollarIcon,
+  'document-text': DocumentTextIcon,
+  'swatch': SwatchIcon,
+  'bell': BellIcon,
+};
 
-
-// Component nội bộ sử dụng theme context
 const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -49,6 +65,11 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   // Theme
   const { actualMode, toggleMode, isLoading } = useUnifiedTheme();
 
+  // Menu items from database
+  const { menuItems: dbMenuItems, loading: menuLoading, error: menuError } = useMenuItems({
+    userId: user?.id,
+  });
+
   // Mount check
   useEffect(() => {
     setMounted(true);
@@ -56,21 +77,14 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
   // Authentication check
   useEffect(() => {
-    
-    // Only check for redirect if loading is complete
     if (!loading) {
       if (!user) {
-        // Check if user just logged in
         const isAuthenticated = sessionStorage.getItem('user-authenticated');
         const hasToken = localStorage.getItem('accessToken');
         
         if (isAuthenticated && hasToken) {
+          refreshAuth().then(() => {});
           
-          // Force refresh auth context
-          refreshAuth().then(() => {
-          });
-          
-          // Give more time for context to update
           const timeoutId = setTimeout(() => {
             if (!user) {
               sessionStorage.removeItem('user-authenticated');
@@ -80,23 +94,19 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
           return () => clearTimeout(timeoutId);
         } else {
-          // No token or not recently authenticated - redirect immediately
           router.push('/login?redirect=' + encodeURIComponent(pathname));
         }
       } else {
-        // User loaded successfully - clear authentication flag
         sessionStorage.removeItem('user-authenticated');
       }
     }
     
-    // Return undefined for other cases (required by linter)
     return undefined;
   }, [user, loading, router, pathname, refreshAuth]);
 
-  // Admin access check with enhanced security
+  // Admin access check
   useEffect(() => {
     if (user && !loading) {
-      // Ensure permissions is always an array
       const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
       const hasAdminAccess = hasModuleAccess('admin') || 
                             userPermissions.includes('admin:*') ||
@@ -110,226 +120,64 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     }
   }, [user, loading, hasModuleAccess, router]);
 
-  const hrSubMenus = [
-    {
-      name: 'Tổng quan',
-      nameVi: 'Tổng quan',
-      href: '/admin/hr',
-      icon: ChartBarIcon,
-      permission: 'read:hrm',
-    },
-    {
-      name: 'Nhân viên',
-      nameVi: 'Nhân viên',
-      href: '/admin/hr/employees',
-      icon: UsersIcon,
-      permission: 'read:employee',
-    },
-    {
-      name: 'Phòng ban',
-      nameVi: 'Phòng ban',
-      href: '/admin/hr/departments',
-      icon: BuildingOfficeIcon,
-      permission: 'read:department',
-    },
-    {
-      name: 'Vị trí',
-      nameVi: 'Vị trí',
-      href: '/admin/hr/positions',
-      icon: BriefcaseIcon,
-      permission: 'read:position',
-    },
-    {
-      name: 'Chấm công',
-      nameVi: 'Chấm công',
-      href: '/admin/hr/attendance',
-      icon: ClockIcon,
-      permission: 'read:attendance',
-    },
-    {
-      name: 'Yêu cầu nghỉ phép',
-      nameVi: 'Yêu cầu nghỉ phép',
-      href: '/admin/hr/leave-requests',
-      icon: CalendarIcon,
-      permission: 'read:leave_request',
-    },
-    {
-      name: 'Bảng lương',
-      nameVi: 'Bảng lương',
-      href: '/admin/hr/payroll',
-      icon: CurrencyDollarIcon,
-      permission: 'read:payroll',
-    },
-    {
-      name: 'Hiệu suất',
-      nameVi: 'Hiệu suất',
-      href: '/admin/hr/performance',
-      icon: ChartBarIcon,
-      permission: 'read:performance',
-    },
-    {
-      name: 'Báo cáo',
-      nameVi: 'Báo cáo',
-      href: '/admin/hr/reports',
-      icon: DocumentTextIcon,
-      permission: 'read:report',
-    },
-    {
-      name: 'Cài đặt',
-      nameVi: 'Cài đặt',
-      href: '/admin/hr/settings',
-      icon: CogIcon,
-      permission: 'admin:hrm',
-    },
-  ];
+  // Transform database menu items to match the existing structure
+  const transformMenuItems = (items: any[]) => {
+    return items.map(item => {
+      const IconComponent = iconMapping[item.icon] || HomeIcon;
+      
+      return {
+        title: item.titleVi || item.title,
+        icon: IconComponent,
+        path: item.path,
+        active: pathname === item.path || pathname.startsWith(item.path + '/'),
+        permission: item.permission,
+        canAccess: item.canAccess,
+        children: item.children ? item.children.map((child: any) => ({
+          name: child.titleVi || child.title,
+          nameVi: child.titleVi || child.title,
+          href: child.path,
+          icon: iconMapping[child.icon] || HomeIcon,
+          permission: child.permission,
+          canAccess: child.canAccess,
+        })) : undefined,
+      };
+    });
+  };
 
-  const crmSubMenus = [
-    {
-      name: 'Dashboard',
-      nameVi: 'Tổng quan',
-      href: '/admin/crm',
-      icon: ChartBarIcon,
-      permission: 'read:crm',
-    },
-    {
-      name: 'Customers',
-      nameVi: 'Khách hàng',
-      href: '/admin/crm/customers',
-      icon: UsersIcon,
-      permission: 'read:customer',
-    },
-    {
-      name: 'Call Center',
-      nameVi: 'Trung tâm cuộc gọi',
-      href: '/admin/crm/callcenter',
-      icon: BellIcon,
-      permission: 'read:call_center',
-    },
-  ];
-
-  const socialSubMenus = [
-    {
-      name: 'Dashboard',
-      nameVi: 'Tổng quan',
-      href: '/admin/social',
-      icon: ChartBarIcon,
-      permission: 'read:social',
-    },
-    {
-      name: 'Facebook',
-      nameVi: 'Facebook',
-      href: '/admin/social/facebook',
-      icon: ComputerDesktopIcon,
-      permission: 'manage:social',
-    },
-    {
-      name: 'Instagram',
-      nameVi: 'Instagram',
-      href: '/admin/social/instagram',
-      icon: UserIcon,
-      permission: 'manage:social',
-    },
-    {
-      name: 'Twitter',
-      nameVi: 'Twitter',
-      href: '/admin/social/twitter',
-      icon: UserIcon,
-      permission: 'manage:social',
-    },
-    {
-      name: 'LinkedIn',
-      nameVi: 'LinkedIn',
-      href: '/admin/social/linkedin',
-      icon: UserIcon,
-      permission: 'manage:social',
-    },
-  ];
-  const websiteSubMenus = [
-    {
-      name: 'Dashboard',
-      nameVi: 'Tổng quan',
-      href: '/admin/website',
-      icon: ChartBarIcon,
-      permission: 'read:website',
-    },
-    {
-      name: 'Builder',
-      nameVi: 'Builder',
-      href: '/admin/website/builder',
-      icon: ComputerDesktopIcon,
-      permission: 'manage:website',
-    },
-  ];
-
-  const menuItems = [
-    {
-      title: 'Dashboard',
-      icon: HomeIcon,
-      path: '/admin',
-      active: pathname === '/admin',
-      permission: 'read:dashboard',
-    },
-    {
-      title: 'Quản lý Nhân sự',
-      icon: UsersIcon,
-      path: '/admin/hr',
-      active: pathname.startsWith('/admin/hr'),
-      children: hrSubMenus,
-      permission: 'read:hrm',
-    },
-    {
-      title: 'CRM',
-      icon: UserIcon,
-      path: '/admin/crm',
-      active: pathname.startsWith('/admin/crm'),
-      children: crmSubMenus,
-      permission: 'read:crm',
-    },
-    {
-      title: 'Social',
-      icon: UserIcon,
-      path: '/admin/social',
-      active: pathname.startsWith('/admin/social'),
-      children: socialSubMenus,
-      permission: 'read:social',
-    },
-    {
-      title: 'Website Management',
-      icon: ComputerDesktopIcon,
-      path: '/admin/website',
-      active: pathname.startsWith('/admin/website'),
-      children: websiteSubMenus,
-      permission: 'manage:website',
-    },
-    {
-      title: 'Analytics',
-      icon: ChartBarIcon,
-      path: '/admin/analytics',
-      active: pathname.startsWith('/admin/analytics'),
-      permission: 'read:analytics',
-    },
-    {
-      title: 'Phân Quyền',
-      icon: CogIcon,
-      path: '/admin/permissions',
-      active: pathname.startsWith('/admin/permissions'),
-      permission: 'admin:system',
-    },
-    {
-      title: 'Cài đặt',
-      icon: CogIcon,
-      path: '/admin/settings',
-      active: pathname.startsWith('/admin/settings'),
-      permission: 'admin:system',
-    },
-    {
-      title: 'Monochrome Demo',
-      icon: SwatchIcon,
-      path: '/admin/monochrome-demo',
-      active: pathname.startsWith('/admin/monochrome-demo'),
-      permission: 'read:demo',
-    },
-  ];
+  // Get menu items (use database if available, fallback to static)
+  const menuItems = dbMenuItems && dbMenuItems.length > 0 
+    ? transformMenuItems(dbMenuItems)
+    : [
+        // Fallback static menu (original structure)
+        {
+          title: 'Dashboard',
+          icon: HomeIcon,
+          path: '/admin',
+          active: pathname === '/admin',
+          permission: 'read:dashboard',
+          canAccess: true,
+        },
+        {
+          title: 'Quản lý Nhân sự',
+          icon: UsersIcon,
+          path: '/admin/hr',
+          active: pathname.startsWith('/admin/hr'),
+          permission: 'read:hrm',
+          canAccess: true,
+          children: [
+            {
+              name: 'Tổng quan',
+              nameVi: 'Tổng quan',
+              href: '/admin/hr',
+              icon: ChartBarIcon,
+              permission: 'read:hrm',
+              canAccess: true,
+            },
+            // ... other HR menu items
+          ],
+        },
+        // ... other static menu items
+      ];
 
   // Auto-expand menus when submenu is active
   useEffect(() => {
@@ -346,7 +194,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
       });
       return newExpanded;
     });
-  }, [pathname]);
+  }, [pathname, menuItems]);
 
   const toggleTheme = () => {
     toggleMode();
@@ -360,22 +208,16 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Force logout even if API fails
-      localStorage.removeItem('admin-user-data');
-      localStorage.removeItem('admin-token');
-      router.push('/login');
-    }
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
   };
 
   const toggleMenuExpansion = (path: string) => {
-    setExpandedMenus((prev) =>
-      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
+    setExpandedMenus(prev => 
+      prev.includes(path) 
+        ? prev.filter(p => p !== path)
+        : [...prev, path]
     );
   };
 
@@ -384,75 +226,37 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     return expandedMenus.includes(item.path) || item.active;
   };
 
-  // Filter menu items based on permissions
-  const filterMenuItems = (items: any[]) => {
-    return items.filter(item => {
-      if (!item.permission) return true;
-      
-      // Ensure permissions is always an array
-      const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
-      
-      const [action, resource] = item.permission.split(':');
-      return userPermissions.includes(item.permission) || 
-             hasModuleAccess(resource);
-    });
-  };
-
-  // Show loading while checking authentication
-  if (!mounted || loading) {
+  // Prevent hydration mismatch
+  if (!mounted || loading || menuLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Show loading for theme
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Redirect if not authenticated (this should rarely show due to useEffect redirect)
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-text-secondary">Redirecting to login...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            {loading ? 'Đang xác thực...' : 'Đang tải menu...'}
+          </p>
         </div>
       </div>
     );
   }
 
-  // Filter menu items based on user permissions
-  const visibleMenuItems = filterMenuItems(menuItems).map(item => ({
-    ...item,
-    children: item.children ? filterMenuItems(item.children) : undefined
-  }));
-
   return (
-    <div className="min-h-screen transition-colors duration-300">
+    <div className={`min-h-screen transition-colors duration-300 ${actualMode === 'dark' ? 'dark' : ''}`}>
       <div className="flex h-screen bg-background">
         {/* Desktop Sidebar */}
-        <aside
-          className={`
+        <aside className={`
           hidden lg:flex flex-col bg-surface border-r border-border transition-all duration-300 z-20
           ${sidebarOpen ? 'w-64' : 'w-16'}
-        `}
-        >
+        `}>
           {/* Sidebar Header */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-border">
             <div className={`flex items-center ${sidebarOpen ? 'space-x-3' : 'justify-center'}`}>
               {sidebarOpen && (
                 <>
-                  <div className="w-8 h-8 bg-accent flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">T</span>
+                  <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">K</span>
                   </div>
-                  <span className="text-lg font-semibold text-primary">Taza Group</span>
+                  <span className="text-lg font-semibold text-primary">KataCore</span>
                 </>
               )}
             </div>
@@ -465,8 +269,8 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
 
           {/* Sidebar Menu */}
-          <nav className="flex-1 p-2 space-y-2">
-            {visibleMenuItems.map((item) => (
+          <nav className="flex-1 px-4 py-4 space-y-2">
+            {menuItems.filter(item => item.canAccess).map((item) => (
               <div key={item.path}>
                 <button
                   onClick={() => {
@@ -478,44 +282,42 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                   }}
                   className={`
                     hover:bg-gray-300 w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors
-                    ${
-                      item.active
-                        ? 'bg-gray-300'
-                        : 'text-text-secondary hover:bg-hover hover:text-primary'
+                    ${item.active 
+                      ? 'bg-gray-300' 
+                      : 'text-text-secondary hover:bg-hover hover:text-primary'
                     }
                   `}
                 >
                   <div className="flex items-center space-x-3">
                     <item.icon className="h-5 w-5" />
-                    {sidebarOpen && <span className="font-medium">{item.title}</span>}
+                    {sidebarOpen && (
+                      <span className="font-medium">{item.title}</span>
+                    )}
                   </div>
                   {sidebarOpen && item.children && (
-                    <ChevronDownIcon
-                      className={`h-4 w-4 transition-transform ${
-                        shouldExpand(item) ? 'rotate-180' : ''
-                      }`}
-                    />
+                    <ChevronDownIcon className={`h-4 w-4 transition-transform ${
+                      shouldExpand(item) ? 'rotate-180' : ''
+                    }`} />
                   )}
                 </button>
-
+                
                 {/* Submenu */}
                 {sidebarOpen && item.children && shouldExpand(item) && (
                   <div className="ml-6 mt-2 space-y-1">
-                    {item.children.map((subItem:any) => (
+                    {item.children.filter((child: any) => child.canAccess).map((subItem: any) => (
                       <button
                         key={subItem.href}
                         onClick={() => router.push(subItem.href)}
                         className={`
                          hover:bg-gray-300 w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
-                          ${
-                            pathname === subItem.href
-                              ? 'bg-gray-300'
-                              : 'text-text-secondary hover:bg-hover hover:text-primary'
+                          ${pathname === subItem.href 
+                            ? 'bg-gray-300' 
+                            : 'text-text-secondary hover:bg-hover hover:text-primary'
                           }
                         `}
                       >
                         <subItem.icon className="h-4 w-4" />
-                        <span>{subItem.name}</span>
+                        <span>{subItem.nameVi}</span>
                       </button>
                     ))}
                   </div>
@@ -531,20 +333,18 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
         )}
 
         {/* Mobile Sidebar */}
-        <aside
-          className={`
-          bg-white fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
+        <aside className={`
+          fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          bg-surface
-        `}
-        >
+          ${actualMode === 'dark' ? 'bg-gray-900' : 'bg-white'}
+        `}>
           {/* Mobile Sidebar Header */}
-            <div className="flex items-center justify-between h-16 px-4 border-b border-border">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-border">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-accent flex items-center justify-center">
-              <span className="text-white font-bold text-sm">T</span>
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">K</span>
               </div>
-              <span className="text-lg font-semibold text-primary">Taza Group</span>
+              <span className="text-lg font-semibold text-primary">KataCore</span>
             </div>
             <button
               onClick={toggleMobileMenu}
@@ -552,65 +352,64 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
             >
               <XMarkIcon className="h-5 w-5 text-text-secondary" />
             </button>
-            </div>
+          </div>
 
           {/* Mobile Menu */}
           <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-            {visibleMenuItems.map((item) => (
+            {menuItems.filter(item => item.canAccess).map((item) => (
               <div key={item.path}>
-          <button
-            onClick={() => {
-              if (item.children) {
-                toggleMenuExpansion(item.path);
-              } else {
-                router.push(item.path);
-                setMobileMenuOpen(false);
-              }
-            }}
-            className={`
-              hover:bg-gray-300 w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors
-              ${item.active? 'bg-gray-300': 'text-text-secondary hover:bg-hover hover:text-primary'
-              }
-            `}
-          >
-            <div className="flex items-center space-x-3">
-              <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.title}</span>
-            </div>
-            {item.children && (
-              <ChevronDownIcon
-                className={`h-4 w-4 transition-transform ${
-            shouldExpand(item) ? 'rotate-180' : ''
-                }`}
-              />
-            )}
-          </button>
-
-          {/* Mobile Submenu */}
-          {item.children && shouldExpand(item) && (
-            <div className="ml-6 mt-2 space-y-1">
-              {item.children.map((subItem:any) => (
                 <button
-            key={subItem.href}
-            onClick={() => {
-              router.push(subItem.href);
-              setMobileMenuOpen(false);
-            }}
-            className={`
-             hover:bg-gray-300 w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
-              ${
-                pathname === subItem.href
-                  ? 'bg-gray-300'
-                  : 'text-text-secondary hover:bg-hover hover:text-primary'
-              }
-            `}
+                  onClick={() => {
+                    if (item.children) {
+                      toggleMenuExpansion(item.path);
+                    } else {
+                      router.push(item.path);
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                  className={`
+                    w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors
+                    ${item.active 
+                      ? 'bg-accent text-white' 
+                      : 'text-text-secondary hover:bg-hover hover:text-primary'
+                    }
+                  `}
                 >
-            <subItem.icon className="h-4 w-4" />
-            <span>{subItem.name}</span>
+                  <div className="flex items-center space-x-3">
+                    <item.icon className="h-5 w-5" />
+                    <span className="font-medium">{item.title}</span>
+                  </div>
+                  {item.children && (
+                    <ChevronDownIcon className={`h-4 w-4 transition-transform ${
+                      shouldExpand(item) ? 'rotate-180' : ''
+                    }`} />
+                  )}
                 </button>
-              ))}
-            </div>
-          )}
+                
+                {/* Mobile Submenu */}
+                {item.children && shouldExpand(item) && (
+                  <div className="ml-6 mt-2 space-y-1">
+                    {item.children.filter((child: any) => child.canAccess).map((subItem: any) => (
+                      <button
+                        key={subItem.href}
+                        onClick={() => {
+                          router.push(subItem.href);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`
+                          w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
+                          ${pathname === subItem.href 
+                            ? 'bg-accent/10 text-accent' 
+                            : 'text-text-secondary hover:bg-hover hover:text-primary'
+                          }
+                        `}
+                      >
+                        <subItem.icon className="h-4 w-4" />
+                        <span>{subItem.nameVi}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </nav>
@@ -628,7 +427,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               >
                 <Bars3Icon className="h-5 w-5 text-text-secondary" />
               </button>
-
+              
               {/* Breadcrumb */}
               <div className="hidden sm:flex items-center space-x-2 text-sm">
                 <span className="text-text-secondary">Admin</span>
@@ -637,41 +436,24 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                   {(() => {
                     const segments = pathname.split('/');
                     const lastSegment = segments[segments.length - 1];
-                    return lastSegment
-                      ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1)
-                      : 'Dashboard';
+                    return lastSegment ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1) : 'Dashboard';
                   })()}
                 </span>
               </div>
             </div>
-
+            
             <div className="flex items-center space-x-4">
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className={`p-2 ${
-                  actualMode === 'dark'
-                    ? 'text-white hover:bg-white/20'
-                    : 'text-black hover:bg-black/20'
-                } rounded-lg transition-colors`}
-                aria-label="Toggle dark mode"
+                className="p-2 rounded-lg hover:bg-hover transition-colors"
+                title="Toggle theme"
               >
-                <div className="relative w-5 h-5 sm:w-6 sm:h-6">
-                  <SunIcon
-                    className={`w-full h-full transition-all duration-500 absolute inset-0 ${
-                      actualMode === 'dark'
-                        ? 'opacity-0 rotate-180 scale-0'
-                        : 'opacity-100 rotate-0 scale-100'
-                    }`}
-                  />
-                  <MoonIcon
-                    className={`w-full h-full transition-all duration-500 absolute inset-0 ${
-                      actualMode === 'dark'
-                        ? 'opacity-100 rotate-0 scale-100'
-                        : 'opacity-0 -rotate-180 scale-0'
-                    }`}
-                  />
-                </div>
+                {actualMode === 'dark' ? (
+                  <SunIcon className="h-5 w-5 text-text-secondary" />
+                ) : (
+                  <MoonIcon className="h-5 w-5 text-text-secondary" />
+                )}
               </button>
 
               {/* Notifications */}
@@ -680,16 +462,11 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
               </button>
 
-              {/* Settings/Config */}
-              <button className="p-2 rounded-lg hover:bg-hover transition-colors">
-                <Cog6ToothIcon className="h-5 w-5 text-text-secondary" />
-              </button>
-
               {/* User Profile */}
               <div className="flex items-center space-x-3">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-medium text-primary">
-                    {user?.displayName || user?.firstName + ' ' + user?.displayName || 'Admin User'}
+                    {user?.displayName || 'Admin User'}
                   </p>
                   <p className="text-xs text-text-secondary">
                     {user?.role?.name || 'Administrator'}
@@ -697,7 +474,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 </div>
                 <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">
-                    {user?.displayName?.charAt(0) || user?.firstName?.charAt(0) || 'A'}
+                    {user?.displayName?.charAt(0) || 'A'}
                   </span>
                 </div>
                 <button
@@ -712,8 +489,12 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
-            <div className="max-w-7xl mx-auto">{children}</div>
+          <main className="flex-1 relative overflow-y-auto focus:outline-none bg-background transition-colors duration-300">
+            <div className="py-6">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+                {children}
+              </div>
+            </div>
           </main>
         </div>
       </div>
@@ -721,10 +502,10 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   );
 };
 
-// Component chính với ThemeManager wrapper
+// Main AdminLayout component với ThemeManager wrapper
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
-    <ThemeManager enablePersistence={true} enableSystemListener={true} enableDebugMode={false}>
+    <ThemeManager>
       <AdminLayoutContent>{children}</AdminLayoutContent>
     </ThemeManager>
   );

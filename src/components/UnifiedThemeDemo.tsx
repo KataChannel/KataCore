@@ -1,11 +1,9 @@
-// Example component demonstrating the unified theme system
-// This shows how to use the new unified theme in a real component
 'use client';
 import React, { useState } from 'react';
 import { ThemeModeToggle, LanguageToggle, ThemeControlPanel } from './ThemeManager';
 import { useUnifiedTheme, useSafeThemeMode, useSafeLanguage } from '@/hooks/useUnifiedTheme';
 
-export function UnifiedThemeDemo() {
+function UnifiedThemeDemo() {
   const [activeTab, setActiveTab] = useState<'overview' | 'controls' | 'examples'>('overview');
 
   // Different ways to access theme data

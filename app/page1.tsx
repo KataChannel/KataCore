@@ -1,5 +1,5 @@
 import { ThemeErrorBoundary } from '@/components/ThemeErrorBoundary';
-import { UnifiedThemeDemo } from '@/components/UnifiedThemeDemo';
+import UnifiedThemeDemo from '@/components/UnifiedThemeDemo';
 
 export default function HomePage() {
   return (

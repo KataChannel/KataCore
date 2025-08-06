@@ -57,6 +57,8 @@
     "db:seed": "tsx prisma/seed/unified-comprehensive-seed.ts",
     "db:seed:master": "tsx prisma/seed/master-seed.ts",
     "db:seed:unified": "tsx prisma/seed/unified-comprehensive-seed.ts",
+    "db:backup": "tsx prisma/backup.ts",
+    "db:restore": "tsx prisma/restore.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "db:pull": "prisma db pull",

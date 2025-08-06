@@ -46,6 +46,8 @@ const RoleManagement: React.FC = () => {
       setLoading(true);
       const response = await fetch('/api/admin/roles');
       const data = await response.json();
+      console.log('Loaded roles:', data);
+      
       setRoles(data);
     } catch (error) {
       console.error('Error loading roles:', error);
