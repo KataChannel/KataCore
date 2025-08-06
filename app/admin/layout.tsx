@@ -1,9 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { ThemeManager } from '../../src/components/ThemeManager';
-import { useUnifiedTheme } from '../../src/hooks/useUnifiedTheme';
-import { useUnifiedAuth } from '../../src/components/auth/UnifiedAuthProvider';
 import { useMenuItems } from '../hooks/useMenuItems';
 import {
   SunIcon,
@@ -28,6 +25,9 @@ import {
   DocumentTextIcon,
   SwatchIcon,
 } from '@heroicons/react/24/outline';
+import { useUnifiedTheme } from '@/hooks';
+import { useUnifiedAuth } from '@/lib/auth';
+import ThemeManager from '../components/ThemeManager';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

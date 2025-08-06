@@ -5,14 +5,12 @@
 
 import type { Metadata, Viewport } from 'next';
 // import { Inter } from 'next/font/google';
-import '@/styles/globals.css';
+// import './globals.css';
 import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
 import { UnifiedAuthProvider } from '@/components/auth/UnifiedAuthProvider';
 import { ThemeInitScript } from '@/components/ThemeManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
-import '@/styles/unified-theme.css';
-
 // const inter = Inter({ subsets: ['latin'] });
 
 // Fix: Loại bỏ viewport khỏi metadata

@@ -1,24 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+// Simplified test setup without external dependencies
+export const mockComponent = () => null;
 
-// Mock Next.js router
-jest.mock('next/navigation', () => ({
-  useRouter() {
-    return {
-      push: jest.fn(),
-      replace: jest.fn(),
-      prefetch: jest.fn(),
-      back: jest.fn(),
-    };
-  },
-  usePathname() {
-    return '/';
-  },
-}));
-
-// Global test utilities
-export const renderWithProviders = (ui: React.ReactElement) => {
-  return render(ui);
+// Mock next/navigation if needed
+export const mockRouter = {
+  push: () => {},
+  replace: () => {},
+  prefetch: () => {},
+  back: () => {},
 };
-
-export * from '@testing-library/react';

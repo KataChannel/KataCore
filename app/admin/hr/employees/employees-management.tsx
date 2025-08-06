@@ -20,7 +20,7 @@ import {
   XCircleIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
-import ResizableTable from '@/components/ui/shared/Table';
+// import ResizableTable from '@/components/ui/shared/Table';
 import AdvancedTable from '@/components/ui/shared/katatable';
 import { Table, TableDemo } from '@/components/ui/shared/table';
 

@@ -47,3 +47,17 @@ Thumbs.db
 *.tgz
 
 certificates
+# BunJS specific
+.bun/
+bun.lockb
+.env.bun
+
+# Migration artifacts
+migration_backup_*/
+backup_*/
+.migration-backup-path
+
+# Next.js v15
+.next/
+out/
+dist/
