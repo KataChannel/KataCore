@@ -8,6 +8,7 @@ import './styles/globals.css';
 import { UnifiedAuthProvider } from '@/components/auth/UnifiedAuthProvider';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
+import { GraphQLProvider } from '@/components/providers/GraphQLProvider';
 
 // Fix: Loại bỏ viewport khỏi metadata
 export const metadata: Metadata = {
@@ -75,10 +76,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enablePersistence={true}
           enableSystemListener={true}
         >
-          <UnifiedAuthProvider>
-            {children}
-            <PWAInstallPrompt />
-          </UnifiedAuthProvider>
+          <GraphQLProvider>
+            <UnifiedAuthProvider>
+              {children}
+              <PWAInstallPrompt />
+            </UnifiedAuthProvider>
+          </GraphQLProvider>
         </UnifiedThemeProvider>
       </body>
     </html>

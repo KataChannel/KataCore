@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   UsersIcon, 
-  CogIcon,
   ShieldCheckIcon,
   KeyIcon,
-  UserGroupIcon,
-  QueueListIcon,
-  UserPlusIcon,
-  ChartBarIcon
+  HomeIcon,
+  Bars3Icon,
+  BoltIcon,
+  BeakerIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface PermissionsLayoutProps {
@@ -21,42 +21,49 @@ interface PermissionsLayoutProps {
 const PermissionsLayout: React.FC<PermissionsLayoutProps> = ({ children }) => {
   const pathname = usePathname();
 
-  const navigation = [
+    const menuItems = [
     {
-      name: 'Tổng quan',
+      name: 'Dashboard',
       href: '/admin/permissions',
-      icon: ChartBarIcon,
-      current: pathname === '/admin/permissions',
-      description: 'Xem tổng quan hệ thống phân quyền'
+      icon: HomeIcon,
+      description: 'Tổng quan hệ thống'
     },
     {
-      name: 'Quản lý Người dùng',
+      name: 'GraphQL API',
+      href: '/admin/permissions/graphql',
+      icon: BoltIcon,
+      description: 'GraphQL API Dashboard'
+    },
+    {
+      name: 'GraphQL Demo',
+      href: '/admin/permissions/graphql-demo',
+      icon: BeakerIcon,
+      description: 'Interactive GraphQL Demo'
+    },
+    {
+      name: 'Quản lý Users',
       href: '/admin/permissions/users',
       icon: UsersIcon,
-      current: pathname.startsWith('/admin/permissions/users'),
-      description: 'Tạo và quản lý người dùng'
+      description: 'Tạo, sửa, xóa users'
     },
     {
-      name: 'Quản lý Vai trò',
+      name: 'Quản lý Roles',
       href: '/admin/permissions/roles',
-      icon: UserGroupIcon,
-      current: pathname.startsWith('/admin/permissions/roles'),
-      description: 'Tạo và quản lý vai trò'
+      icon: ShieldCheckIcon,
+      description: 'Phân quyền vai trò'
     },
     {
       name: 'Quản lý Menu',
       href: '/admin/permissions/menus',
-      icon: QueueListIcon,
-      current: pathname.startsWith('/admin/permissions/menus'),
-      description: 'Quản lý quyền truy cập menu'
+      icon: Bars3Icon,
+      description: 'Cấu trúc menu hệ thống'
     },
     {
-      name: 'Phân quyền Người dùng',
+      name: 'Phân quyền User-Role',
       href: '/admin/permissions/user-roles',
       icon: KeyIcon,
-      current: pathname.startsWith('/admin/permissions/user-roles'),
-      description: 'Phân quyền vai trò cho người dùng'
-    },
+      description: 'Gán role cho users'
+    }
   ];
 
   return (
@@ -85,14 +92,15 @@ const PermissionsLayout: React.FC<PermissionsLayoutProps> = ({ children }) => {
         <div className="hidden lg:block lg:w-80 bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700">
           <nav className="mt-6 px-4">
             <div className="space-y-2">
-              {navigation.map((item) => {
+              {menuItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={`${
-                      item.current
+                      isActive
                         ? 'bg-blue-50 dark:bg-blue-900/20 border-r-4 border-blue-600 text-blue-700 dark:text-blue-300'
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                     } group flex items-start px-4 py-3 text-sm font-medium transition-colors duration-150 rounded-l-lg`}
@@ -115,14 +123,15 @@ const PermissionsLayout: React.FC<PermissionsLayoutProps> = ({ children }) => {
         <div className="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="px-4 py-3">
             <div className="flex space-x-2 overflow-x-auto">
-              {navigation.map((item) => {
+              {menuItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={`${
-                      item.current
+                      isActive
                         ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     } flex items-center px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors duration-150`}
