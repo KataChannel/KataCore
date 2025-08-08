@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Token not found' }, { status: 401 });
     }
 
-    const decoded = authService.verifyToken(token);
+    const decoded = await authService.verifyToken(token);
     await authService.logout(decoded.userId);
 
     const response = NextResponse.json({

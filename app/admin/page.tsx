@@ -84,17 +84,17 @@ const DashboardStats = () => {
 const QuickActions = () => {
   const actions = [
     {
-      name: 'Thêm nhân viên',
-      description: 'Tạo hồ sơ nhân viên mới',
+      name: 'Quản lý người dùng',
+      description: 'Tạo và quản lý người dùng',
       icon: PlusIcon,
-      href: '/admin/hr/employees/new',
+      href: '/admin/permissions',
       color: 'bg-blue-500',
     },
     {
-      name: 'Xem báo cáo',
-      description: 'Kiểm tra báo cáo hiệu suất',
+      name: 'Xem analytics',
+      description: 'Kiểm tra thống kê hệ thống',
       icon: EyeIcon,
-      href: '/admin/hr/reports',
+      href: '/admin/analytics',
       color: 'bg-green-500',
     },
     {

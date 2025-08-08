@@ -599,7 +599,7 @@ function getModuleFromResource(resource: string): string {
     budget: 'finance',
 
     // HRM
-    employee: 'hrm',
+    employees: 'hrm',
     payroll: 'hrm',
     attendance: 'hrm',
     leave: 'hrm',

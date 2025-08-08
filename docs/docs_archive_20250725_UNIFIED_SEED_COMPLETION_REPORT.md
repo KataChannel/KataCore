@@ -41,8 +41,8 @@
 ### 4. **Complete Data Structure Created**
 
 #### 🔐 Authentication System
-- **Super Admin:** `it@tazagroup.vn` / `TazaGroup@2024!` (Level 10)
-- **System Admin:** `admin@tazagroup.vn` / `TazaGroup@2024!` (Level 9)
+- **Super Admin:** `it@tazagroup.vn` / `123456` (Level 10)
+- **System Admin:** `admin@tazagroup.vn` / `123456` (Level 9)
 - **6 Department Managers** (Level 6-8)
 - **9 Employees** (Level 3)
 
@@ -139,8 +139,8 @@ cd site && npx tsx prisma/seed/unified-comprehensive-seed.ts
 
 ### Login Credentials
 ```
-Super Admin: it@tazagroup.vn / TazaGroup@2024!
-All Users:   {email} / TazaGroup@2024!
+Super Admin: it@tazagroup.vn / 123456
+All Users:   {email} / 123456
 ```
 
 ## 🏆 Project Outcomes

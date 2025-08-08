@@ -17,7 +17,7 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { INFORMATION_HUB_MODULES } from '@/types/information-hub';
-import { useInformationHub } from '@/providers/InformationHubProvider';
+import { useInformationHub } from '@/lib/providers/InformationHubProvider';
 
 const iconMap = {
   dashboard: HomeIcon,

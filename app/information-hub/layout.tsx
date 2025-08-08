@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { InformationHubProvider } from '@/providers/InformationHubProvider';
+
 import { InformationHubSidebar } from '@/components/information-hub/layout/Sidebar';
 import { InformationHubHeader } from '@/components/information-hub/layout/Header';
+import { InformationHubProvider } from '@/lib/providers/InformationHubProvider';
 
 interface InformationHubLayoutProps {
   children: React.ReactNode;

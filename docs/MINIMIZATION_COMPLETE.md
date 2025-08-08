@@ -88,7 +88,7 @@ cd site && npm run db:seed
 
 ### **Super Administrator**
 - **Email**: `it@tazagroup.vn`
-- **Password**: `TazaGroup@2024!`
+- **Password**: `123456`
 - **Access**: Full system control
 
 ### **Complete Data Set**

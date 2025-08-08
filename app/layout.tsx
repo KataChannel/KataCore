@@ -4,14 +4,10 @@
 // Root layout following TazaCore unified standards
 
 import type { Metadata, Viewport } from 'next';
-// import { Inter } from 'next/font/google';
-// import './globals.css';
-import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
+import './styles/globals.css';
 import { UnifiedAuthProvider } from '@/components/auth/UnifiedAuthProvider';
-import { ThemeInitScript } from '@/components/ThemeManager';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
-// const inter = Inter({ subsets: ['latin'] });
+import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
 
 // Fix: Loại bỏ viewport khỏi metadata
 export const metadata: Metadata = {
@@ -46,13 +42,13 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: 'cover',
   themeColor: '#000000',
-}
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
-        <ThemeInitScript />
+        {/* ThemeInitScript will be added after fixing import */}
         {/* PWA meta tags */}
         <meta name="application-name" content="TazaCore" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -70,22 +66,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className="font-sans" suppressHydrationWarning>
-        <ErrorBoundary>
-          <UnifiedThemeProvider
-            defaultConfig={{
-              mode: 'light',
-              language: 'vi',
-              colorScheme: 'monochrome',
-            }}
-            enablePersistence={true}
-            enableSystemListener={true}
-          >
-            <UnifiedAuthProvider>
-              {children}
-              <PWAInstallPrompt />
-            </UnifiedAuthProvider>
-          </UnifiedThemeProvider>
-        </ErrorBoundary>
+        <UnifiedThemeProvider
+          defaultConfig={{
+            mode: 'light',
+            language: 'vi',
+            colorScheme: 'colorful',
+          }}
+          enablePersistence={true}
+          enableSystemListener={true}
+        >
+          <UnifiedAuthProvider>
+            {children}
+            <PWAInstallPrompt />
+          </UnifiedAuthProvider>
+        </UnifiedThemeProvider>
       </body>
     </html>
   );

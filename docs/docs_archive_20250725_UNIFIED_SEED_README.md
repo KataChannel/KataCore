@@ -31,7 +31,7 @@ Script seed data tổng hợp từ tất cả các modules và systems trong d�
 
 ### ✅ Super User mặc định
 - **Email**: `it@tazagroup.vn`
-- **Password**: `TazaGroup@2024!`
+- **Password**: `123456`
 - **Role**: Super Administrator với quyền tối cao
 
 ### 🏢 Cấu trúc tổ chức hoàn chỉnh
@@ -96,31 +96,31 @@ npx tsx prisma/seed/unified-comprehensive-seed.ts
 ### System Users
 | Role | Email | Password | Mô tả |
 |------|-------|----------|-------|
-| Super Admin | `it@tazagroup.vn` | `TazaGroup@2024!` | Quyền tối cao |
-| System Admin | `admin@tazagroup.vn` | `TazaGroup@2024!` | Quản trị hệ thống |
+| Super Admin | `it@tazagroup.vn` | `123456` | Quyền tối cao |
+| System Admin | `admin@tazagroup.vn` | `123456` | Quản trị hệ thống |
 
 ### Management Users
 | Role | Email | Password | Department |
 |------|-------|----------|------------|
-| CTO | `cto@tazagroup.vn` | `TazaGroup@2024!` | Technology |
-| HR Director | `hr.director@tazagroup.vn` | `TazaGroup@2024!` | Human Resources |
-| Sales Director | `sales.director@tazagroup.vn` | `TazaGroup@2024!` | Sales & Marketing |
-| Finance Manager | `finance.manager@tazagroup.vn` | `TazaGroup@2024!` | Finance & Accounting |
-| Operations Manager | `ops.manager@tazagroup.vn` | `TazaGroup@2024!` | Operations |
-| QA Manager | `qa.manager@tazagroup.vn` | `TazaGroup@2024!` | Quality Assurance |
+| CTO | `cto@tazagroup.vn` | `123456` | Technology |
+| HR Director | `hr.director@tazagroup.vn` | `123456` | Human Resources |
+| Sales Director | `sales.director@tazagroup.vn` | `123456` | Sales & Marketing |
+| Finance Manager | `finance.manager@tazagroup.vn` | `123456` | Finance & Accounting |
+| Operations Manager | `ops.manager@tazagroup.vn` | `123456` | Operations |
+| QA Manager | `qa.manager@tazagroup.vn` | `123456` | Quality Assurance |
 
 ### Employee Users
 | Email | Password | Department | Position |
 |-------|----------|------------|----------|
-| `dev1@tazagroup.vn` | `TazaGroup@2024!` | Technology | Senior Software Engineer |
-| `dev2@tazagroup.vn` | `TazaGroup@2024!` | Technology | Backend Developer |
-| `devops@tazagroup.vn` | `TazaGroup@2024!` | Technology | DevOps Engineer |
-| `hr1@tazagroup.vn` | `TazaGroup@2024!` | HR | HR Specialist |
-| `sales1@tazagroup.vn` | `TazaGroup@2024!` | Sales | Senior Sales Executive |
-| `sales2@tazagroup.vn` | `TazaGroup@2024!` | Sales | Sales Executive |
-| `accountant1@tazagroup.vn` | `TazaGroup@2024!` | Finance | Senior Accountant |
-| `ops1@tazagroup.vn` | `TazaGroup@2024!` | Operations | Operations Specialist |
-| `qa1@tazagroup.vn` | `TazaGroup@2024!` | QA | QA Specialist |
+| `dev1@tazagroup.vn` | `123456` | Technology | Senior Software Engineer |
+| `dev2@tazagroup.vn` | `123456` | Technology | Backend Developer |
+| `devops@tazagroup.vn` | `123456` | Technology | DevOps Engineer |
+| `hr1@tazagroup.vn` | `123456` | HR | HR Specialist |
+| `sales1@tazagroup.vn` | `123456` | Sales | Senior Sales Executive |
+| `sales2@tazagroup.vn` | `123456` | Sales | Sales Executive |
+| `accountant1@tazagroup.vn` | `123456` | Finance | Senior Accountant |
+| `ops1@tazagroup.vn` | `123456` | Operations | Operations Specialist |
+| `qa1@tazagroup.vn` | `123456` | QA | QA Specialist |
 
 ## 📈 Dữ liệu được tạo
 

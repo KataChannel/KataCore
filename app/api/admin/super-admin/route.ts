@@ -56,12 +56,6 @@ export async function GET(request: NextRequest) {
       },
       include: {
         roles: true,
-        employees: {
-          include: {
-            departments: true,
-            positions: true,
-          },
-        },
       },
     });
 
@@ -78,7 +72,7 @@ export async function GET(request: NextRequest) {
           lastLoginAt: admin.lastSeen || null,
           createdAt: admin.createdAt,
           role: admin.roles,
-          employee: admin.employees,
+          employees: admin.employees,
         })),
         systemStats: stats,
         currentUser: {
@@ -101,10 +95,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { action, userData } = body;
-
-    if (action === 'create-super-admin') {
-      return await createSuperAdmin(userData);
-    }
 
     const user = await authenticateSuperAdmin(request);
 
@@ -153,87 +143,6 @@ async function authenticateSuperAdmin(request: NextRequest) {
   } catch (error: any) {
     console.log('[AUTH] Authentication failed:', error.message);
     throw new Error(`Authentication failed: ${error?.message || 'Unknown error'}`);
-  }
-}
-
-async function createSuperAdmin(userData?: any) {
-  const defaultData = {
-    email: 'admin@taza.com',
-    password: 'TazaAdmin@2024!',
-    displayName: 'Super Administrator',
-    username: 'superadmin',
-  };
-
-  const data = { ...defaultData, ...userData };
-
-  try {
-    const hashedPassword = await bcrypt.hash(data.password, 12);
-
-    const superAdminRole = await prisma.roles.upsert({
-      where: { name: 'Super Administrator' },
-      update: {
-        description: 'Super Administrator with full system access',
-        updatedAt: new Date(),
-      },
-      create: {
-        id: 'super_administrator_role',
-        name: 'Super Administrator',
-        description: 'Super Administrator with full system access',
-        permissions: JSON.stringify([
-          { action: 'admin', resource: '*' },
-          { action: 'manage', resource: '*' },
-          { action: 'create', resource: '*' },
-          { action: 'read', resource: '*' },
-          { action: 'update', resource: '*' },
-          { action: 'delete', resource: '*' },
-        ]),
-        updatedAt: new Date(),
-      },
-    });
-
-    const user = await prisma.users.upsert({
-      where: { email: data.email },
-      update: {
-        password: hashedPassword,
-        displayName: data.displayName,
-        username: data.username,
-        roleId: superAdminRole.id,
-        isActive: true,
-        isVerified: true,
-        updatedAt: new Date(),
-      },
-      create: {
-        id: `super_admin_${Date.now()}`,
-        email: data.email,
-        password: hashedPassword,
-        displayName: data.displayName,
-        username: data.username,
-        roleId: superAdminRole.id,
-        isActive: true,
-        isVerified: true,
-        updatedAt: new Date(),
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Super Administrator created successfully',
-      data: {
-        user: {
-          id: user.id,
-          email: user.email,
-          displayName: user.displayName,
-          username: user.username,
-        },
-        role: {
-          id: superAdminRole.id,
-          name: superAdminRole.name,
-        },
-      },
-    });
-  } catch (error: any) {
-    console.error('Error creating Super Administrator:', error);
-    throw new Error(`Failed to create Super Administrator: ${error?.message || 'Unknown error'}`);
   }
 }
 
@@ -299,14 +208,7 @@ async function getSystemStats() {
       prisma.roles.count(),
     ]);
 
-    let totalEmployees = 0;
     let recentLogins = 0;
-
-    try {
-      totalEmployees = await prisma.employees.count();
-    } catch (e) {
-      console.log('Employee table not available');
-    }
 
     try {
       recentLogins = await prisma.users.count({
@@ -324,7 +226,6 @@ async function getSystemStats() {
       totalUsers,
       activeUsers,
       totalRoles,
-      totalEmployees,
       recentLogins,
       systemHealth: 'operational',
     };
@@ -334,7 +235,6 @@ async function getSystemStats() {
       totalUsers: 0,
       activeUsers: 0,
       totalRoles: 0,
-      totalEmployees: 0,
       recentLogins: 0,
       systemHealth: 'error',
     };

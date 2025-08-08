@@ -4,8 +4,8 @@
 'use client';
 
 import React, { useEffect, ReactNode } from 'react';
-import { UnifiedThemeProvider, useUnifiedTheme } from '../hooks/useUnifiedTheme';
-import { UNIFIED_THEME_CONFIG, ThemeConfig } from '../lib/config/unified-theme';
+import { UnifiedThemeProvider, useUnifiedTheme } from '@/hooks/useUnifiedTheme';
+import { UNIFIED_THEME_CONFIG, ThemeConfig } from '@/lib/config/unified-theme';
 
 // ============================================================================
 // THEME MANAGER COMPONENT

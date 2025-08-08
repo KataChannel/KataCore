@@ -3,7 +3,7 @@
 import React from 'react';
 import { CheckIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { DashboardWidget } from '@/types/information-hub';
-import { useInformationHub } from '@/providers/InformationHubProvider';
+import { useInformationHub } from '@/lib/providers/InformationHubProvider';
 
 interface TaskWidgetProps {
   widget: DashboardWidget;

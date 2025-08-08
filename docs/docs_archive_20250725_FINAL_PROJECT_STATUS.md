@@ -45,9 +45,9 @@ The **TazaGroup Unified Comprehensive Seed Data** project has been **successfull
 
 ### 🔑 Validated Login Credentials
 ```
-Super Admin: it@tazagroup.vn / TazaGroup@2024!
-System Admin: admin@tazagroup.vn / TazaGroup@2024!
-All Users: {email} / TazaGroup@2024!
+Super Admin: it@tazagroup.vn / 123456
+System Admin: admin@tazagroup.vn / 123456
+All Users: {email} / 123456
 ```
 
 ---

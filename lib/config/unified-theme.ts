@@ -97,7 +97,7 @@ export const UNIFIED_THEME_CONFIG = {
   // Default configuration
   defaults: {
     mode: 'light' as ThemeMode,
-    colorScheme: 'monochrome' as ColorScheme,
+    colorScheme: 'colorful' as ColorScheme,
     language: 'vi' as Language,
     animationLevel: 'normal' as AnimationLevel,
     fontSize: 'base' as const,

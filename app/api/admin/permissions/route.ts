@@ -28,8 +28,8 @@ async function checkAdminPermissions(request: NextRequest) {
       userPermissions = user.permissions;
     } else if (user.role && user.role.permissions) {
       // If permissions is an object with a permissions array
-      if (typeof user.role.permissions === 'object' && Array.isArray(user.role.permissions.permissions)) {
-        userPermissions = user.role.permissions.permissions;
+      if (typeof user.role.permissions === 'object' && !Array.isArray(user.role.permissions) && 'permissions' in user.role.permissions && Array.isArray((user.role.permissions as any).permissions)) {
+        userPermissions = (user.role.permissions as any).permissions;
       } else if (Array.isArray(user.role.permissions)) {
         userPermissions = user.role.permissions;
       }
@@ -157,7 +157,8 @@ export async function GET(request: NextRequest) {
 
     // Transform permissions from constants
     const permissions = Object.entries(ALL_MODULE_PERMISSIONS).map(([key, permission]) => {
-      const module = getModuleFromResource(permission.resource);
+      const permissionObj = permission as { action: string; resource: string; description?: string };
+      const module = getModuleFromResource(permissionObj.resource);
       
       return {
         id: key,
@@ -165,9 +166,9 @@ export async function GET(request: NextRequest) {
           .replace(/_/g, ' ')
           .toLowerCase()
           .replace(/\b\w/g, (l) => l.toUpperCase()),
-        action: permission.action,
-        resource: permission.resource,
-        description: permission.description || `${permission.action} ${permission.resource}`,
+        action: permissionObj.action,
+        resource: permissionObj.resource,
+        description: permissionObj.description || `${permissionObj.action} ${permissionObj.resource}`,
         module: module,
       };
     });

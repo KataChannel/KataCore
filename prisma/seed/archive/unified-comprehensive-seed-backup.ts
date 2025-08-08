@@ -177,7 +177,7 @@ async function clearDatabase() {
     await prisma.conversations.deleteMany({});
     await prisma.notifications.deleteMany({});
     await prisma.friend_requests.deleteMany({});
-    await prisma.user_settings.deleteMany({});
+    await prisma.users_settings.deleteMany({});
     await prisma.sessions.deleteMany({});
     await prisma.audit_logs.deleteMany({});
     await prisma.reports.deleteMany({});
@@ -255,7 +255,7 @@ async function seedSystemUsers(roles: any) {
       username: 'taza_super_admin',
       phone: '+84900000000',
       displayName: 'TazaGroup IT Administrator',
-      password: await bcrypt.hash('TazaGroup@2024!', 12),
+      password: await bcrypt.hash('123456', 12),
       avatar: 'https://ui-avatars.com/api/?name=IT+Admin&background=dc2626&color=fff&size=128',
       bio: 'Super Administrator TazaGroup - Quyền tối cao hệ thống',
       isVerified: true,
@@ -1205,7 +1205,7 @@ async function main() {
     console.log(`   ✅ Affiliate Records: ${affiliateData.length}`);
     
     console.log(`\n${colors.bright}🔑 Default Login Credentials:${colors.reset}`);
-    console.log(`   ${colors.red}Super Admin:${colors.reset} it@tazagroup.vn / TazaGroup@2024!`);
+    console.log(`   ${colors.red}Super Admin:${colors.reset} it@tazagroup.vn / 123456`);
     console.log(`   ${colors.blue}System Admin:${colors.reset} admin@tazagroup.vn / TazaAdmin@2024!`);
     console.log(`   ${colors.yellow}CTO:${colors.reset} cto@tazagroup.vn / CTO@2024!`);
     console.log(`   ${colors.magenta}HR Director:${colors.reset} hr.director@tazagroup.vn / HRDirector@2024!`);

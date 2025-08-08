@@ -71,7 +71,7 @@ async function clearExistingData() {
     await prisma.friend_requests.deleteMany();
     
     // Clear user settings
-    await prisma.user_settings.deleteMany();
+    await prisma.users_settings.deleteMany();
     
     // Clear reports
     await prisma.reports.deleteMany();

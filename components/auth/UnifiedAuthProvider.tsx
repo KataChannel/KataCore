@@ -103,8 +103,6 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
 
   const loadUserFromToken = useCallback(async () => {
    // console.log('🔍 [AUTH DEBUG] loadUserFromToken called, isMounted:', isMounted);
-    // Remove isMounted check temporarily for debugging
-    // if (!isMounted) return;
     
     try {
       let token = null;
@@ -124,31 +122,40 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
       }
 
     //  console.log('🔍 [AUTH DEBUG] Making request to /api/auth/me');
-      const response = await fetch('/api/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      
+      // Add timeout and better error handling to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      try {
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
 
-     // console.log('🔍 [AUTH DEBUG] Response status:', response.status);
-      if (response.ok) {
-        const userData = await response.json();
-     //   console.log('🔍 [AUTH DEBUG] User data received:', userData);
-        // Fix: Ensure userData structure matches our User interface
-        if (userData && userData.id) {
-          const transformedUser: User = {
-            id: userData.id,
-            email: userData.email,
-            phone: userData.phone,
-            username: userData.username,
-            displayName: userData.displayName || userData.name || 'User',
-            avatar: userData.avatar,
-            roleId: userData.role?.id || userData.roleId || 'default',
-            role: userData.role ? {
-              id: userData.role.id,
-              name: userData.role.name,
-              permissions: userData.role.permissions || [],
+       // console.log('🔍 [AUTH DEBUG] Response status:', response.status);
+        if (response.ok) {
+          const userData = await response.json();
+       //   console.log('🔍 [AUTH DEBUG] User data received:', userData);
+          // Fix: Ensure userData structure matches our User interface
+          if (userData && userData.id) {
+            const transformedUser: User = {
+              id: userData.id,
+              email: userData.email,
+              phone: userData.phone,
+              username: userData.username,
+              displayName: userData.displayName || userData.name || 'User',
+              avatar: userData.avatar,
+              roleId: userData.role?.id || userData.roleId || 'default',
+              role: userData.role ? {
+                id: userData.role.id,
+                name: userData.role.name,
+                permissions: userData.role.permissions || [],
               level: userData.role.level || 1,
             } : undefined,
             modules: userData.modules || [],
@@ -170,10 +177,22 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
         localStorage.removeItem('accessToken');
         clearAuthCookies();
       }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.warn('[AUTH] Request timeout - continuing without auth');
+        } else {
+          console.error('[AUTH] Fetch error:', fetchError);
+        }
+        // Don't clear tokens on network error, just continue
+      }
     } catch (error) {
     //  console.error('[AUTH] Failed to load user:', error);
-      localStorage.removeItem('accessToken');
-      clearAuthCookies();
+      // Only clear tokens on auth-related errors, not network issues
+      if (error.message?.includes('token') || error.message?.includes('auth')) {
+        localStorage.removeItem('accessToken');
+        clearAuthCookies();
+      }
     } finally {
       setLoading(false);
     }

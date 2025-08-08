@@ -6,7 +6,7 @@ import { prisma } from '../../lib/prisma';
 export const dynamic = 'force-dynamic';
 
 async function seedRoles() {
-  const adminRole = await prisma.role.create({
+  const adminRole = await prisma.roles.create({
     data: {
       name: 'ADMIN',
       description: 'Quản trị viên hệ thống',
@@ -14,7 +14,7 @@ async function seedRoles() {
     },
   });
 
-  const moderatorRole = await prisma.role.create({
+  const moderatorRole = await prisma.roles.create({
     data: {
       name: 'MODERATOR',
       description: 'Điều hành viên',
@@ -22,7 +22,7 @@ async function seedRoles() {
     },
   });
 
-  const userRole = await prisma.role.create({
+  const userRole = await prisma.roles.create({
     data: {
       name: 'USER',
       description: 'Người dùng thông thường',
@@ -30,7 +30,7 @@ async function seedRoles() {
     },
   });
 
-  const guestRole = await prisma.role.create({
+  const guestRole = await prisma.roles.create({
     data: {
       name: 'GUEST',
       description: 'Khách',
@@ -42,7 +42,7 @@ async function seedRoles() {
 }
 
 async function seedUsers(roles: any) {
-  const admin = await prisma.user.create({
+  const admin = await prisma.users.create({
     data: {
       email: 'admin@nextjs-chat.com',
       username: 'admin',
@@ -55,7 +55,7 @@ async function seedUsers(roles: any) {
     },
   });
 
-  const developer1 = await prisma.user.create({
+  const developer1 = await prisma.users.create({
     data: {
       email: 'minh.dev@example.com',
       username: 'minh_dev',
@@ -68,7 +68,7 @@ async function seedUsers(roles: any) {
     },
   });
 
-  const developer2 = await prisma.user.create({
+  const developer2 = await prisma.users.create({
     data: {
       email: 'linh.frontend@example.com',
       username: 'linh_fe',
@@ -81,7 +81,7 @@ async function seedUsers(roles: any) {
     },
   });
 
-  const mentor = await prisma.user.create({
+  const mentor = await prisma.users.create({
     data: {
       email: 'mentor@nextjs-chat.com',
       username: 'nextjs_mentor',
@@ -94,7 +94,7 @@ async function seedUsers(roles: any) {
     },
   });
 
-  const newbie = await prisma.user.create({
+  const newbie = await prisma.users.create({
     data: {
       email: 'newbie@example.com',
       username: 'newbie_dev',

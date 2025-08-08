@@ -8,7 +8,7 @@
 // Loại bỏ các dependencies không cần thiết và tạo data hoàn chỉnh
 // Version: 4.0 - TypeScript Fixed
 
-import { PrismaClient, UserStatus, LeaveType, LeaveStatus, AttendanceStatus, EmployeeStatus, ContractType } from '@prisma/client';
+import { PrismaClient, UserStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { nanoid } from 'nanoid';
 
@@ -162,15 +162,6 @@ async function clearDatabase() {
   
   try {
     // Clear in reverse dependency order to avoid foreign key constraints
-    await prisma.affiliate_referrals.deleteMany({});
-    await prisma.affiliates.deleteMany({});
-    await prisma.performance_reviews.deleteMany({});
-    await prisma.payrolls.deleteMany({});
-    await prisma.leave_requests.deleteMany({});
-    await prisma.attendances.deleteMany({});
-    await prisma.employees.deleteMany({});
-    await prisma.positions.deleteMany({});
-    await prisma.departments.deleteMany({});
     await prisma.message_reactions.deleteMany({});
     await prisma.messages.deleteMany({});
     await prisma.conversation_members.deleteMany({});
@@ -227,7 +218,7 @@ async function seedRoles() {
 async function seedAdminUsers(roles: any[]) {
   log('👤 Creating admin users...');
   
-  const hashedPassword = await bcrypt.hash('TazaGroup@2024!', 10);
+  const hashedPassword = await bcrypt.hash('123456', 10);
   const superAdminRole = roles.find(r => r.name === 'SUPER_ADMIN');
   const systemAdminRole = roles.find(r => r.name === 'SYSTEM_ADMIN');
 
@@ -276,378 +267,12 @@ async function seedAdminUsers(roles: any[]) {
 }
 
 /**
- * Create departments
- */
-async function seedDepartments(adminUsers: any) {
-  log('🏢 Creating departments...');
-  
-  const departments = [];
-
-  // Technology Department with manager
-  const techDept = await prisma.departments.create({
-    data: {
-      id: nanoid(),
-      name: 'Technology Department',
-      description: 'Software Development and IT Infrastructure',
-      code: 'TECH',
-      budget: 500000,
-      location: 'Floor 5, TazaGroup Building',
-      phone: '+84901234580',
-      email: 'tech@tazagroup.vn',
-      isActive: true,
-      managerId: adminUsers.superAdmin.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  departments.push(techDept);
-
-  // HR Department
-  const hrDept = await prisma.departments.create({
-    data: {
-      id: nanoid(),
-      name: 'Human Resources',
-      description: 'Human Resource Management and Development',
-      code: 'HR',
-      budget: 200000,
-      location: 'Floor 2, TazaGroup Building',
-      phone: '+84901234581',
-      email: 'hr@tazagroup.vn',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  departments.push(hrDept);
-
-  // Sales Department
-  const salesDept = await prisma.departments.create({
-    data: {
-      id: nanoid(),
-      name: 'Sales & Marketing',
-      description: 'Sales Operations and Marketing Strategies',
-      code: 'SALES',
-      budget: 300000,
-      location: 'Floor 3, TazaGroup Building',
-      phone: '+84901234582',
-      email: 'sales@tazagroup.vn',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  departments.push(salesDept);
-
-  // Finance Department
-  const financeDept = await prisma.departments.create({
-    data: {
-      id: nanoid(),
-      name: 'Finance & Accounting',
-      description: 'Financial Management and Accounting Operations',
-      code: 'FINANCE',
-      budget: 250000,
-      location: 'Floor 4, TazaGroup Building',
-      phone: '+84901234583',
-      email: 'finance@tazagroup.vn',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  departments.push(financeDept);
-
-  // Operations Department
-  const opsDept = await prisma.departments.create({
-    data: {
-      id: nanoid(),
-      name: 'Operations',
-      description: 'Business Operations and Process Management',
-      code: 'OPS',
-      budget: 180000,
-      location: 'Floor 1, TazaGroup Building',
-      phone: '+84901234584',
-      email: 'ops@tazagroup.vn',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  departments.push(opsDept);
-
-  // QA Department
-  const qaDept = await prisma.departments.create({
-    data: {
-      id: nanoid(),
-      name: 'Quality Assurance',
-      description: 'Quality Control and Testing',
-      code: 'QA',
-      budget: 150000,
-      location: 'Floor 5, TazaGroup Building',
-      phone: '+84901234585',
-      email: 'qa@tazagroup.vn',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  departments.push(qaDept);
-
-  success(`Created ${departments.length} departments`);
-  return { techDept, hrDept, salesDept, financeDept, opsDept, qaDept };
-}
-
-/**
- * Create positions
- */
-async function seedPositions(departments: any) {
-  log('💼 Creating positions...');
-  
-  const positions = [];
-
-  // Technology positions
-  const ctoPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Chief Technology Officer',
-      description: 'Lead technology strategy and development team',
-      level: 9,
-      minSalary: 100000,
-      maxSalary: 150000,
-      requirements: '10+ years experience, Leadership skills, Technical expertise',
-      isActive: true,
-      departmentId: departments.techDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(ctoPosition);
-
-  const seniorDevPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Senior Software Engineer',
-      description: 'Develop and maintain software applications',
-      level: 7,
-      minSalary: 40000,
-      maxSalary: 60000,
-      requirements: '5+ years experience in software development',
-      isActive: true,
-      departmentId: departments.techDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(seniorDevPosition);
-
-  const devopsPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'DevOps Engineer',
-      description: 'Manage infrastructure and deployment pipelines',
-      level: 6,
-      minSalary: 35000,
-      maxSalary: 50000,
-      requirements: '3+ years DevOps experience, AWS/Azure knowledge',
-      isActive: true,
-      departmentId: departments.techDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(devopsPosition);
-
-  // HR positions
-  const hrDirectorPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'HR Director',
-      description: 'Lead human resources strategy and operations',
-      level: 8,
-      minSalary: 60000,
-      maxSalary: 80000,
-      requirements: '8+ years HR experience, Leadership skills',
-      isActive: true,
-      departmentId: departments.hrDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(hrDirectorPosition);
-
-  const hrManagerPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'HR Manager',
-      description: 'Manage HR operations and employee relations',
-      level: 6,
-      minSalary: 30000,
-      maxSalary: 45000,
-      requirements: '5+ years HR experience',
-      isActive: true,
-      departmentId: departments.hrDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(hrManagerPosition);
-
-  const hrSpecialistPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'HR Specialist',
-      description: 'Handle recruitment and employee development',
-      level: 4,
-      minSalary: 20000,
-      maxSalary: 30000,
-      requirements: '2+ years HR experience',
-      isActive: true,
-      departmentId: departments.hrDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(hrSpecialistPosition);
-
-  // Sales positions
-  const salesDirectorPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Sales Director',
-      description: 'Lead sales strategy and team management',
-      level: 8,
-      minSalary: 50000,
-      maxSalary: 75000,
-      requirements: '7+ years sales experience, Team leadership',
-      isActive: true,
-      departmentId: departments.salesDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(salesDirectorPosition);
-
-  const salesManagerPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Sales Manager',
-      description: 'Manage sales operations and client relationships',
-      level: 6,
-      minSalary: 25000,
-      maxSalary: 40000,
-      requirements: '4+ years sales experience',
-      isActive: true,
-      departmentId: departments.salesDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(salesManagerPosition);
-
-  const seniorSalesPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Senior Sales Executive',
-      description: 'Handle key accounts and business development',
-      level: 5,
-      minSalary: 20000,
-      maxSalary: 35000,
-      requirements: '3+ years sales experience',
-      isActive: true,
-      departmentId: departments.salesDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(seniorSalesPosition);
-
-  // Finance positions
-  const financeManagerPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Finance Manager',
-      description: 'Manage financial planning and analysis',
-      level: 7,
-      minSalary: 35000,
-      maxSalary: 50000,
-      requirements: '5+ years finance experience, CPA preferred',
-      isActive: true,
-      departmentId: departments.financeDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(financeManagerPosition);
-
-  const seniorAccountantPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Senior Accountant',
-      description: 'Handle accounting operations and reporting',
-      level: 5,
-      minSalary: 22000,
-      maxSalary: 32000,
-      requirements: '3+ years accounting experience',
-      isActive: true,
-      departmentId: departments.financeDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(seniorAccountantPosition);
-
-  // Operations positions
-  const opsManagerPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'Operations Manager',
-      description: 'Manage business operations and processes',
-      level: 6,
-      minSalary: 30000,
-      maxSalary: 45000,
-      requirements: '4+ years operations experience',
-      isActive: true,
-      departmentId: departments.opsDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(opsManagerPosition);
-
-  // QA positions
-  const qaManagerPosition = await prisma.positions.create({
-    data: {
-      id: nanoid(),
-      title: 'QA Manager',
-      description: 'Lead quality assurance and testing processes',
-      level: 6,
-      minSalary: 28000,
-      maxSalary: 42000,
-      requirements: '4+ years QA experience, Testing methodologies',
-      isActive: true,
-      departmentId: departments.qaDept.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-  });
-  positions.push(qaManagerPosition);
-
-  success(`Created ${positions.length} positions`);
-  return {
-    ctoPosition, seniorDevPosition, devopsPosition,
-    hrDirectorPosition, hrManagerPosition, hrSpecialistPosition,
-    salesDirectorPosition, salesManagerPosition, seniorSalesPosition,
-    financeManagerPosition, seniorAccountantPosition,
-    opsManagerPosition, qaManagerPosition
-  };
-}
-
-/**
  * Create department managers and employees
  */
-async function seedUsers(roles: any[], departments: any, positions: any) {
+async function seedUsers(roles: any[]) {
   log('👥 Creating department managers and employees...');
   
-  const hashedPassword = await bcrypt.hash('TazaGroup@2024!', 10);
+  const hashedPassword = await bcrypt.hash('123456', 10);
   const departmentManagerRole = roles.find(r => r.name === 'DEPARTMENT_MANAGER');
   const employeeRole = roles.find(r => r.name === 'EMPLOYEE');
   
@@ -814,163 +439,16 @@ async function seedUsers(roles: any[], departments: any, positions: any) {
 }
 
 /**
- * Create employee records
+ * Create user profiles
  */
-async function seedEmployees(users: any, departments: any, positions: any) {
-  log('📋 Creating employee records...');
+async function seedEmployees(users: any) {
+  log('👥 Creating user profiles...');
   
-  let employeeIdCounter = 1001;
-  const employees = [];
-
-  // Map users to departments and positions
-  const userMapping = [
-    { user: users.managers[0], dept: departments.techDept, pos: positions.ctoPosition },
-    { user: users.managers[1], dept: departments.hrDept, pos: positions.hrDirectorPosition },
-    { user: users.managers[2], dept: departments.salesDept, pos: positions.salesDirectorPosition },
-    { user: users.managers[3], dept: departments.financeDept, pos: positions.financeManagerPosition },
-    { user: users.managers[4], dept: departments.opsDept, pos: positions.opsManagerPosition },
-    { user: users.managers[5], dept: departments.qaDept, pos: positions.qaManagerPosition },
-    // Employees
-    { user: users.employees[0], dept: departments.techDept, pos: positions.seniorDevPosition },
-    { user: users.employees[1], dept: departments.techDept, pos: positions.seniorDevPosition },
-    { user: users.employees[2], dept: departments.techDept, pos: positions.devopsPosition },
-    { user: users.employees[3], dept: departments.hrDept, pos: positions.hrSpecialistPosition },
-    { user: users.employees[4], dept: departments.salesDept, pos: positions.seniorSalesPosition },
-    { user: users.employees[5], dept: departments.salesDept, pos: positions.salesManagerPosition },
-    { user: users.employees[6], dept: departments.financeDept, pos: positions.seniorAccountantPosition },
-    { user: users.employees[7], dept: departments.opsDept, pos: positions.opsManagerPosition },
-    { user: users.employees[8], dept: departments.qaDept, pos: positions.qaManagerPosition },
-  ];
-
-  for (const mapping of userMapping) {
-    const names = mapping.user.displayName.split(' ');
-    const firstName = names[names.length - 1];
-    const lastName = names.slice(0, -1).join(' ');
-
-    const employee = await prisma.employees.create({
-      data: {
-        id: nanoid(),
-        employeeId: `TG${employeeIdCounter++}`,
-        firstName: firstName,
-        lastName: lastName,
-        fullName: mapping.user.displayName,
-        dateOfBirth: new Date(1990 + Math.floor(Math.random() * 10), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
-        gender: Math.random() > 0.5 ? 'Male' : 'Female',
-        nationality: 'Vietnamese',
-        idNumber: `${Math.floor(Math.random() * 100000000000)}`,
-        address: `${Math.floor(Math.random() * 999) + 1} Nguyen Trai Street, District 1, Ho Chi Minh City`,
-        phone: mapping.user.phone,
-        emergencyContact: `+8490${Math.floor(Math.random() * 10000000)}`,
-        hireDate: new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
-        salary: mapping.pos.minSalary + Math.floor(Math.random() * (mapping.pos.maxSalary - mapping.pos.minSalary)),
-        status: EmployeeStatus.ACTIVE,
-        contractType: ContractType.FULL_TIME,
-        notes: `Employee record for ${mapping.user.displayName}`,
-        userId: mapping.user.id,
-        departmentId: mapping.dept.id,
-        positionId: mapping.pos.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    });
-    employees.push(employee);
-  }
-
-  success(`Created ${employees.length} employee records`);
-  return employees;
-}
-
-/**
- * Create sample HR data
- */
-async function seedHRData(employees: any[], users: any) {
-  log('📊 Creating sample HR data...');
+  // Simply return the users since we removed employee model
+  const allUsers = [...users.managers, ...users.employees];
   
-  // Sample Attendance
-  for (let i = 0; i < 5; i++) {
-    const employee = employees[i];
-    const user = users.managers.find((u: any) => u.id === employee.userId) || users.employees.find((u: any) => u.id === employee.userId);
-    
-    for (let day = 1; day <= 5; day++) {
-      const date = new Date(2024, 10, day); // November 2024
-      const timeIn = new Date(date);
-      timeIn.setHours(8, Math.floor(Math.random() * 30));
-      
-      const timeOut = new Date(date);
-      timeOut.setHours(17, Math.floor(Math.random() * 60));
-      
-      await prisma.attendances.create({
-        data: {
-          id: nanoid(),
-          date: date,
-          timeIn: timeIn,
-          timeOut: timeOut,
-          totalHours: 8 + Math.random() * 2,
-          overtime: Math.random() > 0.7 ? Math.random() * 3 : 0,
-          status: AttendanceStatus.PRESENT,
-          employeeId: employee.id,
-          userId: user.id,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
-      });
-    }
-  }
-
-  // Sample Leave Requests
-  for (let i = 0; i < 3; i++) {
-    const employee = employees[i];
-    const user = users.managers.find((u: any) => u.id === employee.userId) || users.employees.find((u: any) => u.id === employee.userId);
-    
-    const startDate = new Date(2024, 11, 15 + i); // December 2024
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 2);
-
-    await prisma.leave_requests.create({
-      data: {
-        id: nanoid(),
-        startDate: startDate,
-        endDate: endDate,
-        days: 3,
-        type: LeaveType.ANNUAL,
-        reason: `Annual leave for personal activities - Employee ${i + 1}`,
-        status: LeaveStatus.PENDING,
-        employeeId: employee.id,
-        userId: user.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    });
-  }
-
-  // Sample Payroll
-  for (let i = 0; i < 5; i++) {
-    const employee = employees[i];
-    const user = users.managers.find((u: any) => u.id === employee.userId) || users.employees.find((u: any) => u.id === employee.userId);
-    
-    const basicSalary = employee.salary;
-    const overtime = Math.floor(Math.random() * 5000);
-    const bonus = Math.floor(Math.random() * 10000);
-    const deductions = Math.floor(Math.random() * 2000);
-
-    await prisma.payrolls.create({
-      data: {
-        id: nanoid(),
-        period: '2024-11',
-        basicSalary: basicSalary,
-        overtime: overtime,
-        bonus: bonus,
-        deductions: deductions,
-        netSalary: basicSalary + overtime + bonus - deductions,
-        employeeId: employee.id,
-        userId: user.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    });
-  }
-
-  success('Created sample HR data (attendance, leave requests, payroll)');
+  success(`User profiles initialized for ${allUsers.length} users`);
+  return allUsers; 
 }
 
 /**
@@ -1022,7 +500,7 @@ async function seedCommunicationData(users: any) {
   await prisma.messages.create({
     data: {
       id: nanoid(),
-      content: 'Hệ thống đã được triển khai thành công với đầy đủ tính năng HR, Sales, Finance và IT management.',
+      content: 'Hệ thống đã được triển khai thành công với đầy đủ tính năng quản lý người dùng và giao tiếp.',
       type: 'TEXT',
       conversationId: announcement.id,
       userId: users.managers[1].id,
@@ -1044,47 +522,6 @@ async function seedCommunicationData(users: any) {
   });
 
   success('Created sample communication data');
-}
-
-/**
- * Create affiliate system data
- */
-async function seedAffiliateData(users: any) {
-  log('🤝 Creating affiliate system data...');
-  
-  // Create affiliate records for some users
-  for (let i = 0; i < 3; i++) {
-    const user = users.employees[i];
-    
-    const affiliate = await prisma.affiliates.create({
-      data: {
-        id: nanoid(),
-        userId: user.id,
-        affiliateCode: `TG${user.username.toUpperCase()}${Math.floor(Math.random() * 1000)}`,
-        commissionRate: 0.1 + Math.random() * 0.05, // 10-15%
-        totalEarnings: Math.floor(Math.random() * 50000),
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    });
-
-    // Create sample referral
-    await prisma.affiliate_referrals.create({
-      data: {
-        id: nanoid(),
-        userId: users.employees[i + 3].id,
-        affiliateId: affiliate.id,
-        amount: 100000 + Math.floor(Math.random() * 500000),
-        commission: 10000 + Math.floor(Math.random() * 50000),
-        status: 'COMPLETED',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    });
-  }
-
-  success('Created affiliate system data');
 }
 
 /**
@@ -1133,28 +570,16 @@ async function main() {
     // Step 3: Create admin users
     const adminUsers = await seedAdminUsers(roles);
     
-    // Step 4: Create departments
-    const departments = await seedDepartments(adminUsers);
+    // Step 4: Create users
+    const users = await seedUsers(roles);
     
-    // Step 5: Create positions
-    const positions = await seedPositions(departments);
+    // Step 5: Initialize user profiles
+    const allUsers = await seedEmployees(users);
     
-    // Step 6: Create users
-    const users = await seedUsers(roles, departments, positions);
-    
-    // Step 7: Create employee records
-    const employees = await seedEmployees(users, departments, positions);
-    
-    // Step 8: Create HR data
-    await seedHRData(employees, users);
-    
-    // Step 9: Create communication data
+    // Step 6: Create communication data
     await seedCommunicationData(users);
     
-    // Step 10: Create affiliate data
-    await seedAffiliateData(users);
-    
-    // Step 11: Create user settings
+    // Step 7: Create user settings
     await seedUserSettings(users);
     
     // Final summary
@@ -1164,12 +589,12 @@ async function main() {
     info('='.repeat(60));
     info('🔑 SUPER ADMIN:');
     info('   Email: it@tazagroup.vn');
-    info('   Password: TazaGroup@2024!');
+    info('   Password: 123456');
     info('   Level: 10 (Full Access)');
     info('');
     info('🔑 SYSTEM ADMIN:');
     info('   Email: admin@tazagroup.vn');
-    info('   Password: TazaGroup@2024!');
+    info('   Password: 123456');
     info('   Level: 9 (System Management)');
     info('');
     info('🔑 DEPARTMENT MANAGERS:');
@@ -1179,23 +604,22 @@ async function main() {
     info('   Finance Manager: finance.manager@tazagroup.vn');
     info('   Operations Manager: ops.manager@tazagroup.vn');
     info('   QA Manager: qa.manager@tazagroup.vn');
-    info('   Password: TazaGroup@2024! (for all)');
+    info('   Password: 123456 (for all)');
     info('');
     info('🔑 EMPLOYEES (Sample):');
     info('   dev1@tazagroup.vn, dev2@tazagroup.vn, devops@tazagroup.vn');
     info('   hr1@tazagroup.vn, sales1@tazagroup.vn, sales2@tazagroup.vn');
     info('   accountant1@tazagroup.vn, ops1@tazagroup.vn, qa1@tazagroup.vn');
-    info('   Password: TazaGroup@2024! (for all)');
+    info('   Password: 123456 (for all)');
     info('');
     info('📊 DATA SUMMARY:');
     info(`   • ${roles.length} Roles`);
     info(`   • ${Object.keys(departments).length} Departments`);
     info(`   • ${Object.keys(positions).length} Positions`);
     info(`   • ${users.managers.length + users.employees.length} Users`);
-    info(`   • ${employees.length} Employee Records`);
-    info('   • Sample HR Data (Attendance, Leave, Payroll)');
     info('   • Communication System (Conversations, Messages)');
-    info('   • Affiliate System (Referrals, Commissions)');
+    info('   • Affiliate System (Referral Links)');
+    info('   • User Settings and Preferences');
     info('='.repeat(60));
     
   } catch (err: any) {

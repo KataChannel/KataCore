@@ -72,7 +72,7 @@ async function clearMigrationData() {
 
   try {
     // Only clear test users and non-essential data to avoid breaking existing systems
-    await prisma.user.deleteMany({
+    await prisma.users.deleteMany({
       where: {
         email: {
           in: [
@@ -119,7 +119,7 @@ async function migrateSystemRoles() {
       };
 
       // Upsert role to handle both creation and updates
-      const dbRole = await prisma.role.upsert({
+      const dbRole = await prisma.roles.upsert({
         where: { name: systemRole.name },
         update: {
           description: systemRole.description,
@@ -245,7 +245,7 @@ async function migrateTestUsers(roles: any) {
       };
 
       // Upsert user
-      const dbUser = await prisma.user.upsert({
+      const dbUser = await prisma.users.upsert({
         where: { email: userData.email },
         update: {
           displayName: userData.displayName,
@@ -278,7 +278,7 @@ async function createSampleDepartments(users: any) {
 
   try {
     const departments = await Promise.all([
-      prisma.department.upsert({
+      prisma.departments.upsert({
         where: { code: 'IT' },
         update: {},
         create: {
@@ -292,7 +292,7 @@ async function createSampleDepartments(users: any) {
           isActive: true,
         },
       }),
-      prisma.department.upsert({
+      prisma.departments.upsert({
         where: { code: 'HR' },
         update: {},
         create: {
@@ -306,7 +306,7 @@ async function createSampleDepartments(users: any) {
           isActive: true,
         },
       }),
-      prisma.department.upsert({
+      prisma.departments.upsert({
         where: { code: 'SALES' },
         update: {},
         create: {
@@ -320,7 +320,7 @@ async function createSampleDepartments(users: any) {
           isActive: true,
         },
       }),
-      prisma.department.upsert({
+      prisma.departments.upsert({
         where: { code: 'FIN' },
         update: {},
         create: {
@@ -435,9 +435,9 @@ async function validateMigration() {
 
   try {
     // Count migrated data
-    const roleCount = await prisma.role.count({ where: { isSystemRole: true } });
-    const userCount = await prisma.user.count();
-    const departmentCount = await prisma.department.count();
+    const roleCount = await prisma.roles.count({ where: { isSystemRole: true } });
+    const userCount = await prisma.users.count();
+    const departmentCount = await prisma.departments.count();
     const positionCount = await prisma.position.count();
 
     info(`Validation Results:`);
@@ -447,14 +447,14 @@ async function validateMigration() {
     info(`  Positions: ${positionCount}`);
 
     // Verify role-user relationships
-    const usersWithRoles = await prisma.user.count({
+    const usersWithRoles = await prisma.users.count({
       where: { roleId: { not: null } },
     });
 
     info(`  Users with roles: ${usersWithRoles}`);
 
     // Check for orphaned data
-    const orphanedUsers = await prisma.user.count({
+    const orphanedUsers = await prisma.users.count({
       where: { role: null },
     });
 
@@ -478,7 +478,7 @@ async function generateMigrationReport() {
 
   try {
     // Get all system roles with user counts
-    const roles = await prisma.role.findMany({
+    const roles = await prisma.roles.findMany({
       where: { isSystemRole: true },
       include: {
         _count: {
@@ -488,7 +488,7 @@ async function generateMigrationReport() {
     });
 
     // Get all migrated users
-    const users = await prisma.user.findMany({
+    const users = await prisma.users.findMany({
       include: { role: true },
       orderBy: { role: { level: 'desc' } },
     });

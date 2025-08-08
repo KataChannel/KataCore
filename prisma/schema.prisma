@@ -8,53 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model affiliate_referrals {
-  id          String     @id @default(uuid())
-  userId      String
-  affiliateId String
-  amount      Float      @default(0)
-  commission  Float      @default(0)
-  status      String     @default("PENDING")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now())
-  affiliates  affiliates @relation(fields: [affiliateId], references: [id])
-  users       users      @relation(fields: [userId], references: [id])
-}
-
-model affiliates {
-  id                  String                @id @default(uuid())
-  userId              String
-  affiliateCode       String                @unique
-  commissionRate      Float                 @default(0.1)
-  totalEarnings       Float                 @default(0)
-  isActive            Boolean               @default(true)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime
-  affiliate_referrals affiliate_referrals[]
-  users               users                 @relation(fields: [userId], references: [id])
-}
-
-model attendances {
-  id         String           @id @default(uuid())
-  date       DateTime
-  timeIn     DateTime?
-  timeOut    DateTime?
-  breakStart DateTime?
-  breakEnd   DateTime?
-  totalHours Float?
-  overtime   Float?
-  status     AttendanceStatus @default(PRESENT)
-  notes      String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime
-  employeeId String
-  userId     String
-  employees  employees        @relation(fields: [employeeId], references: [id])
-  users      users            @relation(fields: [userId], references: [id])
-
-  @@unique([employeeId, date])
-}
-
 model audit_logs {
   id        String   @id @default(uuid())
   action    String
@@ -73,7 +26,7 @@ model call_extension_users {
   callExtensionId String
   isActive        Boolean         @default(true)
   createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   call_extensions call_extensions @relation(fields: [callExtensionId], references: [id])
   users           users           @relation(fields: [userId], references: [id])
 
@@ -88,7 +41,7 @@ model call_extensions {
   description          String?
   status               String                 @default("active")
   createdAt            DateTime               @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime               @updatedAt
   call_extension_users call_extension_users[]
 }
 
@@ -107,7 +60,7 @@ model call_history_overview {
   recordPath             String?
   callStatus             String?
   createdAt              DateTime @default(now())
-  updatedAt              DateTime
+  updatedAt              DateTime @updatedAt
   cdrId                  String   @unique
 }
 
@@ -135,65 +88,11 @@ model conversations {
   isArchived                             Boolean          @default(false)
   lastActivity                           DateTime?
   createdAt                              DateTime         @default(now())
-  updatedAt                              DateTime
+  updatedAt                              DateTime         @updatedAt
   createdById                            String
   users_conversations_createdByIdTousers users            @relation("conversations_createdByIdTousers", fields: [createdById], references: [id])
   messages                               messages[]
   users_ConversationParticipants         users[]          @relation("ConversationParticipants")
-}
-
-model departments {
-  id                String        @id @default(uuid())
-  name              String        @unique
-  description       String?
-  code              String        @unique
-  budget            Float?
-  location          String?
-  phone             String?
-  email             String?
-  isActive          Boolean       @default(true)
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime
-  managerId         String?
-  parentId          String?
-  users             users?        @relation(fields: [managerId], references: [id])
-  departments       departments?  @relation("departmentsTodepartments", fields: [parentId], references: [id])
-  other_departments departments[] @relation("departmentsTodepartments")
-  employees         employees[]
-  positions         positions[]
-}
-
-model employees {
-  id                  String                @id @default(uuid())
-  employeeId          String                @unique
-  firstName           String
-  lastName            String
-  fullName            String
-  dateOfBirth         DateTime?
-  gender              String?
-  nationality         String?
-  idNumber            String?               @unique
-  address             String?
-  phone               String?
-  emergencyContact    String?
-  hireDate            DateTime
-  terminationDate     DateTime?
-  salary              Float?
-  status              EmployeeStatus        @default(ACTIVE)
-  contractType        ContractType          @default(FULL_TIME)
-  notes               String?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime
-  userId              String                @unique
-  departmentId        String
-  positionId          String
-  attendances         attendances[]
-  departments         departments           @relation(fields: [departmentId], references: [id])
-  positions           positions             @relation(fields: [positionId], references: [id])
-  users               users                 @relation(fields: [userId], references: [id])
-  leave_requests      leave_requests[]
-  payrolls            payrolls[]
-  performance_reviews performance_reviews[]
 }
 
 model facebook_interactions {
@@ -205,7 +104,7 @@ model facebook_interactions {
   userId                String
   message               String?
   createdAt             DateTime        @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime        @updatedAt
   facebook_pages        facebook_pages  @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
 }
 
@@ -222,7 +121,7 @@ model facebook_pages {
   website               String?
   accessToken           String?
   createdAt             DateTime                @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime                @updatedAt
   facebook_interactions facebook_interactions[]
 }
 
@@ -230,34 +129,13 @@ model friend_requests {
   id                                      String   @id @default(uuid())
   status                                  String   @default("PENDING")
   createdAt                               DateTime @default(now())
-  updatedAt                               DateTime
+  updatedAt                               DateTime @updatedAt
   senderId                                String
   receiverId                              String
   users_friend_requests_receiverIdTousers users    @relation("friend_requests_receiverIdTousers", fields: [receiverId], references: [id])
   users_friend_requests_senderIdTousers   users    @relation("friend_requests_senderIdTousers", fields: [senderId], references: [id])
 
   @@unique([senderId, receiverId])
-}
-
-model leave_requests {
-  id         String      @id @default(uuid())
-  startDate  DateTime
-  endDate    DateTime
-  days       Int
-  type       LeaveType
-  reason     String
-  status     LeaveStatus @default(PENDING)
-  approvedBy String?
-  approvedAt DateTime?
-  rejectedBy String?
-  rejectedAt DateTime?
-  notes      String?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime
-  employeeId String
-  userId     String
-  employees  employees   @relation(fields: [employeeId], references: [id])
-  users      users       @relation(fields: [userId], references: [id])
 }
 
 model message_reactions {
@@ -282,7 +160,7 @@ model messages {
   isEdited          Boolean             @default(false)
   isDeleted         Boolean             @default(false)
   createdAt         DateTime            @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime            @updatedAt
   conversationId    String
   userId            String
   parentId          String?
@@ -304,61 +182,6 @@ model notifications {
   createdAt DateTime @default(now())
   userId    String
   users     users    @relation(fields: [userId], references: [id])
-}
-
-model payrolls {
-  id          String    @id @default(uuid())
-  period      String
-  basicSalary Float
-  overtime    Float?    @default(0)
-  bonus       Float?    @default(0)
-  deductions  Float?    @default(0)
-  netSalary   Float
-  paidAt      DateTime?
-  notes       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime
-  employeeId  String
-  userId      String
-  employees   employees @relation(fields: [employeeId], references: [id])
-  users       users     @relation(fields: [userId], references: [id])
-
-  @@unique([employeeId, period])
-}
-
-model performance_reviews {
-  id                                          String    @id @default(uuid())
-  period                                      String
-  goals                                       String?
-  achievements                                String?
-  rating                                      Float?
-  feedback                                    String?
-  createdAt                                   DateTime  @default(now())
-  updatedAt                                   DateTime
-  employeeId                                  String
-  reviewerId                                  String
-  userId                                      String
-  employees                                   employees @relation(fields: [employeeId], references: [id])
-  users_performance_reviews_reviewerIdTousers users     @relation("performance_reviews_reviewerIdTousers", fields: [reviewerId], references: [id])
-  users_performance_reviews_userIdTousers     users     @relation("performance_reviews_userIdTousers", fields: [userId], references: [id])
-
-  @@unique([employeeId, period])
-}
-
-model positions {
-  id           String      @id @default(uuid())
-  title        String
-  description  String?
-  level        Int         @default(1)
-  minSalary    Float?
-  maxSalary    Float?
-  requirements String?
-  isActive     Boolean     @default(true)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime
-  departmentId String
-  employees    employees[]
-  departments  departments @relation(fields: [departmentId], references: [id])
 }
 
 model menu_items {
@@ -385,8 +208,8 @@ model role_menu_items {
   canView    Boolean    @default(true)
   canAccess  Boolean    @default(true)
   createdAt  DateTime   @default(now())
-  role       roles      @relation(fields: [roleId], references: [id], onDelete: Cascade)
   menuItem   menu_items @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  role       roles      @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, menuItemId])
 }
@@ -397,7 +220,7 @@ model reports {
   description                         String?
   status                              String    @default("PENDING")
   createdAt                           DateTime  @default(now())
-  updatedAt                           DateTime
+  updatedAt                           DateTime  @updatedAt
   reporterId                          String
   reportedUserId                      String?
   messageId                           String?
@@ -412,12 +235,12 @@ model roles {
   description     String?
   permissions     String
   createdAt       DateTime          @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime          @updatedAt
   isSystemRole    Boolean           @default(false)
   level           Int               @default(10)
   modules         String?
-  users           users[]
   role_menu_items role_menu_items[]
+  users           users[]
 }
 
 model sessions {
@@ -450,7 +273,7 @@ model user_settings {
 
 model users {
   id                                                        String                 @id @default(uuid())
-  email                                                     String?                @unique  
+  email                                                     String?                @unique
   username                                                  String?                @unique
   phone                                                     String?                @unique
   displayName                                               String
@@ -462,30 +285,21 @@ model users {
   isActive                                                  Boolean                @default(true)
   lastSeen                                                  DateTime?
   createdAt                                                 DateTime               @default(now())
-  updatedAt                                                 DateTime
+  updatedAt                                                 DateTime               @updatedAt
   googleId                                                  String?                @unique
   facebookId                                                String?                @unique
   appleId                                                   String?                @unique
   otpCode                                                   String?
   otpExpiry                                                 DateTime?
   roleId                                                    String
-  affiliate_referrals                                       affiliate_referrals[]
-  affiliates                                                affiliates[]
-  attendances                                               attendances[]
   audit_logs                                                audit_logs[]
   call_extension_users                                      call_extension_users[]
   conversations_conversations_createdByIdTousers            conversations[]        @relation("conversations_createdByIdTousers")
-  departments                                               departments[]
-  employees                                                 employees?
   friend_requests_friend_requests_receiverIdTousers         friend_requests[]      @relation("friend_requests_receiverIdTousers")
   friend_requests_friend_requests_senderIdTousers           friend_requests[]      @relation("friend_requests_senderIdTousers")
-  leave_requests                                            leave_requests[]
   message_reactions                                         message_reactions[]
   messages                                                  messages[]
   notifications                                             notifications[]
-  payrolls                                                  payrolls[]
-  performance_reviews_performance_reviews_reviewerIdTousers performance_reviews[]  @relation("performance_reviews_reviewerIdTousers")
-  performance_reviews_performance_reviews_userIdTousers     performance_reviews[]  @relation("performance_reviews_userIdTousers")
   reports_reports_reportedUserIdTousers                     reports[]              @relation("reports_reportedUserIdTousers")
   reports_reports_reporterIdTousers                         reports[]              @relation("reports_reporterIdTousers")
   sessions                                                  sessions[]
@@ -498,34 +312,10 @@ model users {
   users_UserFriends_B                                       users[]                @relation("UserFriends")
 }
 
-enum AttendanceStatus {
-  PRESENT
-  ABSENT
-  LATE
-  HALF_DAY
-  WORK_FROM_HOME
-}
-
-enum ContractType {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
-  INTERNSHIP
-  FREELANCE
-}
-
 enum ConversationType {
   DIRECT
   GROUP
   CHANNEL
-}
-
-enum EmployeeStatus {
-  ACTIVE
-  INACTIVE
-  TERMINATED
-  ON_LEAVE
-  PROBATION
 }
 
 enum InteractionType {
@@ -533,22 +323,6 @@ enum InteractionType {
   MESSAGE
   LIKE
   SHARE
-}
-
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CANCELLED
-}
-
-enum LeaveType {
-  ANNUAL
-  SICK
-  PERSONAL
-  MATERNITY
-  PATERNITY
-  EMERGENCY
 }
 
 enum MessageType {

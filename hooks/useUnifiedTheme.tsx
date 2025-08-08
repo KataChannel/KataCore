@@ -1,63 +1,93 @@
-// Unified Theme Hook - Centralized theme management for TazaCore
-// Replaces all other theme hooks with a single, synchronized solution
+// ============================================================================
+// UNIFIED THEME HOOK - HOOK THEME THỐNG NHẤT
+// ============================================================================
+// Hook quản lý theme tập trung cho TazaCore
+
 'use client';
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import {
-  UNIFIED_THEME_CONFIG,
-  ThemeConfig,
-  ThemeMode,
-  Language,
-  ColorPalette,
-  ColorScheme,
-  AnimationLevel,
-  getThemeColors,
-  applyCSSVariables,
-  applyThemeMode,
-  saveThemeConfig,
-  loadThemeConfig,
-  createSystemThemeListener,
-  getThemeClasses,
-} from '../lib/config/unified-theme';
 
 // ============================================================================
-// CONTEXT INTERFACES
+// ĐỊNH NGHĨA KIỂU DỮ LIỆU
 // ============================================================================
 
-interface UnifiedThemeContextType {
-  // Current configuration
-  config: ThemeConfig;
+export type ThemeMode = 'light' | 'dark' | 'auto';
+export type Language = 'vi' | 'en';
+export type ColorScheme = 'colorful' | 'blue' | 'green' | 'purple';
 
-  // Derived values
-  actualMode: 'light' | 'dark';
-  colors: ColorPalette;
-  classes: ReturnType<typeof getThemeClasses>;
-
-  // State
-  isLoading: boolean;
-  isSystemMode: boolean;
-
-  // Actions
-  setMode: (mode: ThemeMode) => void;
-  setLanguage: (language: Language) => void;
-  setColorScheme: (scheme: ColorScheme) => void;
-  setAnimationLevel: (level: AnimationLevel) => void;
-  setFontSize: (size: ThemeConfig['fontSize']) => void;
-  setBorderRadius: (radius: ThemeConfig['borderRadius']) => void;
-
-  // Utilities
-  toggleMode: () => void;
-  toggleLanguage: () => void;
-  resetToDefaults: () => void;
-  updateConfig: (updates: Partial<ThemeConfig>) => void;
-
-  // Accessibility
-  enableHighContrast: (enabled: boolean) => void;
-  enableReducedMotion: (enabled: boolean) => void;
+export interface ThemeConfig {
+  mode: ThemeMode;
+  language: Language;
+  colorScheme: ColorScheme;
 }
 
 // ============================================================================
-// CONTEXT CREATION
+// CẤU HÌNH MẶC ĐỊNH
 // ============================================================================
+
+const DEFAULT_CONFIG: ThemeConfig = {
+  mode: 'light',
+  language: 'vi',
+  colorScheme: 'colorful',
+};
+
+// ============================================================================
+// HÀM TIỆN ÍCH
+// ============================================================================
+
+function getSystemMode(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(config: ThemeConfig): 'light' | 'dark' {
+  if (typeof document === 'undefined') return 'light';
+
+  const actualMode = config.mode === 'auto' ? getSystemMode() : config.mode;
+  
+  // Áp dụng class cho document
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(actualMode);
+  document.documentElement.setAttribute('data-theme', actualMode);
+  document.documentElement.setAttribute('lang', config.language);
+
+  return actualMode;
+}
+
+function saveConfig(config: ThemeConfig): void {
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('taza-theme-config', JSON.stringify(config));
+    } catch (error) {
+      console.warn('Không thể lưu cấu hình theme:', error);
+    }
+  }
+}
+
+function loadConfig(): Partial<ThemeConfig> {
+  if (typeof localStorage === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem('taza-theme-config');
+    return stored ? JSON.parse(stored) : {};
+  } catch (error) {
+    console.warn('Không thể tải cấu hình theme:', error);
+    return {};
+  }
+}
+
+// ============================================================================
+// CONTEXT
+// ============================================================================
+
+interface UnifiedThemeContextType {
+  config: ThemeConfig;
+  actualMode: 'light' | 'dark';
+  isLoading: boolean;
+  setMode: (mode: ThemeMode) => void;
+  setLanguage: (language: Language) => void;
+  setColorScheme: (scheme: ColorScheme) => void;
+  toggleMode: () => void;
+  toggleLanguage: () => void;
+}
 
 const UnifiedThemeContext = createContext<UnifiedThemeContextType | undefined>(undefined);
 
@@ -78,229 +108,91 @@ export function UnifiedThemeProvider({
   enablePersistence = true,
   enableSystemListener = true,
 }: UnifiedThemeProviderProps) {
-  // State with SSR-safe initialization
-  const [config, setConfigState] = useState<ThemeConfig>(() => {
-    // Use defaults during SSR, load from storage on client
-    return { ...UNIFIED_THEME_CONFIG.defaults, ...defaultConfig };
-  });
-
+  // State
+  const [config, setConfig] = useState<ThemeConfig>(() => ({
+    ...DEFAULT_CONFIG,
+    ...defaultConfig,
+  }));
+  const [actualMode, setActualMode] = useState<'light' | 'dark'>('light');
   const [isLoading, setIsLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const [actualMode, setActualMode] = useState<'light' | 'dark'>('light');
-  const [colors, setColors] = useState<ColorPalette>(getThemeColors('light'));
 
-  // Derived values
-  const isSystemMode = config.mode === 'auto';
-  const classes = getThemeClasses(config);
-
-  // Initialize theme on mount (client-side only)
+  // Khởi tạo theme khi component mount
   useEffect(() => {
     setIsMounted(true);
     
-    // Load persisted config on client side
+    // Tải cấu hình đã lưu nếu được bật
     if (enablePersistence) {
-      const loadedConfig = loadThemeConfig();
-      setConfigState({ ...config, ...loadedConfig });
+      const savedConfig = loadConfig();
+      setConfig(prev => ({ ...prev, ...savedConfig }));
     }
-    
-    const applied = applyThemeMode(config.mode);
-    setActualMode(applied);
-    setColors(getThemeColors(applied));
-    applyCSSVariables(config);
+
     setIsLoading(false);
-  }, []);
+  }, [enablePersistence]);
 
-  // Handle config changes
+  // Áp dụng theme khi config thay đổi
   useEffect(() => {
-    if (!isMounted || isLoading) return;
-    
-    const applied = applyThemeMode(config.mode);
+    if (!isMounted) return;
+
+    const applied = applyTheme(config);
     setActualMode(applied);
-    setColors(getThemeColors(applied));
-    applyCSSVariables(config);
 
+    // Lưu cấu hình nếu được bật
     if (enablePersistence) {
-      saveThemeConfig(config);
+      saveConfig(config);
     }
-  }, [config, isLoading, isMounted, enablePersistence]);
+  }, [config, isMounted, enablePersistence]);
 
-  // System theme listener
+  // Lắng nghe thay đổi system theme
   useEffect(() => {
     if (!isMounted || !enableSystemListener || config.mode !== 'auto') return;
 
-    const cleanup = createSystemThemeListener((isDark: boolean) => {
-      const newMode = isDark ? 'dark' : 'light';
-      setActualMode(newMode);
-      setColors(getThemeColors(newMode));
-      applyCSSVariables({ ...config, mode: newMode });
-    });
-
-    return cleanup;
-  }, [config.mode, enableSystemListener, isMounted]);
-
-  // Internal config update function
-  const updateConfigInternal = useCallback((updates: Partial<ThemeConfig>) => {
-    setConfigState((prev: ThemeConfig) => ({ ...prev, ...updates }));
-  }, []);
-
-  // Accessibility: Listen for reduced motion preference
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      if (e.matches && !config.reducedMotion) {
-        updateConfigInternal({ reducedMotion: true });
-      }
+      setActualMode(e.matches ? 'dark' : 'light');
     };
 
     mediaQuery.addEventListener('change', handleChange);
-
-    // Check initial state
-    if (mediaQuery.matches && !config.reducedMotion) {
-      updateConfigInternal({ reducedMotion: true });
-    }
-
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [config.reducedMotion, updateConfigInternal]);
+  }, [config.mode, enableSystemListener, isMounted]);
 
-  // ============================================================================
-  // ACTION FUNCTIONS
-  // ============================================================================
+  // Actions
+  const setMode = useCallback((mode: ThemeMode) => {
+    setConfig(prev => ({ ...prev, mode }));
+  }, []);
 
-  const setMode = useCallback(
-    (mode: ThemeMode) => {
-      updateConfigInternal({ mode });
-    },
-    [updateConfigInternal]
-  );
+  const setLanguage = useCallback((language: Language) => {
+    setConfig(prev => ({ ...prev, language }));
+  }, []);
 
-  const setLanguage = useCallback(
-    (language: Language) => {
-      updateConfigInternal({ language });
-
-      // Update document language
-      if (typeof document !== 'undefined') {
-        document.documentElement.lang = language;
-      }
-    },
-    [updateConfigInternal]
-  );
-
-  const setColorScheme = useCallback(
-    (colorScheme: ColorScheme) => {
-      updateConfigInternal({ colorScheme });
-    },
-    [updateConfigInternal]
-  );
-
-  const setAnimationLevel = useCallback(
-    (animationLevel: AnimationLevel) => {
-      updateConfigInternal({ animationLevel });
-    },
-    [updateConfigInternal]
-  );
-
-  const setFontSize = useCallback(
-    (fontSize: ThemeConfig['fontSize']) => {
-      updateConfigInternal({ fontSize });
-    },
-    [updateConfigInternal]
-  );
-
-  const setBorderRadius = useCallback(
-    (borderRadius: ThemeConfig['borderRadius']) => {
-      updateConfigInternal({ borderRadius });
-    },
-    [updateConfigInternal]
-  );
+  const setColorScheme = useCallback((colorScheme: ColorScheme) => {
+    setConfig(prev => ({ ...prev, colorScheme }));
+  }, []);
 
   const toggleMode = useCallback(() => {
-    const nextMode: ThemeMode =
-      config.mode === 'light' ? 'dark' : config.mode === 'dark' ? 'auto' : 'light';
-    setMode(nextMode);
+    setMode(config.mode === 'light' ? 'dark' : config.mode === 'dark' ? 'auto' : 'light');
   }, [config.mode, setMode]);
 
   const toggleLanguage = useCallback(() => {
-    const nextLanguage: Language = config.language === 'vi' ? 'en' : 'vi';
-    setLanguage(nextLanguage);
+    setLanguage(config.language === 'vi' ? 'en' : 'vi');
   }, [config.language, setLanguage]);
-
-  const resetToDefaults = useCallback(() => {
-    const defaults = { ...UNIFIED_THEME_CONFIG.defaults, ...defaultConfig };
-    setConfigState(defaults);
-  }, [defaultConfig]);
-
-  const updateConfig = useCallback(
-    (updates: Partial<ThemeConfig>) => {
-      updateConfigInternal(updates);
-    },
-    [updateConfigInternal]
-  );
-
-  const enableHighContrast = useCallback(
-    (enabled: boolean) => {
-      updateConfigInternal({ highContrast: enabled });
-
-      // Apply high contrast class
-      if (typeof document !== 'undefined') {
-        document.documentElement.classList.toggle('high-contrast', enabled);
-      }
-    },
-    [updateConfigInternal]
-  );
-
-  const enableReducedMotion = useCallback(
-    (enabled: boolean) => {
-      updateConfigInternal({
-        reducedMotion: enabled,
-        enableAnimations: enabled ? false : config.enableAnimations,
-        enableTransitions: enabled ? false : config.enableTransitions,
-      });
-
-      // Apply reduced motion class
-      if (typeof document !== 'undefined') {
-        document.documentElement.classList.toggle('reduced-motion', enabled);
-      }
-    },
-    [updateConfigInternal, config.enableAnimations, config.enableTransitions]
-  );
 
   // Context value
   const contextValue: UnifiedThemeContextType = {
-    // Current configuration
     config,
-
-    // Derived values
     actualMode,
-    colors,
-    classes,
-
-    // State
     isLoading,
-    isSystemMode,
-
-    // Actions
     setMode,
     setLanguage,
     setColorScheme,
-    setAnimationLevel,
-    setFontSize,
-    setBorderRadius,
-
-    // Utilities
     toggleMode,
     toggleLanguage,
-    resetToDefaults,
-    updateConfig,
-
-    // Accessibility
-    enableHighContrast,
-    enableReducedMotion,
   };
 
   return (
-    <UnifiedThemeContext.Provider value={contextValue}>{children}</UnifiedThemeContext.Provider>
+    <UnifiedThemeContext.Provider value={contextValue}>
+      {children}
+    </UnifiedThemeContext.Provider>
   );
 }
 
@@ -308,128 +200,24 @@ export function UnifiedThemeProvider({
 // HOOKS
 // ============================================================================
 
-/**
- * Main hook for accessing unified theme context
- */
 export function useUnifiedTheme(): UnifiedThemeContextType {
   const context = useContext(UnifiedThemeContext);
   if (context === undefined) {
-    throw new Error('useUnifiedTheme must be used within a UnifiedThemeProvider');
+    throw new Error('useUnifiedTheme phải được sử dụng trong UnifiedThemeProvider');
   }
   return context;
 }
 
-/**
- * Safe hook that returns default values if provider is not available
- */
-export function useSafeUnifiedTheme(): UnifiedThemeContextType | null {
-  const context = useContext(UnifiedThemeContext);
-  return context || null;
-}
-
-/**
- * Hook for theme mode with fallback
- */
-export function useSafeThemeMode() {
-  const context = useSafeUnifiedTheme();
-  
-  if (!context) {
-    return {
-      mode: 'light' as ThemeMode,
-      actualMode: 'light' as const,
-      setMode: () => {},
-      toggleMode: () => {},
-      isSystemMode: false,
-    };
-  }
-
-  const { config, actualMode, setMode, toggleMode, isSystemMode } = context;
-  return {
-    mode: config.mode,
-    actualMode,
-    setMode,
-    toggleMode,
-    isSystemMode,
-  };
-}
-
-/**
- * Hook for language with fallback
- */
-export function useSafeLanguage() {
-  const context = useSafeUnifiedTheme();
-  
-  if (!context) {
-    return {
-      language: 'vi' as Language,
-      setLanguage: () => {},
-      toggleLanguage: () => {},
-    };
-  }
-
-  const { config, setLanguage, toggleLanguage } = context;
-  return {
-    language: config.language,
-    setLanguage,
-    toggleLanguage,
-  };
-}
-
-/**
- * Hook for colors only
- */
-export function useThemeColors() {
-  const { colors, actualMode } = useUnifiedTheme();
-  return { colors, mode: actualMode };
-}
-
-/**
- * Hook for dark mode state (boolean)
- */
-export function useIsDarkMode() {
-  const { actualMode } = useUnifiedTheme();
-  return actualMode === 'dark';
-}
-
-/**
- * Hook for current language
- */
-export function useCurrentLanguage() {
-  const { config } = useUnifiedTheme();
-  return config.language;
-}
-
-/**
- * Hook for accessibility features
- */
-export function useAccessibility() {
-  const { config, enableHighContrast, enableReducedMotion } = useUnifiedTheme();
-
-  return {
-    highContrast: config.highContrast,
-    reducedMotion: config.reducedMotion,
-    enableHighContrast,
-    enableReducedMotion,
-  };
-}
-
-/**
- * Hook for theme mode (alternative to useSafeThemeMode for backward compatibility)
- */
 export function useThemeMode() {
-  const { config, actualMode, setMode, toggleMode, isSystemMode } = useUnifiedTheme();
+  const { config, actualMode, setMode, toggleMode } = useUnifiedTheme();
   return {
     mode: config.mode,
     actualMode,
     setMode,
     toggleMode,
-    isSystemMode,
   };
 }
 
-/**
- * Hook for language (alternative to useSafeLanguage for backward compatibility)
- */
 export function useLanguage() {
   const { config, setLanguage, toggleLanguage } = useUnifiedTheme();
   return {
@@ -440,95 +228,6 @@ export function useLanguage() {
 }
 
 // ============================================================================
-// HOCs (Higher-Order Components)
+// EXPORT MẶC ĐỊNH
 // ============================================================================
-
-/**
- * HOC to inject theme props
- */
-export function withTheme<P extends object>(
-  Component: React.ComponentType<P & { theme: UnifiedThemeContextType }>
-) {
-  return function ThemedComponent(props: P) {
-    const theme = useUnifiedTheme();
-    return <Component {...props} theme={theme} />;
-  };
-}
-
-/**
- * HOC to inject only theme mode
- */
-export function withThemeMode<P extends object>(
-  Component: React.ComponentType<P & { themeMode: ReturnType<typeof useThemeMode> }>
-) {
-  return function ThemedComponent(props: P) {
-    const themeMode = useThemeMode();
-    return <Component {...props} themeMode={themeMode} />;
-  };
-}
-
-/**
- * HOC to inject only language
- */
-export function withLanguage<P extends object>(
-  Component: React.ComponentType<P & { language: ReturnType<typeof useLanguage> }>
-) {
-  return function ThemedComponent(props: P) {
-    const language = useLanguage();
-    return <Component {...props} language={language} />;
-  };
-}
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-/**
- * Create a theme-aware class name helper
- */
-export function createThemeClassNames(config: ThemeConfig) {
-  const classes = getThemeClasses(config);
-
-  return {
-    // Mode classes
-    mode: classes.mode,
-    isDark: classes.mode === 'dark',
-    isLight: classes.mode === 'light',
-
-    // Feature classes
-    colorScheme: `color-scheme-${classes.colorScheme}`,
-    animation: `animation-${classes.animationLevel}`,
-    fontSize: `font-size-${classes.fontSize}`,
-    borderRadius: `border-radius-${classes.borderRadius}`,
-
-    // Combined class
-    combined: [
-      classes.mode,
-      `color-scheme-${classes.colorScheme}`,
-      `animation-${classes.animationLevel}`,
-      `font-size-${classes.fontSize}`,
-      `border-radius-${classes.borderRadius}`,
-    ].join(' '),
-  };
-}
-
-/**
- * Get theme value by key path
- */
-export function getThemeValue(path: string, config: ThemeConfig): any {
-  const keys = path.split('.');
-  let value: any = UNIFIED_THEME_CONFIG;
-
-  for (const key of keys) {
-    value = value?.[key];
-    if (value === undefined) break;
-  }
-
-  return value;
-}
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
 export default useUnifiedTheme;

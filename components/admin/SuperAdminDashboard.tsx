@@ -41,7 +41,6 @@ interface SystemStats {
   totalUsers: number;
   activeUsers: number;
   totalRoles: number;
-  totalEmployees: number;
   recentLogins: number;
   systemHealth: string;
 }
@@ -53,33 +52,9 @@ const SuperAdminDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showInitModal, setShowInitModal] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-
   useEffect(() => {
-    checkInitialization();
+    loadSuperAdminData();
   }, []);
-
-  useEffect(() => {
-    if (isInitialized) {
-      loadSuperAdminData();
-    }
-  }, [isInitialized]);
-
-  const checkInitialization = async () => {
-    try {
-      const response = await fetch('/api/admin/initialize');
-      const data = await response.json();
-      setIsInitialized(data.initialized);
-
-      if (!data.initialized) {
-        setShowInitModal(true);
-      }
-    } catch (error: any) {
-     // console.error('Error checking initialization:', error);
-      setError('Failed to check system status');
-    }
-  };
 
   const loadSuperAdminData = async () => {
     try {
@@ -88,8 +63,8 @@ const SuperAdminDashboard: React.FC = () => {
 
       //console.log('Loading Super Admin data with token:', token ? 'Token exists' : 'No token');
 
-      // If no token and system is initialized, redirect to login immediately
-      if (!token && isInitialized) {
+      // If no token, redirect to login immediately
+      if (!token) {
         //console.log('No token found, redirecting to login...');
        // window.location.href = '/login';
         return;
@@ -147,45 +122,6 @@ const SuperAdminDashboard: React.FC = () => {
       setError(error.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleInitializeSystem = async (formData: any) => {
-    try {
-      const response = await fetch('/api/admin/initialize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          setupKey: formData.setupKey,
-          adminData: {
-            email: formData.email,
-            password: formData.password,
-            displayName: formData.displayName,
-            username: formData.username,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to initialize system');
-      }
-
-      const result = await response.json();
-      setIsInitialized(true);
-      setShowInitModal(false);
-
-      alert(
-        `System initialized successfully!\nEmail: ${result.data.credentials.email}\nPassword: ${result.data.credentials.password}\n\nPlease login to continue.`
-      );
-
-      // Redirect to login page instead of loading data immediately
-     // window.location.href = '/login';
-    } catch (error: any) {
-     // console.error('Error initializing system:', error);
-      alert(`Error: ${error.message}`);
     }
   };
 
@@ -289,13 +225,9 @@ const SuperAdminDashboard: React.FC = () => {
     }
   };
 
-  if (!isInitialized) {
-    return <SystemInitializationModal onInitialize={handleInitializeSystem} />;
-  }
-
   // Add authentication check
   const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-  if (!token && isInitialized) {
+  if (!token) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
@@ -493,120 +425,6 @@ const SuperAdminDashboard: React.FC = () => {
           onSubmit={handleCreateSuperAdmin}
         />
       )}
-    </div>
-  );
-};
-
-// System Initialization Modal
-const SystemInitializationModal: React.FC<{ onInitialize: (data: any) => void }> = ({
-  onInitialize,
-}) => {
-  const [formData, setFormData] = useState({
-    setupKey: '',
-    email: 'admin@taza.com',
-    password: 'TazaAdmin@2024!',
-    displayName: 'Super Administrator',
-    username: 'superadmin',
-  });
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onInitialize(formData);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-        <div className="text-center mb-6">
-          <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900">Initialize TazaCore System</h2>
-          <p className="text-gray-600 mt-2">
-            Set up your Super Administrator account to get started
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Setup Key</label>
-            <input
-              type="password"
-              value={formData.setupKey}
-              onChange={(e) => setFormData({ ...formData, setupKey: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              placeholder="Enter system setup key"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Admin Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 pr-10"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
-            <input
-              type="text"
-              value={formData.displayName}
-              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 font-medium"
-          >
-            Initialize System
-          </button>
-        </form>
-
-        <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-sm text-amber-800">
-            <strong>Important:</strong> This will create the initial Super Administrator account.
-            Make sure to change the default password after first login for security.
-          </p>
-        </div>
-      </div>
     </div>
   );
 };

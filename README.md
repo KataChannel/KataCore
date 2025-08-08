@@ -23,11 +23,10 @@ cd site && npm run db:seed
 - **👥 HR Management**: Complete employee lifecycle
 - **🔐 Authentication**: Role-based access control  
 - **💬 Communication**: Internal messaging system
-- **🤝 Affiliate Program**: Referral tracking
 - **📊 Analytics**: Business insights
 
 ### User Roles
-- **Super Admin**: it@tazagroup.vn / TazaGroup@2024!
+- **Super Admin**: it@tazagroup.vn / 123456
 - **Department Managers**: Full department access
 - **Employees**: Self-service portal
 

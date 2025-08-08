@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useMenuItems } from '../hooks/useMenuItems';
 import {
@@ -26,8 +26,9 @@ import {
   SwatchIcon,
 } from '@heroicons/react/24/outline';
 import { useUnifiedTheme } from '@/hooks';
-import { useUnifiedAuth } from '@/lib/auth';
-import ThemeManager from '../components/ThemeManager';
+import { useUnifiedAuth } from '@/components/auth/UnifiedAuthProvider';
+import ThemeManager from '@/components/ThemeManager';
+
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -121,63 +122,69 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   }, [user, loading, hasModuleAccess, router]);
 
   // Transform database menu items to match the existing structure
-  const transformMenuItems = (items: any[]) => {
-    return items.map(item => {
-      const IconComponent = iconMapping[item.icon] || HomeIcon;
-      
-      return {
-        title: item.titleVi || item.title,
-        icon: IconComponent,
-        path: item.path,
-        active: pathname === item.path || pathname.startsWith(item.path + '/'),
-        permission: item.permission,
-        canAccess: item.canAccess,
-        children: item.children ? item.children.map((child: any) => ({
-          name: child.titleVi || child.title,
-          nameVi: child.titleVi || child.title,
-          href: child.path,
-          icon: iconMapping[child.icon] || HomeIcon,
-          permission: child.permission,
-          canAccess: child.canAccess,
-        })) : undefined,
-      };
-    });
-  };
+  const transformMenuItems = useMemo(() => {
+    return (items: any[]) => {
+      return items.map(item => {
+        const IconComponent = iconMapping[item.icon] || HomeIcon;
+        
+        return {
+          title: item.titleVi || item.title,
+          icon: IconComponent,
+          path: item.path,
+          active: pathname === item.path || pathname.startsWith(item.path + '/'),
+          permission: item.permission,
+          canAccess: item.canAccess,
+          children: item.children ? item.children.map((child: any) => ({
+            name: child.titleVi || child.title,
+            nameVi: child.titleVi || child.title,
+            href: child.path,
+            icon: iconMapping[child.icon] || HomeIcon,
+            permission: child.permission,
+            canAccess: child.canAccess,
+          })) : undefined,
+        };
+      });
+    };
+  }, [pathname]);
 
   // Get menu items (use database if available, fallback to static)
-  const menuItems = dbMenuItems && dbMenuItems.length > 0 
-    ? transformMenuItems(dbMenuItems)
-    : [
-        // Fallback static menu (original structure)
-        {
-          title: 'Dashboard',
-          icon: HomeIcon,
-          path: '/admin',
-          active: pathname === '/admin',
-          permission: 'read:dashboard',
-          canAccess: true,
-        },
-        {
-          title: 'Quản lý Nhân sự',
-          icon: UsersIcon,
-          path: '/admin/hr',
-          active: pathname.startsWith('/admin/hr'),
-          permission: 'read:hrm',
-          canAccess: true,
-          children: [
-            {
-              name: 'Tổng quan',
-              nameVi: 'Tổng quan',
-              href: '/admin/hr',
-              icon: ChartBarIcon,
-              permission: 'read:hrm',
-              canAccess: true,
-            },
-            // ... other HR menu items
-          ],
-        },
-        // ... other static menu items
-      ];
+  const menuItems = useMemo(() => {
+    if (dbMenuItems && dbMenuItems.length > 0) {
+      return transformMenuItems(dbMenuItems);
+    }
+    
+    return [
+      // Fallback static menu (original structure)
+      {
+        title: 'Dashboard',
+        icon: HomeIcon,
+        path: '/admin',
+        active: pathname === '/admin',
+        permission: 'read:dashboard',
+        canAccess: true,
+      },
+      {
+        title: 'Quản lý Nhân sự',
+        icon: UsersIcon,
+        path: '/admin/hr',
+        active: pathname.startsWith('/admin/hr'),
+        permission: 'read:hrm',
+        canAccess: true,
+        children: [
+          {
+            name: 'Tổng quan',
+            nameVi: 'Tổng quan',
+            href: '/admin/hr',
+            icon: ChartBarIcon,
+            permission: 'read:hrm',
+            canAccess: true,
+          },
+          // ... other HR menu items
+        ],
+      },
+      // ... other static menu items
+    ];
+  }, [dbMenuItems, transformMenuItems, pathname]);
 
   // Auto-expand menus when submenu is active
   useEffect(() => {
@@ -187,14 +194,18 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
     setExpandedMenus((prev) => {
       const newExpanded = [...prev];
+      let hasChanges = false;
+      
       activeParentMenus.forEach((path) => {
         if (!newExpanded.includes(path)) {
           newExpanded.push(path);
+          hasChanges = true;
         }
       });
-      return newExpanded;
+      
+      return hasChanges ? newExpanded : prev;
     });
-  }, [pathname, menuItems]);
+  }, [menuItems]);
 
   const toggleTheme = () => {
     toggleMode();

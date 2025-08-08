@@ -37,7 +37,7 @@ cd site && npx tsx prisma/seed/unified-comprehensive-seed.ts
 ### Super Admin Login
 ```
 Email: it@tazagroup.vn
-Password: TazaGroup@2024!
+Password: 123456
 Access Level: 10 (Full System Access)
 ```
 
@@ -90,10 +90,10 @@ Access Level: 10 (Full System Access)
 
 | User Type | Email Pattern | Password | Level | Count |
 |-----------|---------------|----------|-------|-------|
-| Super Admin | `it@tazagroup.vn` | `TazaGroup@2024!` | 10 | 1 |
-| System Admin | `admin@tazagroup.vn` | `TazaGroup@2024!` | 9 | 1 |
-| Managers | `{role}@tazagroup.vn` | `TazaGroup@2024!` | 6-8 | 6 |
-| Employees | `{user}@tazagroup.vn` | `TazaGroup@2024!` | 3 | 9 |
+| Super Admin | `it@tazagroup.vn` | `123456` | 10 | 1 |
+| System Admin | `admin@tazagroup.vn` | `123456` | 9 | 1 |
+| Managers | `{role}@tazagroup.vn` | `123456` | 6-8 | 6 |
+| Employees | `{user}@tazagroup.vn` | `123456` | 3 | 9 |
 
 ---
 

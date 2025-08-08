@@ -54,7 +54,7 @@ async function clearDatabase() {
   await prisma.notification.deleteMany();
   await prisma.friendRequest.deleteMany();
   await prisma.conversation.deleteMany();
-  await prisma.userSettings.deleteMany();
+  await prisma.usersSettings.deleteMany();
   await prisma.session.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.report.deleteMany();
@@ -64,13 +64,13 @@ async function clearDatabase() {
   await prisma.payroll.deleteMany();
   await prisma.leaveRequest.deleteMany();
   await prisma.attendance.deleteMany();
-  await prisma.employee.deleteMany();
+  await prisma.employees.deleteMany();
   await prisma.position.deleteMany();
-  await prisma.department.deleteMany();
+  await prisma.departments.deleteMany();
   
   // Clear users and roles last
-  await prisma.user.deleteMany();
-  await prisma.role.deleteMany();
+  await prisma.users.deleteMany();
+  await prisma.roles.deleteMany();
   
   success('Database cleared successfully');
 }
@@ -81,7 +81,7 @@ async function clearDatabase() {
 async function seedRoles() {
   log('👑 Creating system roles...');
   
-  const superAdminRole = await prisma.role.create({
+  const superAdminRole = await prisma.roles.create({
     data: {
       name: 'SUPER_ADMIN',
       description: 'Super Administrator với quyền tối cao',
@@ -99,7 +99,7 @@ async function seedRoles() {
     }
   });
 
-  const adminRole = await prisma.role.create({
+  const adminRole = await prisma.roles.create({
     data: {
       name: 'ADMIN',
       description: 'Quản trị viên hệ thống',
@@ -114,7 +114,7 @@ async function seedRoles() {
     }
   });
 
-  const hrManagerRole = await prisma.role.create({
+  const hrManagerRole = await prisma.roles.create({
     data: {
       name: 'HR_MANAGER',
       description: 'Quản lý nhân sự với quyền toàn bộ HRM',
@@ -130,7 +130,7 @@ async function seedRoles() {
     }
   });
 
-  const departmentManagerRole = await prisma.role.create({
+  const departmentManagerRole = await prisma.roles.create({
     data: {
       name: 'DEPARTMENT_MANAGER',
       description: 'Quản lý phòng ban',
@@ -145,7 +145,7 @@ async function seedRoles() {
     }
   });
 
-  const employeeRole = await prisma.role.create({
+  const employeeRole = await prisma.roles.create({
     data: {
       name: 'EMPLOYEE',
       description: 'Nhân viên với quyền cơ bản',
@@ -160,7 +160,7 @@ async function seedRoles() {
     }
   });
 
-  const moderatorRole = await prisma.role.create({
+  const moderatorRole = await prisma.roles.create({
     data: {
       name: 'MODERATOR',
       description: 'Điều hành viên chat',
@@ -172,7 +172,7 @@ async function seedRoles() {
     }
   });
 
-  const userRole = await prisma.role.create({
+  const userRole = await prisma.roles.create({
     data: {
       name: 'USER',
       description: 'Người dùng thông thường',
@@ -184,7 +184,7 @@ async function seedRoles() {
     }
   });
 
-  const guestRole = await prisma.role.create({
+  const guestRole = await prisma.roles.create({
     data: {
       name: 'GUEST',
       description: 'Khách với quyền chỉ đọc',
@@ -216,7 +216,7 @@ async function seedRoles() {
 async function seedSystemUsers(roles: any) {
   log('👥 Creating system users...');
   
-  const superAdmin = await prisma.user.create({
+  const superAdmin = await prisma.users.create({
     data: {
       email: 'superadmin@tazacore.com',
       username: 'superadmin',
@@ -232,7 +232,7 @@ async function seedSystemUsers(roles: any) {
     }
   });
 
-  const admin = await prisma.user.create({
+  const admin = await prisma.users.create({
     data: {
       email: 'admin@tazacore.com',
       username: 'admin',
@@ -259,7 +259,7 @@ async function seedSystemUsers(roles: any) {
 async function seedDepartments(users: any) {
   log('🏢 Creating departments...');
   
-  const ceoOffice = await prisma.department.create({
+  const ceoOffice = await prisma.departments.create({
     data: {
       name: 'CEO Office',
       description: 'Văn phòng Tổng Giám đốc điều hành',
@@ -273,7 +273,7 @@ async function seedDepartments(users: any) {
     }
   });
 
-  const hrDepartment = await prisma.department.create({
+  const hrDepartment = await prisma.departments.create({
     data: {
       name: 'Human Resources',
       description: 'Phòng Nhân sự - Quản lý nguồn nhân lực và phúc lợi',
@@ -287,7 +287,7 @@ async function seedDepartments(users: any) {
     }
   });
 
-  const itDepartment = await prisma.department.create({
+  const itDepartment = await prisma.departments.create({
     data: {
       name: 'Information Technology',
       description: 'Phòng Công nghệ Thông tin - Phát triển và vận hành hệ thống',
@@ -301,7 +301,7 @@ async function seedDepartments(users: any) {
     }
   });
 
-  const salesDepartment = await prisma.department.create({
+  const salesDepartment = await prisma.departments.create({
     data: {
       name: 'Sales & Marketing',
       description: 'Phòng Kinh doanh và Marketing - Phát triển thị trường',
@@ -315,7 +315,7 @@ async function seedDepartments(users: any) {
     }
   });
 
-  const financeDepartment = await prisma.department.create({
+  const financeDepartment = await prisma.departments.create({
     data: {
       name: 'Finance & Accounting',
       description: 'Phòng Tài chính Kế toán - Quản lý tài chính doanh nghiệp',
@@ -329,7 +329,7 @@ async function seedDepartments(users: any) {
     }
   });
 
-  const operationsDepartment = await prisma.department.create({
+  const operationsDepartment = await prisma.departments.create({
     data: {
       name: 'Operations',
       description: 'Phòng Vận hành - Quản lý hoạt động và quy trình',
@@ -531,7 +531,7 @@ async function seedHRAndDepartmentUsers(roles: any, departments: any, positions:
   log('👨‍💼 Creating HR and department users...');
   
   // Update department managers
-  const hrManager = await prisma.user.create({
+  const hrManager = await prisma.users.create({
     data: {
       email: 'hr.manager@tazacore.com',
       username: 'hr_manager',
@@ -547,7 +547,7 @@ async function seedHRAndDepartmentUsers(roles: any, departments: any, positions:
     }
   });
 
-  const itDirector = await prisma.user.create({
+  const itDirector = await prisma.users.create({
     data: {
       email: 'it.director@tazacore.com',
       username: 'it_director',
@@ -563,7 +563,7 @@ async function seedHRAndDepartmentUsers(roles: any, departments: any, positions:
     }
   });
 
-  const salesManager = await prisma.user.create({
+  const salesManager = await prisma.users.create({
     data: {
       email: 'sales.manager@tazacore.com',
       username: 'sales_manager',
@@ -579,7 +579,7 @@ async function seedHRAndDepartmentUsers(roles: any, departments: any, positions:
     }
   });
 
-  const financeManager = await prisma.user.create({
+  const financeManager = await prisma.users.create({
     data: {
       email: 'finance.manager@tazacore.com',
       username: 'finance_manager',
@@ -595,7 +595,7 @@ async function seedHRAndDepartmentUsers(roles: any, departments: any, positions:
     }
   });
 
-  const operationsManager = await prisma.user.create({
+  const operationsManager = await prisma.users.create({
     data: {
       email: 'ops.manager@tazacore.com',
       username: 'ops_manager',
@@ -613,23 +613,23 @@ async function seedHRAndDepartmentUsers(roles: any, departments: any, positions:
 
   // Update department managers
   await Promise.all([
-    prisma.department.update({
+    prisma.departments.update({
       where: { id: departments.hrDepartment.id },
       data: { managerId: hrManager.id }
     }),
-    prisma.department.update({
+    prisma.departments.update({
       where: { id: departments.itDepartment.id },
       data: { managerId: itDirector.id }
     }),
-    prisma.department.update({
+    prisma.departments.update({
       where: { id: departments.salesDepartment.id },
       data: { managerId: salesManager.id }
     }),
-    prisma.department.update({
+    prisma.departments.update({
       where: { id: departments.financeDepartment.id },
       data: { managerId: financeManager.id }
     }),
-    prisma.department.update({
+    prisma.departments.update({
       where: { id: departments.operationsDepartment.id },
       data: { managerId: operationsManager.id }
     }),
@@ -656,7 +656,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
   
   // IT Department employees
   const itEmployees = await Promise.all([
-    prisma.user.create({
+    prisma.users.create({
       data: {
         email: 'john.doe@tazacore.com',
         username: 'john_doe',
@@ -671,7 +671,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
         roleId: roles.employeeRole.id,
       }
     }),
-    prisma.user.create({
+    prisma.users.create({
       data: {
         email: 'jane.smith@tazacore.com',
         username: 'jane_smith',
@@ -686,7 +686,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
         roleId: roles.employeeRole.id,
       }
     }),
-    prisma.user.create({
+    prisma.users.create({
       data: {
         email: 'david.wilson@tazacore.com',
         username: 'david_wilson',
@@ -705,7 +705,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
 
   // Sales employees
   const salesEmployees = await Promise.all([
-    prisma.user.create({
+    prisma.users.create({
       data: {
         email: 'sarah.johnson@tazacore.com',
         username: 'sarah_johnson',
@@ -720,7 +720,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
         roleId: roles.employeeRole.id,
       }
     }),
-    prisma.user.create({
+    prisma.users.create({
       data: {
         email: 'mike.brown@tazacore.com',
         username: 'mike_brown',
@@ -739,7 +739,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
 
   // HR employees
   const hrEmployees = await Promise.all([
-    prisma.user.create({
+    prisma.users.create({
       data: {
         email: 'lisa.garcia@tazacore.com',
         username: 'lisa_garcia',
@@ -758,7 +758,7 @@ async function seedEmployees(roles: any, departments: any, positions: any, manag
 
   // Finance employees
   const financeEmployees = await Promise.all([
-    prisma.user.create({
+    prisma.users.create({
       data: {
         email: 'robert.davis@tazacore.com',
         username: 'robert_davis',
@@ -797,7 +797,7 @@ async function createEmployeeRecords(users: any, departments: any, positions: an
   const employeeRecords: any[] = [];
   
   // CEO
-  const ceoEmployee = await prisma.employee.create({
+  const ceoEmployee = await prisma.employees.create({
     data: {
       employeeId: 'CEO001',
       firstName: 'Super',
@@ -822,7 +822,7 @@ async function createEmployeeRecords(users: any, departments: any, positions: an
   });
 
   // HR Manager
-  const hrManagerEmployee = await prisma.employee.create({
+  const hrManagerEmployee = await prisma.employees.create({
     data: {
       employeeId: 'HR001',
       firstName: 'Thị Hương',
@@ -847,7 +847,7 @@ async function createEmployeeRecords(users: any, departments: any, positions: an
   });
 
   // IT Director
-  const itDirectorEmployee = await prisma.employee.create({
+  const itDirectorEmployee = await prisma.employees.create({
     data: {
       employeeId: 'IT001',
       firstName: 'Văn Minh',

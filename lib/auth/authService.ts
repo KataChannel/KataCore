@@ -106,7 +106,7 @@ class AuthService {
     const { email, phone, username, password, displayName, provider = 'email' } = data;
 
     // Check if user exists
-    const existingUser = await prisma.user.findFirst({
+    const existingUser = await prisma.users.findFirst({
       where: {
         OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
@@ -117,7 +117,7 @@ class AuthService {
     }
 
     // Get default role
-    const defaultRole = await prisma.role.findFirst({
+    const defaultRole = await prisma.roles.findFirst({
       where: { name: 'USER' },
     });
 
@@ -128,7 +128,7 @@ class AuthService {
     // Create user
     const hashedPassword = password ? await this.hashPassword(password) : null;
 
-    const user = await prisma.user.create({
+    const user = await prisma.users.create({
       data: {
         email,
         phone,
@@ -154,7 +154,7 @@ class AuthService {
     const { email, phone, username, password, provider = 'email' } = credentials;
 
     // Find user
-    const user = await prisma.user.findFirst({
+    const user = await prisma.users.findFirst({
       where: {
         OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
@@ -188,7 +188,7 @@ class AuthService {
     const tokens = this.generateTokens(transformedUser);
 
     // Update last seen
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
       data: { lastSeen: new Date() },
     });
@@ -198,7 +198,7 @@ class AuthService {
 
   // Login with OTP (for phone)
   async loginWithOTP(phone: string, otpCode: string): Promise<{ user: AuthUser; tokens: any }> {
-    const user = await prisma.user.findFirst({
+    const user = await prisma.users.findFirst({
       where: { phone },
       include: { role: true },
     });
@@ -220,7 +220,7 @@ class AuthService {
     }
 
     // Clear OTP
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
       data: {
         otpCode: null,
@@ -237,7 +237,7 @@ class AuthService {
 
   // Send OTP to phone
   async sendOTP(phone: string): Promise<boolean> {
-    const user = await prisma.user.findFirst({
+    const user = await prisma.users.findFirst({
       where: { phone },
     });
 
@@ -248,7 +248,7 @@ class AuthService {
     const otpCode = this.generateOTP();
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
       data: {
         otpCode,
@@ -268,7 +268,7 @@ class AuthService {
     email: string,
     displayName: string
   ): Promise<{ user: AuthUser; tokens: any }> {
-    let user = await prisma.user.findFirst({
+    let user = await prisma.users.findFirst({
       where: {
         OR: [{ googleId }, { email }],
       },
@@ -277,7 +277,7 @@ class AuthService {
 
     if (!user) {
       // Create new user
-      const defaultRole = await prisma.role.findFirst({
+      const defaultRole = await prisma.roles.findFirst({
         where: { name: 'USER' },
       });
 
@@ -285,7 +285,7 @@ class AuthService {
         throw new Error('Default role not found');
       }
 
-      user = await prisma.user.create({
+      user = await prisma.users.create({
         data: {
           email,
           googleId,
@@ -297,7 +297,7 @@ class AuthService {
       });
     } else if (!user.googleId) {
       // Link Google account to existing user
-      user = await prisma.user.update({
+      user = await prisma.users.update({
         where: { id: user.id },
         data: { googleId },
         include: { role: true },
@@ -311,7 +311,7 @@ class AuthService {
 
   // Get user by ID
   async getUserById(userId: string): Promise<AuthUser | null> {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: userId },
       include: { role: true },
     });
@@ -338,7 +338,7 @@ class AuthService {
 
   // Logout
   async logout(userId: string): Promise<boolean> {
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { lastSeen: new Date() },
     });

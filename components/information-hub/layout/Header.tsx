@@ -8,7 +8,7 @@ import {
   UserCircleIcon,
   Cog6ToothIcon
 } from '@heroicons/react/24/outline';
-import { useInformationHub } from '@/providers/InformationHubProvider';
+import { useInformationHub } from '@/lib/providers/InformationHubProvider';
 
 export function InformationHubHeader() {
   const pathname = usePathname();

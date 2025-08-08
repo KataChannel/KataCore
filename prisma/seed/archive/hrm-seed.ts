@@ -11,18 +11,18 @@ async function seedHRMData() {
     await prisma.payroll.deleteMany();
     await prisma.leaveRequest.deleteMany();
     await prisma.attendance.deleteMany();
-    await prisma.employee.deleteMany();
+    await prisma.employees.deleteMany();
     await prisma.position.deleteMany();
-    await prisma.department.deleteMany();
+    await prisma.departments.deleteMany();
 
     // Clear existing users and roles for fresh start
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await prisma.users.deleteMany();
+    await prisma.roles.deleteMany();
 
     console.log('Existing data cleared');
 
     // Create Roles
-    const hrManagerRole = await prisma.role.create({
+    const hrManagerRole = await prisma.roles.create({
       data: {
         name: 'HR_MANAGER',
         description: 'HR Manager with full access to HRM system',
@@ -37,7 +37,7 @@ async function seedHRMData() {
       },
     });
 
-    const departmentManagerRole = await prisma.role.create({
+    const departmentManagerRole = await prisma.roles.create({
       data: {
         name: 'DEPARTMENT_MANAGER',
         description: 'Department Manager with team management access',
@@ -45,7 +45,7 @@ async function seedHRMData() {
       },
     });
 
-    const employeeRole = await prisma.role.create({
+    const employeeRole = await prisma.roles.create({
       data: {
         name: 'EMPLOYEE',
         description: 'Regular employee with basic access',
@@ -56,7 +56,7 @@ async function seedHRMData() {
     console.log('Roles created');
 
     // Create Users
-    const hrManager = await prisma.user.create({
+    const hrManager = await prisma.users.create({
       data: {
         email: 'hr.manager@company.com',
         username: 'hr_manager',
@@ -71,7 +71,7 @@ async function seedHRMData() {
       },
     });
 
-    const itManager = await prisma.user.create({
+    const itManager = await prisma.users.create({
       data: {
         email: 'it.manager@company.com',
         username: 'it_manager',
@@ -86,7 +86,7 @@ async function seedHRMData() {
       },
     });
 
-    const salesManager = await prisma.user.create({
+    const salesManager = await prisma.users.create({
       data: {
         email: 'sales.manager@company.com',
         username: 'sales_manager',
@@ -101,7 +101,7 @@ async function seedHRMData() {
       },
     });
 
-    const developer1 = await prisma.user.create({
+    const developer1 = await prisma.users.create({
       data: {
         email: 'john.doe@company.com',
         username: 'john_doe',
@@ -116,7 +116,7 @@ async function seedHRMData() {
       },
     });
 
-    const developer2 = await prisma.user.create({
+    const developer2 = await prisma.users.create({
       data: {
         email: 'jane.smith@company.com',
         username: 'jane_smith',
@@ -131,7 +131,7 @@ async function seedHRMData() {
       },
     });
 
-    const salesRep1 = await prisma.user.create({
+    const salesRep1 = await prisma.users.create({
       data: {
         email: 'mike.wilson@company.com',
         username: 'mike_wilson',
@@ -146,7 +146,7 @@ async function seedHRMData() {
       },
     });
 
-    const salesRep2 = await prisma.user.create({
+    const salesRep2 = await prisma.users.create({
       data: {
         email: 'sarah.jones@company.com',
         username: 'sarah_jones',
@@ -164,7 +164,7 @@ async function seedHRMData() {
     console.log('Users created');
 
     // Create Departments
-    const hrDepartment = await prisma.department.create({
+    const hrDepartment = await prisma.departments.create({
       data: {
         name: 'Human Resources',
         description: 'Manages employee relations, recruitment, and HR policies',
@@ -178,7 +178,7 @@ async function seedHRMData() {
       },
     });
 
-    const itDepartment = await prisma.department.create({
+    const itDepartment = await prisma.departments.create({
       data: {
         name: 'Information Technology',
         description:
@@ -193,7 +193,7 @@ async function seedHRMData() {
       },
     });
 
-    const salesDepartment = await prisma.department.create({
+    const salesDepartment = await prisma.departments.create({
       data: {
         name: 'Sales & Marketing',
         description:
@@ -297,7 +297,7 @@ async function seedHRMData() {
     console.log('Positions created');
 
     // Create Employees
-    const hrManagerEmployee = await prisma.employee.create({
+    const hrManagerEmployee = await prisma.employees.create({
       data: {
         employeeId: 'EMP001',
         firstName: 'HR',
@@ -321,7 +321,7 @@ async function seedHRMData() {
       },
     });
 
-    const itManagerEmployee = await prisma.employee.create({
+    const itManagerEmployee = await prisma.employees.create({
       data: {
         employeeId: 'EMP002',
         firstName: 'IT',
@@ -345,7 +345,7 @@ async function seedHRMData() {
       },
     });
 
-    const salesManagerEmployee = await prisma.employee.create({
+    const salesManagerEmployee = await prisma.employees.create({
       data: {
         employeeId: 'EMP003',
         firstName: 'Sales',
@@ -369,7 +369,7 @@ async function seedHRMData() {
       },
     });
 
-    const johnDoeEmployee = await prisma.employee.create({
+    const johnDoeEmployee = await prisma.employees.create({
       data: {
         employeeId: 'EMP004',
         firstName: 'John',
@@ -393,7 +393,7 @@ async function seedHRMData() {
       },
     });
 
-    const janeSmithEmployee = await prisma.employee.create({
+    const janeSmithEmployee = await prisma.employees.create({
       data: {
         employeeId: 'EMP005',
         firstName: 'Jane',
@@ -417,7 +417,7 @@ async function seedHRMData() {
       },
     });
 
-    const mikeWilsonEmployee = await prisma.employee.create({
+    const mikeWilsonEmployee = await prisma.employees.create({
       data: {
         employeeId: 'EMP006',
         firstName: 'Mike',
@@ -441,7 +441,7 @@ async function seedHRMData() {
       },
     });
 
-    const sarahJonesEmployee = await prisma.employee.create({
+    const sarahJonesEmployee = await prisma.employees.create({
       data: {
         employeeId: 'EMP007',
         firstName: 'Sarah',

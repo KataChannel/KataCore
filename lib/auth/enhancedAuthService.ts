@@ -119,7 +119,7 @@ class EnhancedAuthService {
     themePreferences: Partial<ThemeConfig>
   ): Promise<void> {
     try {
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: userId },
         data: {
           themePreferences: JSON.stringify(themePreferences),
@@ -133,7 +133,7 @@ class EnhancedAuthService {
   // Get user theme preferences
   async getThemePreferences(userId: string): Promise<Partial<ThemeConfig>> {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: userId },
         select: { themePreferences: true },
       });
@@ -162,7 +162,7 @@ class EnhancedAuthService {
     } = data;
 
     // Check if user exists
-    const existingUser = await prisma.user.findFirst({
+    const existingUser = await prisma.users.findFirst({
       where: {
         OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
@@ -173,7 +173,7 @@ class EnhancedAuthService {
     }
 
     // Get default role
-    const defaultRole = await prisma.role.findFirst({
+    const defaultRole = await prisma.roles.findFirst({
       where: { name: 'USER' },
     });
 
@@ -184,7 +184,7 @@ class EnhancedAuthService {
     // Create user with theme preferences
     const hashedPassword = password ? await this.hashPassword(password) : null;
 
-    const user = await prisma.user.create({
+    const user = await prisma.users.create({
       data: {
         email,
         phone,
@@ -215,7 +215,7 @@ class EnhancedAuthService {
     const { email, phone, username, password, provider = 'email', clientTheme } = credentials;
 
     // Find user
-    const user = await prisma.user.findFirst({
+    const user = await prisma.users.findFirst({
       where: {
         OR: [email ? { email } : {}, phone ? { phone } : {}, username ? { username } : {}],
       },
@@ -258,7 +258,7 @@ class EnhancedAuthService {
       });
     }
 
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
       data: updateData,
     });
@@ -272,7 +272,7 @@ class EnhancedAuthService {
 
   // Login with OTP (for phone)
   async loginWithOTP(phone: string, otpCode: string): Promise<{ user: AuthUser; tokens: any }> {
-    const user = await prisma.user.findFirst({
+    const user = await prisma.users.findFirst({
       where: { phone },
       include: { role: true },
     });
@@ -294,7 +294,7 @@ class EnhancedAuthService {
     }
 
     // Clear OTP
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
       data: {
         otpCode: null,
@@ -311,7 +311,7 @@ class EnhancedAuthService {
 
   // Send OTP to phone
   async sendOTP(phone: string): Promise<boolean> {
-    const user = await prisma.user.findFirst({
+    const user = await prisma.users.findFirst({
       where: { phone },
     });
 
@@ -322,7 +322,7 @@ class EnhancedAuthService {
     const otpCode = this.generateOTP();
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
       data: {
         otpCode,
@@ -343,7 +343,7 @@ class EnhancedAuthService {
     displayName: string,
     themePreferences?: Partial<ThemeConfig>
   ): Promise<{ user: AuthUser; tokens: any }> {
-    let user = await prisma.user.findFirst({
+    let user = await prisma.users.findFirst({
       where: {
         OR: [{ googleId }, { email }],
       },
@@ -352,7 +352,7 @@ class EnhancedAuthService {
 
     if (!user) {
       // Create new user
-      const defaultRole = await prisma.role.findFirst({
+      const defaultRole = await prisma.roles.findFirst({
         where: { name: 'USER' },
       });
 
@@ -360,7 +360,7 @@ class EnhancedAuthService {
         throw new Error('Default role not found');
       }
 
-      user = await prisma.user.create({
+      user = await prisma.users.create({
         data: {
           email,
           googleId,
@@ -389,7 +389,7 @@ class EnhancedAuthService {
         });
       }
 
-      user = await prisma.user.update({
+      user = await prisma.users.update({
         where: { id: user.id },
         data: updateData,
         include: { role: true },
@@ -403,7 +403,7 @@ class EnhancedAuthService {
 
   // Get user by ID with theme preferences
   async getUserById(userId: string): Promise<AuthUser | null> {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: userId },
       include: { role: true },
     });
@@ -430,7 +430,7 @@ class EnhancedAuthService {
 
   // Logout
   async logout(userId: string): Promise<boolean> {
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { lastSeen: new Date() },
     });
@@ -444,7 +444,7 @@ class EnhancedAuthService {
     themePreferences: Partial<ThemeConfig>
   ): Promise<AuthUser | null> {
     try {
-      const user = await prisma.user.update({
+      const user = await prisma.users.update({
         where: { id: userId },
         data: {
           themePreferences: JSON.stringify(themePreferences),

@@ -105,7 +105,7 @@ const info = (message: string) =>
 async function validateSystemRoles() {
   log('🔍 Validating system roles against database...');
 
-  const dbRoles = await prisma.role.findMany({
+  const dbRoles = await prisma.roles.findMany({
     where: { isSystemRole: true },
   });
 
@@ -188,7 +188,7 @@ async function validateTestUsers() {
   log('👥 Validating test users against database...');
 
   const testUserEmails = Object.values(testUsers).map(u => u.email);
-  const dbUsers = await prisma.user.findMany({
+  const dbUsers = await prisma.users.findMany({
     where: {
       email: {
         in: testUserEmails,
@@ -278,7 +278,7 @@ async function validatePermissionConstants() {
 async function generatePermissionAuditReport() {
   log('📊 Generating detailed permission audit report...');
 
-  const dbRoles = await prisma.role.findMany({
+  const dbRoles = await prisma.roles.findMany({
     where: { isSystemRole: true },
     include: {
       _count: { select: { users: true } },
@@ -335,7 +335,7 @@ async function generatePermissionAuditReport() {
   console.log(`  Expected System Roles: ${SYSTEM_ROLES.length}`);
   console.log(`  Test Users Expected: ${Object.keys(testUsers).length}`);
 
-  const totalUsers = await prisma.user.count();
+  const totalUsers = await prisma.users.count();
   console.log(`  Total Users in DB: ${totalUsers}`);
 
   success('Permission audit report generated');
@@ -351,7 +351,7 @@ async function fixPermissionIssues() {
 
   try {
     // Fix roles with invalid JSON permissions
-    const rolesWithBadJson = await prisma.role.findMany({
+    const rolesWithBadJson = await prisma.roles.findMany({
       where: { isSystemRole: true },
     });
 
@@ -379,7 +379,7 @@ async function fixPermissionIssues() {
             fixedAt: new Date().toISOString(),
           };
 
-          await prisma.role.update({
+          await prisma.roles.update({
             where: { id: role.id },
             data: {
               permissions: JSON.stringify(fixedPermissions),
@@ -394,14 +394,14 @@ async function fixPermissionIssues() {
     }
 
     // Fix users without roles
-    const usersWithoutRoles = await prisma.user.findMany({
+    const usersWithoutRoles = await prisma.users.findMany({
       where: {
         roleId: '',
       },
     });
 
     if (usersWithoutRoles.length > 0) {
-      const employeeRole = await prisma.role.findFirst({
+      const employeeRole = await prisma.roles.findFirst({
         where: {
           OR: [
             { name: 'Employee' },
@@ -413,7 +413,7 @@ async function fixPermissionIssues() {
 
       if (employeeRole) {
         for (const user of usersWithoutRoles) {
-          await prisma.user.update({
+          await prisma.users.update({
             where: { id: user.id },
             data: { roleId: employeeRole.id },
           });
