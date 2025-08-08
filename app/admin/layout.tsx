@@ -24,6 +24,7 @@ import {
   CurrencyDollarIcon,
   DocumentTextIcon,
   SwatchIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { useUnifiedTheme } from '@/hooks';
 import { useUnifiedAuth } from '@/components/auth/UnifiedAuthProvider';
@@ -57,6 +58,8 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -75,6 +78,25 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Keyboard shortcut for search (Ctrl+K or Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      
+      // ESC to clear search
+      if (e.key === 'Escape' && searchQuery.trim()) {
+        setSearchQuery('');
+        searchInputRef.current?.blur();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [searchQuery]);
 
   // Authentication check
   useEffect(() => {
@@ -186,10 +208,63 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     ];
   }, [dbMenuItems, transformMenuItems, pathname]);
 
-  // Auto-expand menus when submenu is active
+  // Filter menu items based on search query
+  const filteredMenuItems = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return menuItems;
+    }
+
+    const searchLower = searchQuery.toLowerCase();
+    
+    return menuItems.filter(item => {
+      // Check if parent menu matches
+      const parentMatches = item.title.toLowerCase().includes(searchLower);
+      
+      // Check if any child menu matches
+      const childMatches = item.children?.some((child: any) => 
+        child.name.toLowerCase().includes(searchLower) ||
+        child.nameVi.toLowerCase().includes(searchLower)
+      ) || false;
+      
+      return parentMatches || childMatches;
+    }).map(item => {
+      // If parent doesn't match but children do, filter children
+      if (!item.title.toLowerCase().includes(searchLower) && item.children) {
+        return {
+          ...item,
+          children: item.children.filter((child: any) =>
+            child.name.toLowerCase().includes(searchLower) ||
+            child.nameVi.toLowerCase().includes(searchLower)
+          )
+        };
+      }
+      return item;
+    });
+  }, [menuItems, searchQuery]);
+
+  // Show "No results" message when search has no results
+  const hasSearchResults = searchQuery.trim() && filteredMenuItems.length === 0;
+
+  // Helper function to highlight search terms
+  const highlightSearchTerm = (text: string, searchTerm: string) => {
+    if (!searchTerm.trim()) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
+    
+    return parts.map((part, index) => 
+      regex.test(part) ? (
+        <span key={index} className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">
+          {part}
+        </span>
+      ) : part
+    );
+  };
+
+  // Auto-expand menus when submenu is active or when searching
   useEffect(() => {
-    const activeParentMenus = menuItems
-      .filter((item) => item.children && item.active)
+    const activeParentMenus = filteredMenuItems
+      .filter((item) => item.children && (item.active || searchQuery.trim()))
       .map((item) => item.path);
 
     setExpandedMenus((prev) => {
@@ -203,9 +278,19 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
         }
       });
       
+      // If searching, expand all parent menus with children
+      if (searchQuery.trim()) {
+        filteredMenuItems.forEach((item) => {
+          if (item.children && !newExpanded.includes(item.path)) {
+            newExpanded.push(item.path);
+            hasChanges = true;
+          }
+        });
+      }
+      
       return hasChanges ? newExpanded : prev;
     });
-  }, [menuItems]);
+  }, [filteredMenuItems, searchQuery]);
 
   const toggleTheme = () => {
     toggleMode();
@@ -279,9 +364,47 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
             </button>
           </div>
 
+          {/* Search Box */}
+          {sidebarOpen && (
+            <div className="px-4 py-3 border-b border-border">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Tìm kiếm menu... (Ctrl+K)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 bg-background border border-border rounded-lg text-sm 
+                           focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent
+                           placeholder-text-secondary transition-colors"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-hover rounded"
+                  >
+                    <XMarkIcon className="h-3 w-3 text-text-secondary" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Sidebar Menu */}
           <nav className="flex-1 px-4 py-4 space-y-2">
-            {menuItems.filter(item => item.canAccess).map((item) => (
+            {/* No search results message */}
+            {hasSearchResults && (
+              <div className="text-center py-8">
+                <div className="text-text-secondary text-sm">
+                  <MagnifyingGlassIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>Không tìm thấy menu nào</p>
+                  <p className="text-xs mt-1">với từ khóa "{searchQuery}"</p>
+                </div>
+              </div>
+            )}
+
+            {filteredMenuItems.filter(item => item.canAccess).map((item) => (
               <div key={item.path}>
                 <button
                   onClick={() => {
@@ -302,7 +425,9 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                   <div className="flex items-center space-x-3">
                     <item.icon className="h-5 w-5" />
                     {sidebarOpen && (
-                      <span className="font-medium">{item.title}</span>
+                      <span className="font-medium">
+                        {searchQuery.trim() ? highlightSearchTerm(item.title, searchQuery) : item.title}
+                      </span>
                     )}
                   </div>
                   {sidebarOpen && item.children && (
@@ -328,7 +453,9 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                         `}
                       >
                         <subItem.icon className="h-4 w-4" />
-                        <span>{subItem.nameVi}</span>
+                        <span>
+                          {searchQuery.trim() ? highlightSearchTerm(subItem.nameVi, searchQuery) : subItem.nameVi}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -367,7 +494,42 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
           {/* Mobile Menu */}
           <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-            {menuItems.filter(item => item.canAccess).map((item) => (
+            {/* Mobile Search */}
+            <div className="mb-4">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm menu..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 bg-background border border-border rounded-lg text-sm 
+                           focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent
+                           placeholder-text-secondary transition-colors"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-hover rounded"
+                  >
+                    <XMarkIcon className="h-3 w-3 text-text-secondary" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* No search results message for mobile */}
+            {hasSearchResults && (
+              <div className="text-center py-8">
+                <div className="text-text-secondary text-sm">
+                  <MagnifyingGlassIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>Không tìm thấy menu nào</p>
+                  <p className="text-xs mt-1">với từ khóa "{searchQuery}"</p>
+                </div>
+              </div>
+            )}
+
+            {filteredMenuItems.filter(item => item.canAccess).map((item) => (
               <div key={item.path}>
                 <button
                   onClick={() => {
@@ -388,7 +550,9 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 >
                   <div className="flex items-center space-x-3">
                     <item.icon className="h-5 w-5" />
-                    <span className="font-medium">{item.title}</span>
+                    <span className="font-medium">
+                      {searchQuery.trim() ? highlightSearchTerm(item.title, searchQuery) : item.title}
+                    </span>
                   </div>
                   {item.children && (
                     <ChevronDownIcon className={`h-4 w-4 transition-transform ${
@@ -416,7 +580,9 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                         `}
                       >
                         <subItem.icon className="h-4 w-4" />
-                        <span>{subItem.nameVi}</span>
+                        <span>
+                          {searchQuery.trim() ? highlightSearchTerm(subItem.nameVi, searchQuery) : subItem.nameVi}
+                        </span>
                       </button>
                     ))}
                   </div>

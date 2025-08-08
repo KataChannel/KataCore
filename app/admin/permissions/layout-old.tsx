@@ -10,8 +10,7 @@ import {
   KeyIcon,
   UserGroupIcon,
   QueueListIcon,
-  UserPlusIcon,
-  ChartBarIcon
+  UserPlusIcon 
 } from '@heroicons/react/24/outline';
 
 interface PermissionsLayoutProps {
@@ -25,7 +24,7 @@ const PermissionsLayout: React.FC<PermissionsLayoutProps> = ({ children }) => {
     {
       name: 'Tổng quan',
       href: '/admin/permissions',
-      icon: ChartBarIcon,
+      icon: ShieldCheckIcon,
       current: pathname === '/admin/permissions',
       description: 'Xem tổng quan hệ thống phân quyền'
     },
@@ -33,28 +32,28 @@ const PermissionsLayout: React.FC<PermissionsLayoutProps> = ({ children }) => {
       name: 'Quản lý Người dùng',
       href: '/admin/permissions/users',
       icon: UsersIcon,
-      current: pathname.startsWith('/admin/permissions/users'),
+      current: pathname === '/admin/permissions/users',
       description: 'Tạo và quản lý người dùng'
     },
     {
       name: 'Quản lý Vai trò',
       href: '/admin/permissions/roles',
       icon: UserGroupIcon,
-      current: pathname.startsWith('/admin/permissions/roles'),
+      current: pathname === '/admin/permissions/roles',
       description: 'Tạo và quản lý vai trò'
     },
     {
       name: 'Quản lý Menu',
       href: '/admin/permissions/menus',
       icon: QueueListIcon,
-      current: pathname.startsWith('/admin/permissions/menus'),
+      current: pathname === '/admin/permissions/menus',
       description: 'Quản lý quyền truy cập menu'
     },
     {
       name: 'Phân quyền Người dùng',
       href: '/admin/permissions/user-roles',
       icon: KeyIcon,
-      current: pathname.startsWith('/admin/permissions/user-roles'),
+      current: pathname === '/admin/permissions/user-roles',
       description: 'Phân quyền vai trò cho người dùng'
     },
   ];
@@ -135,12 +134,24 @@ const PermissionsLayout: React.FC<PermissionsLayoutProps> = ({ children }) => {
             </div>
           </div>
         </div>
+                    <Icon
+                      className={`${
+                        item.current
+                          ? 'text-blue-500 dark:text-blue-300'
+                          : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
+                      } mr-4 flex-shrink-0 h-6 w-6`}
+                    />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        </div>
 
-        {/* Main Content */}
+        {/* Main content */}
         <div className="flex-1 overflow-hidden">
-          <div className="p-4 lg:p-8">
-            {children}
-          </div>
+          {children}
         </div>
       </div>
     </div>

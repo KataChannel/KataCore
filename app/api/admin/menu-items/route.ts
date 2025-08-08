@@ -45,7 +45,8 @@ export async function GET(request: NextRequest) {
           isActive: child.isActive,
         })),
       }));
-
+      console.log(formattedMenuItems);
+      
       return NextResponse.json(formattedMenuItems);
     }
 

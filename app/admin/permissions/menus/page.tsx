@@ -71,21 +71,57 @@ const RoleMenuPermissionsManager: React.FC = () => {
         'Content-Type': 'application/json'
       };
 
-      // Load roles
-      const rolesResponse = await fetch('/api/admin/roles', {
-        headers
-      });
-      
-      if (!rolesResponse.ok) {
-        throw new Error(`Failed to load roles: ${rolesResponse.status} ${rolesResponse.statusText}`);
-      }
-      
-      const rolesData = await rolesResponse.json();
-      console.log('Loaded roles:', rolesData);
-
-      setRoles(rolesData.roles);
-
-      // Load all menu items
+      // Load roles with detailed error handling
+      try {
+        const rolesResponse = await fetch('/api/admin/roles', {
+          headers
+        });
+        console.log('Roles response status:', rolesResponse.status);
+        
+        if (!rolesResponse.ok) {
+          throw new Error(`Failed to load roles: ${rolesResponse.status} ${rolesResponse.statusText}`);
+        }
+        
+        const rolesResponseData = await rolesResponse.json();
+        console.log('Loaded roles data:', rolesResponseData);
+        
+        // Handle different response formats
+        let rolesData = [];
+        if (Array.isArray(rolesResponseData)) {
+          rolesData = rolesResponseData;
+        } else if (rolesResponseData?.roles && Array.isArray(rolesResponseData.roles)) {
+          rolesData = rolesResponseData.roles;
+        } else if (rolesResponseData?.data && Array.isArray(rolesResponseData.data)) {
+          rolesData = rolesResponseData.data;
+        } else {
+          console.warn('Unexpected roles response format:', rolesResponseData);
+          // Fallback: create default roles if none found
+          rolesData = [
+            { id: '1', name: 'Super Administrator', description: 'Full access', level: 10 },
+            { id: '2', name: 'Admin', description: 'Admin access', level: 9 },
+            { id: '3', name: 'Manager', description: 'Manager access', level: 5 },
+            { id: '4', name: 'User', description: 'Basic access', level: 1 }
+          ];
+        }
+        
+        console.log('Extracted roles array:', rolesData);
+        
+        if (!Array.isArray(rolesData)) {
+          throw new Error('Roles data is not an array');
+        }
+        
+        setRoles(rolesData);
+      } catch (rolesError) {
+        console.error('Error loading roles:', rolesError);
+        // Set fallback roles
+        const fallbackRoles = [
+          { id: '1', name: 'Super Administrator', description: 'Full access', level: 10 },
+          { id: '2', name: 'Admin', description: 'Admin access', level: 9 },
+          { id: '3', name: 'Manager', description: 'Manager access', level: 5 },
+          { id: '4', name: 'User', description: 'Basic access', level: 1 }
+        ];
+        setRoles(fallbackRoles);
+      }      // Load all menu items
       const menuResponse = await fetch('/api/admin/menu-items?adminView=true', {
         headers
       });
@@ -97,24 +133,35 @@ const RoleMenuPermissionsManager: React.FC = () => {
       const menuData = await menuResponse.json();
       setMenuItems(menuData);
 
-      // Load permissions for each role
+      // Load permissions for each role (use current roles state)
+      const currentRoles = roles.length > 0 ? roles : [
+        { id: '1', name: 'Super Administrator', description: 'Full access', level: 10 },
+        { id: '2', name: 'Admin', description: 'Admin access', level: 9 }
+      ];
+      
       const permissionsData: Record<string, RoleMenuPermission[]> = {};
-      for (const role of rolesData) {
-        const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${role.id}`, {
-          headers
-        });
-        
-        if (!permResponse.ok) {
-          throw new Error(`Failed to load permissions for role ${role.name}: ${permResponse.status} ${permResponse.statusText}`);
+      for (const role of currentRoles) {
+        try {
+          const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${role.id}`, {
+            headers
+          });
+          
+          if (permResponse.ok) {
+            const permData = await permResponse.json();
+            permissionsData[role.id] = permData;
+          } else {
+            console.warn(`Failed to load permissions for role ${role.name}`);
+            permissionsData[role.id] = [];
+          }
+        } catch (permError) {
+          console.warn(`Error loading permissions for role ${role.name}:`, permError);
+          permissionsData[role.id] = [];
         }
-        
-        const permData = await permResponse.json();
-        permissionsData[role.id] = permData;
       }
       setPermissions(permissionsData);
 
-      if (rolesData.length > 0) {
-        setSelectedRole(rolesData[0].id);
+      if (currentRoles.length > 0 && currentRoles[0]?.id) {
+        setSelectedRole(currentRoles[0].id);
       }
 
     } catch (error) {

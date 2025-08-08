@@ -48,7 +48,7 @@ const RoleManagement: React.FC = () => {
       const data = await response.json();
       console.log('Loaded roles:', data);
       
-      setRoles(data);
+      setRoles(data.roles);
     } catch (error) {
       console.error('Error loading roles:', error);
     } finally {
