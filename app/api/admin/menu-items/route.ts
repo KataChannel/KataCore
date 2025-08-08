@@ -3,12 +3,51 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// GET - Lấy danh sách menu items dựa trên role của user
+// GET - Lấy danh sách menu items dựa trên role của user, hoặc tất cả menu items cho admin
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const roleId = searchParams.get('roleId');
+    const adminView = searchParams.get('adminView'); // Add admin view parameter
+
+    // If adminView is true, return all menu items for admin management
+    if (adminView === 'true') {
+      const allMenuItems = await prisma.menu_items.findMany({
+        include: {
+          children: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+        where: {
+          parentId: null, // Only get parent items, children are included
+        },
+        orderBy: { sortOrder: 'asc' },
+      });
+
+      const formattedMenuItems = allMenuItems.map(menuItem => ({
+        id: menuItem.id,
+        title: menuItem.title,
+        titleVi: menuItem.titleVi,
+        path: menuItem.path,
+        icon: menuItem.icon,
+        permission: menuItem.permission,
+        sortOrder: menuItem.sortOrder,
+        isActive: menuItem.isActive,
+        children: menuItem.children.map(child => ({
+          id: child.id,
+          title: child.title,
+          titleVi: child.titleVi,
+          path: child.path,
+          icon: child.icon,
+          permission: child.permission,
+          sortOrder: child.sortOrder,
+          isActive: child.isActive,
+        })),
+      }));
+
+      return NextResponse.json(formattedMenuItems);
+    }
 
     if (!userId && !roleId) {
       return NextResponse.json(

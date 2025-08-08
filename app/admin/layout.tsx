@@ -113,7 +113,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                             userPermissions.includes('admin:*') ||
                             userPermissions.includes('admin:system') ||
                             user.role?.name === 'Super Administrator' ||
-                            (user.role?.level && user.role.level >= 8);
+                            (user.role?.level && user.role.level >= 3);
             
       if (!hasAdminAccess) {
         router.push('/?error=access-denied&reason=insufficient-permissions');

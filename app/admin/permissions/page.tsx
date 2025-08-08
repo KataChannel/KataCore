@@ -83,9 +83,18 @@ const PermissionManagementPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [userForm, setUserForm] = useState({
     roleId: '',
     permissions: [] as string[],
+  });
+  const [createUserForm, setCreateUserForm] = useState({
+    email: '',
+    displayName: '',
+    username: '',
+    password: '',
+    roleId: '',
+    isActive: true,
   });
 
   // Permissions state
@@ -292,6 +301,30 @@ const PermissionManagementPage: React.FC = () => {
     }
   };
 
+  const handleCreateUser = async () => {
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify(createUserForm),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create user');
+      }
+
+      await loadUsers();
+      setShowCreateUserModal(false);
+      resetCreateUserForm();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const resetRoleForm = () => {
     setRoleForm({
       name: '',
@@ -306,6 +339,17 @@ const PermissionManagementPage: React.FC = () => {
     setUserForm({
       roleId: '',
       permissions: [],
+    });
+  };
+
+  const resetCreateUserForm = () => {
+    setCreateUserForm({
+      email: '',
+      displayName: '',
+      username: '',
+      password: '',
+      roleId: '',
+      isActive: true,
     });
   };
 
@@ -492,6 +536,7 @@ const PermissionManagementPage: React.FC = () => {
                 {activeTab === 'users' && <UsersTab 
                   users={filteredUsers}
                   onEdit={openUserModal}
+                  onCreate={() => setShowCreateUserModal(true)}
                   canManage={canManageUsers}
                 />}
                 {activeTab === 'permissions' && <PermissionsTab 
@@ -532,6 +577,19 @@ const PermissionManagementPage: React.FC = () => {
             setShowUserModal(false);
             setSelectedUser(null);
             resetUserForm();
+          }}
+        />
+      )}
+
+      {showCreateUserModal && (
+        <CreateUserModal
+          form={createUserForm}
+          roles={roles}
+          onChange={setCreateUserForm}
+          onSave={handleCreateUser}
+          onClose={() => {
+            setShowCreateUserModal(false);
+            resetCreateUserForm();
           }}
         />
       )}
@@ -631,12 +689,27 @@ const RolesTab: React.FC<RolesTabProps> = ({ roles, onEdit, onDelete, canManage 
 interface UsersTabProps {
   users: User[];
   onEdit: (user: User) => void;
+  onCreate?: () => void;
   canManage: boolean;
 }
 
-const UsersTab: React.FC<UsersTabProps> = ({ users, onEdit, canManage }) => {
+const UsersTab: React.FC<UsersTabProps> = ({ users, onEdit, onCreate, canManage }) => {
   return (
     <div className="space-y-4">
+      {/* Header with Create Button */}
+      {canManage && onCreate && (
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Users</h3>
+          <button
+            onClick={onCreate}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg"
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Create User
+          </button>
+        </div>
+      )}
+      
       {users.length === 0 ? (
         <div className="text-center py-12">
           <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -1036,6 +1109,153 @@ const UserRoleModal: React.FC<UserRoleModalProps> = ({
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Update Role
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface CreateUserModalProps {
+  form: {
+    email: string;
+    displayName: string;
+    username: string;
+    password: string;
+    roleId: string;
+    isActive: boolean;
+  };
+  roles: Role[];
+  onChange: (form: any) => void;
+  onSave: () => void;
+  onClose: () => void;
+}
+
+const CreateUserModal: React.FC<CreateUserModalProps> = ({ 
+  form, 
+  roles, 
+  onChange, 
+  onSave, 
+  onClose 
+}) => {
+  const isFormValid = form.email && form.displayName && form.username && form.password && form.roleId;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full m-4 max-h-[90vh] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            Create New User
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Add a new user to the system with a role assignment
+          </p>
+        </div>
+        
+        <div className="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => onChange({ ...form, email: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                placeholder="user@example.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Display Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.displayName}
+                onChange={(e) => onChange({ ...form, displayName: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Username <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.username}
+                onChange={(e) => onChange({ ...form, username: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                placeholder="johndoe"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => onChange({ ...form, password: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                placeholder="Enter password"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Role <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={form.roleId}
+                onChange={(e) => onChange({ ...form, roleId: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                required
+              >
+                <option value="">Select a role</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name} (Level {role.level})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={form.isActive}
+                onChange={(e) => onChange({ ...form, isActive: e.target.checked })}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                Active user (can log in)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSave}
+            disabled={!isFormValid}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Create User
           </button>
         </div>
       </div>

@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
           superAdmins: [],
           systemStats: stats,
           currentUser: null,
-          needsInitialization: true,
         },
       });
     }
@@ -72,7 +71,6 @@ export async function GET(request: NextRequest) {
           lastLoginAt: admin.lastSeen || null,
           createdAt: admin.createdAt,
           role: admin.roles,
-          employees: admin.employees,
         })),
         systemStats: stats,
         currentUser: {
@@ -91,29 +89,8 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { action, userData } = body;
-
-    const user = await authenticateSuperAdmin(request);
-
-    switch (action) {
-      case 'grant-super-admin':
-        return await grantSuperAdminRole(userData.userId);
-      case 'revoke-super-admin':
-        return await revokeSuperAdminRole(userData.userId);
-      default:
-        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-    }
-  } catch (error: any) {
-    console.error('Super Admin API Error:', error);
-    return NextResponse.json(
-      { error: error?.message || 'Internal server error' },
-      { status: error?.message?.includes('Access denied') ? 403 : 500 }
-    );
-  }
-}
+// POST endpoint removed - super admin modification functionality disabled
+// Use the permission management system instead
 
 async function authenticateSuperAdmin(request: NextRequest) {
   try {
@@ -146,59 +123,9 @@ async function authenticateSuperAdmin(request: NextRequest) {
   }
 }
 
-async function grantSuperAdminRole(userId: string) {
-  try {
-    const superAdminRole = await prisma.roles.findUnique({
-      where: { name: 'Super Administrator' },
-    });
-
-    if (!superAdminRole) {
-      throw new Error('Super Administrator role not found');
-    }
-
-    const user = await prisma.users.update({
-      where: { id: userId },
-      data: { roleId: superAdminRole.id },
-      include: { roles: true },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Super Administrator role granted successfully',
-      data: { user },
-    });
-  } catch (error: any) {
-    console.error('Error granting Super Admin role:', error);
-    throw new Error(`Failed to grant Super Admin role: ${error?.message || 'Unknown error'}`);
-  }
-}
-
-async function revokeSuperAdminRole(userId: string) {
-  try {
-    const defaultRole = await prisma.roles.findFirst({
-      where: { name: { in: ['Manager', 'Employee'] } },
-    });
-
-    if (!defaultRole) {
-      throw new Error('No default role found to assign');
-    }
-
-    const user = await prisma.users.update({
-      where: { id: userId },
-      data: { roleId: defaultRole.id },
-      include: { roles: true },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Super Administrator role revoked successfully',
-      data: { user },
-    });
-  } catch (error: any) {
-    console.error('Error revoking Super Admin role:', error);
-    throw new Error(`Failed to revoke Super Admin role: ${error?.message || 'Unknown error'}`);
-  }
-}
+// Super admin role modification functions removed
+// These functions are no longer needed as user role management
+// should be handled through the permission management system
 
 async function getSystemStats() {
   try {

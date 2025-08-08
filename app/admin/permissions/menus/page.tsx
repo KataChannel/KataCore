@@ -82,11 +82,11 @@ const RoleMenuPermissionsManager: React.FC = () => {
       
       const rolesData = await rolesResponse.json();
       console.log('Loaded roles:', rolesData);
-      
-      setRoles(rolesData);
+
+      setRoles(rolesData.roles);
 
       // Load all menu items
-      const menuResponse = await fetch('/api/admin/menu-items', {
+      const menuResponse = await fetch('/api/admin/menu-items?adminView=true', {
         headers
       });
       

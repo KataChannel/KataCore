@@ -1,11 +1,12 @@
 'use client';
 import React, { useState } from 'react';
-import { UsersIcon, PencilIcon, TrashIcon, KeyIcon, EyeIcon, LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/outline';
+import { UsersIcon, PencilIcon, TrashIcon, KeyIcon, EyeIcon, LockClosedIcon, LockOpenIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { User } from '../types';
 
 interface UsersTabProps {
   users: User[];
   onEdit: (user: User) => void;
+  onCreate?: () => void;
   onDelete?: (user: User) => void;
   onToggleStatus?: (user: User) => void;
   onResetPassword?: (user: User) => void;
@@ -17,6 +18,7 @@ interface UsersTabProps {
 const UsersTab: React.FC<UsersTabProps> = ({ 
   users, 
   onEdit, 
+  onCreate,
   onDelete,
   onToggleStatus,
   onResetPassword,
@@ -122,6 +124,23 @@ const UsersTab: React.FC<UsersTabProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Header with Create Button */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Users Management</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Manage user accounts and role assignments</p>
+        </div>
+        {canManage && onCreate && (
+          <button
+            onClick={onCreate}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Create User
+          </button>
+        )}
+      </div>
+
       {users.length === 0 ? (
         <div className="text-center py-12">
           <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />

@@ -97,11 +97,9 @@ export default function LoginPage() {
       sessionStorage.setItem('user-authenticated', 'true');
 
       console.log('Login successful:', data);
-      
-      // Check if user is Super Admin (level 10) or Admin (level >= 3)
-      if (data.user?.role?.level === 10) {
-        router.push('/admin/super-admin');
-      } else if (data.user?.role?.level >= 3) {
+
+      // Check if user is Admin (level >= 3)
+      if (data.user?.role?.level >= 3) {
         router.push('/admin');
       } else {
         // For users below admin level, redirect to appropriate page

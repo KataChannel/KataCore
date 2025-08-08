@@ -41,7 +41,12 @@ async function checkAdminPermissions(request: NextRequest) {
     }
 
     // Check if user has admin permissions or is super admin
-    const isSuperAdmin = user.role.name === 'Super Administrator';
+    const isSuperAdmin = (user.role && (
+      user.role.name === 'Super Administrator' || 
+      user.role.name === 'SUPER_ADMIN' || 
+      user.role.name === 'super_admin' ||
+      (user.role.level && user.role.level >= 10)
+    )) || user.roleId === 'super_admin';
     
     // Get permissions array from user object or role permissions
     let userPermissions: string[] = [];
@@ -49,18 +54,12 @@ async function checkAdminPermissions(request: NextRequest) {
       userPermissions = user.permissions;
     } else if (user.role && user.role.permissions) {
       try {
-        // If permissions is stored as JSON string, parse it
-        const rolePermissions = typeof user.role.permissions === 'string' 
-          ? JSON.parse(user.role.permissions) 
-          : user.role.permissions;
-        
-        if (typeof rolePermissions === 'object' && Array.isArray(rolePermissions.permissions)) {
-          userPermissions = rolePermissions.permissions;
-        } else if (Array.isArray(rolePermissions)) {
-          userPermissions = rolePermissions;
-        }
+        // Role permissions are already parsed in the auth service
+        userPermissions = Array.isArray(user.role.permissions) 
+          ? user.role.permissions 
+          : [];
       } catch (error) {
-        console.error('Error parsing role permissions:', error);
+        console.error('Error getting role permissions:', error);
         userPermissions = [];
       }
     }
@@ -70,10 +69,20 @@ async function checkAdminPermissions(request: NextRequest) {
                               userPermissions.includes('system:admin') ||
                               userPermissions.includes('admin:*') ||
                               userPermissions.includes('read:user') ||
-                              userPermissions.includes('manage:user');
+                              userPermissions.includes('manage:user') ||
+                              userPermissions.includes('manage:*') ||
+                              userPermissions.includes('create:*');
 
     if (!isSuperAdmin && !hasAdminPermission) {
-      throw new Error('Insufficient permissions');
+      console.log('Permission check failed:', { 
+        isSuperAdmin, 
+        hasAdminPermission, 
+        userPermissions, 
+        roleName: user.role?.name, 
+        roleLevel: user.role?.level,
+        roleId: user.roleId 
+      });
+      throw new Error('Insufficient permissions to create users');
     }
 
     return user;
@@ -219,20 +228,11 @@ export async function GET(request: NextRequest) {
 // POST - Create new user with role assignment
 export async function POST(request: NextRequest) {
   try {
+    // Check permissions using the same method as other admin endpoints
+    await checkAdminPermissions(request);
+    
+    // Also get the authenticated user for additional checks
     const user = await authenticate(request);
-
-    // Check permissions
-    const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
-    const canCreateUsers = userRole?.permissions.some(
-      (p:any) => p.action === 'create' && p.resource === 'users'
-    );
-
-    if (!canCreateUsers && (!userRole || userRole.level < 8)) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions to create users' },
-        { status: 403 }
-      );
-    }
 
     const body = await request.json();
     const {
@@ -272,11 +272,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if role is appropriate for current user's level
+    const currentUserRole = user.role;
     const targetSystemRole = SYSTEM_ROLES.find(
       (sr) =>
         sr.name.toLowerCase().replace(/ /g, '_') === role.name.toLowerCase().replace(/ /g, '_')
     );
-    if (targetSystemRole && userRole && targetSystemRole.level > userRole.level) {
+    if (targetSystemRole && currentUserRole && targetSystemRole.level > currentUserRole.level) {
       return NextResponse.json(
         { error: 'Cannot assign role with higher level than your own' },
         { status: 403 }
@@ -308,11 +309,7 @@ export async function POST(request: NextRequest) {
         username,
         password: hashedPassword,
         displayName,
-        roles: {
-          connect: {
-            id: roleId
-          }
-        },
+        roleId,
         isActive,
         isVerified: true, // Auto-verify admin-created users
         updatedAt: new Date(),
@@ -329,26 +326,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create employee record if provided
-    let employee = null;
-    if (employeeData) {
-      try {
-        employee = await prisma.employees.create({
-          data: {
-            ...employeeData,
-            userId: newUser.id,
-          },
-          include: {
-            departments: true,
-            positions: true,
-          },
-        });
-      } catch (error) {
-        console.warn('Failed to create employee record:', error);
-      }
-    }
-
     // Get system role information
+    // Find system role for additional info
     const systemRole = SYSTEM_ROLES.find(
       (sr) =>
         sr.name.toLowerCase().replace(/ /g, '_') === role.name.toLowerCase().replace(/ /g, '_')
@@ -356,25 +335,27 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        id: newUser.id,
-        email: newUser.email,
-        phone: newUser.phone,
-        username: newUser.username,
-        displayName: newUser.displayName,
-        avatar: newUser.avatar,
-        isActive: newUser.isActive,
-        isVerified: newUser.isVerified,
-        role: {
-          id: newUser.roles.id,
-          name: newUser.roles.name,
-          description: newUser.roles.description,
-          permissions: newUser.roles.permissions
-            ? JSON.parse(newUser.roles.permissions as string)
-            : [],
-        },
-        systemRole: systemRole || null,
-        employee,
-        createdAt: newUser.createdAt,
+        success: true,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          phone: newUser.phone,
+          username: newUser.username,
+          displayName: newUser.displayName,
+          avatar: newUser.avatar,
+          isActive: newUser.isActive,
+          isVerified: newUser.isVerified,
+          role: {
+            id: newUser.roles.id,
+            name: newUser.roles.name,
+            description: newUser.roles.description,
+            permissions: newUser.roles.permissions
+              ? JSON.parse(newUser.roles.permissions as string)
+              : [],
+          },
+          systemRole: systemRole || null,
+          createdAt: newUser.createdAt,
+        }
       },
       { status: 201 }
     );
@@ -411,7 +392,6 @@ export async function PUT(request: NextRequest) {
       roleId,
       isActive,
       password,
-      employeeData,
     } = body;
 
     if (!userId) {
@@ -495,22 +475,8 @@ export async function PUT(request: NextRequest) {
             permissions: true,
           },
         },
-        employees: {
-          include: {
-            departments: true,
-            positions: true,
-          },
-        },
       },
     });
-
-    // Update employee data if provided
-    if (employeeData && updatedUser.employees) {
-      await prisma.employees.update({
-        where: { id: updatedUser.employees.id },
-        data: employeeData,
-      });
-    }
 
     // Get system role information
     const systemRole = SYSTEM_ROLES.find(
@@ -520,25 +486,27 @@ export async function PUT(request: NextRequest) {
     );
 
     return NextResponse.json({
-      id: updatedUser.id,
-      email: updatedUser.email,
-      phone: updatedUser.phone,
-      username: updatedUser.username,
-      displayName: updatedUser.displayName,
-      avatar: updatedUser.avatar,
-      isActive: updatedUser.isActive,
-      isVerified: updatedUser.isVerified,
-      roles: {
-        id: updatedUser.roles?.id,
-        name: updatedUser.roles?.name,
-        description: updatedUser.roles?.description,
-        permissions: updatedUser.roles?.permissions
-          ? JSON.parse(updatedUser.roles.permissions as string)
-          : [],
-      },
-      systemRole: systemRole || null,
-      employees: updatedUser.employees,
-      updatedAt: updatedUser.updatedAt,
+      success: true,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        username: updatedUser.username,
+        displayName: updatedUser.displayName,
+        avatar: updatedUser.avatar,
+        isActive: updatedUser.isActive,
+        isVerified: updatedUser.isVerified,
+        role: {
+          id: updatedUser.roles?.id,
+          name: updatedUser.roles?.name,
+          description: updatedUser.roles?.description,
+          permissions: updatedUser.roles?.permissions
+            ? JSON.parse(updatedUser.roles.permissions as string)
+            : [],
+        },
+        systemRole: systemRole || null,
+        updatedAt: updatedUser.updatedAt,
+      }
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to update user' }, { status: 500 });

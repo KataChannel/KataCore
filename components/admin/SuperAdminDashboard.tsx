@@ -12,7 +12,6 @@ import {
   Eye,
   EyeOff,
   Key,
-  UserPlus,
   Crown,
   Lock,
   Unlock,
@@ -50,8 +49,7 @@ const SuperAdminDashboard: React.FC = () => {
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  
   useEffect(() => {
     loadSuperAdminData();
   }, []);
@@ -125,106 +123,6 @@ const SuperAdminDashboard: React.FC = () => {
     }
   };
 
-  const handleCreateSuperAdmin = async (formData: any) => {
-    try {
-      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-
-      const response = await fetch('/api/admin/super-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          action: 'create-super-admin',
-          userData: formData,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create Super Admin');
-      }
-
-      setShowCreateModal(false);
-      await loadSuperAdminData();
-      alert('Super Administrator created successfully!');
-    } catch (error: any) {
-      //console.error('Error creating Super Admin:', error);
-      alert(`Error: ${error.message}`);
-    }
-  };
-
-  const handleGrantSuperAdmin = async (userId: string) => {
-    if (!confirm('Are you sure you want to grant Super Administrator role to this user?')) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-
-      const response = await fetch('/api/admin/super-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          action: 'grant-super-admin',
-          userData: { userId },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to grant Super Admin role');
-      }
-
-      await loadSuperAdminData();
-      alert('Super Administrator role granted successfully!');
-    } catch (error: any) {
-     // console.error('Error granting Super Admin role:', error);
-      alert(`Error: ${error.message}`);
-    }
-  };
-
-  const handleRevokeSuperAdmin = async (userId: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to revoke Super Administrator role from this user? This action cannot be undone!'
-      )
-    ) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
-
-      const response = await fetch('/api/admin/super-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          action: 'revoke-super-admin',
-          userData: { userId },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to revoke Super Admin role');
-      }
-
-      await loadSuperAdminData();
-      alert('Super Administrator role revoked successfully!');
-    } catch (error: any) {
-     // console.error('Error revoking Super Admin role:', error);
-      alert(`Error: ${error.message}`);
-    }
-  };
-
   // Add authentication check
   const token = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
   if (!token) {
@@ -239,8 +137,8 @@ const SuperAdminDashboard: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
               <h3 className="font-semibold text-gray-900 mb-2">Default Login Credentials:</h3>
-              <p className="text-sm text-gray-700">Email: admin@taza.com</p>
-              <p className="text-sm text-gray-700">Password: TazaAdmin@2024!</p>
+              <p className="text-sm text-gray-700">Email: it@tazagroup.vn</p>
+              <p className="text-sm text-gray-700">Password: 123456</p>
             </div>
             <button
               onClick={() => (window.location.href = '/login')}
@@ -295,13 +193,9 @@ const SuperAdminDashboard: React.FC = () => {
               <p className="text-red-100">Complete system control and management</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 flex items-center space-x-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>Create Super Admin</span>
-          </button>
+          <div className="bg-white/10 text-white px-4 py-2 rounded-lg">
+            <span className="text-sm">Use Permission Management to create/modify users</span>
+          </div>
         </div>
       </div>
 
@@ -402,131 +296,15 @@ const SuperAdminDashboard: React.FC = () => {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleRevokeSuperAdmin(admin.id)}
-                      className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 flex items-center space-x-1"
-                      title="Revoke Super Admin Role"
-                    >
-                      <Unlock className="h-3 w-3" />
-                      <span>Revoke</span>
-                    </button>
+                    <span className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                      Use Permission Management to modify roles
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </div>
-
-      {/* Modals */}
-      {showCreateModal && (
-        <CreateSuperAdminModal
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={handleCreateSuperAdmin}
-        />
-      )}
-    </div>
-  );
-};
-
-// Create Super Admin Modal
-const CreateSuperAdminModal: React.FC<{
-  onClose: () => void;
-  onSubmit: (data: any) => void;
-}> = ({ onClose, onSubmit }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    displayName: '',
-    username: '',
-  });
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Create Super Administrator</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            ×
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 pr-10"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
-            <input
-              type="text"
-              value={formData.displayName}
-              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-          </div>
-
-          <div className="flex space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Create
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );
