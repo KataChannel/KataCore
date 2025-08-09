@@ -2,6 +2,298 @@
 ### Do not make changes to this file directly
 
 
+type Advertisement {
+  budget: Float
+  callToAction: String
+  campaign: Campaign
+  campaignId: String!
+  clicks: Int
+  content: String
+  conversions: Int
+  cpc: Float
+  cpm: Float
+  createdAt: DateTime!
+  ctr: Float
+  description: String
+  id: String!
+  images: [String]
+  impressions: Int
+  link: String
+  name: String!
+  spent: Float
+  status: String!
+  targetAudience: String
+  type: String!
+  updatedAt: DateTime!
+  video: String
+}
+
+type AuthResponse {
+  message: String!
+  tokens: AuthTokens
+  user: User
+}
+
+type AuthTokens {
+  accessToken: String!
+  expiresIn: Int!
+  refreshToken: String!
+}
+
+type BlogCategory {
+  createdAt: DateTime!
+  description: String
+  id: String!
+  image: String
+  isActive: Boolean!
+  name: String!
+  posts: [BlogPost]
+  postsCount: Int
+  slug: String
+  updatedAt: DateTime!
+}
+
+input BlogCategoryCreateInput {
+  description: String
+  image: String
+  isActive: Boolean
+  name: String!
+  slug: String
+}
+
+input BlogCategoryUpdateInput {
+  description: String
+  image: String
+  isActive: Boolean
+  name: String
+  slug: String
+}
+
+type BlogComment {
+  author: User
+  authorEmail: String
+  authorId: String
+  authorName: String
+  authorWebsite: String
+  content: String!
+  createdAt: DateTime!
+  id: String!
+  parent: BlogComment
+  parentId: String
+  post: BlogPost
+  postId: String!
+  replies: [BlogComment]
+  status: String!
+  updatedAt: DateTime!
+}
+
+input BlogCommentCreateInput {
+  authorEmail: String
+  authorName: String
+  authorWebsite: String
+  content: String!
+  parentId: String
+  postId: String!
+}
+
+type BlogPost {
+  allowComments: Boolean
+  author: User
+  authorId: String!
+  category: BlogCategory
+  categoryId: String
+  comments: [BlogComment]
+  commentsCount: Int
+  content: String
+  createdAt: DateTime!
+  excerpt: String
+  featuredImage: String
+  id: String!
+  isFeatured: Boolean
+  likes: Int
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  slug: String
+  status: String!
+  tags: [BlogTag]
+  title: String!
+  updatedAt: DateTime!
+  views: Int
+  visibility: String!
+}
+
+input BlogPostCreateInput {
+  allowComments: Boolean
+  categoryId: String
+  content: String
+  excerpt: String
+  featuredImage: String
+  isFeatured: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  slug: String
+  status: String
+  tagIds: [String]
+  title: String!
+  visibility: String
+}
+
+input BlogPostUpdateInput {
+  allowComments: Boolean
+  categoryId: String
+  content: String
+  excerpt: String
+  featuredImage: String
+  isFeatured: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  slug: String
+  status: String
+  tagIds: [String]
+  title: String
+  visibility: String
+}
+
+type BlogTag {
+  color: String
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isActive: Boolean!
+  name: String!
+  postsCount: Int
+  slug: String
+  updatedAt: DateTime!
+}
+
+input BlogTagCreateInput {
+  color: String
+  description: String
+  isActive: Boolean
+  name: String!
+  slug: String
+}
+
+type CallExtension {
+  assignedUsers: [CallExtensionUser]
+  assignedUsersCount: Int
+  createdAt: DateTime!
+  description: String
+  extCode: String!
+  id: String!
+  name: String!
+  password: String
+  status: String!
+  updatedAt: DateTime!
+}
+
+input CallExtensionCreateInput {
+  description: String
+  extCode: String!
+  name: String!
+  password: String
+  status: String
+}
+
+input CallExtensionUpdateInput {
+  description: String
+  extCode: String
+  name: String
+  password: String
+  status: String
+}
+
+type CallExtensionUser {
+  callExtension: CallExtension
+  callExtensionId: String!
+  createdAt: DateTime!
+  id: String!
+  isActive: Boolean!
+  updatedAt: DateTime!
+  user: User
+  userId: String!
+}
+
+input CallExtensionUserCreateInput {
+  callExtensionId: String!
+  isActive: Boolean
+  userId: String!
+}
+
+type CallHistoryOverview {
+  answerEpoch: String
+  billsec: String
+  callStatus: String
+  callerIdNumber: String
+  cdrId: String!
+  createdAt: DateTime!
+  destinationNumber: String
+  direction: String!
+  duration: String
+  endEpoch: String
+  id: String!
+  outboundCallerIdNumber: String
+  recordPath: String
+  sipHangupDisposition: String
+  startEpoch: String
+  updatedAt: DateTime!
+}
+
+type Campaign {
+  ads: [Advertisement]
+  analytics: [CampaignAnalytics]
+  budget: Float
+  createdAt: DateTime!
+  description: String
+  endDate: DateTime
+  id: String!
+  manager: User
+  managerId: String
+  name: String!
+  objectives: String
+  spent: Float
+  startDate: DateTime!
+  status: String!
+  targetAudience: String
+  type: String!
+  updatedAt: DateTime!
+}
+
+type CampaignAnalytics {
+  campaign: Campaign
+  campaignId: String!
+  clicks: Int
+  conversions: Int
+  cpc: Float
+  cpm: Float
+  createdAt: DateTime!
+  ctr: Float
+  date: DateTime!
+  id: String!
+  impressions: Int
+  revenue: Float
+  roas: Float
+  spent: Float
+  updatedAt: DateTime!
+}
+
+input CampaignCreateInput {
+  budget: Float
+  description: String
+  endDate: DateTime
+  name: String!
+  objectives: String
+  startDate: DateTime!
+  targetAudience: String
+  type: String!
+}
+
 type Conversation {
   avatar: String
   createdAt: DateTime!
@@ -25,6 +317,262 @@ type DashboardStats {
 }
 
 scalar DateTime
+
+type Document {
+  category: DocumentCategory
+  categoryId: String
+  createdAt: DateTime!
+  description: String
+  downloads: Int
+  fileName: String!
+  filePath: String!
+  fileSize: Int
+  fileType: String
+  id: String!
+  isActive: Boolean!
+  isPublic: Boolean!
+  title: String!
+  updatedAt: DateTime!
+  uploadedBy: String
+  uploader: User
+}
+
+type DocumentCategory {
+  createdAt: DateTime!
+  description: String
+  documents: [Document]
+  documentsCount: Int
+  icon: String
+  id: String!
+  isActive: Boolean!
+  name: String!
+  sortOrder: Int
+  updatedAt: DateTime!
+}
+
+input DocumentCreateInput {
+  categoryId: String
+  description: String
+  fileName: String!
+  filePath: String!
+  fileSize: Int
+  fileType: String
+  isActive: Boolean
+  isPublic: Boolean
+  title: String!
+}
+
+type EmailCampaign {
+  audienceId: String
+  bounced: Int
+  clicked: Int
+  content: String
+  createdAt: DateTime!
+  createdBy: String
+  creator: User
+  delivered: Int
+  htmlContent: String
+  id: String!
+  name: String!
+  opened: Int
+  scheduledAt: DateTime
+  sentAt: DateTime
+  status: String!
+  subject: String
+  template: EmailTemplate
+  templateId: String
+  totalRecipients: Int
+  unsubscribed: Int
+  updatedAt: DateTime!
+}
+
+input EmailCampaignCreateInput {
+  audienceId: String
+  content: String
+  htmlContent: String
+  name: String!
+  scheduledAt: DateTime
+  subject: String
+  templateId: String
+}
+
+type EmailTemplate {
+  category: String
+  content: String
+  createdAt: DateTime!
+  createdBy: String
+  creator: User
+  htmlContent: String
+  id: String!
+  isActive: Boolean!
+  name: String!
+  subject: String
+  type: String!
+  updatedAt: DateTime!
+}
+
+input EmailTemplateCreateInput {
+  category: String
+  content: String
+  htmlContent: String
+  isActive: Boolean
+  name: String!
+  subject: String
+  type: String!
+}
+
+type FAQ {
+  answer: String!
+  category: FAQCategory
+  categoryId: String
+  createdAt: DateTime!
+  helpful: Int
+  id: String!
+  isActive: Boolean!
+  notHelpful: Int
+  question: String!
+  sortOrder: Int
+  updatedAt: DateTime!
+  views: Int
+}
+
+type FAQCategory {
+  createdAt: DateTime!
+  description: String
+  faqs: [FAQ]
+  faqsCount: Int
+  icon: String
+  id: String!
+  isActive: Boolean!
+  name: String!
+  sortOrder: Int
+  updatedAt: DateTime!
+}
+
+input FAQCreateInput {
+  answer: String!
+  categoryId: String
+  isActive: Boolean
+  question: String!
+  sortOrder: Int
+}
+
+type InformationArticle {
+  allowComments: Boolean
+  author: User
+  authorId: String!
+  category: InformationCategory
+  categoryId: String
+  comments: [InformationComment]
+  commentsCount: Int
+  content: String
+  createdAt: DateTime!
+  excerpt: String
+  featuredImage: String
+  id: String!
+  isFeatured: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  slug: String
+  sortOrder: Int
+  status: String!
+  tags: [InformationTag]
+  title: String!
+  updatedAt: DateTime!
+  views: Int
+  visibility: String!
+}
+
+input InformationArticleCreateInput {
+  allowComments: Boolean
+  categoryId: String
+  content: String
+  excerpt: String
+  featuredImage: String
+  isFeatured: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  slug: String
+  sortOrder: Int
+  status: String
+  tagIds: [String]
+  title: String!
+  visibility: String
+}
+
+type InformationCategory {
+  articles: [InformationArticle]
+  articlesCount: Int
+  color: String
+  createdAt: DateTime!
+  description: String
+  icon: String
+  id: String!
+  isActive: Boolean!
+  name: String!
+  slug: String
+  sortOrder: Int
+  updatedAt: DateTime!
+}
+
+input InformationCategoryCreateInput {
+  color: String
+  description: String
+  icon: String
+  isActive: Boolean
+  name: String!
+  slug: String
+  sortOrder: Int
+}
+
+type InformationComment {
+  article: InformationArticle
+  articleId: String!
+  author: User
+  authorEmail: String
+  authorId: String
+  authorName: String
+  content: String!
+  createdAt: DateTime!
+  id: String!
+  parent: InformationComment
+  parentId: String
+  replies: [InformationComment]
+  status: String!
+  updatedAt: DateTime!
+}
+
+input InformationCommentCreateInput {
+  articleId: String!
+  authorEmail: String
+  authorName: String
+  content: String!
+  parentId: String
+}
+
+type InformationTag {
+  articlesCount: Int
+  color: String
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isActive: Boolean!
+  name: String!
+  slug: String
+  updatedAt: DateTime!
+}
+
+input LoginInput {
+  email: String
+  password: String!
+  phone: String
+  provider: String
+  username: String
+}
 
 type MenuItem {
   children: [MenuItem]
@@ -70,33 +618,366 @@ input MenuPermissionInput {
 }
 
 type Mutation {
+  approveBlogComment(id: String!): BlogComment
+  assignUserToCallExtension(input: CallExtensionUserCreateInput!): CallExtensionUser
   bulkCreateRoleMenuPermissions(inputs: [RoleMenuPermissionCreateInput!]!): [RoleMenuPermission]
   bulkUpdateRoleMenuPermissions(menuPermissions: [MenuPermissionInput!]!, roleId: String!): String
+  createBlogCategory(input: BlogCategoryCreateInput!): BlogCategory
+  createBlogComment(input: BlogCommentCreateInput!): BlogComment
+  createBlogPost(input: BlogPostCreateInput!): BlogPost
+  createBlogTag(input: BlogTagCreateInput!): BlogTag
+  createCallExtension(input: CallExtensionCreateInput!): CallExtension
+  createCampaign(input: CampaignCreateInput!): Campaign
+  createDocument(input: DocumentCreateInput!): Document
+  createEmailCampaign(input: EmailCampaignCreateInput!): EmailCampaign
+  createEmailTemplate(input: EmailTemplateCreateInput!): EmailTemplate
+  createFAQ(input: FAQCreateInput!): FAQ
+  createInformationArticle(input: InformationArticleCreateInput!): InformationArticle
+  createInformationCategory(input: InformationCategoryCreateInput!): InformationCategory
+  createInformationComment(input: InformationCommentCreateInput!): InformationComment
   createMenuItem(input: MenuItemCreateInput!): MenuItem
+  createOrder(input: OrderCreateInput!): Order
+  createProduct(input: ProductCreateInput!): Product
+  createProductCategory(input: ProductCategoryCreateInput!): ProductCategory
+  createProductReview(input: ProductReviewCreateInput!): ProductReview
   createRole(input: RoleCreateInput!): Role
   createRoleMenuPermission(input: RoleMenuPermissionCreateInput!): RoleMenuPermission
+  createSocialMediaAccount(input: SocialMediaAccountCreateInput!): SocialMediaAccount
+  createSocialMediaPost(input: SocialMediaPostCreateInput!): SocialMediaPost
   createUser(input: UserCreateInput!): User
+  deleteBlogCategory(id: String!): BlogCategory
+  deleteBlogPost(id: String!): BlogPost
+  deleteCallExtension(id: String!): CallExtension
   deleteMenuItem(id: String!): MenuItem
   deleteRole(id: String!): Role
   deleteRoleMenuPermission(id: String!): RoleMenuPermission
   deleteUser(id: String!): User
+  downloadDocument(id: String!): Document
+  likeBlogPost(id: String!): BlogPost
+  login(input: LoginInput!): AuthResponse
+  logout: String
+  markFAQHelpful(helpful: Boolean!, id: String!): FAQ
+  publishSocialMediaPost(id: String!): SocialMediaPost
+  refreshTokens(input: RefreshTokenInput!): AuthResponse
+  register(input: RegisterInput!): AuthResponse
+  rejectBlogComment(id: String!): BlogComment
+  removeUserFromCallExtension(callExtensionId: String!, userId: String!): CallExtensionUser
+  sendEmailCampaign(id: String!): EmailCampaign
+  sendOTP(identifier: String!): String
+  toggleCallExtensionUserStatus(callExtensionId: String!, isActive: Boolean!, userId: String!): CallExtensionUser
+  updateBlogCategory(id: String!, input: BlogCategoryUpdateInput!): BlogCategory
+  updateBlogPost(id: String!, input: BlogPostUpdateInput!): BlogPost
+  updateCallExtension(id: String!, input: CallExtensionUpdateInput!): CallExtension
   updateMenuItem(id: String!, input: MenuItemUpdateInput!): MenuItem
+  updateOrderStatus(id: String!, status: String!): Order
+  updateProduct(id: String!, input: ProductUpdateInput!): Product
   updateRole(id: String!, input: RoleUpdateInput!): Role
   updateRoleMenuPermission(id: String!, input: RoleMenuPermissionUpdateInput!): RoleMenuPermission
   updateUser(id: String!, input: UserUpdateInput!): User
+  verifyOTP(identifier: String!, otpCode: String!): AuthResponse
+}
+
+input OTPInput {
+  email: String
+  otpCode: String!
+  phone: String
+}
+
+type Order {
+  billingAddress: String
+  createdAt: DateTime!
+  currency: String
+  customer: User
+  customerEmail: String
+  customerId: String
+  customerPhone: String
+  deliveredAt: DateTime
+  discount: Float!
+  id: String!
+  items: [OrderItem]
+  itemsCount: Int
+  notes: String
+  orderNumber: String!
+  paymentMethod: String
+  paymentStatus: String!
+  shippedAt: DateTime
+  shipping: Float!
+  shippingAddress: String
+  status: String!
+  subtotal: Float!
+  tax: Float!
+  total: Float!
+  trackingNumber: String
+  updatedAt: DateTime!
+}
+
+input OrderCreateInput {
+  billingAddress: String
+  customerEmail: String
+  customerId: String
+  customerPhone: String
+  items: [OrderItemInput]
+  notes: String
+  paymentMethod: String
+  shippingAddress: String
+}
+
+type OrderItem {
+  attributes: String
+  createdAt: DateTime!
+  id: String!
+  order: Order
+  orderId: String!
+  price: Float!
+  product: Product
+  productId: String!
+  productImage: String
+  productName: String
+  productSku: String
+  quantity: Int!
+  total: Float!
+  updatedAt: DateTime!
+}
+
+input OrderItemInput {
+  attributes: String
+  productId: String!
+  quantity: Int!
+}
+
+type Product {
+  attributes: [ProductAttribute]
+  averageRating: Float
+  brand: ProductBrand
+  brandId: String
+  catalogVisibility: String
+  category: ProductCategory
+  categoryId: String
+  createdAt: DateTime!
+  description: String
+  dimensions: String
+  featured: Boolean
+  id: String!
+  images: [String]
+  inStock: Boolean
+  lowStockThreshold: Int
+  manageStock: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  name: String!
+  parent: Product
+  parentId: String
+  price: Float!
+  ratingCount: Int
+  reviews: [ProductReview]
+  salePrice: Float
+  shippingClass: String
+  shortDescription: String
+  sku: String
+  slug: String
+  status: String
+  stockQuantity: Int
+  thumbnailImage: String
+  type: String
+  updatedAt: DateTime!
+  variants: [Product]
+  views: Int
+  weight: String
+}
+
+type ProductAttribute {
+  createdAt: DateTime!
+  id: String!
+  isVariation: Boolean
+  name: String!
+  product: Product
+  productId: String!
+  sortOrder: Int
+  type: String
+  updatedAt: DateTime!
+  value: String!
+}
+
+type ProductBrand {
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isActive: Boolean!
+  logo: String
+  name: String!
+  productsCount: Int
+  slug: String
+  updatedAt: DateTime!
+  website: String
+}
+
+type ProductCategory {
+  children: [ProductCategory]
+  createdAt: DateTime!
+  description: String
+  id: String!
+  image: String
+  isActive: Boolean!
+  name: String!
+  parent: ProductCategory
+  parentId: String
+  productsCount: Int
+  slug: String
+  sortOrder: Int
+  updatedAt: DateTime!
+}
+
+input ProductCategoryCreateInput {
+  description: String
+  image: String
+  isActive: Boolean
+  name: String!
+  parentId: String
+  slug: String
+  sortOrder: Int
+}
+
+input ProductCreateInput {
+  brandId: String
+  catalogVisibility: String
+  categoryId: String
+  description: String
+  dimensions: String
+  featured: Boolean
+  images: [String]
+  lowStockThreshold: Int
+  manageStock: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  name: String!
+  parentId: String
+  price: Float!
+  salePrice: Float
+  shippingClass: String
+  shortDescription: String
+  sku: String
+  slug: String
+  status: String
+  stockQuantity: Int
+  thumbnailImage: String
+  type: String
+  weight: String
+}
+
+type ProductReview {
+  content: String
+  createdAt: DateTime!
+  customer: User
+  customerEmail: String
+  customerId: String
+  customerName: String
+  id: String!
+  product: Product
+  productId: String!
+  rating: Int!
+  status: String!
+  title: String
+  updatedAt: DateTime!
+  verified: Boolean
+}
+
+input ProductReviewCreateInput {
+  content: String
+  customerEmail: String
+  customerName: String
+  productId: String!
+  rating: Int!
+  title: String
+}
+
+input ProductUpdateInput {
+  brandId: String
+  catalogVisibility: String
+  categoryId: String
+  description: String
+  dimensions: String
+  featured: Boolean
+  images: [String]
+  lowStockThreshold: Int
+  manageStock: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  name: String
+  parentId: String
+  price: Float
+  salePrice: Float
+  shippingClass: String
+  shortDescription: String
+  sku: String
+  slug: String
+  status: String
+  stockQuantity: Int
+  thumbnailImage: String
+  type: String
+  weight: String
 }
 
 type Query {
+  blogCategories(isActive: Boolean, search: String, skip: Int, take: Int): [BlogCategory]
+  blogCategory(id: String, slug: String): BlogCategory
+  blogComments(postId: String, skip: Int, status: String, take: Int): [BlogComment]
+  blogPost(id: String, slug: String): BlogPost
+  blogPosts(authorId: String, categoryId: String, isFeatured: Boolean, search: String, skip: Int, status: String, tagId: String, take: Int): [BlogPost]
+  blogTags(isActive: Boolean, search: String, skip: Int, take: Int): [BlogTag]
+  callExtension(id: String!): CallExtension
+  callExtensionUsers(callExtensionId: String, isActive: Boolean, userId: String): [CallExtensionUser]
+  callExtensions(search: String, skip: Int, status: String, take: Int): [CallExtension]
+  callHistory(callStatus: String, direction: String, endDate: String, skip: Int, startDate: String, take: Int): [CallHistoryOverview]
+  callHistoryCount(callStatus: String, direction: String, endDate: String, startDate: String): Int
+  campaigns(skip: Int, status: String, take: Int, type: String): [Campaign]
   dashboardStats: DashboardStats
+  documentCategories(isActive: Boolean): [DocumentCategory]
+  documents(categoryId: String, isActive: Boolean, isPublic: Boolean, search: String, skip: Int, take: Int): [Document]
+  emailCampaigns(skip: Int, status: String, take: Int): [EmailCampaign]
+  emailTemplates(category: String, isActive: Boolean, type: String): [EmailTemplate]
+  faqCategories(isActive: Boolean): [FAQCategory]
+  faqs(categoryId: String, isActive: Boolean, search: String): [FAQ]
+  informationArticle(id: String, slug: String): InformationArticle
+  informationArticles(categoryId: String, isFeatured: Boolean, search: String, skip: Int, status: String, tagId: String, take: Int): [InformationArticle]
+  informationCategories(isActive: Boolean): [InformationCategory]
+  isAuthenticated: Boolean
+  me: User
   menuItem(id: String!): MenuItem
   menuItems(isActive: Boolean, parentId: String, search: String, skip: Int, take: Int): [MenuItem]
   menuTree(isActive: Boolean = true, roleId: String): [MenuItem]
+  order(id: String, orderNumber: String): Order
+  orders(customerId: String, orderNumber: String, paymentStatus: String, skip: Int, status: String, take: Int): [Order]
+  product(id: String, slug: String): Product
+  productBrands(isActive: Boolean): [ProductBrand]
+  productCategories(isActive: Boolean, parentId: String): [ProductCategory]
+  products(brandId: String, categoryId: String, featured: Boolean, inStock: Boolean, maxPrice: Float, minPrice: Float, search: String, skip: Int, sortBy: String, sortOrder: String, status: String, take: Int): [Product]
   role(id: String!): Role
   roleMenuPermissions(canAccess: Boolean, canView: Boolean, menuItemId: String, roleId: String): [RoleMenuPermission]
   roles(isSystemRole: Boolean, search: String, skip: Int, take: Int): [Role]
+  socialMediaAccounts(isActive: Boolean, platform: String, status: String): [SocialMediaAccount]
+  socialMediaPosts(accountId: String, skip: Int, status: String, take: Int): [SocialMediaPost]
   user(id: String!): User
   users(isActive: Boolean, roleId: String, search: String, skip: Int, take: Int): [User]
   usersCount(isActive: Boolean, roleId: String, search: String): Int
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
+}
+
+input RegisterInput {
+  appleId: String
+  displayName: String!
+  email: String
+  facebookId: String
+  googleId: String
+  password: String
+  phone: String
+  provider: String
+  username: String
 }
 
 type Role {
@@ -153,6 +1034,73 @@ input RoleUpdateInput {
   modules: String
   name: String
   permissions: String
+}
+
+type SocialMediaAccount {
+  accessToken: String
+  accountId: String
+  accountName: String!
+  createdAt: DateTime!
+  description: String
+  followersCount: Int
+  followingCount: Int
+  id: String!
+  isActive: Boolean!
+  platform: String!
+  posts: [SocialMediaPost]
+  profilePicture: String
+  refreshToken: String
+  status: String!
+  tokenExpiresAt: DateTime
+  updatedAt: DateTime!
+  user: User
+  userId: String
+}
+
+input SocialMediaAccountCreateInput {
+  accessToken: String
+  accountId: String
+  accountName: String!
+  description: String
+  isActive: Boolean
+  platform: String!
+  profilePicture: String
+  refreshToken: String
+  status: String
+  tokenExpiresAt: DateTime
+}
+
+type SocialMediaPost {
+  account: SocialMediaAccount
+  accountId: String!
+  comments: Int
+  content: String!
+  createdAt: DateTime!
+  hashtags: String
+  id: String!
+  images: [String]
+  likes: Int
+  link: String
+  mentions: String
+  platformPostId: String
+  publishedAt: DateTime
+  scheduledAt: DateTime
+  shares: Int
+  status: String!
+  updatedAt: DateTime!
+  video: String
+  views: Int
+}
+
+input SocialMediaPostCreateInput {
+  accountId: String!
+  content: String!
+  hashtags: String
+  images: [String]
+  link: String
+  mentions: String
+  scheduledAt: DateTime
+  video: String
 }
 
 type User {

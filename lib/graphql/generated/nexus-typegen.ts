@@ -14,6 +14,175 @@ declare global {
 }
 
 export interface NexusGenInputs {
+  BlogCategoryCreateInput: { // input type
+    description?: string | null; // String
+    image?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    name: string; // String!
+    slug?: string | null; // String
+  }
+  BlogCategoryUpdateInput: { // input type
+    description?: string | null; // String
+    image?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    name?: string | null; // String
+    slug?: string | null; // String
+  }
+  BlogCommentCreateInput: { // input type
+    authorEmail?: string | null; // String
+    authorName?: string | null; // String
+    authorWebsite?: string | null; // String
+    content: string; // String!
+    parentId?: string | null; // String
+    postId: string; // String!
+  }
+  BlogPostCreateInput: { // input type
+    allowComments?: boolean | null; // Boolean
+    categoryId?: string | null; // String
+    content?: string | null; // String
+    excerpt?: string | null; // String
+    featuredImage?: string | null; // String
+    isFeatured?: boolean | null; // Boolean
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    publishedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    slug?: string | null; // String
+    status?: string | null; // String
+    tagIds?: Array<string | null> | null; // [String]
+    title: string; // String!
+    visibility?: string | null; // String
+  }
+  BlogPostUpdateInput: { // input type
+    allowComments?: boolean | null; // Boolean
+    categoryId?: string | null; // String
+    content?: string | null; // String
+    excerpt?: string | null; // String
+    featuredImage?: string | null; // String
+    isFeatured?: boolean | null; // Boolean
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    publishedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    slug?: string | null; // String
+    status?: string | null; // String
+    tagIds?: Array<string | null> | null; // [String]
+    title?: string | null; // String
+    visibility?: string | null; // String
+  }
+  BlogTagCreateInput: { // input type
+    color?: string | null; // String
+    description?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    name: string; // String!
+    slug?: string | null; // String
+  }
+  CallExtensionCreateInput: { // input type
+    description?: string | null; // String
+    extCode: string; // String!
+    name: string; // String!
+    password?: string | null; // String
+    status?: string | null; // String
+  }
+  CallExtensionUpdateInput: { // input type
+    description?: string | null; // String
+    extCode?: string | null; // String
+    name?: string | null; // String
+    password?: string | null; // String
+    status?: string | null; // String
+  }
+  CallExtensionUserCreateInput: { // input type
+    callExtensionId: string; // String!
+    isActive?: boolean | null; // Boolean
+    userId: string; // String!
+  }
+  CampaignCreateInput: { // input type
+    budget?: number | null; // Float
+    description?: string | null; // String
+    endDate?: NexusGenScalars['DateTime'] | null; // DateTime
+    name: string; // String!
+    objectives?: string | null; // String
+    startDate: NexusGenScalars['DateTime']; // DateTime!
+    targetAudience?: string | null; // String
+    type: string; // String!
+  }
+  DocumentCreateInput: { // input type
+    categoryId?: string | null; // String
+    description?: string | null; // String
+    fileName: string; // String!
+    filePath: string; // String!
+    fileSize?: number | null; // Int
+    fileType?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    isPublic?: boolean | null; // Boolean
+    title: string; // String!
+  }
+  EmailCampaignCreateInput: { // input type
+    audienceId?: string | null; // String
+    content?: string | null; // String
+    htmlContent?: string | null; // String
+    name: string; // String!
+    scheduledAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    subject?: string | null; // String
+    templateId?: string | null; // String
+  }
+  EmailTemplateCreateInput: { // input type
+    category?: string | null; // String
+    content?: string | null; // String
+    htmlContent?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    name: string; // String!
+    subject?: string | null; // String
+    type: string; // String!
+  }
+  FAQCreateInput: { // input type
+    answer: string; // String!
+    categoryId?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    question: string; // String!
+    sortOrder?: number | null; // Int
+  }
+  InformationArticleCreateInput: { // input type
+    allowComments?: boolean | null; // Boolean
+    categoryId?: string | null; // String
+    content?: string | null; // String
+    excerpt?: string | null; // String
+    featuredImage?: string | null; // String
+    isFeatured?: boolean | null; // Boolean
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    publishedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    slug?: string | null; // String
+    sortOrder?: number | null; // Int
+    status?: string | null; // String
+    tagIds?: Array<string | null> | null; // [String]
+    title: string; // String!
+    visibility?: string | null; // String
+  }
+  InformationCategoryCreateInput: { // input type
+    color?: string | null; // String
+    description?: string | null; // String
+    icon?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    name: string; // String!
+    slug?: string | null; // String
+    sortOrder?: number | null; // Int
+  }
+  InformationCommentCreateInput: { // input type
+    articleId: string; // String!
+    authorEmail?: string | null; // String
+    authorName?: string | null; // String
+    content: string; // String!
+    parentId?: string | null; // String
+  }
+  LoginInput: { // input type
+    email?: string | null; // String
+    password: string; // String!
+    phone?: string | null; // String
+    provider?: string | null; // String
+    username?: string | null; // String
+  }
   MenuItemCreateInput: { // input type
     description?: string | null; // String
     icon?: string | null; // String
@@ -36,6 +205,111 @@ export interface NexusGenInputs {
     canAccess?: boolean | null; // Boolean
     canView?: boolean | null; // Boolean
     menuItemId: string; // String!
+  }
+  OTPInput: { // input type
+    email?: string | null; // String
+    otpCode: string; // String!
+    phone?: string | null; // String
+  }
+  OrderCreateInput: { // input type
+    billingAddress?: string | null; // String
+    customerEmail?: string | null; // String
+    customerId?: string | null; // String
+    customerPhone?: string | null; // String
+    items?: Array<NexusGenInputs['OrderItemInput'] | null> | null; // [OrderItemInput]
+    notes?: string | null; // String
+    paymentMethod?: string | null; // String
+    shippingAddress?: string | null; // String
+  }
+  OrderItemInput: { // input type
+    attributes?: string | null; // String
+    productId: string; // String!
+    quantity: number; // Int!
+  }
+  ProductCategoryCreateInput: { // input type
+    description?: string | null; // String
+    image?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    name: string; // String!
+    parentId?: string | null; // String
+    slug?: string | null; // String
+    sortOrder?: number | null; // Int
+  }
+  ProductCreateInput: { // input type
+    brandId?: string | null; // String
+    catalogVisibility?: string | null; // String
+    categoryId?: string | null; // String
+    description?: string | null; // String
+    dimensions?: string | null; // String
+    featured?: boolean | null; // Boolean
+    images?: Array<string | null> | null; // [String]
+    lowStockThreshold?: number | null; // Int
+    manageStock?: boolean | null; // Boolean
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    name: string; // String!
+    parentId?: string | null; // String
+    price: number; // Float!
+    salePrice?: number | null; // Float
+    shippingClass?: string | null; // String
+    shortDescription?: string | null; // String
+    sku?: string | null; // String
+    slug?: string | null; // String
+    status?: string | null; // String
+    stockQuantity?: number | null; // Int
+    thumbnailImage?: string | null; // String
+    type?: string | null; // String
+    weight?: string | null; // String
+  }
+  ProductReviewCreateInput: { // input type
+    content?: string | null; // String
+    customerEmail?: string | null; // String
+    customerName?: string | null; // String
+    productId: string; // String!
+    rating: number; // Int!
+    title?: string | null; // String
+  }
+  ProductUpdateInput: { // input type
+    brandId?: string | null; // String
+    catalogVisibility?: string | null; // String
+    categoryId?: string | null; // String
+    description?: string | null; // String
+    dimensions?: string | null; // String
+    featured?: boolean | null; // Boolean
+    images?: Array<string | null> | null; // [String]
+    lowStockThreshold?: number | null; // Int
+    manageStock?: boolean | null; // Boolean
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    name?: string | null; // String
+    parentId?: string | null; // String
+    price?: number | null; // Float
+    salePrice?: number | null; // Float
+    shippingClass?: string | null; // String
+    shortDescription?: string | null; // String
+    sku?: string | null; // String
+    slug?: string | null; // String
+    status?: string | null; // String
+    stockQuantity?: number | null; // Int
+    thumbnailImage?: string | null; // String
+    type?: string | null; // String
+    weight?: string | null; // String
+  }
+  RefreshTokenInput: { // input type
+    refreshToken: string; // String!
+  }
+  RegisterInput: { // input type
+    appleId?: string | null; // String
+    displayName: string; // String!
+    email?: string | null; // String
+    facebookId?: string | null; // String
+    googleId?: string | null; // String
+    password?: string | null; // String
+    phone?: string | null; // String
+    provider?: string | null; // String
+    username?: string | null; // String
   }
   RoleCreateInput: { // input type
     description?: string | null; // String
@@ -62,6 +336,28 @@ export interface NexusGenInputs {
     modules?: string | null; // String
     name?: string | null; // String
     permissions?: string | null; // String
+  }
+  SocialMediaAccountCreateInput: { // input type
+    accessToken?: string | null; // String
+    accountId?: string | null; // String
+    accountName: string; // String!
+    description?: string | null; // String
+    isActive?: boolean | null; // Boolean
+    platform: string; // String!
+    profilePicture?: string | null; // String
+    refreshToken?: string | null; // String
+    status?: string | null; // String
+    tokenExpiresAt?: NexusGenScalars['DateTime'] | null; // DateTime
+  }
+  SocialMediaPostCreateInput: { // input type
+    accountId: string; // String!
+    content: string; // String!
+    hashtags?: string | null; // String
+    images?: Array<string | null> | null; // [String]
+    link?: string | null; // String
+    mentions?: string | null; // String
+    scheduledAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    video?: string | null; // String
   }
   UserCreateInput: { // input type
     avatar?: string | null; // String
@@ -99,6 +395,163 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  Advertisement: { // root type
+    budget?: number | null; // Float
+    callToAction?: string | null; // String
+    campaignId: string; // String!
+    clicks?: number | null; // Int
+    content?: string | null; // String
+    conversions?: number | null; // Int
+    cpc?: number | null; // Float
+    cpm?: number | null; // Float
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    ctr?: number | null; // Float
+    description?: string | null; // String
+    id: string; // String!
+    images?: Array<string | null> | null; // [String]
+    impressions?: number | null; // Int
+    link?: string | null; // String
+    name: string; // String!
+    spent?: number | null; // Float
+    status: string; // String!
+    targetAudience?: string | null; // String
+    type: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    video?: string | null; // String
+  }
+  AuthResponse: { // root type
+    message: string; // String!
+    tokens?: NexusGenRootTypes['AuthTokens'] | null; // AuthTokens
+    user?: NexusGenRootTypes['User'] | null; // User
+  }
+  AuthTokens: { // root type
+    accessToken: string; // String!
+    expiresIn: number; // Int!
+    refreshToken: string; // String!
+  }
+  BlogCategory: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    id: string; // String!
+    image?: string | null; // String
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    slug?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  BlogComment: { // root type
+    authorEmail?: string | null; // String
+    authorId?: string | null; // String
+    authorName?: string | null; // String
+    authorWebsite?: string | null; // String
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    parentId?: string | null; // String
+    postId: string; // String!
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  BlogPost: { // root type
+    allowComments?: boolean | null; // Boolean
+    authorId: string; // String!
+    categoryId?: string | null; // String
+    content?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    excerpt?: string | null; // String
+    featuredImage?: string | null; // String
+    id: string; // String!
+    isFeatured?: boolean | null; // Boolean
+    likes?: number | null; // Int
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    publishedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    slug?: string | null; // String
+    status: string; // String!
+    title: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    views?: number | null; // Int
+    visibility: string; // String!
+  }
+  BlogTag: { // root type
+    color?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    slug?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  CallExtension: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    extCode: string; // String!
+    id: string; // String!
+    name: string; // String!
+    password?: string | null; // String
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  CallExtensionUser: { // root type
+    callExtensionId: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    userId: string; // String!
+  }
+  CallHistoryOverview: { // root type
+    answerEpoch?: string | null; // String
+    billsec?: string | null; // String
+    callStatus?: string | null; // String
+    callerIdNumber?: string | null; // String
+    cdrId: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    destinationNumber?: string | null; // String
+    direction: string; // String!
+    duration?: string | null; // String
+    endEpoch?: string | null; // String
+    id: string; // String!
+    outboundCallerIdNumber?: string | null; // String
+    recordPath?: string | null; // String
+    sipHangupDisposition?: string | null; // String
+    startEpoch?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  Campaign: { // root type
+    budget?: number | null; // Float
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    endDate?: NexusGenScalars['DateTime'] | null; // DateTime
+    id: string; // String!
+    managerId?: string | null; // String
+    name: string; // String!
+    objectives?: string | null; // String
+    spent?: number | null; // Float
+    startDate: NexusGenScalars['DateTime']; // DateTime!
+    status: string; // String!
+    targetAudience?: string | null; // String
+    type: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  CampaignAnalytics: { // root type
+    campaignId: string; // String!
+    clicks?: number | null; // Int
+    conversions?: number | null; // Int
+    cpc?: number | null; // Float
+    cpm?: number | null; // Float
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    ctr?: number | null; // Float
+    date: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    impressions?: number | null; // Int
+    revenue?: number | null; // Float
+    roas?: number | null; // Float
+    spent?: number | null; // Float
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
   Conversation: { // root type
     avatar?: string | null; // String
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -118,6 +571,145 @@ export interface NexusGenObjects {
     rolesCount: number; // Int!
     usersCount: number; // Int!
   }
+  Document: { // root type
+    categoryId?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    downloads?: number | null; // Int
+    fileName: string; // String!
+    filePath: string; // String!
+    fileSize?: number | null; // Int
+    fileType?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    isPublic: boolean; // Boolean!
+    title: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    uploadedBy?: string | null; // String
+  }
+  DocumentCategory: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    icon?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    sortOrder?: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  EmailCampaign: { // root type
+    audienceId?: string | null; // String
+    bounced?: number | null; // Int
+    clicked?: number | null; // Int
+    content?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    createdBy?: string | null; // String
+    delivered?: number | null; // Int
+    htmlContent?: string | null; // String
+    id: string; // String!
+    name: string; // String!
+    opened?: number | null; // Int
+    scheduledAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    sentAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    status: string; // String!
+    subject?: string | null; // String
+    templateId?: string | null; // String
+    totalRecipients?: number | null; // Int
+    unsubscribed?: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  EmailTemplate: { // root type
+    category?: string | null; // String
+    content?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    createdBy?: string | null; // String
+    htmlContent?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    subject?: string | null; // String
+    type: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  FAQ: { // root type
+    answer: string; // String!
+    categoryId?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    helpful?: number | null; // Int
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    notHelpful?: number | null; // Int
+    question: string; // String!
+    sortOrder?: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    views?: number | null; // Int
+  }
+  FAQCategory: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    icon?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    sortOrder?: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  InformationArticle: { // root type
+    allowComments?: boolean | null; // Boolean
+    authorId: string; // String!
+    categoryId?: string | null; // String
+    content?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    excerpt?: string | null; // String
+    featuredImage?: string | null; // String
+    id: string; // String!
+    isFeatured?: boolean | null; // Boolean
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    publishedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    slug?: string | null; // String
+    sortOrder?: number | null; // Int
+    status: string; // String!
+    title: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    views?: number | null; // Int
+    visibility: string; // String!
+  }
+  InformationCategory: { // root type
+    color?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    icon?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    slug?: string | null; // String
+    sortOrder?: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  InformationComment: { // root type
+    articleId: string; // String!
+    authorEmail?: string | null; // String
+    authorId?: string | null; // String
+    authorName?: string | null; // String
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    parentId?: string | null; // String
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  InformationTag: { // root type
+    color?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    slug?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
   MenuItem: { // root type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     description?: string | null; // String
@@ -131,6 +723,126 @@ export interface NexusGenObjects {
     url?: string | null; // String
   }
   Mutation: {};
+  Order: { // root type
+    billingAddress?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    currency?: string | null; // String
+    customerEmail?: string | null; // String
+    customerId?: string | null; // String
+    customerPhone?: string | null; // String
+    deliveredAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    discount: number; // Float!
+    id: string; // String!
+    notes?: string | null; // String
+    orderNumber: string; // String!
+    paymentMethod?: string | null; // String
+    paymentStatus: string; // String!
+    shippedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    shipping: number; // Float!
+    shippingAddress?: string | null; // String
+    status: string; // String!
+    subtotal: number; // Float!
+    tax: number; // Float!
+    total: number; // Float!
+    trackingNumber?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  OrderItem: { // root type
+    attributes?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    orderId: string; // String!
+    price: number; // Float!
+    productId: string; // String!
+    productImage?: string | null; // String
+    productName?: string | null; // String
+    productSku?: string | null; // String
+    quantity: number; // Int!
+    total: number; // Float!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  Product: { // root type
+    averageRating?: number | null; // Float
+    brandId?: string | null; // String
+    catalogVisibility?: string | null; // String
+    categoryId?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    dimensions?: string | null; // String
+    featured?: boolean | null; // Boolean
+    id: string; // String!
+    images?: Array<string | null> | null; // [String]
+    inStock?: boolean | null; // Boolean
+    lowStockThreshold?: number | null; // Int
+    manageStock?: boolean | null; // Boolean
+    metaDescription?: string | null; // String
+    metaKeywords?: string | null; // String
+    metaTitle?: string | null; // String
+    name: string; // String!
+    parentId?: string | null; // String
+    price: number; // Float!
+    ratingCount?: number | null; // Int
+    salePrice?: number | null; // Float
+    shippingClass?: string | null; // String
+    shortDescription?: string | null; // String
+    sku?: string | null; // String
+    slug?: string | null; // String
+    status?: string | null; // String
+    stockQuantity?: number | null; // Int
+    thumbnailImage?: string | null; // String
+    type?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    views?: number | null; // Int
+    weight?: string | null; // String
+  }
+  ProductAttribute: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    isVariation?: boolean | null; // Boolean
+    name: string; // String!
+    productId: string; // String!
+    sortOrder?: number | null; // Int
+    type?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    value: string; // String!
+  }
+  ProductBrand: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    logo?: string | null; // String
+    name: string; // String!
+    slug?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    website?: string | null; // String
+  }
+  ProductCategory: { // root type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    id: string; // String!
+    image?: string | null; // String
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    parentId?: string | null; // String
+    slug?: string | null; // String
+    sortOrder?: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  ProductReview: { // root type
+    content?: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    customerEmail?: string | null; // String
+    customerId?: string | null; // String
+    customerName?: string | null; // String
+    id: string; // String!
+    productId: string; // String!
+    rating: number; // Int!
+    status: string; // String!
+    title?: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    verified?: boolean | null; // Boolean
+  }
   Query: {};
   Role: { // root type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -150,6 +862,44 @@ export interface NexusGenObjects {
     id: string; // String!
     menuItemId: string; // String!
     roleId: string; // String!
+  }
+  SocialMediaAccount: { // root type
+    accessToken?: string | null; // String
+    accountId?: string | null; // String
+    accountName: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description?: string | null; // String
+    followersCount?: number | null; // Int
+    followingCount?: number | null; // Int
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    platform: string; // String!
+    profilePicture?: string | null; // String
+    refreshToken?: string | null; // String
+    status: string; // String!
+    tokenExpiresAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    userId?: string | null; // String
+  }
+  SocialMediaPost: { // root type
+    accountId: string; // String!
+    comments?: number | null; // Int
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    hashtags?: string | null; // String
+    id: string; // String!
+    images?: Array<string | null> | null; // [String]
+    likes?: number | null; // Int
+    link?: string | null; // String
+    mentions?: string | null; // String
+    platformPostId?: string | null; // String
+    publishedAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    scheduledAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    shares?: number | null; // Int
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    video?: string | null; // String
+    views?: number | null; // Int
   }
   User: { // root type
     appleId?: string | null; // String
@@ -183,6 +933,184 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
+  Advertisement: { // field return type
+    budget: number | null; // Float
+    callToAction: string | null; // String
+    campaign: NexusGenRootTypes['Campaign'] | null; // Campaign
+    campaignId: string; // String!
+    clicks: number | null; // Int
+    content: string | null; // String
+    conversions: number | null; // Int
+    cpc: number | null; // Float
+    cpm: number | null; // Float
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    ctr: number | null; // Float
+    description: string | null; // String
+    id: string; // String!
+    images: Array<string | null> | null; // [String]
+    impressions: number | null; // Int
+    link: string | null; // String
+    name: string; // String!
+    spent: number | null; // Float
+    status: string; // String!
+    targetAudience: string | null; // String
+    type: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    video: string | null; // String
+  }
+  AuthResponse: { // field return type
+    message: string; // String!
+    tokens: NexusGenRootTypes['AuthTokens'] | null; // AuthTokens
+    user: NexusGenRootTypes['User'] | null; // User
+  }
+  AuthTokens: { // field return type
+    accessToken: string; // String!
+    expiresIn: number; // Int!
+    refreshToken: string; // String!
+  }
+  BlogCategory: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    id: string; // String!
+    image: string | null; // String
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    posts: Array<NexusGenRootTypes['BlogPost'] | null> | null; // [BlogPost]
+    postsCount: number | null; // Int
+    slug: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  BlogComment: { // field return type
+    author: NexusGenRootTypes['User'] | null; // User
+    authorEmail: string | null; // String
+    authorId: string | null; // String
+    authorName: string | null; // String
+    authorWebsite: string | null; // String
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    parent: NexusGenRootTypes['BlogComment'] | null; // BlogComment
+    parentId: string | null; // String
+    post: NexusGenRootTypes['BlogPost'] | null; // BlogPost
+    postId: string; // String!
+    replies: Array<NexusGenRootTypes['BlogComment'] | null> | null; // [BlogComment]
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  BlogPost: { // field return type
+    allowComments: boolean | null; // Boolean
+    author: NexusGenRootTypes['User'] | null; // User
+    authorId: string; // String!
+    category: NexusGenRootTypes['BlogCategory'] | null; // BlogCategory
+    categoryId: string | null; // String
+    comments: Array<NexusGenRootTypes['BlogComment'] | null> | null; // [BlogComment]
+    commentsCount: number | null; // Int
+    content: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    excerpt: string | null; // String
+    featuredImage: string | null; // String
+    id: string; // String!
+    isFeatured: boolean | null; // Boolean
+    likes: number | null; // Int
+    metaDescription: string | null; // String
+    metaKeywords: string | null; // String
+    metaTitle: string | null; // String
+    publishedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    slug: string | null; // String
+    status: string; // String!
+    tags: Array<NexusGenRootTypes['BlogTag'] | null> | null; // [BlogTag]
+    title: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    views: number | null; // Int
+    visibility: string; // String!
+  }
+  BlogTag: { // field return type
+    color: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    postsCount: number | null; // Int
+    slug: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  CallExtension: { // field return type
+    assignedUsers: Array<NexusGenRootTypes['CallExtensionUser'] | null> | null; // [CallExtensionUser]
+    assignedUsersCount: number | null; // Int
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    extCode: string; // String!
+    id: string; // String!
+    name: string; // String!
+    password: string | null; // String
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  CallExtensionUser: { // field return type
+    callExtension: NexusGenRootTypes['CallExtension'] | null; // CallExtension
+    callExtensionId: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    user: NexusGenRootTypes['User'] | null; // User
+    userId: string; // String!
+  }
+  CallHistoryOverview: { // field return type
+    answerEpoch: string | null; // String
+    billsec: string | null; // String
+    callStatus: string | null; // String
+    callerIdNumber: string | null; // String
+    cdrId: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    destinationNumber: string | null; // String
+    direction: string; // String!
+    duration: string | null; // String
+    endEpoch: string | null; // String
+    id: string; // String!
+    outboundCallerIdNumber: string | null; // String
+    recordPath: string | null; // String
+    sipHangupDisposition: string | null; // String
+    startEpoch: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  Campaign: { // field return type
+    ads: Array<NexusGenRootTypes['Advertisement'] | null> | null; // [Advertisement]
+    analytics: Array<NexusGenRootTypes['CampaignAnalytics'] | null> | null; // [CampaignAnalytics]
+    budget: number | null; // Float
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    endDate: NexusGenScalars['DateTime'] | null; // DateTime
+    id: string; // String!
+    manager: NexusGenRootTypes['User'] | null; // User
+    managerId: string | null; // String
+    name: string; // String!
+    objectives: string | null; // String
+    spent: number | null; // Float
+    startDate: NexusGenScalars['DateTime']; // DateTime!
+    status: string; // String!
+    targetAudience: string | null; // String
+    type: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  CampaignAnalytics: { // field return type
+    campaign: NexusGenRootTypes['Campaign'] | null; // Campaign
+    campaignId: string; // String!
+    clicks: number | null; // Int
+    conversions: number | null; // Int
+    cpc: number | null; // Float
+    cpm: number | null; // Float
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    ctr: number | null; // Float
+    date: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    impressions: number | null; // Int
+    revenue: number | null; // Float
+    roas: number | null; // Float
+    spent: number | null; // Float
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
   Conversation: { // field return type
     avatar: string | null; // String
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -203,6 +1131,167 @@ export interface NexusGenFieldTypes {
     rolesCount: number; // Int!
     usersCount: number; // Int!
   }
+  Document: { // field return type
+    category: NexusGenRootTypes['DocumentCategory'] | null; // DocumentCategory
+    categoryId: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    downloads: number | null; // Int
+    fileName: string; // String!
+    filePath: string; // String!
+    fileSize: number | null; // Int
+    fileType: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    isPublic: boolean; // Boolean!
+    title: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    uploadedBy: string | null; // String
+    uploader: NexusGenRootTypes['User'] | null; // User
+  }
+  DocumentCategory: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    documents: Array<NexusGenRootTypes['Document'] | null> | null; // [Document]
+    documentsCount: number | null; // Int
+    icon: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    sortOrder: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  EmailCampaign: { // field return type
+    audienceId: string | null; // String
+    bounced: number | null; // Int
+    clicked: number | null; // Int
+    content: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    createdBy: string | null; // String
+    creator: NexusGenRootTypes['User'] | null; // User
+    delivered: number | null; // Int
+    htmlContent: string | null; // String
+    id: string; // String!
+    name: string; // String!
+    opened: number | null; // Int
+    scheduledAt: NexusGenScalars['DateTime'] | null; // DateTime
+    sentAt: NexusGenScalars['DateTime'] | null; // DateTime
+    status: string; // String!
+    subject: string | null; // String
+    template: NexusGenRootTypes['EmailTemplate'] | null; // EmailTemplate
+    templateId: string | null; // String
+    totalRecipients: number | null; // Int
+    unsubscribed: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  EmailTemplate: { // field return type
+    category: string | null; // String
+    content: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    createdBy: string | null; // String
+    creator: NexusGenRootTypes['User'] | null; // User
+    htmlContent: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    subject: string | null; // String
+    type: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  FAQ: { // field return type
+    answer: string; // String!
+    category: NexusGenRootTypes['FAQCategory'] | null; // FAQCategory
+    categoryId: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    helpful: number | null; // Int
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    notHelpful: number | null; // Int
+    question: string; // String!
+    sortOrder: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    views: number | null; // Int
+  }
+  FAQCategory: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    faqs: Array<NexusGenRootTypes['FAQ'] | null> | null; // [FAQ]
+    faqsCount: number | null; // Int
+    icon: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    sortOrder: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  InformationArticle: { // field return type
+    allowComments: boolean | null; // Boolean
+    author: NexusGenRootTypes['User'] | null; // User
+    authorId: string; // String!
+    category: NexusGenRootTypes['InformationCategory'] | null; // InformationCategory
+    categoryId: string | null; // String
+    comments: Array<NexusGenRootTypes['InformationComment'] | null> | null; // [InformationComment]
+    commentsCount: number | null; // Int
+    content: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    excerpt: string | null; // String
+    featuredImage: string | null; // String
+    id: string; // String!
+    isFeatured: boolean | null; // Boolean
+    metaDescription: string | null; // String
+    metaKeywords: string | null; // String
+    metaTitle: string | null; // String
+    publishedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    slug: string | null; // String
+    sortOrder: number | null; // Int
+    status: string; // String!
+    tags: Array<NexusGenRootTypes['InformationTag'] | null> | null; // [InformationTag]
+    title: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    views: number | null; // Int
+    visibility: string; // String!
+  }
+  InformationCategory: { // field return type
+    articles: Array<NexusGenRootTypes['InformationArticle'] | null> | null; // [InformationArticle]
+    articlesCount: number | null; // Int
+    color: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    icon: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    slug: string | null; // String
+    sortOrder: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  InformationComment: { // field return type
+    article: NexusGenRootTypes['InformationArticle'] | null; // InformationArticle
+    articleId: string; // String!
+    author: NexusGenRootTypes['User'] | null; // User
+    authorEmail: string | null; // String
+    authorId: string | null; // String
+    authorName: string | null; // String
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    parent: NexusGenRootTypes['InformationComment'] | null; // InformationComment
+    parentId: string | null; // String
+    replies: Array<NexusGenRootTypes['InformationComment'] | null> | null; // [InformationComment]
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  InformationTag: { // field return type
+    articlesCount: number | null; // Int
+    color: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    slug: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
   MenuItem: { // field return type
     children: Array<NexusGenRootTypes['MenuItem'] | null> | null; // [MenuItem]
     childrenCount: number | null; // Int
@@ -220,29 +1309,241 @@ export interface NexusGenFieldTypes {
     url: string | null; // String
   }
   Mutation: { // field return type
+    approveBlogComment: NexusGenRootTypes['BlogComment'] | null; // BlogComment
+    assignUserToCallExtension: NexusGenRootTypes['CallExtensionUser'] | null; // CallExtensionUser
     bulkCreateRoleMenuPermissions: Array<NexusGenRootTypes['RoleMenuPermission'] | null> | null; // [RoleMenuPermission]
     bulkUpdateRoleMenuPermissions: string | null; // String
+    createBlogCategory: NexusGenRootTypes['BlogCategory'] | null; // BlogCategory
+    createBlogComment: NexusGenRootTypes['BlogComment'] | null; // BlogComment
+    createBlogPost: NexusGenRootTypes['BlogPost'] | null; // BlogPost
+    createBlogTag: NexusGenRootTypes['BlogTag'] | null; // BlogTag
+    createCallExtension: NexusGenRootTypes['CallExtension'] | null; // CallExtension
+    createCampaign: NexusGenRootTypes['Campaign'] | null; // Campaign
+    createDocument: NexusGenRootTypes['Document'] | null; // Document
+    createEmailCampaign: NexusGenRootTypes['EmailCampaign'] | null; // EmailCampaign
+    createEmailTemplate: NexusGenRootTypes['EmailTemplate'] | null; // EmailTemplate
+    createFAQ: NexusGenRootTypes['FAQ'] | null; // FAQ
+    createInformationArticle: NexusGenRootTypes['InformationArticle'] | null; // InformationArticle
+    createInformationCategory: NexusGenRootTypes['InformationCategory'] | null; // InformationCategory
+    createInformationComment: NexusGenRootTypes['InformationComment'] | null; // InformationComment
     createMenuItem: NexusGenRootTypes['MenuItem'] | null; // MenuItem
+    createOrder: NexusGenRootTypes['Order'] | null; // Order
+    createProduct: NexusGenRootTypes['Product'] | null; // Product
+    createProductCategory: NexusGenRootTypes['ProductCategory'] | null; // ProductCategory
+    createProductReview: NexusGenRootTypes['ProductReview'] | null; // ProductReview
     createRole: NexusGenRootTypes['Role'] | null; // Role
     createRoleMenuPermission: NexusGenRootTypes['RoleMenuPermission'] | null; // RoleMenuPermission
+    createSocialMediaAccount: NexusGenRootTypes['SocialMediaAccount'] | null; // SocialMediaAccount
+    createSocialMediaPost: NexusGenRootTypes['SocialMediaPost'] | null; // SocialMediaPost
     createUser: NexusGenRootTypes['User'] | null; // User
+    deleteBlogCategory: NexusGenRootTypes['BlogCategory'] | null; // BlogCategory
+    deleteBlogPost: NexusGenRootTypes['BlogPost'] | null; // BlogPost
+    deleteCallExtension: NexusGenRootTypes['CallExtension'] | null; // CallExtension
     deleteMenuItem: NexusGenRootTypes['MenuItem'] | null; // MenuItem
     deleteRole: NexusGenRootTypes['Role'] | null; // Role
     deleteRoleMenuPermission: NexusGenRootTypes['RoleMenuPermission'] | null; // RoleMenuPermission
     deleteUser: NexusGenRootTypes['User'] | null; // User
+    downloadDocument: NexusGenRootTypes['Document'] | null; // Document
+    likeBlogPost: NexusGenRootTypes['BlogPost'] | null; // BlogPost
+    login: NexusGenRootTypes['AuthResponse'] | null; // AuthResponse
+    logout: string | null; // String
+    markFAQHelpful: NexusGenRootTypes['FAQ'] | null; // FAQ
+    publishSocialMediaPost: NexusGenRootTypes['SocialMediaPost'] | null; // SocialMediaPost
+    refreshTokens: NexusGenRootTypes['AuthResponse'] | null; // AuthResponse
+    register: NexusGenRootTypes['AuthResponse'] | null; // AuthResponse
+    rejectBlogComment: NexusGenRootTypes['BlogComment'] | null; // BlogComment
+    removeUserFromCallExtension: NexusGenRootTypes['CallExtensionUser'] | null; // CallExtensionUser
+    sendEmailCampaign: NexusGenRootTypes['EmailCampaign'] | null; // EmailCampaign
+    sendOTP: string | null; // String
+    toggleCallExtensionUserStatus: NexusGenRootTypes['CallExtensionUser'] | null; // CallExtensionUser
+    updateBlogCategory: NexusGenRootTypes['BlogCategory'] | null; // BlogCategory
+    updateBlogPost: NexusGenRootTypes['BlogPost'] | null; // BlogPost
+    updateCallExtension: NexusGenRootTypes['CallExtension'] | null; // CallExtension
     updateMenuItem: NexusGenRootTypes['MenuItem'] | null; // MenuItem
+    updateOrderStatus: NexusGenRootTypes['Order'] | null; // Order
+    updateProduct: NexusGenRootTypes['Product'] | null; // Product
     updateRole: NexusGenRootTypes['Role'] | null; // Role
     updateRoleMenuPermission: NexusGenRootTypes['RoleMenuPermission'] | null; // RoleMenuPermission
     updateUser: NexusGenRootTypes['User'] | null; // User
+    verifyOTP: NexusGenRootTypes['AuthResponse'] | null; // AuthResponse
+  }
+  Order: { // field return type
+    billingAddress: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    currency: string | null; // String
+    customer: NexusGenRootTypes['User'] | null; // User
+    customerEmail: string | null; // String
+    customerId: string | null; // String
+    customerPhone: string | null; // String
+    deliveredAt: NexusGenScalars['DateTime'] | null; // DateTime
+    discount: number; // Float!
+    id: string; // String!
+    items: Array<NexusGenRootTypes['OrderItem'] | null> | null; // [OrderItem]
+    itemsCount: number | null; // Int
+    notes: string | null; // String
+    orderNumber: string; // String!
+    paymentMethod: string | null; // String
+    paymentStatus: string; // String!
+    shippedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    shipping: number; // Float!
+    shippingAddress: string | null; // String
+    status: string; // String!
+    subtotal: number; // Float!
+    tax: number; // Float!
+    total: number; // Float!
+    trackingNumber: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  OrderItem: { // field return type
+    attributes: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    order: NexusGenRootTypes['Order'] | null; // Order
+    orderId: string; // String!
+    price: number; // Float!
+    product: NexusGenRootTypes['Product'] | null; // Product
+    productId: string; // String!
+    productImage: string | null; // String
+    productName: string | null; // String
+    productSku: string | null; // String
+    quantity: number; // Int!
+    total: number; // Float!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  Product: { // field return type
+    attributes: Array<NexusGenRootTypes['ProductAttribute'] | null> | null; // [ProductAttribute]
+    averageRating: number | null; // Float
+    brand: NexusGenRootTypes['ProductBrand'] | null; // ProductBrand
+    brandId: string | null; // String
+    catalogVisibility: string | null; // String
+    category: NexusGenRootTypes['ProductCategory'] | null; // ProductCategory
+    categoryId: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    dimensions: string | null; // String
+    featured: boolean | null; // Boolean
+    id: string; // String!
+    images: Array<string | null> | null; // [String]
+    inStock: boolean | null; // Boolean
+    lowStockThreshold: number | null; // Int
+    manageStock: boolean | null; // Boolean
+    metaDescription: string | null; // String
+    metaKeywords: string | null; // String
+    metaTitle: string | null; // String
+    name: string; // String!
+    parent: NexusGenRootTypes['Product'] | null; // Product
+    parentId: string | null; // String
+    price: number; // Float!
+    ratingCount: number | null; // Int
+    reviews: Array<NexusGenRootTypes['ProductReview'] | null> | null; // [ProductReview]
+    salePrice: number | null; // Float
+    shippingClass: string | null; // String
+    shortDescription: string | null; // String
+    sku: string | null; // String
+    slug: string | null; // String
+    status: string | null; // String
+    stockQuantity: number | null; // Int
+    thumbnailImage: string | null; // String
+    type: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    variants: Array<NexusGenRootTypes['Product'] | null> | null; // [Product]
+    views: number | null; // Int
+    weight: string | null; // String
+  }
+  ProductAttribute: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    isVariation: boolean | null; // Boolean
+    name: string; // String!
+    product: NexusGenRootTypes['Product'] | null; // Product
+    productId: string; // String!
+    sortOrder: number | null; // Int
+    type: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    value: string; // String!
+  }
+  ProductBrand: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    logo: string | null; // String
+    name: string; // String!
+    productsCount: number | null; // Int
+    slug: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    website: string | null; // String
+  }
+  ProductCategory: { // field return type
+    children: Array<NexusGenRootTypes['ProductCategory'] | null> | null; // [ProductCategory]
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    id: string; // String!
+    image: string | null; // String
+    isActive: boolean; // Boolean!
+    name: string; // String!
+    parent: NexusGenRootTypes['ProductCategory'] | null; // ProductCategory
+    parentId: string | null; // String
+    productsCount: number | null; // Int
+    slug: string | null; // String
+    sortOrder: number | null; // Int
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+  }
+  ProductReview: { // field return type
+    content: string | null; // String
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    customer: NexusGenRootTypes['User'] | null; // User
+    customerEmail: string | null; // String
+    customerId: string | null; // String
+    customerName: string | null; // String
+    id: string; // String!
+    product: NexusGenRootTypes['Product'] | null; // Product
+    productId: string; // String!
+    rating: number; // Int!
+    status: string; // String!
+    title: string | null; // String
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    verified: boolean | null; // Boolean
   }
   Query: { // field return type
+    blogCategories: Array<NexusGenRootTypes['BlogCategory'] | null> | null; // [BlogCategory]
+    blogCategory: NexusGenRootTypes['BlogCategory'] | null; // BlogCategory
+    blogComments: Array<NexusGenRootTypes['BlogComment'] | null> | null; // [BlogComment]
+    blogPost: NexusGenRootTypes['BlogPost'] | null; // BlogPost
+    blogPosts: Array<NexusGenRootTypes['BlogPost'] | null> | null; // [BlogPost]
+    blogTags: Array<NexusGenRootTypes['BlogTag'] | null> | null; // [BlogTag]
+    callExtension: NexusGenRootTypes['CallExtension'] | null; // CallExtension
+    callExtensionUsers: Array<NexusGenRootTypes['CallExtensionUser'] | null> | null; // [CallExtensionUser]
+    callExtensions: Array<NexusGenRootTypes['CallExtension'] | null> | null; // [CallExtension]
+    callHistory: Array<NexusGenRootTypes['CallHistoryOverview'] | null> | null; // [CallHistoryOverview]
+    callHistoryCount: number | null; // Int
+    campaigns: Array<NexusGenRootTypes['Campaign'] | null> | null; // [Campaign]
     dashboardStats: NexusGenRootTypes['DashboardStats'] | null; // DashboardStats
+    documentCategories: Array<NexusGenRootTypes['DocumentCategory'] | null> | null; // [DocumentCategory]
+    documents: Array<NexusGenRootTypes['Document'] | null> | null; // [Document]
+    emailCampaigns: Array<NexusGenRootTypes['EmailCampaign'] | null> | null; // [EmailCampaign]
+    emailTemplates: Array<NexusGenRootTypes['EmailTemplate'] | null> | null; // [EmailTemplate]
+    faqCategories: Array<NexusGenRootTypes['FAQCategory'] | null> | null; // [FAQCategory]
+    faqs: Array<NexusGenRootTypes['FAQ'] | null> | null; // [FAQ]
+    informationArticle: NexusGenRootTypes['InformationArticle'] | null; // InformationArticle
+    informationArticles: Array<NexusGenRootTypes['InformationArticle'] | null> | null; // [InformationArticle]
+    informationCategories: Array<NexusGenRootTypes['InformationCategory'] | null> | null; // [InformationCategory]
+    isAuthenticated: boolean | null; // Boolean
+    me: NexusGenRootTypes['User'] | null; // User
     menuItem: NexusGenRootTypes['MenuItem'] | null; // MenuItem
     menuItems: Array<NexusGenRootTypes['MenuItem'] | null> | null; // [MenuItem]
     menuTree: Array<NexusGenRootTypes['MenuItem'] | null> | null; // [MenuItem]
+    order: NexusGenRootTypes['Order'] | null; // Order
+    orders: Array<NexusGenRootTypes['Order'] | null> | null; // [Order]
+    product: NexusGenRootTypes['Product'] | null; // Product
+    productBrands: Array<NexusGenRootTypes['ProductBrand'] | null> | null; // [ProductBrand]
+    productCategories: Array<NexusGenRootTypes['ProductCategory'] | null> | null; // [ProductCategory]
+    products: Array<NexusGenRootTypes['Product'] | null> | null; // [Product]
     role: NexusGenRootTypes['Role'] | null; // Role
     roleMenuPermissions: Array<NexusGenRootTypes['RoleMenuPermission'] | null> | null; // [RoleMenuPermission]
     roles: Array<NexusGenRootTypes['Role'] | null> | null; // [Role]
+    socialMediaAccounts: Array<NexusGenRootTypes['SocialMediaAccount'] | null> | null; // [SocialMediaAccount]
+    socialMediaPosts: Array<NexusGenRootTypes['SocialMediaPost'] | null> | null; // [SocialMediaPost]
     user: NexusGenRootTypes['User'] | null; // User
     users: Array<NexusGenRootTypes['User'] | null> | null; // [User]
     usersCount: number | null; // Int
@@ -271,6 +1572,47 @@ export interface NexusGenFieldTypes {
     role: NexusGenRootTypes['Role'] | null; // Role
     roleId: string; // String!
   }
+  SocialMediaAccount: { // field return type
+    accessToken: string | null; // String
+    accountId: string | null; // String
+    accountName: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    description: string | null; // String
+    followersCount: number | null; // Int
+    followingCount: number | null; // Int
+    id: string; // String!
+    isActive: boolean; // Boolean!
+    platform: string; // String!
+    posts: Array<NexusGenRootTypes['SocialMediaPost'] | null> | null; // [SocialMediaPost]
+    profilePicture: string | null; // String
+    refreshToken: string | null; // String
+    status: string; // String!
+    tokenExpiresAt: NexusGenScalars['DateTime'] | null; // DateTime
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    user: NexusGenRootTypes['User'] | null; // User
+    userId: string | null; // String
+  }
+  SocialMediaPost: { // field return type
+    account: NexusGenRootTypes['SocialMediaAccount'] | null; // SocialMediaAccount
+    accountId: string; // String!
+    comments: number | null; // Int
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    hashtags: string | null; // String
+    id: string; // String!
+    images: Array<string | null> | null; // [String]
+    likes: number | null; // Int
+    link: string | null; // String
+    mentions: string | null; // String
+    platformPostId: string | null; // String
+    publishedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    scheduledAt: NexusGenScalars['DateTime'] | null; // DateTime
+    shares: number | null; // Int
+    status: string; // String!
+    updatedAt: NexusGenScalars['DateTime']; // DateTime!
+    video: string | null; // String
+    views: number | null; // Int
+  }
   User: { // field return type
     appleId: string | null; // String
     avatar: string | null; // String
@@ -297,6 +1639,184 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  Advertisement: { // field return type name
+    budget: 'Float'
+    callToAction: 'String'
+    campaign: 'Campaign'
+    campaignId: 'String'
+    clicks: 'Int'
+    content: 'String'
+    conversions: 'Int'
+    cpc: 'Float'
+    cpm: 'Float'
+    createdAt: 'DateTime'
+    ctr: 'Float'
+    description: 'String'
+    id: 'String'
+    images: 'String'
+    impressions: 'Int'
+    link: 'String'
+    name: 'String'
+    spent: 'Float'
+    status: 'String'
+    targetAudience: 'String'
+    type: 'String'
+    updatedAt: 'DateTime'
+    video: 'String'
+  }
+  AuthResponse: { // field return type name
+    message: 'String'
+    tokens: 'AuthTokens'
+    user: 'User'
+  }
+  AuthTokens: { // field return type name
+    accessToken: 'String'
+    expiresIn: 'Int'
+    refreshToken: 'String'
+  }
+  BlogCategory: { // field return type name
+    createdAt: 'DateTime'
+    description: 'String'
+    id: 'String'
+    image: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    posts: 'BlogPost'
+    postsCount: 'Int'
+    slug: 'String'
+    updatedAt: 'DateTime'
+  }
+  BlogComment: { // field return type name
+    author: 'User'
+    authorEmail: 'String'
+    authorId: 'String'
+    authorName: 'String'
+    authorWebsite: 'String'
+    content: 'String'
+    createdAt: 'DateTime'
+    id: 'String'
+    parent: 'BlogComment'
+    parentId: 'String'
+    post: 'BlogPost'
+    postId: 'String'
+    replies: 'BlogComment'
+    status: 'String'
+    updatedAt: 'DateTime'
+  }
+  BlogPost: { // field return type name
+    allowComments: 'Boolean'
+    author: 'User'
+    authorId: 'String'
+    category: 'BlogCategory'
+    categoryId: 'String'
+    comments: 'BlogComment'
+    commentsCount: 'Int'
+    content: 'String'
+    createdAt: 'DateTime'
+    excerpt: 'String'
+    featuredImage: 'String'
+    id: 'String'
+    isFeatured: 'Boolean'
+    likes: 'Int'
+    metaDescription: 'String'
+    metaKeywords: 'String'
+    metaTitle: 'String'
+    publishedAt: 'DateTime'
+    slug: 'String'
+    status: 'String'
+    tags: 'BlogTag'
+    title: 'String'
+    updatedAt: 'DateTime'
+    views: 'Int'
+    visibility: 'String'
+  }
+  BlogTag: { // field return type name
+    color: 'String'
+    createdAt: 'DateTime'
+    description: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    postsCount: 'Int'
+    slug: 'String'
+    updatedAt: 'DateTime'
+  }
+  CallExtension: { // field return type name
+    assignedUsers: 'CallExtensionUser'
+    assignedUsersCount: 'Int'
+    createdAt: 'DateTime'
+    description: 'String'
+    extCode: 'String'
+    id: 'String'
+    name: 'String'
+    password: 'String'
+    status: 'String'
+    updatedAt: 'DateTime'
+  }
+  CallExtensionUser: { // field return type name
+    callExtension: 'CallExtension'
+    callExtensionId: 'String'
+    createdAt: 'DateTime'
+    id: 'String'
+    isActive: 'Boolean'
+    updatedAt: 'DateTime'
+    user: 'User'
+    userId: 'String'
+  }
+  CallHistoryOverview: { // field return type name
+    answerEpoch: 'String'
+    billsec: 'String'
+    callStatus: 'String'
+    callerIdNumber: 'String'
+    cdrId: 'String'
+    createdAt: 'DateTime'
+    destinationNumber: 'String'
+    direction: 'String'
+    duration: 'String'
+    endEpoch: 'String'
+    id: 'String'
+    outboundCallerIdNumber: 'String'
+    recordPath: 'String'
+    sipHangupDisposition: 'String'
+    startEpoch: 'String'
+    updatedAt: 'DateTime'
+  }
+  Campaign: { // field return type name
+    ads: 'Advertisement'
+    analytics: 'CampaignAnalytics'
+    budget: 'Float'
+    createdAt: 'DateTime'
+    description: 'String'
+    endDate: 'DateTime'
+    id: 'String'
+    manager: 'User'
+    managerId: 'String'
+    name: 'String'
+    objectives: 'String'
+    spent: 'Float'
+    startDate: 'DateTime'
+    status: 'String'
+    targetAudience: 'String'
+    type: 'String'
+    updatedAt: 'DateTime'
+  }
+  CampaignAnalytics: { // field return type name
+    campaign: 'Campaign'
+    campaignId: 'String'
+    clicks: 'Int'
+    conversions: 'Int'
+    cpc: 'Float'
+    cpm: 'Float'
+    createdAt: 'DateTime'
+    ctr: 'Float'
+    date: 'DateTime'
+    id: 'String'
+    impressions: 'Int'
+    revenue: 'Float'
+    roas: 'Float'
+    spent: 'Float'
+    updatedAt: 'DateTime'
+  }
   Conversation: { // field return type name
     avatar: 'String'
     createdAt: 'DateTime'
@@ -317,6 +1837,167 @@ export interface NexusGenFieldTypeNames {
     rolesCount: 'Int'
     usersCount: 'Int'
   }
+  Document: { // field return type name
+    category: 'DocumentCategory'
+    categoryId: 'String'
+    createdAt: 'DateTime'
+    description: 'String'
+    downloads: 'Int'
+    fileName: 'String'
+    filePath: 'String'
+    fileSize: 'Int'
+    fileType: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    isPublic: 'Boolean'
+    title: 'String'
+    updatedAt: 'DateTime'
+    uploadedBy: 'String'
+    uploader: 'User'
+  }
+  DocumentCategory: { // field return type name
+    createdAt: 'DateTime'
+    description: 'String'
+    documents: 'Document'
+    documentsCount: 'Int'
+    icon: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    sortOrder: 'Int'
+    updatedAt: 'DateTime'
+  }
+  EmailCampaign: { // field return type name
+    audienceId: 'String'
+    bounced: 'Int'
+    clicked: 'Int'
+    content: 'String'
+    createdAt: 'DateTime'
+    createdBy: 'String'
+    creator: 'User'
+    delivered: 'Int'
+    htmlContent: 'String'
+    id: 'String'
+    name: 'String'
+    opened: 'Int'
+    scheduledAt: 'DateTime'
+    sentAt: 'DateTime'
+    status: 'String'
+    subject: 'String'
+    template: 'EmailTemplate'
+    templateId: 'String'
+    totalRecipients: 'Int'
+    unsubscribed: 'Int'
+    updatedAt: 'DateTime'
+  }
+  EmailTemplate: { // field return type name
+    category: 'String'
+    content: 'String'
+    createdAt: 'DateTime'
+    createdBy: 'String'
+    creator: 'User'
+    htmlContent: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    subject: 'String'
+    type: 'String'
+    updatedAt: 'DateTime'
+  }
+  FAQ: { // field return type name
+    answer: 'String'
+    category: 'FAQCategory'
+    categoryId: 'String'
+    createdAt: 'DateTime'
+    helpful: 'Int'
+    id: 'String'
+    isActive: 'Boolean'
+    notHelpful: 'Int'
+    question: 'String'
+    sortOrder: 'Int'
+    updatedAt: 'DateTime'
+    views: 'Int'
+  }
+  FAQCategory: { // field return type name
+    createdAt: 'DateTime'
+    description: 'String'
+    faqs: 'FAQ'
+    faqsCount: 'Int'
+    icon: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    sortOrder: 'Int'
+    updatedAt: 'DateTime'
+  }
+  InformationArticle: { // field return type name
+    allowComments: 'Boolean'
+    author: 'User'
+    authorId: 'String'
+    category: 'InformationCategory'
+    categoryId: 'String'
+    comments: 'InformationComment'
+    commentsCount: 'Int'
+    content: 'String'
+    createdAt: 'DateTime'
+    excerpt: 'String'
+    featuredImage: 'String'
+    id: 'String'
+    isFeatured: 'Boolean'
+    metaDescription: 'String'
+    metaKeywords: 'String'
+    metaTitle: 'String'
+    publishedAt: 'DateTime'
+    slug: 'String'
+    sortOrder: 'Int'
+    status: 'String'
+    tags: 'InformationTag'
+    title: 'String'
+    updatedAt: 'DateTime'
+    views: 'Int'
+    visibility: 'String'
+  }
+  InformationCategory: { // field return type name
+    articles: 'InformationArticle'
+    articlesCount: 'Int'
+    color: 'String'
+    createdAt: 'DateTime'
+    description: 'String'
+    icon: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    slug: 'String'
+    sortOrder: 'Int'
+    updatedAt: 'DateTime'
+  }
+  InformationComment: { // field return type name
+    article: 'InformationArticle'
+    articleId: 'String'
+    author: 'User'
+    authorEmail: 'String'
+    authorId: 'String'
+    authorName: 'String'
+    content: 'String'
+    createdAt: 'DateTime'
+    id: 'String'
+    parent: 'InformationComment'
+    parentId: 'String'
+    replies: 'InformationComment'
+    status: 'String'
+    updatedAt: 'DateTime'
+  }
+  InformationTag: { // field return type name
+    articlesCount: 'Int'
+    color: 'String'
+    createdAt: 'DateTime'
+    description: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    slug: 'String'
+    updatedAt: 'DateTime'
+  }
   MenuItem: { // field return type name
     children: 'MenuItem'
     childrenCount: 'Int'
@@ -334,29 +2015,241 @@ export interface NexusGenFieldTypeNames {
     url: 'String'
   }
   Mutation: { // field return type name
+    approveBlogComment: 'BlogComment'
+    assignUserToCallExtension: 'CallExtensionUser'
     bulkCreateRoleMenuPermissions: 'RoleMenuPermission'
     bulkUpdateRoleMenuPermissions: 'String'
+    createBlogCategory: 'BlogCategory'
+    createBlogComment: 'BlogComment'
+    createBlogPost: 'BlogPost'
+    createBlogTag: 'BlogTag'
+    createCallExtension: 'CallExtension'
+    createCampaign: 'Campaign'
+    createDocument: 'Document'
+    createEmailCampaign: 'EmailCampaign'
+    createEmailTemplate: 'EmailTemplate'
+    createFAQ: 'FAQ'
+    createInformationArticle: 'InformationArticle'
+    createInformationCategory: 'InformationCategory'
+    createInformationComment: 'InformationComment'
     createMenuItem: 'MenuItem'
+    createOrder: 'Order'
+    createProduct: 'Product'
+    createProductCategory: 'ProductCategory'
+    createProductReview: 'ProductReview'
     createRole: 'Role'
     createRoleMenuPermission: 'RoleMenuPermission'
+    createSocialMediaAccount: 'SocialMediaAccount'
+    createSocialMediaPost: 'SocialMediaPost'
     createUser: 'User'
+    deleteBlogCategory: 'BlogCategory'
+    deleteBlogPost: 'BlogPost'
+    deleteCallExtension: 'CallExtension'
     deleteMenuItem: 'MenuItem'
     deleteRole: 'Role'
     deleteRoleMenuPermission: 'RoleMenuPermission'
     deleteUser: 'User'
+    downloadDocument: 'Document'
+    likeBlogPost: 'BlogPost'
+    login: 'AuthResponse'
+    logout: 'String'
+    markFAQHelpful: 'FAQ'
+    publishSocialMediaPost: 'SocialMediaPost'
+    refreshTokens: 'AuthResponse'
+    register: 'AuthResponse'
+    rejectBlogComment: 'BlogComment'
+    removeUserFromCallExtension: 'CallExtensionUser'
+    sendEmailCampaign: 'EmailCampaign'
+    sendOTP: 'String'
+    toggleCallExtensionUserStatus: 'CallExtensionUser'
+    updateBlogCategory: 'BlogCategory'
+    updateBlogPost: 'BlogPost'
+    updateCallExtension: 'CallExtension'
     updateMenuItem: 'MenuItem'
+    updateOrderStatus: 'Order'
+    updateProduct: 'Product'
     updateRole: 'Role'
     updateRoleMenuPermission: 'RoleMenuPermission'
     updateUser: 'User'
+    verifyOTP: 'AuthResponse'
+  }
+  Order: { // field return type name
+    billingAddress: 'String'
+    createdAt: 'DateTime'
+    currency: 'String'
+    customer: 'User'
+    customerEmail: 'String'
+    customerId: 'String'
+    customerPhone: 'String'
+    deliveredAt: 'DateTime'
+    discount: 'Float'
+    id: 'String'
+    items: 'OrderItem'
+    itemsCount: 'Int'
+    notes: 'String'
+    orderNumber: 'String'
+    paymentMethod: 'String'
+    paymentStatus: 'String'
+    shippedAt: 'DateTime'
+    shipping: 'Float'
+    shippingAddress: 'String'
+    status: 'String'
+    subtotal: 'Float'
+    tax: 'Float'
+    total: 'Float'
+    trackingNumber: 'String'
+    updatedAt: 'DateTime'
+  }
+  OrderItem: { // field return type name
+    attributes: 'String'
+    createdAt: 'DateTime'
+    id: 'String'
+    order: 'Order'
+    orderId: 'String'
+    price: 'Float'
+    product: 'Product'
+    productId: 'String'
+    productImage: 'String'
+    productName: 'String'
+    productSku: 'String'
+    quantity: 'Int'
+    total: 'Float'
+    updatedAt: 'DateTime'
+  }
+  Product: { // field return type name
+    attributes: 'ProductAttribute'
+    averageRating: 'Float'
+    brand: 'ProductBrand'
+    brandId: 'String'
+    catalogVisibility: 'String'
+    category: 'ProductCategory'
+    categoryId: 'String'
+    createdAt: 'DateTime'
+    description: 'String'
+    dimensions: 'String'
+    featured: 'Boolean'
+    id: 'String'
+    images: 'String'
+    inStock: 'Boolean'
+    lowStockThreshold: 'Int'
+    manageStock: 'Boolean'
+    metaDescription: 'String'
+    metaKeywords: 'String'
+    metaTitle: 'String'
+    name: 'String'
+    parent: 'Product'
+    parentId: 'String'
+    price: 'Float'
+    ratingCount: 'Int'
+    reviews: 'ProductReview'
+    salePrice: 'Float'
+    shippingClass: 'String'
+    shortDescription: 'String'
+    sku: 'String'
+    slug: 'String'
+    status: 'String'
+    stockQuantity: 'Int'
+    thumbnailImage: 'String'
+    type: 'String'
+    updatedAt: 'DateTime'
+    variants: 'Product'
+    views: 'Int'
+    weight: 'String'
+  }
+  ProductAttribute: { // field return type name
+    createdAt: 'DateTime'
+    id: 'String'
+    isVariation: 'Boolean'
+    name: 'String'
+    product: 'Product'
+    productId: 'String'
+    sortOrder: 'Int'
+    type: 'String'
+    updatedAt: 'DateTime'
+    value: 'String'
+  }
+  ProductBrand: { // field return type name
+    createdAt: 'DateTime'
+    description: 'String'
+    id: 'String'
+    isActive: 'Boolean'
+    logo: 'String'
+    name: 'String'
+    productsCount: 'Int'
+    slug: 'String'
+    updatedAt: 'DateTime'
+    website: 'String'
+  }
+  ProductCategory: { // field return type name
+    children: 'ProductCategory'
+    createdAt: 'DateTime'
+    description: 'String'
+    id: 'String'
+    image: 'String'
+    isActive: 'Boolean'
+    name: 'String'
+    parent: 'ProductCategory'
+    parentId: 'String'
+    productsCount: 'Int'
+    slug: 'String'
+    sortOrder: 'Int'
+    updatedAt: 'DateTime'
+  }
+  ProductReview: { // field return type name
+    content: 'String'
+    createdAt: 'DateTime'
+    customer: 'User'
+    customerEmail: 'String'
+    customerId: 'String'
+    customerName: 'String'
+    id: 'String'
+    product: 'Product'
+    productId: 'String'
+    rating: 'Int'
+    status: 'String'
+    title: 'String'
+    updatedAt: 'DateTime'
+    verified: 'Boolean'
   }
   Query: { // field return type name
+    blogCategories: 'BlogCategory'
+    blogCategory: 'BlogCategory'
+    blogComments: 'BlogComment'
+    blogPost: 'BlogPost'
+    blogPosts: 'BlogPost'
+    blogTags: 'BlogTag'
+    callExtension: 'CallExtension'
+    callExtensionUsers: 'CallExtensionUser'
+    callExtensions: 'CallExtension'
+    callHistory: 'CallHistoryOverview'
+    callHistoryCount: 'Int'
+    campaigns: 'Campaign'
     dashboardStats: 'DashboardStats'
+    documentCategories: 'DocumentCategory'
+    documents: 'Document'
+    emailCampaigns: 'EmailCampaign'
+    emailTemplates: 'EmailTemplate'
+    faqCategories: 'FAQCategory'
+    faqs: 'FAQ'
+    informationArticle: 'InformationArticle'
+    informationArticles: 'InformationArticle'
+    informationCategories: 'InformationCategory'
+    isAuthenticated: 'Boolean'
+    me: 'User'
     menuItem: 'MenuItem'
     menuItems: 'MenuItem'
     menuTree: 'MenuItem'
+    order: 'Order'
+    orders: 'Order'
+    product: 'Product'
+    productBrands: 'ProductBrand'
+    productCategories: 'ProductCategory'
+    products: 'Product'
     role: 'Role'
     roleMenuPermissions: 'RoleMenuPermission'
     roles: 'Role'
+    socialMediaAccounts: 'SocialMediaAccount'
+    socialMediaPosts: 'SocialMediaPost'
     user: 'User'
     users: 'User'
     usersCount: 'Int'
@@ -385,6 +2278,47 @@ export interface NexusGenFieldTypeNames {
     role: 'Role'
     roleId: 'String'
   }
+  SocialMediaAccount: { // field return type name
+    accessToken: 'String'
+    accountId: 'String'
+    accountName: 'String'
+    createdAt: 'DateTime'
+    description: 'String'
+    followersCount: 'Int'
+    followingCount: 'Int'
+    id: 'String'
+    isActive: 'Boolean'
+    platform: 'String'
+    posts: 'SocialMediaPost'
+    profilePicture: 'String'
+    refreshToken: 'String'
+    status: 'String'
+    tokenExpiresAt: 'DateTime'
+    updatedAt: 'DateTime'
+    user: 'User'
+    userId: 'String'
+  }
+  SocialMediaPost: { // field return type name
+    account: 'SocialMediaAccount'
+    accountId: 'String'
+    comments: 'Int'
+    content: 'String'
+    createdAt: 'DateTime'
+    hashtags: 'String'
+    id: 'String'
+    images: 'String'
+    likes: 'Int'
+    link: 'String'
+    mentions: 'String'
+    platformPostId: 'String'
+    publishedAt: 'DateTime'
+    scheduledAt: 'DateTime'
+    shares: 'Int'
+    status: 'String'
+    updatedAt: 'DateTime'
+    video: 'String'
+    views: 'Int'
+  }
   User: { // field return type name
     appleId: 'String'
     avatar: 'String'
@@ -412,6 +2346,12 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    approveBlogComment: { // args
+      id: string; // String!
+    }
+    assignUserToCallExtension: { // args
+      input: NexusGenInputs['CallExtensionUserCreateInput']; // CallExtensionUserCreateInput!
+    }
     bulkCreateRoleMenuPermissions: { // args
       inputs: NexusGenInputs['RoleMenuPermissionCreateInput'][]; // [RoleMenuPermissionCreateInput!]!
     }
@@ -419,8 +2359,59 @@ export interface NexusGenArgTypes {
       menuPermissions: NexusGenInputs['MenuPermissionInput'][]; // [MenuPermissionInput!]!
       roleId: string; // String!
     }
+    createBlogCategory: { // args
+      input: NexusGenInputs['BlogCategoryCreateInput']; // BlogCategoryCreateInput!
+    }
+    createBlogComment: { // args
+      input: NexusGenInputs['BlogCommentCreateInput']; // BlogCommentCreateInput!
+    }
+    createBlogPost: { // args
+      input: NexusGenInputs['BlogPostCreateInput']; // BlogPostCreateInput!
+    }
+    createBlogTag: { // args
+      input: NexusGenInputs['BlogTagCreateInput']; // BlogTagCreateInput!
+    }
+    createCallExtension: { // args
+      input: NexusGenInputs['CallExtensionCreateInput']; // CallExtensionCreateInput!
+    }
+    createCampaign: { // args
+      input: NexusGenInputs['CampaignCreateInput']; // CampaignCreateInput!
+    }
+    createDocument: { // args
+      input: NexusGenInputs['DocumentCreateInput']; // DocumentCreateInput!
+    }
+    createEmailCampaign: { // args
+      input: NexusGenInputs['EmailCampaignCreateInput']; // EmailCampaignCreateInput!
+    }
+    createEmailTemplate: { // args
+      input: NexusGenInputs['EmailTemplateCreateInput']; // EmailTemplateCreateInput!
+    }
+    createFAQ: { // args
+      input: NexusGenInputs['FAQCreateInput']; // FAQCreateInput!
+    }
+    createInformationArticle: { // args
+      input: NexusGenInputs['InformationArticleCreateInput']; // InformationArticleCreateInput!
+    }
+    createInformationCategory: { // args
+      input: NexusGenInputs['InformationCategoryCreateInput']; // InformationCategoryCreateInput!
+    }
+    createInformationComment: { // args
+      input: NexusGenInputs['InformationCommentCreateInput']; // InformationCommentCreateInput!
+    }
     createMenuItem: { // args
       input: NexusGenInputs['MenuItemCreateInput']; // MenuItemCreateInput!
+    }
+    createOrder: { // args
+      input: NexusGenInputs['OrderCreateInput']; // OrderCreateInput!
+    }
+    createProduct: { // args
+      input: NexusGenInputs['ProductCreateInput']; // ProductCreateInput!
+    }
+    createProductCategory: { // args
+      input: NexusGenInputs['ProductCategoryCreateInput']; // ProductCategoryCreateInput!
+    }
+    createProductReview: { // args
+      input: NexusGenInputs['ProductReviewCreateInput']; // ProductReviewCreateInput!
     }
     createRole: { // args
       input: NexusGenInputs['RoleCreateInput']; // RoleCreateInput!
@@ -428,8 +2419,23 @@ export interface NexusGenArgTypes {
     createRoleMenuPermission: { // args
       input: NexusGenInputs['RoleMenuPermissionCreateInput']; // RoleMenuPermissionCreateInput!
     }
+    createSocialMediaAccount: { // args
+      input: NexusGenInputs['SocialMediaAccountCreateInput']; // SocialMediaAccountCreateInput!
+    }
+    createSocialMediaPost: { // args
+      input: NexusGenInputs['SocialMediaPostCreateInput']; // SocialMediaPostCreateInput!
+    }
     createUser: { // args
       input: NexusGenInputs['UserCreateInput']; // UserCreateInput!
+    }
+    deleteBlogCategory: { // args
+      id: string; // String!
+    }
+    deleteBlogPost: { // args
+      id: string; // String!
+    }
+    deleteCallExtension: { // args
+      id: string; // String!
     }
     deleteMenuItem: { // args
       id: string; // String!
@@ -443,9 +2449,69 @@ export interface NexusGenArgTypes {
     deleteUser: { // args
       id: string; // String!
     }
+    downloadDocument: { // args
+      id: string; // String!
+    }
+    likeBlogPost: { // args
+      id: string; // String!
+    }
+    login: { // args
+      input: NexusGenInputs['LoginInput']; // LoginInput!
+    }
+    markFAQHelpful: { // args
+      helpful: boolean; // Boolean!
+      id: string; // String!
+    }
+    publishSocialMediaPost: { // args
+      id: string; // String!
+    }
+    refreshTokens: { // args
+      input: NexusGenInputs['RefreshTokenInput']; // RefreshTokenInput!
+    }
+    register: { // args
+      input: NexusGenInputs['RegisterInput']; // RegisterInput!
+    }
+    rejectBlogComment: { // args
+      id: string; // String!
+    }
+    removeUserFromCallExtension: { // args
+      callExtensionId: string; // String!
+      userId: string; // String!
+    }
+    sendEmailCampaign: { // args
+      id: string; // String!
+    }
+    sendOTP: { // args
+      identifier: string; // String!
+    }
+    toggleCallExtensionUserStatus: { // args
+      callExtensionId: string; // String!
+      isActive: boolean; // Boolean!
+      userId: string; // String!
+    }
+    updateBlogCategory: { // args
+      id: string; // String!
+      input: NexusGenInputs['BlogCategoryUpdateInput']; // BlogCategoryUpdateInput!
+    }
+    updateBlogPost: { // args
+      id: string; // String!
+      input: NexusGenInputs['BlogPostUpdateInput']; // BlogPostUpdateInput!
+    }
+    updateCallExtension: { // args
+      id: string; // String!
+      input: NexusGenInputs['CallExtensionUpdateInput']; // CallExtensionUpdateInput!
+    }
     updateMenuItem: { // args
       id: string; // String!
       input: NexusGenInputs['MenuItemUpdateInput']; // MenuItemUpdateInput!
+    }
+    updateOrderStatus: { // args
+      id: string; // String!
+      status: string; // String!
+    }
+    updateProduct: { // args
+      id: string; // String!
+      input: NexusGenInputs['ProductUpdateInput']; // ProductUpdateInput!
     }
     updateRole: { // args
       id: string; // String!
@@ -459,8 +2525,127 @@ export interface NexusGenArgTypes {
       id: string; // String!
       input: NexusGenInputs['UserUpdateInput']; // UserUpdateInput!
     }
+    verifyOTP: { // args
+      identifier: string; // String!
+      otpCode: string; // String!
+    }
   }
   Query: {
+    blogCategories: { // args
+      isActive?: boolean | null; // Boolean
+      search?: string | null; // String
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
+    blogCategory: { // args
+      id?: string | null; // String
+      slug?: string | null; // String
+    }
+    blogComments: { // args
+      postId?: string | null; // String
+      skip?: number | null; // Int
+      status?: string | null; // String
+      take?: number | null; // Int
+    }
+    blogPost: { // args
+      id?: string | null; // String
+      slug?: string | null; // String
+    }
+    blogPosts: { // args
+      authorId?: string | null; // String
+      categoryId?: string | null; // String
+      isFeatured?: boolean | null; // Boolean
+      search?: string | null; // String
+      skip?: number | null; // Int
+      status?: string | null; // String
+      tagId?: string | null; // String
+      take?: number | null; // Int
+    }
+    blogTags: { // args
+      isActive?: boolean | null; // Boolean
+      search?: string | null; // String
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
+    callExtension: { // args
+      id: string; // String!
+    }
+    callExtensionUsers: { // args
+      callExtensionId?: string | null; // String
+      isActive?: boolean | null; // Boolean
+      userId?: string | null; // String
+    }
+    callExtensions: { // args
+      search?: string | null; // String
+      skip?: number | null; // Int
+      status?: string | null; // String
+      take?: number | null; // Int
+    }
+    callHistory: { // args
+      callStatus?: string | null; // String
+      direction?: string | null; // String
+      endDate?: string | null; // String
+      skip?: number | null; // Int
+      startDate?: string | null; // String
+      take?: number | null; // Int
+    }
+    callHistoryCount: { // args
+      callStatus?: string | null; // String
+      direction?: string | null; // String
+      endDate?: string | null; // String
+      startDate?: string | null; // String
+    }
+    campaigns: { // args
+      skip?: number | null; // Int
+      status?: string | null; // String
+      take?: number | null; // Int
+      type?: string | null; // String
+    }
+    documentCategories: { // args
+      isActive?: boolean | null; // Boolean
+    }
+    documents: { // args
+      categoryId?: string | null; // String
+      isActive?: boolean | null; // Boolean
+      isPublic?: boolean | null; // Boolean
+      search?: string | null; // String
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
+    emailCampaigns: { // args
+      skip?: number | null; // Int
+      status?: string | null; // String
+      take?: number | null; // Int
+    }
+    emailTemplates: { // args
+      category?: string | null; // String
+      isActive?: boolean | null; // Boolean
+      type?: string | null; // String
+    }
+    faqCategories: { // args
+      isActive?: boolean | null; // Boolean
+    }
+    faqs: { // args
+      categoryId?: string | null; // String
+      isActive?: boolean | null; // Boolean
+      search?: string | null; // String
+    }
+    informationArticle: { // args
+      id?: string | null; // String
+      slug?: string | null; // String
+    }
+    informationArticles: { // args
+      categoryId?: string | null; // String
+      isFeatured?: boolean | null; // Boolean
+      search?: string | null; // String
+      skip?: number | null; // Int
+      status?: string | null; // String
+      tagId?: string | null; // String
+      take?: number | null; // Int
+    }
+    informationCategories: { // args
+      isActive?: boolean | null; // Boolean
+    }
     menuItem: { // args
       id: string; // String!
     }
@@ -475,6 +2660,43 @@ export interface NexusGenArgTypes {
       isActive: boolean | null; // Boolean
       roleId?: string | null; // String
     }
+    order: { // args
+      id?: string | null; // String
+      orderNumber?: string | null; // String
+    }
+    orders: { // args
+      customerId?: string | null; // String
+      orderNumber?: string | null; // String
+      paymentStatus?: string | null; // String
+      skip?: number | null; // Int
+      status?: string | null; // String
+      take?: number | null; // Int
+    }
+    product: { // args
+      id?: string | null; // String
+      slug?: string | null; // String
+    }
+    productBrands: { // args
+      isActive?: boolean | null; // Boolean
+    }
+    productCategories: { // args
+      isActive?: boolean | null; // Boolean
+      parentId?: string | null; // String
+    }
+    products: { // args
+      brandId?: string | null; // String
+      categoryId?: string | null; // String
+      featured?: boolean | null; // Boolean
+      inStock?: boolean | null; // Boolean
+      maxPrice?: number | null; // Float
+      minPrice?: number | null; // Float
+      search?: string | null; // String
+      skip?: number | null; // Int
+      sortBy?: string | null; // String
+      sortOrder?: string | null; // String
+      status?: string | null; // String
+      take?: number | null; // Int
+    }
     role: { // args
       id: string; // String!
     }
@@ -488,6 +2710,17 @@ export interface NexusGenArgTypes {
       isSystemRole?: boolean | null; // Boolean
       search?: string | null; // String
       skip?: number | null; // Int
+      take?: number | null; // Int
+    }
+    socialMediaAccounts: { // args
+      isActive?: boolean | null; // Boolean
+      platform?: string | null; // String
+      status?: string | null; // String
+    }
+    socialMediaPosts: { // args
+      accountId?: string | null; // String
+      skip?: number | null; // Int
+      status?: string | null; // String
       take?: number | null; // Int
     }
     user: { // args
