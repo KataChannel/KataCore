@@ -24,6 +24,24 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   
+  // File watcher configuration to fix EINVAL errors
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/.next/**',
+          '**/dist/**',
+          '**/build/**'
+        ]
+      };
+    }
+    return config;
+  },
+  
   // TypeScript
   typescript: {
     ignoreBuildErrors: true
