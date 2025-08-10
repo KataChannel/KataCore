@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Output configuration for Docker
+  output: 'standalone',
+  
   // Next.js 15 optimizations
   serverExternalPackages: [
     'prisma',

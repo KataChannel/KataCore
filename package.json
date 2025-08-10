@@ -170,6 +170,7 @@
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "dotenv": "^17.2.1",
+    "prettier": "^3.6.2",
     "sharp": "^0.34.2",
     "tailwindcss": "^4.1.11",
     "ts-node": "^10.9.2",
