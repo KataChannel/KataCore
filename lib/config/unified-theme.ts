@@ -1,7 +1,8 @@
 // Unified Theme Configuration System for TazaCore
-// Centralized dark mode and theme management
+// Centralized dark mode and theme management with Joy UI integration
 
 import { z } from 'zod';
+import { joyUIVariables, joyUIVariablesDark } from './joy-ui-theme';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -117,97 +118,97 @@ export const UNIFIED_THEME_CONFIG = {
     mode: 'taza-theme-mode',
   },
 
-  // Color palettes
+  // Color palettes with Joy UI integration
   colors: {
     light: {
-      // Primary colors
-      primary: '#000000',
-      secondary: '#6c757d',
+      // Primary colors - Joy UI integrated
+      primary: '#0ea5e9', // Joy UI primary-500
+      secondary: '#737373', // Joy UI neutral-500
       accent: '#2563eb',
 
-      // Background colors
-      background: '#ffffff',
-      surface: '#fafafa',
-      surfaceElevated: '#f8f9fa',
+      // Background colors - Joy UI integrated
+      background: '#ffffff', // Joy UI background-body
+      surface: '#f8fafc', // Joy UI background-level1
+      surfaceElevated: '#f1f5f9', // Joy UI background-level2
 
-      // Text colors
-      text: '#000000',
-      textSecondary: '#495057',
-      textMuted: '#6c757d',
+      // Text colors - Joy UI integrated
+      text: '#0f172a', // Joy UI text-primary
+      textSecondary: '#475569', // Joy UI text-secondary
+      textMuted: '#64748b', // Joy UI text-tertiary
 
-      // Border colors
-      border: '#dee2e6',
-      borderLight: '#e9ecef',
+      // Border colors - Joy UI integrated
+      border: '#e2e8f0', // Joy UI divider
+      borderLight: '#f1f5f9',
 
       // State colors
-      hover: '#f8f9fa',
-      active: '#e9ecef',
-      disabled: '#f8f9fa',
+      hover: '#f8fafc',
+      active: '#e2e8f0',
+      disabled: '#f8fafc',
 
-      // Status colors
-      success: '#198754',
-      warning: '#fd7e14',
-      error: '#dc3545',
-      info: '#0dcaf0',
+      // Status colors - Joy UI integrated
+      success: '#22c55e', // Joy UI success-500
+      warning: '#f59e0b', // Joy UI warning-500
+      error: '#ef4444', // Joy UI danger-500
+      info: '#0ea5e9', // Joy UI primary-500
 
-      // Gray scale
+      // Gray scale - Joy UI integrated
       gray: {
-        50: '#fafafa',
-        100: '#f8f9fa',
-        200: '#e9ecef',
-        300: '#dee2e6',
-        400: '#ced4da',
-        500: '#adb5bd',
-        600: '#6c757d',
-        700: '#495057',
-        800: '#343a40',
-        900: '#212529',
+        50: '#fafafa', // Joy UI neutral-50
+        100: '#f5f5f5', // Joy UI neutral-100
+        200: '#e5e5e5', // Joy UI neutral-200
+        300: '#d4d4d4', // Joy UI neutral-300
+        400: '#a3a3a3', // Joy UI neutral-400
+        500: '#737373', // Joy UI neutral-500
+        600: '#525252', // Joy UI neutral-600
+        700: '#404040', // Joy UI neutral-700
+        800: '#262626', // Joy UI neutral-800
+        900: '#171717', // Joy UI neutral-900
       },
     } as ColorPalette,
 
     dark: {
-      // Primary colors
-      primary: '#ffffff',
-      secondary: '#8b949e',
+      // Primary colors - Joy UI dark mode
+      primary: '#38bdf8', // Joy UI primary-500 (inverted)
+      secondary: '#a3a3a3', // Joy UI neutral-500 (inverted)
       accent: '#3b82f6',
 
-      // Background colors
-      background: '#0d1117',
-      surface: '#161b22',
-      surfaceElevated: '#21262d',
+      // Background colors - Joy UI dark mode
+      background: '#0f172a', // Joy UI background-body dark
+      surface: '#1e293b', // Joy UI background-surface dark
+      surfaceElevated: '#334155', // Joy UI background-level1 dark
 
-      // Text colors
-      text: '#f0f6fc',
-      textSecondary: '#8b949e',
-      textMuted: '#6e7681',
+      // Text colors - Joy UI dark mode
+      text: '#f8fafc', // Joy UI text-primary dark
+      textSecondary: '#cbd5e1', // Joy UI text-secondary dark
+      textMuted: '#94a3b8', // Joy UI text-tertiary dark
 
-      // Border colors
-      border: '#30363d',
-      borderLight: '#21262d',
+      // Border colors - Joy UI dark mode
+      border: '#334155', // Joy UI divider dark
+      borderLight: '#475569',
 
       // State colors
-      hover: '#21262d',
-      active: '#30363d',
-      disabled: '#21262d',
+      hover: '#1e293b',
+      active: '#334155',
+      disabled: '#1e293b',
 
-      // Status colors
-      success: '#3fb950',
-      warning: '#d29922',
-      error: '#f85149',
-      info: '#79c0ff',
+      // Status colors - Joy UI dark mode (inverted)
+      success: '#4ade80', // Joy UI success-400
+      warning: '#fbbf24', // Joy UI warning-400
+      error: '#f87171', // Joy UI danger-400
+      info: '#38bdf8', // Joy UI primary-400
 
-      // Gray scale
+      // Gray scale - Joy UI dark mode (inverted)
       gray: {
-        50: '#0d1117',
-        100: '#161b22',
-        200: '#21262d',
-        300: '#30363d',
-        400: '#484f58',
-        500: '#6e7681',
-        600: '#8b949e',
-        700: '#b1bac4',
-        800: '#c9d1d9',
-        900: '#f0f6fc',
+        50: '#171717', // Joy UI neutral-900
+        100: '#262626', // Joy UI neutral-800
+        200: '#404040', // Joy UI neutral-700
+        300: '#525252', // Joy UI neutral-600
+        400: '#737373', // Joy UI neutral-500
+        500: '#a3a3a3', // Joy UI neutral-400
+        600: '#d4d4d4', // Joy UI neutral-300
+        700: '#e5e5e5', // Joy UI neutral-200
+        800: '#f5f5f5', // Joy UI neutral-100
+        900: '#fafafa', // Joy UI neutral-50
       },
     } as ColorPalette,
 
@@ -501,13 +502,28 @@ export function generateCSSVariables(config: Partial<ThemeConfig>): Record<strin
 }
 
 /**
- * Apply CSS variables to document
+ * Apply CSS variables to document with Joy UI integration
  */
 export function applyCSSVariables(config: Partial<ThemeConfig>): void {
   if (typeof document === 'undefined') return;
 
   const variables = generateCSSVariables(config);
+  
+  // Apply unified theme variables
   Object.entries(variables).forEach(([key, value]) => {
+    document.documentElement.style.setProperty(key, value);
+  });
+
+  // Apply Joy UI variables based on theme mode
+  const mode = config.mode || 'light';
+  const actualMode = mode === 'auto' 
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : mode;
+
+  const joyVariables = actualMode === 'dark' ? joyUIVariablesDark : joyUIVariables;
+  
+  // Apply Joy UI CSS variables
+  Object.entries(joyVariables).forEach(([key, value]) => {
     document.documentElement.style.setProperty(key, value);
   });
 }

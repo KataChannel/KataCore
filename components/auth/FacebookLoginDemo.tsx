@@ -160,10 +160,25 @@ export default function FacebookLoginDemo() {
             <button
               onClick={() => {
                 if (typeof window !== 'undefined' && window.FB) {
-                  window.FB.getLoginStatus((response: any) => {
-                    console.log('Facebook Status:', response);
-                    alert(`Facebook Status: ${response.status}`);
-                  });
+                  // Check HTTPS requirement first
+                  const isSecure = window.location.protocol === 'https:' || 
+                                   window.location.hostname === 'localhost' || 
+                                   window.location.hostname === '127.0.0.1';
+
+                  if (!isSecure) {
+                    alert('Facebook API requires HTTPS. Please access via HTTPS or localhost.\nSee: https://developers.facebook.com/blog/post/2018/06/08/enforce-https-facebook-login/');
+                    return;
+                  }
+
+                  try {
+                    window.FB.getLoginStatus((response: any) => {
+                      console.log('Facebook Status:', response);
+                      alert(`Facebook Status: ${response.status}`);
+                    });
+                  } catch (error: any) {
+                    console.error('Facebook API error:', error);
+                    alert('Facebook API call failed. Ensure HTTPS connection.');
+                  }
                 } else {
                   alert('Facebook SDK not loaded yet');
                 }

@@ -3,6 +3,30 @@
 ## 📋 Overview
 This guide walks you through setting up Facebook Login for the TAZA project with comprehensive user management, including user creation and update functionality.
 
+## ⚠️ HTTPS REQUIREMENT (Critical)
+**Facebook requires HTTPS for all login-related API calls since June 8, 2018.**
+
+### Allowed Environments:
+- ✅ `https://` - Production and staging environments
+- ✅ `localhost` - Local development 
+- ✅ `127.0.0.1` - Local development
+
+### Implementation:
+All Facebook login components now include automatic HTTPS enforcement:
+
+```javascript
+// HTTPS check implemented in all Facebook login functions
+const isSecure = window.location.protocol === 'https:' || 
+                 window.location.hostname === 'localhost' || 
+                 window.location.hostname === '127.0.0.1';
+
+if (!isSecure) {
+  throw new Error('Facebook login requires HTTPS. See: https://developers.facebook.com/blog/post/2018/06/08/enforce-https-facebook-login/');
+}
+```
+
+**Reference:** [Facebook Developer Blog - Enforce HTTPS](https://developers.facebook.com/blog/post/2018/06/08/enforce-https-facebook-login/)
+
 ## 🔧 Environment Variables Setup
 
 Add these variables to your `.env` file:

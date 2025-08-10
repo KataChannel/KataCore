@@ -283,6 +283,16 @@ export default function LoginForm({ onLogin, onBack, loading = false }: LoginFor
       return;
     }
 
+    // Facebook requires HTTPS since 2018 - strict enforcement
+    const isSecure = window.location.protocol === 'https:' || 
+                     window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1';
+
+    if (!isSecure) {
+      setError('Facebook login requires HTTPS. Please access via HTTPS or localhost. See: https://developers.facebook.com/blog/post/2018/06/08/enforce-https-facebook-login/');
+      return;
+    }
+
     try {
       window.FB.login(async (response: any) => {
         if (response.authResponse) {
@@ -311,8 +321,9 @@ export default function LoginForm({ onLogin, onBack, loading = false }: LoginFor
           setError('Facebook login was cancelled');
         }
       }, { scope: 'email' });
-    } catch (error) {
-      setError('Failed to initialize Facebook login');
+    } catch (error: any) {
+      console.error('Facebook login error:', error);
+      setError('Failed to initialize Facebook login. Please ensure you are accessing via HTTPS.');
     }
   };
 

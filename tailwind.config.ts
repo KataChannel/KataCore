@@ -11,34 +11,109 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Joy UI Integration - Primary palette
+        'joy-primary': {
+          50: 'var(--joy-palette-primary-50)',
+          100: 'var(--joy-palette-primary-100)',
+          200: 'var(--joy-palette-primary-200)',
+          300: 'var(--joy-palette-primary-300)',
+          400: 'var(--joy-palette-primary-400)',
+          500: 'var(--joy-palette-primary-500)',
+          600: 'var(--joy-palette-primary-600)',
+          700: 'var(--joy-palette-primary-700)',
+          800: 'var(--joy-palette-primary-800)',
+          900: 'var(--joy-palette-primary-900)',
+          DEFAULT: 'var(--joy-palette-primary-500)',
+        },
+        
+        // Joy UI Secondary palette
+        'joy-neutral': {
+          50: 'var(--joy-palette-neutral-50)',
+          100: 'var(--joy-palette-neutral-100)',
+          200: 'var(--joy-palette-neutral-200)',
+          300: 'var(--joy-palette-neutral-300)',
+          400: 'var(--joy-palette-neutral-400)',
+          500: 'var(--joy-palette-neutral-500)',
+          600: 'var(--joy-palette-neutral-600)',
+          700: 'var(--joy-palette-neutral-700)',
+          800: 'var(--joy-palette-neutral-800)',
+          900: 'var(--joy-palette-neutral-900)',
+          DEFAULT: 'var(--joy-palette-neutral-500)',
+        },
+
+        // Joy UI Success palette
+        'joy-success': {
+          50: 'var(--joy-palette-success-50)',
+          100: 'var(--joy-palette-success-100)',
+          200: 'var(--joy-palette-success-200)',
+          300: 'var(--joy-palette-success-300)',
+          400: 'var(--joy-palette-success-400)',
+          500: 'var(--joy-palette-success-500)',
+          600: 'var(--joy-palette-success-600)',
+          700: 'var(--joy-palette-success-700)',
+          800: 'var(--joy-palette-success-800)',
+          900: 'var(--joy-palette-success-900)',
+          DEFAULT: 'var(--joy-palette-success-500)',
+        },
+
+        // Joy UI Warning palette
+        'joy-warning': {
+          50: 'var(--joy-palette-warning-50)',
+          100: 'var(--joy-palette-warning-100)',
+          200: 'var(--joy-palette-warning-200)',
+          300: 'var(--joy-palette-warning-300)',
+          400: 'var(--joy-palette-warning-400)',
+          500: 'var(--joy-palette-warning-500)',
+          600: 'var(--joy-palette-warning-600)',
+          700: 'var(--joy-palette-warning-700)',
+          800: 'var(--joy-palette-warning-800)',
+          900: 'var(--joy-palette-warning-900)',
+          DEFAULT: 'var(--joy-palette-warning-500)',
+        },
+
+        // Joy UI Danger palette
+        'joy-danger': {
+          50: 'var(--joy-palette-danger-50)',
+          100: 'var(--joy-palette-danger-100)',
+          200: 'var(--joy-palette-danger-200)',
+          300: 'var(--joy-palette-danger-300)',
+          400: 'var(--joy-palette-danger-400)',
+          500: 'var(--joy-palette-danger-500)',
+          600: 'var(--joy-palette-danger-600)',
+          700: 'var(--joy-palette-danger-700)',
+          800: 'var(--joy-palette-danger-800)',
+          900: 'var(--joy-palette-danger-900)',
+          DEFAULT: 'var(--joy-palette-danger-500)',
+        },
+
         // Unified Theme System - CSS variables for dynamic theming
-        background: 'var(--color-background)',
-        surface: 'var(--color-surface)',
-        'surface-elevated': 'var(--color-surface-elevated)',
-        primary: 'var(--color-primary)',
-        secondary: 'var(--color-secondary)',
+        background: 'var(--joy-palette-background-body, var(--color-background))',
+        surface: 'var(--joy-palette-background-surface, var(--color-surface))',
+        'surface-elevated': 'var(--joy-palette-background-level1, var(--color-surface-elevated))',
+        primary: 'var(--joy-palette-primary-500, var(--color-primary))',
+        secondary: 'var(--joy-palette-neutral-500, var(--color-secondary))',
         accent: 'var(--color-accent)',
-        text: 'var(--color-text)',
-        'text-secondary': 'var(--color-text-secondary)',
-        'text-muted': 'var(--color-text-muted)',
-        border: 'var(--color-border)',
+        text: 'var(--joy-palette-text-primary, var(--color-text))',
+        'text-secondary': 'var(--joy-palette-text-secondary, var(--color-text-secondary))',
+        'text-muted': 'var(--joy-palette-text-tertiary, var(--color-text-muted))',
+        border: 'var(--joy-palette-divider, var(--color-border))',
         'border-light': 'var(--color-border-light)',
         hover: 'var(--color-hover)',
         active: 'var(--color-active)',
         disabled: 'var(--color-disabled)',
 
-        // Unified gray scale
+        // Unified gray scale with Joy UI integration
         gray: {
-          50: 'var(--color-gray-50)',
-          100: 'var(--color-gray-100)',
-          200: 'var(--color-gray-200)',
-          300: 'var(--color-gray-300)',
-          400: 'var(--color-gray-400)',
-          500: 'var(--color-gray-500)',
-          600: 'var(--color-gray-600)',
-          700: 'var(--color-gray-700)',
-          800: 'var(--color-gray-800)',
-          900: 'var(--color-gray-900)',
+          50: 'var(--joy-palette-neutral-50, var(--color-gray-50))',
+          100: 'var(--joy-palette-neutral-100, var(--color-gray-100))',
+          200: 'var(--joy-palette-neutral-200, var(--color-gray-200))',
+          300: 'var(--joy-palette-neutral-300, var(--color-gray-300))',
+          400: 'var(--joy-palette-neutral-400, var(--color-gray-400))',
+          500: 'var(--joy-palette-neutral-500, var(--color-gray-500))',
+          600: 'var(--joy-palette-neutral-600, var(--color-gray-600))',
+          700: 'var(--joy-palette-neutral-700, var(--color-gray-700))',
+          800: 'var(--joy-palette-neutral-800, var(--color-gray-800))',
+          900: 'var(--joy-palette-neutral-900, var(--color-gray-900))',
         },
 
         // Legacy mono classes for backward compatibility
@@ -55,14 +130,56 @@ export default {
           900: 'var(--color-gray-900)',
         },
 
-        // Semantic colors
-        success: 'var(--color-success)',
-        warning: 'var(--color-warning)',
-        error: 'var(--color-error)',
-        info: 'var(--color-info)',
+        // Semantic colors with Joy UI integration
+        success: 'var(--joy-palette-success-500, var(--color-success))',
+        warning: 'var(--joy-palette-warning-500, var(--color-warning))',
+        error: 'var(--joy-palette-danger-500, var(--color-error))',
+        info: 'var(--joy-palette-primary-500, var(--color-info))',
+      },
+      
+      // Joy UI spacing system integration
+      spacing: {
+        'joy-xs': 'var(--joy-spacing-xs, 0.25rem)',
+        'joy-sm': 'var(--joy-spacing-sm, 0.5rem)',
+        'joy-md': 'var(--joy-spacing-md, 1rem)',
+        'joy-lg': 'var(--joy-spacing-lg, 1.5rem)',
+        'joy-xl': 'var(--joy-spacing-xl, 2rem)',
+        'joy-2xl': 'var(--joy-spacing-2xl, 2.5rem)',
+        'joy-3xl': 'var(--joy-spacing-3xl, 3rem)',
+      },
 
-        // Colorful theme colors
-        colorful: {
+      // Joy UI Typography system
+      fontSize: {
+        'joy-xs': ['var(--joy-fontSize-xs, 0.75rem)', { lineHeight: 'var(--joy-lineHeight-xs, 1.33333)' }],
+        'joy-sm': ['var(--joy-fontSize-sm, 0.875rem)', { lineHeight: 'var(--joy-lineHeight-sm, 1.42857)' }],
+        'joy-md': ['var(--joy-fontSize-md, 1rem)', { lineHeight: 'var(--joy-lineHeight-md, 1.5)' }],
+        'joy-lg': ['var(--joy-fontSize-lg, 1.125rem)', { lineHeight: 'var(--joy-lineHeight-lg, 1.55556)' }],
+        'joy-xl': ['var(--joy-fontSize-xl, 1.25rem)', { lineHeight: 'var(--joy-lineHeight-xl, 1.6)' }],
+        'joy-xl2': ['var(--joy-fontSize-xl2, 1.5rem)', { lineHeight: 'var(--joy-lineHeight-xl2, 1.66667)' }],
+        'joy-xl3': ['var(--joy-fontSize-xl3, 1.875rem)', { lineHeight: 'var(--joy-lineHeight-xl3, 1.73333)' }],
+        'joy-xl4': ['var(--joy-fontSize-xl4, 2.25rem)', { lineHeight: 'var(--joy-lineHeight-xl4, 1.77778)' }],
+      },
+
+      // Joy UI Border radius system
+      borderRadius: {
+        'joy-xs': 'var(--joy-radius-xs, 0.125rem)',
+        'joy-sm': 'var(--joy-radius-sm, 0.25rem)',
+        'joy-md': 'var(--joy-radius-md, 0.375rem)',
+        'joy-lg': 'var(--joy-radius-lg, 0.5rem)',
+        'joy-xl': 'var(--joy-radius-xl, 0.75rem)',
+      },
+
+      // Joy UI Shadow system
+      boxShadow: {
+        'joy-xs': 'var(--joy-shadow-xs)',
+        'joy-sm': 'var(--joy-shadow-sm)',
+        'joy-md': 'var(--joy-shadow-md)',
+        'joy-lg': 'var(--joy-shadow-lg)',
+        'joy-xl': 'var(--joy-shadow-xl)',
+      },
+
+      // Keep existing colorful theme colors in the main colors object
+      colorful: {
           primary: 'var(--colorful-primary)',
           'primary-light': 'var(--colorful-primary-light)',
           'primary-dark': 'var(--colorful-primary-dark)',
@@ -298,4 +415,4 @@ export default {
       });
     },
   ],
-} satisfies Config;
+};

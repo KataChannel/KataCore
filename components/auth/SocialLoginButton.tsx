@@ -149,35 +149,41 @@ export default function SocialLoginButton({
       return;
     }
 
-    // Check HTTPS requirement
+    // Facebook requires HTTPS since 2018 - strict enforcement
     const isSecure = window.location.protocol === 'https:' || 
                      window.location.hostname === 'localhost' || 
-                     window.location.hostname === '127.0.0.1' ||
-                     window.location.hostname.includes('taza');
+                     window.location.hostname === '127.0.0.1';
 
     if (!isSecure) {
-      onError('Facebook login yêu cầu HTTPS. Vui lòng truy cập qua HTTPS hoặc localhost.');
+      onError('Facebook login requires HTTPS. Please access via HTTPS or localhost. See: https://developers.facebook.com/blog/post/2018/06/08/enforce-https-facebook-login/');
       return;
     }
 
-    // Check login status first
-    window.FB.getLoginStatus((response: any) => {
-      if (response.status === 'connected') {
-        handleFacebookResponse(response);
-      } else {
-        window.FB?.login(async (loginResponse: any) => {
-          if (loginResponse.authResponse) {
-            handleFacebookResponse(loginResponse);
-          } else {
-            onError('Đăng nhập Facebook đã bị hủy hoặc thất bại');
-          }
-        }, { 
-          scope: config.scopes?.join(',') || 'email,public_profile',
-          return_scopes: true,
-          auth_type: 'rerequest'
-        });
-      }
-    });
+    try {
+      // Check login status first - only on secure connections
+      window.FB.getLoginStatus((response: any) => {
+        if (response.status === 'connected') {
+          handleFacebookResponse(response);
+        } else {
+          // User is not logged in, prompt for login
+          window.FB?.login(async (loginResponse: any) => {
+            if (loginResponse.authResponse) {
+              handleFacebookResponse(loginResponse);
+            } else {
+              onError('Đăng nhập Facebook đã bị hủy hoặc thất bại');
+            }
+          }, { 
+            scope: config.scopes?.join(',') || 'email,public_profile',
+            return_scopes: true,
+            auth_type: 'rerequest'
+          });
+        }
+      });
+    } catch (error: any) {
+      // Handle Facebook API errors gracefully
+      console.error('Facebook login error:', error);
+      onError('Facebook login failed. Please ensure you are accessing via HTTPS.');
+    }
   };
 
   const handleFacebookResponse = async (response: any) => {

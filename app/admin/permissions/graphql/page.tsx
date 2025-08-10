@@ -76,7 +76,7 @@ export default function PermissionsDashboardGraphQL() {
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {loading ? (
-                  <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <p className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></p>
                 ) : (
                   stats?.dashboardStats?.usersCount || 0
                 )}
