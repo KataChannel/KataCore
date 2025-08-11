@@ -145,6 +145,30 @@ export default function Home() {
         // Fetch from database
         if (type === 'fanpages' || type === 'pages') {
           url = `/api/admin/social/facebook/database?action=pages`;
+        } else if (type === 'posts') {
+          const params = new URLSearchParams({
+            action: 'posts',
+            ...(pageId && { pageId }),
+            ...(page > 1 && { page: page.toString() }),
+            limit: '10'
+          });
+          url = `/api/admin/social/facebook/database?${params.toString()}`;
+        } else if (type === 'comments') {
+          const params = new URLSearchParams({
+            action: 'comments',
+            ...(postId && { postId }),
+            ...(page > 1 && { page: page.toString() }),
+            limit: '20'
+          });
+          url = `/api/admin/social/facebook/database?${params.toString()}`;
+        } else if (type === 'messages') {
+          const params = new URLSearchParams({
+            action: 'messages',
+            ...(pageId && { pageId }),
+            ...(page > 1 && { page: page.toString() }),
+            limit: '10'
+          });
+          url = `/api/admin/social/facebook/database?${params.toString()}`;
         } else if (type === 'interactions') {
           const params = new URLSearchParams({
             action: 'interactions',
@@ -155,7 +179,7 @@ export default function Home() {
           });
           url = `/api/admin/social/facebook/database?${params.toString()}`;
         } else {
-          // For other types, fall back to Facebook API
+          // For any other types, fall back to Facebook API
           const params = new URLSearchParams({
             type,
             ...(postId && { postId }),
@@ -385,6 +409,117 @@ export default function Home() {
       console.error('Interactions sync error:', error);
       setSyncStatus({ ...syncStatus, [pageId]: 'error' });
       alert(`❌ Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Sync posts for a specific page
+  const syncPostsToDatabase = async (pageId: string) => {
+    try {
+      setSyncStatus({ ...syncStatus, [`posts-${pageId}`]: 'syncing' });
+
+      const response = await fetch('/api/admin/social/facebook/database', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync-posts',
+          data: { pageId }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync posts');
+      }
+
+      const result = await response.json();
+      console.log('Posts sync result:', result);
+
+      setSyncStatus({ ...syncStatus, [`posts-${pageId}`]: 'synced' });
+      
+      // Show success message
+      alert(`✅ Posts synced!\n\n${result.message}`);
+      
+      // Refresh posts if we're viewing them
+      if (activeTab === 'posts' && selectedPageId === pageId) {
+        fetchData('posts', '', pageId);
+      }
+    } catch (error) {
+      console.error('Posts sync error:', error);
+      setSyncStatus({ ...syncStatus, [`posts-${pageId}`]: 'error' });
+      alert(`❌ Posts sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Sync messages for a specific page
+  const syncMessagesToDatabase = async (pageId: string) => {
+    try {
+      setSyncStatus({ ...syncStatus, [`messages-${pageId}`]: 'syncing' });
+
+      const response = await fetch('/api/admin/social/facebook/database', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync-messages',
+          data: { pageId }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync messages');
+      }
+
+      const result = await response.json();
+      console.log('Messages sync result:', result);
+
+      setSyncStatus({ ...syncStatus, [`messages-${pageId}`]: 'synced' });
+      
+      // Show success message
+      alert(`✅ Messages synced!\n\n${result.message}`);
+      
+      // Refresh messages if we're viewing them
+      if (activeTab === 'messages' && selectedPageId === pageId) {
+        fetchData('messages', '', pageId);
+      }
+    } catch (error) {
+      console.error('Messages sync error:', error);
+      setSyncStatus({ ...syncStatus, [`messages-${pageId}`]: 'error' });
+      alert(`❌ Messages sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Sync comments for a specific post
+  const syncCommentsToDatabase = async (postId: string) => {
+    try {
+      setSyncStatus({ ...syncStatus, [`comments-${postId}`]: 'syncing' });
+
+      const response = await fetch('/api/admin/social/facebook/database', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync-comments',
+          data: { postId }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync comments');
+      }
+
+      const result = await response.json();
+      console.log('Comments sync result:', result);
+
+      setSyncStatus({ ...syncStatus, [`comments-${postId}`]: 'synced' });
+      
+      // Show success message
+      alert(`✅ Comments synced!\n\n${result.message}`);
+      
+      // Refresh comments if we're viewing them
+      if (activeTab === 'comments') {
+        fetchData('comments', postId);
+      }
+    } catch (error) {
+      console.error('Comments sync error:', error);
+      setSyncStatus({ ...syncStatus, [`comments-${postId}`]: 'error' });
+      alert(`❌ Comments sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -739,10 +874,39 @@ export default function Home() {
                       View Messages
                     </button>
                     {isAdmin && dataSource === 'database' && (
-                      <button
-                        onClick={() => syncPageInteractions(page.id)}
-                        disabled={syncStatus[page.id] === 'syncing'}
-                        className="px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50 flex items-center gap-1"
+                      <>
+                        <button
+                          onClick={() => syncPostsToDatabase(page.id)}
+                          disabled={syncStatus[`posts-${page.id}`] === 'syncing'}
+                          className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1"
+                        >
+                          {syncStatus[`posts-${page.id}`] === 'syncing' ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                              Syncing...
+                            </>
+                          ) : (
+                            <>🔄 Sync Posts</>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => syncMessagesToDatabase(page.id)}
+                          disabled={syncStatus[`messages-${page.id}`] === 'syncing'}
+                          className="px-3 py-1 bg-pink-600 text-white rounded text-sm hover:bg-pink-700 disabled:opacity-50 flex items-center gap-1"
+                        >
+                          {syncStatus[`messages-${page.id}`] === 'syncing' ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                              Syncing...
+                            </>
+                          ) : (
+                            <>🔄 Sync Messages</>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => syncPageInteractions(page.id)}
+                          disabled={syncStatus[page.id] === 'syncing'}
+                          className="px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50 flex items-center gap-1"
                       >
                         {syncStatus[page.id] === 'syncing' ? (
                           <>
@@ -753,6 +917,7 @@ export default function Home() {
                           <>🔄 Sync Data</>
                         )}
                       </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -984,14 +1149,40 @@ export default function Home() {
       {activeTab === 'posts' && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Posts ({posts.length})</h2>
-            <button
-              onClick={() => fetchData('posts')}
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Loading...' : 'Refresh Posts'}
-            </button>
+            <div>
+              <h2 className="text-2xl font-semibold">Posts ({posts.length})</h2>
+              {dataSource === 'database' && (
+                <p className="text-sm text-green-600 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Showing data from database
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => fetchData('posts', '', selectedPageId)}
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Loading...' : 'Refresh Posts'}
+              </button>
+              {isAdmin && dataSource === 'database' && selectedPageId && (
+                <button
+                  onClick={() => syncPostsToDatabase(selectedPageId)}
+                  disabled={syncStatus[`posts-${selectedPageId}`] === 'syncing'}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {syncStatus[`posts-${selectedPageId}`] === 'syncing' ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Syncing...
+                    </>
+                  ) : (
+                    <>🔄 Sync from Facebook</>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
           {loading && posts.length === 0 ? (
@@ -1000,20 +1191,46 @@ export default function Home() {
             <div className="space-y-4">
               {posts.map((post) => (
                 <div key={post.id} className="bg-white rounded-lg shadow-md p-6 border">
-                  <p className="text-gray-800 mb-3">{post.message || 'No message'}</p>
+                  <div className="flex justify-between items-start mb-3">
+                    <p className="text-gray-800 flex-1">{post.message || 'No message'}</p>
+                    {dataSource === 'database' && (post as any).isSynced && (
+                      <span className="ml-3 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Synced
+                      </span>
+                    )}
+                  </div>
                   <div className="text-sm text-gray-600 mb-3">{formatDate(post.created_time)}</div>
                   <div className="flex gap-4 text-sm text-gray-600 mb-3">
                     <span>👍 {post.likes?.summary?.total_count || 0} likes</span>
                     <span>💬 {post.comments?.summary?.total_count || 0} comments</span>
                     <span>🔄 {post.shares?.count || 0} shares</span>
                   </div>
-                  <button
-                    onClick={() => fetchData('comments', post.id)}
-                    disabled={loading}
-                    className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
-                  >
-                    Load Comments
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => fetchData('comments', post.id)}
+                      disabled={loading}
+                      className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50"
+                    >
+                      Load Comments
+                    </button>
+                    {isAdmin && dataSource === 'database' && (
+                      <button
+                        onClick={() => syncCommentsToDatabase(post.id)}
+                        disabled={syncStatus[`comments-${post.id}`] === 'syncing'}
+                        className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1"
+                      >
+                        {syncStatus[`comments-${post.id}`] === 'syncing' ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                            Syncing...
+                          </>
+                        ) : (
+                          <>🔄 Sync Comments</>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
               {posts.length === 0 && !loading && (
@@ -1054,22 +1271,56 @@ export default function Home() {
       {activeTab === 'messages' && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Messages ({messages.length})</h2>
-            <button
-              onClick={() => fetchData('messages')}
-              disabled={loading}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50"
-            >
-              {loading ? 'Loading...' : 'Load Messages'}
-            </button>
+            <div>
+              <h2 className="text-2xl font-semibold">Messages ({messages.length})</h2>
+              {dataSource === 'database' && (
+                <p className="text-sm text-green-600 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Showing data from database
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => fetchData('messages', '', selectedPageId)}
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Loading...' : 'Refresh Messages'}
+              </button>
+              {isAdmin && dataSource === 'database' && selectedPageId && (
+                <button
+                  onClick={() => syncMessagesToDatabase(selectedPageId)}
+                  disabled={syncStatus[`messages-${selectedPageId}`] === 'syncing'}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {syncStatus[`messages-${selectedPageId}`] === 'syncing' ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Syncing...
+                    </>
+                  ) : (
+                    <>🔄 Sync from Facebook</>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">
             {messages.map((conversation) => (
               <div key={conversation.id} className="bg-white rounded-lg shadow-md p-6 border">
-                <div className="mb-3">
-                  <strong>Participants:</strong>{' '}
-                  {conversation.participants?.data?.map((p) => p.name).join(', ') || 'Unknown'}
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <strong>Participants:</strong>{' '}
+                    {conversation.participants?.data?.map((p) => p.name).join(', ') || 'Unknown'}
+                  </div>
+                  {dataSource === 'database' && (conversation as any).isSynced && (
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      Synced
+                    </span>
+                  )}
                 </div>
                 {conversation.messages?.data && conversation.messages.data.length > 0 && (
                   <div>

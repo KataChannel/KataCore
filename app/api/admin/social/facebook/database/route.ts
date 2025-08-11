@@ -16,6 +16,14 @@ export async function GET(request: NextRequest) {
             facebook_interactions: {
               take: 5,
               orderBy: { createdAt: 'desc' }
+            },
+            facebook_posts: {
+              take: 3,
+              orderBy: { createdAt: 'desc' }
+            },
+            facebook_messages: {
+              take: 3,
+              orderBy: { createdAt: 'desc' }
             }
           },
           orderBy: { updatedAt: 'desc' }
@@ -35,11 +43,209 @@ export async function GET(request: NextRequest) {
           // Add sync status
           lastSyncAt: page.updatedAt,
           interactionCount: page.facebook_interactions.length,
+          postsCount: page.facebook_posts.length,
+          messagesCount: page.facebook_messages.length,
           isSynced: true, // Data from database is considered synced
           dbId: page.id
         }));
 
         return NextResponse.json({ data: transformedPages });
+
+      case 'posts':
+        const postsPage = searchParams.get('page') || '1';
+        const postsLimit = parseInt(searchParams.get('limit') || '10');
+        const postsPageId = searchParams.get('pageId') || '';
+
+        const postsOffset = (parseInt(postsPage) - 1) * postsLimit;
+
+        // Build where clause for posts
+        const postsWhere: any = {};
+        if (postsPageId) {
+          postsWhere.facebookPageId = postsPageId;
+        }
+
+        const [posts, postsTotal] = await Promise.all([
+          prisma.facebook_posts.findMany({
+            where: postsWhere,
+            include: {
+              facebook_pages: true,
+              facebook_comments: {
+                take: 5,
+                orderBy: { createdAt: 'desc' }
+              }
+            },
+            orderBy: { createdTime: 'desc' },
+            skip: postsOffset,
+            take: postsLimit
+          }),
+          prisma.facebook_posts.count({ where: postsWhere })
+        ]);
+
+        // Transform posts to match frontend interface
+        const transformedPosts = posts.map(post => ({
+          id: post.facebookPostId,
+          message: post.message,
+          story: post.story,
+          created_time: post.createdTime?.toISOString(),
+          updated_time: post.updatedTime?.toISOString(),
+          likes: {
+            summary: {
+              total_count: post.likesCount
+            }
+          },
+          comments: {
+            summary: {
+              total_count: post.commentsCount
+            }
+          },
+          shares: {
+            count: post.sharesCount
+          },
+          permalink_url: post.permalink,
+          attachments: post.attachments,
+          isSynced: true,
+          dbId: post.id
+        }));
+
+        return NextResponse.json({
+          data: transformedPosts,
+          pagination: {
+            current: parseInt(postsPage),
+            limit: postsLimit,
+            total: postsTotal,
+            pages: Math.ceil(postsTotal / postsLimit)
+          }
+        });
+
+      case 'comments':
+        const commentsPostId = searchParams.get('postId') || '';
+        const commentsPage = searchParams.get('page') || '1';
+        const commentsLimit = parseInt(searchParams.get('limit') || '20');
+
+        if (!commentsPostId) {
+          return NextResponse.json({ error: 'Post ID required for comments' }, { status: 400 });
+        }
+
+        const commentsOffset = (parseInt(commentsPage) - 1) * commentsLimit;
+
+        const [comments, commentsTotal] = await Promise.all([
+          prisma.facebook_comments.findMany({
+            where: {
+              facebookPostId: commentsPostId
+            },
+            include: {
+              replies: {
+                take: 3,
+                orderBy: { createdAt: 'desc' }
+              }
+            },
+            orderBy: { createdTime: 'desc' },
+            skip: commentsOffset,
+            take: commentsLimit
+          }),
+          prisma.facebook_comments.count({
+            where: {
+              facebookPostId: commentsPostId
+            }
+          })
+        ]);
+
+        // Transform comments to match frontend interface
+        const transformedComments = comments.map(comment => ({
+          id: comment.facebookCommentId,
+          message: comment.message,
+          created_time: comment.createdTime?.toISOString(),
+          from: {
+            name: comment.fromName,
+            id: comment.fromId
+          },
+          likes: {
+            summary: {
+              total_count: comment.likesCount
+            }
+          },
+          can_reply: comment.canReply,
+          can_hide: comment.canHide,
+          can_like: comment.canLike,
+          is_hidden: comment.isHidden,
+          isSynced: true,
+          dbId: comment.id
+        }));
+
+        return NextResponse.json({
+          data: transformedComments,
+          pagination: {
+            current: parseInt(commentsPage),
+            limit: commentsLimit,
+            total: commentsTotal,
+            pages: Math.ceil(commentsTotal / commentsLimit)
+          }
+        });
+
+      case 'messages':
+        const messagesPage = searchParams.get('page') || '1';
+        const messagesLimit = parseInt(searchParams.get('limit') || '10');
+        const messagesPageId = searchParams.get('pageId') || '';
+
+        const messagesOffset = (parseInt(messagesPage) - 1) * messagesLimit;
+
+        // Build where clause for messages
+        const messagesWhere: any = {};
+        if (messagesPageId) {
+          messagesWhere.facebookPageId = messagesPageId;
+        }
+
+        const [conversations, conversationsTotal] = await Promise.all([
+          prisma.facebook_conversations.findMany({
+            include: {
+              facebook_messages: {
+                orderBy: { createdTime: 'desc' },
+                take: 10
+              }
+            },
+            orderBy: { updatedTime: 'desc' },
+            skip: messagesOffset,
+            take: messagesLimit
+          }),
+          prisma.facebook_conversations.count()
+        ]);
+
+        // Transform conversations to match frontend interface
+        const transformedConversations = conversations.map(conversation => ({
+          id: conversation.facebookConversationId,
+          participants: conversation.participants,
+          snippet: conversation.snippet,
+          updated_time: conversation.updatedTime?.toISOString(),
+          unread_count: conversation.unreadCount,
+          message_count: conversation.messageCount,
+          can_reply: conversation.canReply,
+          messages: {
+            data: conversation.facebook_messages.map(message => ({
+              id: message.facebookMessageId,
+              message: message.message,
+              created_time: message.createdTime?.toISOString(),
+              from: {
+                name: message.fromName,
+                id: message.fromId
+              },
+              attachments: message.attachments,
+              tags: message.tags,
+              is_echo: message.isEcho
+            }))
+          },
+          isSynced: true,
+          dbId: conversation.id
+        }));
+
+        return NextResponse.json({
+          data: transformedConversations,
+          pagination: {
+            current: parseInt(messagesPage),
+            limit: messagesLimit,
+            total: conversationsTotal,
+            pages: Math.ceil(conversationsTotal / messagesLimit)
+          }
+        });
 
       case 'interactions':
         const page = searchParams.get('page') || '1';
@@ -192,6 +398,213 @@ export async function POST(request: NextRequest) {
           results: syncResults,
           synced: syncResults.filter(r => r.status !== 'error').length,
           errors: syncResults.filter(r => r.status === 'error').length
+        });
+
+      case 'sync-posts':
+        if (!data?.pageId) {
+          return NextResponse.json({ error: 'Page ID required' }, { status: 400 });
+        }
+
+        // Get page access token and sync posts from Facebook API
+        const { getFacebookConfig } = await import('@/lib/facebook-config');
+        const config = getFacebookConfig();
+        
+        if (!config.accessToken || !config.pageId) {
+          return NextResponse.json({ error: 'Facebook configuration not valid' }, { status: 400 });
+        }
+
+        const postsResponse = await fetch(
+          `https://graph.facebook.com/v18.0/${data.pageId}/posts?fields=id,message,story,created_time,updated_time,likes.summary(true),comments.summary(true),shares&access_token=${config.accessToken}&limit=50`
+        );
+
+        if (!postsResponse.ok) {
+          return NextResponse.json({ error: 'Failed to fetch posts from Facebook' }, { status: 500 });
+        }
+
+        const postsData = await postsResponse.json();
+        let syncedCount = 0;
+
+        // Sync posts to database
+        for (const post of postsData.data || []) {
+          await prisma.facebook_posts.upsert({
+            where: { facebookPostId: post.id },
+            create: {
+              facebookPostId: post.id,
+              facebookPageId: data.pageId,
+              message: post.message || null,
+              story: post.story || null,
+              createdTime: new Date(post.created_time),
+              updatedTime: post.updated_time ? new Date(post.updated_time) : null,
+              likesCount: post.likes?.summary?.total_count || 0,
+              commentsCount: post.comments?.summary?.total_count || 0,
+              sharesCount: post.shares?.count || 0,
+              permalink: `https://facebook.com/${post.id}`
+            },
+            update: {
+              message: post.message || null,
+              story: post.story || null,
+              updatedTime: post.updated_time ? new Date(post.updated_time) : null,
+              likesCount: post.likes?.summary?.total_count || 0,
+              commentsCount: post.comments?.summary?.total_count || 0,
+              sharesCount: post.shares?.count || 0
+            }
+          });
+          syncedCount++;
+        }
+
+        return NextResponse.json({ 
+          success: true, 
+          message: `Synced ${syncedCount} posts`,
+          syncedCount 
+        });
+
+      case 'sync-comments':
+        if (!data?.postId) {
+          return NextResponse.json({ error: 'Post ID required' }, { status: 400 });
+        }
+
+        const { getFacebookConfig: getConfigForComments } = await import('@/lib/facebook-config');
+        const configForComments = getConfigForComments();
+        
+        if (!configForComments.accessToken) {
+          return NextResponse.json({ error: 'Facebook configuration not valid' }, { status: 400 });
+        }
+
+        const commentsResponse = await fetch(
+          `https://graph.facebook.com/v18.0/${data.postId}/comments?fields=id,message,created_time,from,likes.summary(true),can_reply,can_hide,can_like,is_hidden&access_token=${configForComments.accessToken}&limit=100`
+        );
+
+        if (!commentsResponse.ok) {
+          return NextResponse.json({ error: 'Failed to fetch comments from Facebook' }, { status: 500 });
+        }
+
+        const commentsData = await commentsResponse.json();
+        let commentsSyncedCount = 0;
+
+        // Sync comments to database
+        for (const comment of commentsData.data || []) {
+          await prisma.facebook_comments.upsert({
+            where: { facebookCommentId: comment.id },
+            create: {
+              facebookCommentId: comment.id,
+              facebookPostId: data.postId,
+              message: comment.message || '',
+              createdTime: new Date(comment.created_time),
+              fromId: comment.from?.id || '',
+              fromName: comment.from?.name || '',
+              likesCount: comment.likes?.summary?.total_count || 0,
+              canReply: comment.can_reply || false,
+              canHide: comment.can_hide || false,
+              canLike: comment.can_like || false,
+              isHidden: comment.is_hidden || false
+            },
+            update: {
+              message: comment.message || '',
+              likesCount: comment.likes?.summary?.total_count || 0,
+              canReply: comment.can_reply || false,
+              canHide: comment.can_hide || false,
+              canLike: comment.can_like || false,
+              isHidden: comment.is_hidden || false
+            }
+          });
+          commentsSyncedCount++;
+        }
+
+        return NextResponse.json({ 
+          success: true, 
+          message: `Synced ${commentsSyncedCount} comments`,
+          syncedCount: commentsSyncedCount 
+        });
+
+      case 'sync-messages':
+        if (!data?.pageId) {
+          return NextResponse.json({ error: 'Page ID required' }, { status: 400 });
+        }
+
+        const { getFacebookConfig: getConfigForMessages } = await import('@/lib/facebook-config');
+        const configForMessages = getConfigForMessages();
+        
+        if (!configForMessages.accessToken) {
+          return NextResponse.json({ error: 'Facebook configuration not valid' }, { status: 400 });
+        }
+
+        const conversationsResponse = await fetch(
+          `https://graph.facebook.com/v18.0/${data.pageId}/conversations?fields=id,participants,snippet,updated_time,unread_count,message_count,can_reply&access_token=${configForMessages.accessToken}&limit=50`
+        );
+
+        if (!conversationsResponse.ok) {
+          return NextResponse.json({ error: 'Failed to fetch conversations from Facebook' }, { status: 500 });
+        }
+
+        const conversationsData = await conversationsResponse.json();
+        let conversationsSyncedCount = 0;
+        let messagesSyncedCount = 0;
+
+        // Sync conversations and messages to database
+        for (const conversation of conversationsData.data || []) {
+          // Upsert conversation
+          await prisma.facebook_conversations.upsert({
+            where: { facebookConversationId: conversation.id },
+            create: {
+              facebookConversationId: conversation.id,
+              facebookPageId: data.pageId,
+              participants: conversation.participants || {},
+              snippet: conversation.snippet || '',
+              updatedTime: conversation.updated_time ? new Date(conversation.updated_time) : new Date(),
+              unreadCount: conversation.unread_count || 0,
+              messageCount: conversation.message_count || 0,
+              canReply: conversation.can_reply || false
+            },
+            update: {
+              participants: conversation.participants || {},
+              snippet: conversation.snippet || '',
+              updatedTime: conversation.updated_time ? new Date(conversation.updated_time) : new Date(),
+              unreadCount: conversation.unread_count || 0,
+              messageCount: conversation.message_count || 0,
+              canReply: conversation.can_reply || false
+            }
+          });
+          conversationsSyncedCount++;
+
+          // Fetch and sync messages for this conversation
+          const messagesResponse = await fetch(
+            `https://graph.facebook.com/v18.0/${conversation.id}/messages?fields=id,message,created_time,from,attachments,tags,is_echo&access_token=${configForMessages.accessToken}&limit=50`
+          );
+
+          if (messagesResponse.ok) {
+            const messagesData = await messagesResponse.json();
+            
+            for (const message of messagesData.data || []) {
+              await prisma.facebook_messages.upsert({
+                where: { facebookMessageId: message.id },
+                create: {
+                  facebookMessageId: message.id,
+                  conversationId: conversation.id,
+                  facebookPageId: data.pageId,
+                  message: message.message || '',
+                  createdTime: new Date(message.created_time),
+                  fromId: message.from?.id || '',
+                  fromName: message.from?.name || '',
+                  attachments: message.attachments || {},
+                  tags: message.tags || {},
+                  isEcho: message.is_echo || false
+                },
+                update: {
+                  message: message.message || '',
+                  attachments: message.attachments || {},
+                  tags: message.tags || {},
+                  isEcho: message.is_echo || false
+                }
+              });
+              messagesSyncedCount++;
+            }
+          }
+        }
+
+        return NextResponse.json({ 
+          success: true, 
+          message: `Synced ${conversationsSyncedCount} conversations and ${messagesSyncedCount} messages`,
+          syncedCount: { conversations: conversationsSyncedCount, messages: messagesSyncedCount }
         });
 
       case 'sync_interactions':

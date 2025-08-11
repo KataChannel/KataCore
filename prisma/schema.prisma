@@ -123,6 +123,85 @@ model facebook_pages {
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   facebook_interactions facebook_interactions[]
+  facebook_posts        facebook_posts[]
+  facebook_messages     facebook_messages[]
+}
+
+model facebook_posts {
+  id                 String          @id @default(uuid())
+  facebookPostId     String          @unique
+  facebookPageId     String
+  message            String?
+  story              String?
+  createdTime        DateTime?
+  updatedTime        DateTime?
+  likesCount         Int             @default(0)
+  commentsCount      Int             @default(0)
+  sharesCount        Int             @default(0)
+  postType           String?
+  attachments        Json?
+  permalink          String?
+  isPublished        Boolean         @default(true)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  facebook_pages     facebook_pages  @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
+  facebook_comments  facebook_comments[]
+}
+
+model facebook_comments {
+  id                String          @id @default(uuid())
+  facebookCommentId String          @unique
+  facebookPostId    String?
+  parentCommentId   String?
+  fromId            String
+  fromName          String
+  message           String
+  createdTime       DateTime?
+  likesCount        Int             @default(0)
+  canReply          Boolean         @default(true)
+  canHide           Boolean         @default(false)
+  canLike           Boolean         @default(true)
+  isHidden          Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  facebook_posts    facebook_posts? @relation(fields: [facebookPostId], references: [facebookPostId], onDelete: Cascade)
+  parent_comment    facebook_comments? @relation("CommentReplies", fields: [parentCommentId], references: [facebookCommentId])
+  replies           facebook_comments[] @relation("CommentReplies")
+}
+
+model facebook_messages {
+  id                   String          @id @default(uuid())
+  facebookMessageId    String          @unique
+  facebookPageId       String
+  conversationId       String
+  fromId               String
+  fromName             String
+  message              String?
+  attachments          Json?
+  createdTime          DateTime?
+  tags                 Json?
+  messageType          String          @default("TEXT")
+  isEcho               Boolean         @default(false)
+  isRead               Boolean         @default(false)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  facebook_pages       facebook_pages  @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
+  facebook_conversations facebook_conversations? @relation(fields: [conversationId], references: [facebookConversationId])
+}
+
+model facebook_conversations {
+  id                      String              @id @default(uuid())
+  facebookConversationId  String              @unique
+  facebookPageId          String
+  participants            Json?
+  messageCount            Int                 @default(0)
+  unreadCount             Int                 @default(0)
+  canReply                Boolean             @default(true)
+  snippet                 String?
+  updatedTime             DateTime?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  facebook_messages       facebook_messages[]
 }
 
 model friend_requests {

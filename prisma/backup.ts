@@ -8,7 +8,7 @@ const BACKUP_ROOT_DIR = '../taza_json';
 function getFormattedDate(): string {
   const now = new Date();
   const pad = (num: number) => num.toString().padStart(2, '0');
-  return `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}_${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}`;
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 }
 
 const BACKUP_DIR = path.join(BACKUP_ROOT_DIR, getFormattedDate());
