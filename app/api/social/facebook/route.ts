@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         // Store pages in database
         if (data.data) {
           for (const page of data.data) {
-            await prisma.facebook_pagess.upsert({
+            await prisma.facebook_pages.upsert({
               where: { facebookPageId: page.id },
               update: {
                 name: page.name,
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
             if (comment.from) {
               const phone = extractPhoneFromText(comment.message || '');
               
-              await prisma.facebook_interactionss.upsert({
+              await prisma.facebook_interactions.upsert({
                 where: { facebookInteractionId: comment.id },
                 update: {
                   message: comment.message,
@@ -249,7 +249,7 @@ export async function GET(request: NextRequest) {
                 if (message.from && message.from.id !== pageId) {
                   const phone = extractPhoneFromText(message.message || '');
                   
-                  await prisma.facebook_interactionss.upsert({
+                  await prisma.facebook_interactions.upsert({
                     where: { facebookInteractionId: message.id },
                     update: {
                       message: message.message,
@@ -301,7 +301,7 @@ export async function GET(request: NextRequest) {
         }
 
         const [interactions, total] = await Promise.all([
-          prisma.facebook_interactionss.findMany({
+          prisma.facebook_interactions.findMany({
             where,
             include: {
               facebook_pages: {
@@ -316,7 +316,7 @@ export async function GET(request: NextRequest) {
             skip,
             take: limit,
           }),
-          prisma.facebook_interactionss.count({ where }),
+          prisma.facebook_interactions.count({ where }),
         ]);
 
         // Group interactions by user to get first and last interaction dates

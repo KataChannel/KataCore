@@ -1,6 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useUnifiedAuth } from '@/components/auth/UnifiedAuthProvider';
+import { getFacebookConfig, getFacebookHeaders, getFacebookConfigStatus, logFacebookConfigSource } from '@/lib/facebook-config';
 
 interface Post {
   id: string;
@@ -68,6 +70,11 @@ interface FacebookPage {
   about?: string;
   phone?: string;
   website?: string;
+  // Database specific fields
+  lastSyncAt?: string;
+  interactionCount?: number;
+  isSynced?: boolean;
+  dbId?: string;
 }
 
 interface InteractionData {
@@ -90,6 +97,15 @@ interface PaginationData {
 }
 
 export default function Home() {
+  // Auth and permissions
+  const { user, hasModuleAccess, isSuperAdmin, isSystemAdmin } = useUnifiedAuth();
+  
+  // Check if user has admin permissions
+  const isAdmin = isSuperAdmin() || isSystemAdmin() || 
+                 hasModuleAccess('admin') || 
+                 user?.role?.name?.includes('ADMIN') ||
+                 (user?.role?.level && user.role.level >= 8);
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [messages, setMessages] = useState<Conversation[]>([]);
@@ -100,6 +116,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isUsingMockData, setIsUsingMockData] = useState(false);
   const [activeTab, setActiveTab] = useState('fanpages');
+  const [dataSource, setDataSource] = useState<'database' | 'facebook'>('database');
+  const [syncStatus, setSyncStatus] = useState<{ [key: string]: 'syncing' | 'synced' | 'error' }>({});
   
   // Pagination and search states
   const [currentPage, setCurrentPage] = useState(1);
@@ -117,29 +135,61 @@ export default function Home() {
     setError(null);
 
     try {
-      const params = new URLSearchParams({
-        type,
-        ...(postId && { postId }),
-        ...(pageId && { pageId }),
-        ...(page > 1 && { page: page.toString() }),
-        ...(search && { search }),
-        limit: '10'
-      });
-      
-      const url = `/api/social/facebook?${params.toString()}`;
-      console.log('Fetching:', url);
+      let url: string;
+      let headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
 
-      // Get localStorage values for Facebook configuration
-      const localPageId = localStorage.getItem('NEXT_PUBLIC_FACEBOOK_PAGE_ID');
-      const localAccessToken = localStorage.getItem('NEXT_PUBLIC_FACEBOOK_ACCESS_TOKEN');
-
-      const res = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(localPageId && { 'X-Facebook-Page-Id': localPageId }),
-          ...(localAccessToken && { 'X-Facebook-Access-Token': localAccessToken })
+      // Determine data source and API endpoint
+      if (dataSource === 'database') {
+        // Fetch from database
+        if (type === 'fanpages' || type === 'pages') {
+          url = `/api/admin/social/facebook/database?action=pages`;
+        } else if (type === 'interactions') {
+          const params = new URLSearchParams({
+            action: 'interactions',
+            ...(pageId && { pageId }),
+            ...(page > 1 && { page: page.toString() }),
+            ...(search && { search }),
+            limit: '10'
+          });
+          url = `/api/admin/social/facebook/database?${params.toString()}`;
+        } else {
+          // For other types, fall back to Facebook API
+          const params = new URLSearchParams({
+            type,
+            ...(postId && { postId }),
+            ...(pageId && { pageId }),
+            ...(page > 1 && { page: page.toString() }),
+            ...(search && { search }),
+            limit: '10'
+          });
+          url = `/api/social/facebook?${params.toString()}`;
+          
+          // Get Facebook headers with priority: env > localStorage
+          const facebookHeaders = getFacebookHeaders();
+          headers = { ...headers, ...facebookHeaders };
         }
-      });
+      } else {
+        // Fetch directly from Facebook API
+        const params = new URLSearchParams({
+          type,
+          ...(postId && { postId }),
+          ...(pageId && { pageId }),
+          ...(page > 1 && { page: page.toString() }),
+          ...(search && { search }),
+          limit: '10'
+        });
+        url = `/api/social/facebook?${params.toString()}`;
+        
+        // Get Facebook headers with priority: env > localStorage
+        const facebookHeaders = getFacebookHeaders();
+        headers = { ...headers, ...facebookHeaders };
+      }
+      
+      console.log('Fetching:', url, 'Source:', dataSource);
+
+      const res = await fetch(url, { headers });
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -152,6 +202,8 @@ export default function Home() {
       // Check if we're using mock data (mock data has predictable IDs)
       if (data.data && data.data.length > 0 && data.data[0].id === '1') {
         setIsUsingMockData(true);
+      } else {
+        setIsUsingMockData(false);
       }
 
       if (type === 'fanpages' || type === 'pages') {
@@ -180,20 +232,23 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Load pages based on current data source
     fetchData('fanpages');
-  }, []);
+  }, [dataSource]);
 
-  // Load Facebook configuration from localStorage on component mount
+  // Load Facebook configuration from environment variables first, then localStorage
   useEffect(() => {
-    const savedPageId = localStorage.getItem('NEXT_PUBLIC_FACEBOOK_PAGE_ID');
-    const savedAccessToken = localStorage.getItem('NEXT_PUBLIC_FACEBOOK_ACCESS_TOKEN');
+    const config = getFacebookConfig();
     
-    if (savedPageId) {
-      setFacebookPageId(savedPageId);
+    if (config.pageId) {
+      setFacebookPageId(config.pageId);
     }
-    if (savedAccessToken) {
-      setFacebookAccessToken(savedAccessToken);
+    if (config.accessToken) {
+      setFacebookAccessToken(config.accessToken);
     }
+    
+    // Log configuration source for debugging
+    logFacebookConfigSource();
   }, []);
 
   const handleSearch = () => {
@@ -256,39 +311,214 @@ export default function Home() {
     }
   };
 
+  // Sync pages from Facebook to database
+  const syncPagesToDatabase = async () => {
+    try {
+      setLoading(true);
+      setSyncStatus({ ...syncStatus, all: 'syncing' });
+
+      // Get Facebook headers with priority: env > localStorage
+      const headers = getFacebookHeaders();
+
+      const response = await fetch('/api/admin/social/facebook/database', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          action: 'sync_pages'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync pages');
+      }
+
+      const result = await response.json();
+      console.log('Sync result:', result);
+
+      setSyncStatus({ ...syncStatus, all: 'synced' });
+      
+      // Show success message
+      alert(`✅ Sync completed!\n\nSynced: ${result.synced} pages\nErrors: ${result.errors} pages`);
+      
+      // Refresh the pages list
+      if (dataSource === 'database') {
+        fetchData('fanpages');
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      setSyncStatus({ ...syncStatus, all: 'error' });
+      alert(`❌ Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Sync individual page interactions
+  const syncPageInteractions = async (pageId: string) => {
+    try {
+      setSyncStatus({ ...syncStatus, [pageId]: 'syncing' });
+
+      // Get Facebook headers with priority: env > localStorage
+      const headers = getFacebookHeaders();
+
+      const response = await fetch('/api/admin/social/facebook/database', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          action: 'sync_interactions',
+          data: { pageId }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync interactions');
+      }
+
+      const result = await response.json();
+      console.log('Interactions sync result:', result);
+
+      setSyncStatus({ ...syncStatus, [pageId]: 'synced' });
+      
+      // Show success message
+      alert(`✅ Interactions synced!\n\nSynced: ${result.synced} interactions\nErrors: ${result.errors} interactions`);
+    } catch (error) {
+      console.error('Interactions sync error:', error);
+      setSyncStatus({ ...syncStatus, [pageId]: 'error' });
+      alert(`❌ Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Facebook Social Media Management</h1>
       
-      {/* Facebook Configuration Section */}
-      <div className="mb-6 bg-white rounded-lg shadow-md p-4 border">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Facebook API Configuration</h2>
-          <button
-            onClick={() => setShowConfiguration(!showConfiguration)}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
-          >
-            {showConfiguration ? 'Hide Config' : 'Show Config'}
-          </button>
+      {/* Data Source Toggle - Admin Only */}
+      {isAdmin && (
+        <div className="mb-6 bg-white rounded-lg shadow-md p-4 border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Data Source</h2>
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="dataSource"
+                  value="database"
+                  checked={dataSource === 'database'}
+                  onChange={(e) => {
+                    setDataSource(e.target.value as 'database' | 'facebook');
+                    // Refresh data when source changes
+                    if (activeTab === 'fanpages') {
+                      fetchData('fanpages');
+                    } else if (activeTab === 'interactions') {
+                      fetchData('interactions', '', selectedPageId, currentPage, searchTerm);
+                    }
+                  }}
+                  className="form-radio text-blue-600"
+                />
+                <span className="text-sm font-medium">Database (Synced)</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="dataSource"
+                  value="facebook"
+                  checked={dataSource === 'facebook'}
+                  onChange={(e) => {
+                    setDataSource(e.target.value as 'database' | 'facebook');
+                    // Refresh data when source changes
+                    if (activeTab === 'fanpages') {
+                      fetchData('fanpages');
+                    } else if (activeTab === 'interactions') {
+                      fetchData('interactions', '', selectedPageId, currentPage, searchTerm);
+                    }
+                  }}
+                  className="form-radio text-green-600"
+                />
+                <span className="text-sm font-medium">Facebook API (Live)</span>
+              </label>
+            </div>
+          </div>
+          <div className="text-sm text-gray-600">
+            <p>📊 <strong>Database:</strong> Shows synced data from your local database (faster, offline-capable)</p>
+            <p>🌐 <strong>Facebook API:</strong> Shows live data directly from Facebook (requires internet, rate-limited)</p>
+          </div>
         </div>
+      )}
+      
+      {/* Facebook Configuration Section - Admin Only */}
+      {isAdmin && (
+        <div className="mb-6 bg-white rounded-lg shadow-md p-4 border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Facebook API Configuration</h2>
+            <button
+              onClick={() => setShowConfiguration(!showConfiguration)}
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+            >
+              {showConfiguration ? 'Hide Config' : 'Show Config'}
+            </button>
+          </div>
 
-        {/* Configuration Status */}
-        <div className="mb-4">
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center">
-              <span className={`inline-block w-3 h-3 rounded-full mr-2 ${facebookPageId ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              <span className="text-gray-700">Page ID: {facebookPageId ? 'Configured (localStorage)' : 'Not configured'}</span>
+          {/* Configuration Status */}
+          <div className="mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="space-y-2">
+                <h3 className="font-medium text-gray-900">Page ID Configuration</h3>
+                <div className="flex items-center">
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                    getFacebookConfigStatus().environment.pageId ? 'bg-blue-500' : 'bg-gray-400'
+                  }`}></span>
+                  <span className="text-gray-700">
+                    Environment: {getFacebookConfigStatus().environment.pageId ? 'Configured' : 'Not configured'}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                    getFacebookConfigStatus().localStorage.pageId ? 'bg-green-500' : 'bg-gray-400'
+                  }`}></span>
+                  <span className="text-gray-700">
+                    localStorage: {getFacebookConfigStatus().localStorage.pageId ? 'Configured' : 'Not configured'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Current: {getFacebookConfigStatus().current.pageId || 'Not configured'}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="font-medium text-gray-900">Access Token Configuration</h3>
+                <div className="flex items-center">
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                    getFacebookConfigStatus().environment.accessToken ? 'bg-blue-500' : 'bg-gray-400'
+                  }`}></span>
+                  <span className="text-gray-700">
+                    Environment: {getFacebookConfigStatus().environment.accessToken ? 'Configured' : 'Not configured'}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                    getFacebookConfigStatus().localStorage.accessToken ? 'bg-green-500' : 'bg-gray-400'
+                  }`}></span>
+                  <span className="text-gray-700">
+                    localStorage: {getFacebookConfigStatus().localStorage.accessToken ? 'Configured' : 'Not configured'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Current: {getFacebookConfigStatus().current.accessToken ? 
+                    `${getFacebookConfigStatus().current.accessToken.substring(0, 20)}...` : 
+                    'Not configured'}
+                </div>
+              </div>
             </div>
-            <div className="flex items-center">
-              <span className={`inline-block w-3 h-3 rounded-full mr-2 ${facebookAccessToken ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              <span className="text-gray-700">Access Token: {facebookAccessToken ? 'Configured (localStorage)' : 'Not configured'}</span>
+            
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="text-sm text-blue-800">
+                <p className="font-medium mb-1">� Configuration Priority:</p>
+                <p className="mb-1">1. <strong>Environment Variables</strong> (.env.local) - Higher priority</p>
+                <p className="mb-1">2. <strong>localStorage</strong> (Browser storage) - Lower priority</p>
+                <p className="text-xs">Environment variables override localStorage settings when both are present.</p>
+              </div>
             </div>
           </div>
-          <div className="mt-2 text-xs text-gray-500">
-            <p>📝 Configuration is saved in browser localStorage and sent to the API</p>
-            <p>🔄 Values override environment variables when present</p>
-          </div>
-        </div>
 
         {showConfiguration && (
           <div className="space-y-4 border-t pt-4">
@@ -350,7 +580,8 @@ export default function Home() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
       
       {/* Navigation Tabs */}
       <div className="mb-6 border-b border-gray-200">
@@ -414,14 +645,37 @@ export default function Home() {
       {activeTab === 'fanpages' && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Facebook Pages ({fanpages.length})</h2>
-            <button
-              onClick={() => fetchData('fanpages')}
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Loading...' : 'Refresh Pages'}
-            </button>
+            <h2 className="text-2xl font-semibold">
+              Facebook Pages ({fanpages.length})
+              <span className="text-sm font-normal text-gray-600 ml-2">
+                {dataSource === 'database' ? '📊 From Database' : '🌐 From Facebook API'}
+              </span>
+            </h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => fetchData('fanpages')}
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Loading...' : 'Refresh Pages'}
+              </button>
+              {isAdmin && dataSource === 'database' && (
+                <button
+                  onClick={syncPagesToDatabase}
+                  disabled={loading || syncStatus.all === 'syncing'}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {syncStatus.all === 'syncing' ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Syncing...
+                    </>
+                  ) : (
+                    <>🔄 Sync from Facebook</>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
           {loading && fanpages.length === 0 ? (
@@ -430,6 +684,25 @@ export default function Home() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {fanpages.map((page) => (
                 <div key={page.id} className="bg-white rounded-lg shadow-md p-6 border">
+                  {/* Sync Status Indicator */}
+                  {dataSource === 'database' && (
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <span className={`inline-block w-3 h-3 rounded-full ${
+                          page.isSynced ? 'bg-green-500' : 'bg-yellow-500'
+                        }`}></span>
+                        <span className="text-xs text-gray-600">
+                          {page.isSynced ? 'Synced' : 'Not synced'}
+                        </span>
+                      </div>
+                      {page.lastSyncAt && (
+                        <span className="text-xs text-gray-500">
+                          {formatDate(page.lastSyncAt)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
                   <h3 className="text-lg font-semibold mb-2">{page.name}</h3>
                   <div className="space-y-2 text-sm text-gray-600">
                     {page.category && <p><strong>Category:</strong> {page.category}</p>}
@@ -437,11 +710,14 @@ export default function Home() {
                     {page.followers_count && <p><strong>Followers:</strong> {page.followers_count.toLocaleString()}</p>}
                     {page.phone && <p><strong>Phone:</strong> {page.phone}</p>}
                     {page.website && <p><strong>Website:</strong> <a href={page.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{page.website}</a></p>}
+                    {dataSource === 'database' && page.interactionCount !== undefined && (
+                      <p><strong>Interactions:</strong> {page.interactionCount}</p>
+                    )}
                   </div>
                   {page.about && (
                     <p className="mt-3 text-gray-700 text-sm line-clamp-3">{page.about}</p>
                   )}
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4 flex gap-2 flex-wrap">
                     <button
                       onClick={() => {
                         setSelectedPageId(page.id);
@@ -462,12 +738,31 @@ export default function Home() {
                     >
                       View Messages
                     </button>
+                    {isAdmin && dataSource === 'database' && (
+                      <button
+                        onClick={() => syncPageInteractions(page.id)}
+                        disabled={syncStatus[page.id] === 'syncing'}
+                        className="px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 disabled:opacity-50 flex items-center gap-1"
+                      >
+                        {syncStatus[page.id] === 'syncing' ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                            Sync
+                          </>
+                        ) : (
+                          <>🔄 Sync Data</>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
               {fanpages.length === 0 && !loading && (
                 <div className="col-span-full text-center py-8 text-gray-500">
-                  No fanpages found. Make sure your Facebook credentials are configured correctly.
+                  {dataSource === 'database' 
+                    ? 'No pages in database. Click "Sync from Facebook" to import pages.'
+                    : 'No fanpages found. Make sure your Facebook credentials are configured correctly.'
+                  }
                 </div>
               )}
             </div>
@@ -479,7 +774,12 @@ export default function Home() {
       {activeTab === 'interactions' && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Comprehensive Interactions Table</h2>
+            <h2 className="text-2xl font-semibold">
+              Comprehensive Interactions Table
+              <span className="text-sm font-normal text-gray-600 ml-2">
+                {dataSource === 'database' ? '📊 From Database' : '🌐 From Facebook API'}
+              </span>
+            </h2>
             <button
               onClick={() => fetchData('interactions', '', selectedPageId, 1, searchTerm)}
               disabled={loading}
