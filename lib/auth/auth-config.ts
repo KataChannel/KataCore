@@ -39,7 +39,7 @@ export const AUTH_CONFIG = {
       enabled: true,
       appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
       appSecret: process.env.NEXT_PUBLIC_FACEBOOK_APP_SECRET,
-      version: 'v18.0',
+      version: 'v23.0',
       scopes: ['email', 'public_profile'],
     },
     apple: {

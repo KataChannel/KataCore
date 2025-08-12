@@ -75,7 +75,7 @@ The system automatically extracts Vietnamese phone numbers from message text usi
 ```env
 NEXT_PUBLIC_FACEBOOK_PAGE_ID=your_page_id_here
 NEXT_PUBLIC_FACEBOOK_ACCESS_TOKEN=your_access_token_here
-NEXT_PUBLIC_FACEBOOK_API_VERSION=v18.0
+NEXT_PUBLIC_FACEBOOK_API_VERSION=v23.0
 ```
 
 ### Facebook API Permissions Required:

@@ -171,7 +171,7 @@ To use with real Facebook data, configure these environment variables:
 ```env
 NEXT_PUBLIC_FACEBOOK_PAGE_ID=your_page_id
 NEXT_PUBLIC_FACEBOOK_ACCESS_TOKEN=your_access_token  
-NEXT_PUBLIC_FACEBOOK_API_VERSION=v18.0
+NEXT_PUBLIC_FACEBOOK_API_VERSION=v23.0
 ```
 
 The module will work with mock data for development when credentials are not configured.

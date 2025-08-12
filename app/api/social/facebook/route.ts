@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 const FACEBOOK_PAGE_ID = process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID;
 const FACEBOOK_ACCESS_TOKEN = process.env.NEXT_PUBLIC_FACEBOOK_ACCESS_TOKEN;
-const FACEBOOK_API_VERSION = process.env.NEXT_PUBLIC_FACEBOOK_API_VERSION || 'v18.0';
+const FACEBOOK_API_VERSION = process.env.NEXT_PUBLIC_FACEBOOK_API_VERSION || 'v23.0';
 
 // Helper function to get page access token
 async function getPageAccessToken(pageId: string, fallbackToken?: string): Promise<string | null> {
   try {
-    const page = await prisma.facebook_pagess.findUnique({
+    const page = await prisma.facebook_pages.findUnique({
       where: { facebookPageId: pageId },
     });
     return page?.accessToken || fallbackToken || FACEBOOK_ACCESS_TOKEN || null;

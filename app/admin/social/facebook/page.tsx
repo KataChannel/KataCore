@@ -128,6 +128,7 @@ export default function Home() {
   // Facebook configuration states
   const [facebookPageId, setFacebookPageId] = useState<string>('');
   const [facebookAccessToken, setFacebookAccessToken] = useState<string>('');
+  const [facebookLongLivedToken, setFacebookLongLivedToken] = useState<string>('');
   const [showConfiguration, setShowConfiguration] = useState(false);
 
   const fetchData = async (type: string, postId = '', pageId = '', page = 1, search = '') => {
@@ -270,6 +271,9 @@ export default function Home() {
     if (config.accessToken) {
       setFacebookAccessToken(config.accessToken);
     }
+    if (config.longLivedToken) {
+      setFacebookLongLivedToken(config.longLivedToken);
+    }
     
     // Log configuration source for debugging
     logFacebookConfigSource();
@@ -308,6 +312,10 @@ export default function Home() {
       localStorage.setItem('NEXT_PUBLIC_FACEBOOK_ACCESS_TOKEN', facebookAccessToken.trim());
       savedItems.push('Access Token');
     }
+    if (facebookLongLivedToken.trim()) {
+      localStorage.setItem('NEXT_PUBLIC_FACEBOOK_LONG_LIVED_TOKEN', facebookLongLivedToken.trim());
+      savedItems.push('Long-Lived Token');
+    }
     
     if (savedItems.length > 0) {
       // Show success message
@@ -323,11 +331,13 @@ export default function Home() {
 
   // Clear Facebook configuration
   const clearFacebookConfiguration = () => {
-    if (confirm('⚠️ Are you sure you want to clear the Facebook configuration?\n\nThis will remove the saved Page ID and Access Token from localStorage.')) {
+    if (confirm('⚠️ Are you sure you want to clear the Facebook configuration?\n\nThis will remove the saved Page ID, Access Token, and Long-Lived Token from localStorage.')) {
       localStorage.removeItem('NEXT_PUBLIC_FACEBOOK_PAGE_ID');
       localStorage.removeItem('NEXT_PUBLIC_FACEBOOK_ACCESS_TOKEN');
+      localStorage.removeItem('NEXT_PUBLIC_FACEBOOK_LONG_LIVED_TOKEN');
       setFacebookPageId('');
       setFacebookAccessToken('');
+      setFacebookLongLivedToken('');
       alert('🗑️ Facebook configuration cleared successfully!');
       
       // Refresh to show the effect
@@ -417,19 +427,20 @@ export default function Home() {
     try {
       setSyncStatus({ ...syncStatus, [`posts-${pageId}`]: 'syncing' });
 
+      // Get Facebook headers with priority: env > localStorage
+      const headers = getFacebookHeaders();
+
       const response = await fetch('/api/admin/social/facebook/database', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           action: 'sync-posts',
           data: { pageId }
         })
       });
-
       if (!response.ok) {
         throw new Error('Failed to sync posts');
       }
-
       const result = await response.json();
       console.log('Posts sync result:', result);
 
@@ -454,9 +465,12 @@ export default function Home() {
     try {
       setSyncStatus({ ...syncStatus, [`messages-${pageId}`]: 'syncing' });
 
+      // Get Facebook headers with priority: env > localStorage
+      const headers = getFacebookHeaders();
+
       const response = await fetch('/api/admin/social/facebook/database', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           action: 'sync-messages',
           data: { pageId }
@@ -491,9 +505,12 @@ export default function Home() {
     try {
       setSyncStatus({ ...syncStatus, [`comments-${postId}`]: 'syncing' });
 
+      // Get Facebook headers with priority: env > localStorage
+      const headers = getFacebookHeaders();
+
       const response = await fetch('/api/admin/social/facebook/database', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           action: 'sync-comments',
           data: { postId }
@@ -643,11 +660,37 @@ export default function Home() {
                     'Not configured'}
                 </div>
               </div>
+              
+              <div className="space-y-2">
+                <h3 className="font-medium text-gray-900">Long-Lived Token Configuration</h3>
+                <div className="flex items-center">
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                    getFacebookConfigStatus().environment.longLivedToken ? 'bg-blue-500' : 'bg-gray-400'
+                  }`}></span>
+                  <span className="text-gray-700">
+                    Environment: {getFacebookConfigStatus().environment.longLivedToken ? 'Configured' : 'Not configured'}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                    getFacebookConfigStatus().localStorage.longLivedToken ? 'bg-green-500' : 'bg-gray-400'
+                  }`}></span>
+                  <span className="text-gray-700">
+                    localStorage: {getFacebookConfigStatus().localStorage.longLivedToken ? 'Configured' : 'Not configured'}
+                  </span>
+                </div>
+                <div className="text-xs text-green-600 font-medium">
+                  Type: {getFacebookConfigStatus().current.tokenType || 'Not configured'}
+                </div>
+              </div>
             </div>
             
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">� Configuration Priority:</p>
+                <p className="font-medium mb-1">🔧 Configuration Priority:</p>
+                <p className="mb-1">1. <strong>Long-Lived Token</strong> (60 days) - Highest priority</p>
+                <p className="mb-1">2. <strong>Regular Access Token</strong> (1-2 hours) - Lower priority</p>
+                <p className="mb-2 text-xs border-t pt-2">Source Priority:</p>
                 <p className="mb-1">1. <strong>Environment Variables</strong> (.env.local) - Higher priority</p>
                 <p className="mb-1">2. <strong>localStorage</strong> (Browser storage) - Lower priority</p>
                 <p className="text-xs">Environment variables override localStorage settings when both are present.</p>
@@ -672,21 +715,37 @@ export default function Home() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Facebook Access Token
+                Facebook Access Token (Regular - 1-2 hours)
               </label>
               <textarea
                 value={facebookAccessToken}
                 onChange={(e) => setFacebookAccessToken(e.target.value)}
-                placeholder="Enter Facebook Access Token"
+                placeholder="Enter Facebook Access Token (short-lived)"
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Facebook Long-Lived Token (Recommended - 60 days)
+              </label>
+              <textarea
+                value={facebookLongLivedToken}
+                onChange={(e) => setFacebookLongLivedToken(e.target.value)}
+                placeholder="Enter Facebook Long-Lived Token (lasts 60 days)"
+                rows={3}
+                className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <p className="text-xs text-green-600 mt-1">
+                💡 Long-lived tokens are more reliable and last 60 days instead of 1-2 hours
+              </p>
+            </div>
+
             <div className="flex gap-3">
               <button
                 onClick={saveFacebookConfiguration}
-                disabled={!facebookPageId.trim() && !facebookAccessToken.trim()}
+                disabled={!facebookPageId.trim() && !facebookAccessToken.trim() && !facebookLongLivedToken.trim()}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Save Configuration
