@@ -24,18 +24,18 @@ echo -e "${CYAN}╔════════════════════�
 echo -e "${CYAN}║         🚀 TazaCore Script Runner        ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════╝${NC}"
 echo
-echo -e "${BLUE}Chọn file để chạy từ thư mục sh/:${NC}"
+echo -e "${BLUE}Chọn file để chạy từ thư mục run/:${NC}"
 echo
 
-# Kiểm tra xem thư mục sh/ có tồn tại không
+# Kiểm tra xem thư mục run/ có tồn tại không
 if [ ! -d "sh" ]; then
-    error "Thư mục sh/ không tồn tại!"
+    error "Thư mục run/ không tồn tại!"
 fi
 
-# Liệt kê các file .sh trong thư mục sh/ với improved glob handling
+# Liệt kê các file .sh trong thư mục run/ với improved glob handling
 files=()
 shopt -s nullglob  # Enable nullglob to handle empty matches
-for file in sh/*.sh; do
+for file in run/*.sh; do
     if [ -f "$file" ]; then
         files+=("$file")
     fi
@@ -44,10 +44,10 @@ shopt -u nullglob  # Disable nullglob
 
 # Kiểm tra xem có file .sh nào không
 if [ ${#files[@]} -eq 0 ]; then
-    error "Không có file .sh nào trong thư mục sh/!"
+    error "Không có file .sh nào trong thư mục run/!"
 fi
 
-log "Tìm thấy ${#files[@]} script trong thư mục sh/"
+log "Tìm thấy ${#files[@]} script trong thư mục run/"
 
 # Hiển thị danh sách file với enhanced formatting
 for i in "${!files[@]}"; do

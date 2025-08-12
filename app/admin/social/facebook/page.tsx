@@ -656,7 +656,7 @@ export default function Home() {
                 </div>
                 <div className="text-xs text-gray-500">
                   Current: {getFacebookConfigStatus().current.accessToken ? 
-                    `${getFacebookConfigStatus().current.accessToken.substring(0, 20)}...` : 
+                    `${getFacebookConfigStatus().current.accessToken?.substring(0, 20)}...` : 
                     'Not configured'}
                 </div>
               </div>

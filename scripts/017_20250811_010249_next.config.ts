@@ -4,11 +4,6 @@ const nextConfig: NextConfig = {
   // Output configuration for Docker
   output: 'standalone',
   
-  // Temporarily disable ESLint during build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
   // Next.js 15 optimizations
   serverExternalPackages: [
     'prisma',
