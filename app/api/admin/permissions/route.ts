@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/lib/auth/unified-auth.service';
 import { ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permissions';
 
-// Middleware to check admin permissions
+// Middleware to check admin permissions with enhanced validation
 async function checkAdminPermissions(request: NextRequest) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -15,33 +15,65 @@ async function checkAdminPermissions(request: NextRequest) {
     const decoded = await authService.verifyToken(token);
     const user = await authService.getUserById(decoded.userId);
 
-    if (!user || !user.role) {
+    if (!user) {
       throw new Error('User not found');
     }
 
+    if (!user.isActive) {
+      throw new Error('Account is deactivated');
+    }
+
     // Check if user has admin permissions or is super admin
-    const isSuperAdmin = user.role.name === 'Super Administrator';
+    const isSuperAdmin = (user.role && (
+      user.role.name === 'Super Administrator' || 
+      user.role.name === 'SUPER_ADMIN' || 
+      user.role.name === 'super_admin' ||
+      (user.role.level && user.role.level >= 10)
+    )) || user.roleId === 'super_admin';
     
-    // Get permissions array from user object or role permissions
+    // Get permissions array from user object or role permissions with enhanced handling
     let userPermissions: string[] = [];
     if (Array.isArray(user.permissions)) {
       userPermissions = user.permissions;
     } else if (user.role && user.role.permissions) {
-      // If permissions is an object with a permissions array
-      if (typeof user.role.permissions === 'object' && !Array.isArray(user.role.permissions) && 'permissions' in user.role.permissions && Array.isArray((user.role.permissions as any).permissions)) {
-        userPermissions = (user.role.permissions as any).permissions;
-      } else if (Array.isArray(user.role.permissions)) {
-        userPermissions = user.role.permissions;
+      try {
+        if (Array.isArray(user.role.permissions)) {
+          userPermissions = user.role.permissions.map((p: any) => {
+            if (typeof p === 'string') return p;
+            if (typeof p === 'object' && p.action && p.resource) {
+              return `${p.action}:${p.resource}`;
+            }
+            return '';
+          }).filter(p => p.length > 0);
+        } else if (typeof user.role.permissions === 'string') {
+          const parsed = JSON.parse(user.role.permissions);
+          if (Array.isArray(parsed)) {
+            userPermissions = parsed;
+          } else if (typeof parsed === 'object' && parsed.permissions && Array.isArray(parsed.permissions)) {
+            userPermissions = parsed.permissions;
+          }
+        } else if (typeof user.role.permissions === 'object' && user.role.permissions !== null) {
+          if ('permissions' in user.role.permissions && Array.isArray((user.role.permissions as any).permissions)) {
+            userPermissions = (user.role.permissions as any).permissions;
+          } else if (Array.isArray(user.role.permissions)) {
+            userPermissions = user.role.permissions;
+          }
+        }
+      } catch (parseError) {
+        console.error('Error parsing role permissions:', parseError);
+        userPermissions = [];
       }
     }
     
     const hasAdminPermission = userPermissions.includes('admin:system') || 
                               userPermissions.includes('read:permissions') ||
                               userPermissions.includes('system:admin') ||
-                              userPermissions.includes('admin:*');
+                              userPermissions.includes('admin:*') ||
+                              userPermissions.includes('manage:*') ||
+                              userPermissions.includes('read:*');
 
     if (!isSuperAdmin && !hasAdminPermission) {
-      throw new Error('Insufficient permissions');
+      throw new Error('Insufficient permissions to access system permissions');
     }
 
     return user;

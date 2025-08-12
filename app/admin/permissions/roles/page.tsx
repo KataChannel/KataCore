@@ -9,16 +9,22 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
+interface Permission {
+  action: string;
+  resource: string;
+}
+
 interface Role {
   id: string;
   name: string;
   description: string;
-  permissions: string;
+  permissions: Permission[] | string; // Can be array of objects or JSON string
   level: number;
   isSystemRole: boolean;
-  modules: string;
+  modules: any[] | string; // Can be array or JSON string
   createdAt: string;
   updatedAt: string;
+  userCount?: number;
   _count?: {
     users: number;
   };
@@ -36,6 +42,52 @@ const RoleManagement: React.FC = () => {
     level: 1,
     modules: '',
   });
+
+  // Helper function to format permissions for display
+  const formatPermissions = (permissions: Permission[] | string): string => {
+    if (!permissions) return 'Không có';
+    
+    if (typeof permissions === 'string') {
+      try {
+        const parsed = JSON.parse(permissions);
+        if (Array.isArray(parsed)) {
+          return parsed.map((p: Permission) => `${p.action}:${p.resource}`).join(', ');
+        }
+        return permissions;
+      } catch {
+        return permissions;
+      }
+    }
+    
+    if (Array.isArray(permissions)) {
+      return permissions.map((p: Permission) => `${p.action}:${p.resource}`).join(', ');
+    }
+    
+    return 'Không có';
+  };
+
+  // Helper function to format modules for display
+  const formatModules = (modules: any[] | string): string => {
+    if (!modules) return '';
+    
+    if (typeof modules === 'string') {
+      try {
+        const parsed = JSON.parse(modules);
+        if (Array.isArray(parsed)) {
+          return parsed.join(', ');
+        }
+        return modules;
+      } catch {
+        return modules;
+      }
+    }
+    
+    if (Array.isArray(modules)) {
+      return modules.join(', ');
+    }
+    
+    return '';
+  };
 
   useEffect(() => {
     loadRoles();
@@ -93,39 +145,54 @@ const RoleManagement: React.FC = () => {
 
   const handleEdit = (role: Role) => {
     setEditingRole(role);
+    
+    // Convert permissions to string format for editing
+    let permissionsString = '';
+    if (typeof role.permissions === 'string') {
+      permissionsString = role.permissions;
+    } else if (Array.isArray(role.permissions)) {
+      permissionsString = JSON.stringify(role.permissions);
+    }
+    
+    // Convert modules to string format for editing
+    let modulesString = '';
+    if (typeof role.modules === 'string') {
+      modulesString = role.modules;
+    } else if (Array.isArray(role.modules)) {
+      modulesString = JSON.stringify(role.modules);
+    }
+    
     setFormData({
       name: role.name,
       description: role.description || '',
-      permissions: role.permissions,
+      permissions: permissionsString,
       level: role.level,
-      modules: role.modules || '',
+      modules: modulesString,
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (role: Role) => {
-    if (role.isSystemRole) {
-      alert('Không thể xóa role hệ thống');
+  const handleDelete = async (roleId: string) => {
+    const role = roles.find(r => r.id === roleId);
+    if (role && ((role.userCount && role.userCount > 0) || (role._count?.users && role._count.users > 0))) {
+      alert('Không thể xóa vai trò đang được sử dụng bởi người dùng.');
       return;
     }
 
-    if (role._count?.users && role._count.users > 0) {
-      alert('Không thể xóa role đang được sử dụng bởi người dùng');
+    if (!confirm('Bạn có chắc chắn muốn xóa vai trò này?')) {
       return;
     }
 
-    if (confirm(`Bạn có chắc muốn xóa role "${role.name}"?`)) {
-      try {
-        const response = await fetch(`/api/admin/roles/${role.id}`, {
-          method: 'DELETE',
-        });
+    try {
+      const response = await fetch(`/api/admin/roles/${roleId}`, {
+        method: 'DELETE',
+      });
 
-        if (response.ok) {
-          await loadRoles();
-        }
-      } catch (error) {
-        console.error('Error deleting role:', error);
+      if (response.ok) {
+        await loadRoles();
       }
+    } catch (error) {
+      console.error('Error deleting role:', error);
     }
   };
 
@@ -218,7 +285,8 @@ const RoleManagement: React.FC = () => {
                         {role.description}
                       </p>
                       <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                        {role._count?.users ? `${role._count.users} người dùng` : '0 người dùng'}
+                        {(role.userCount !== undefined ? role.userCount : role._count?.users) ? 
+                          `${role.userCount || role._count?.users} người dùng` : '0 người dùng'}
                       </div>
                     </div>
                   </div>
@@ -232,7 +300,7 @@ const RoleManagement: React.FC = () => {
                     </button>
                     {!role.isSystemRole && (
                       <button
-                        onClick={() => handleDelete(role)}
+                        onClick={() => handleDelete(role.id)}
                         className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
                         title="Xóa"
                       >
@@ -245,11 +313,11 @@ const RoleManagement: React.FC = () => {
                 {/* Permissions Preview */}
                 <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    <strong>Quyền:</strong> {role.permissions || 'Không có'}
+                    <strong>Quyền:</strong> {formatPermissions(role.permissions)}
                   </div>
                   {role.modules && (
                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      <strong>Modules:</strong> {role.modules}
+                      <strong>Modules:</strong> {formatModules(role.modules)}
                     </div>
                   )}
                 </div>

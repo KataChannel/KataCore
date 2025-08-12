@@ -21,6 +21,7 @@ interface MenuItem {
   permission: string;
   sortOrder: number;
   isActive: boolean;
+  parentId?: string;
   children?: MenuItem[];
 }
 
@@ -29,6 +30,7 @@ interface Role {
   name: string;
   description: string;
   level: number;
+  permissions?: any;
 }
 
 interface RoleMenuPermission {
@@ -37,8 +39,8 @@ interface RoleMenuPermission {
   menuItemId: string;
   canView: boolean;
   canAccess: boolean;
-  menuItem: MenuItem;
-  role: Role;
+  menuItem?: MenuItem;
+  role?: Role;
 }
 
 const RoleMenuPermissionsManager: React.FC = () => {
@@ -49,6 +51,70 @@ const RoleMenuPermissionsManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+
+  // Load data
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Reload permissions when role changes
+  useEffect(() => {
+    if (selectedRole && roles.length > 0) {
+      // Ensure permissions are loaded for the selected role
+      const roleExists = roles.find(r => r.id === selectedRole);
+      if (roleExists && !permissions[selectedRole]) {
+        loadPermissionsForRole(selectedRole);
+      }
+    }
+  }, [selectedRole, roles]);
+
+  // Auto-clear messages after 3 seconds
+  useEffect(() => {
+    if (error || successMessage) {
+      const timer = setTimeout(() => {
+        setError('');
+        setSuccessMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, successMessage]);
+
+  // Load permissions for a specific role
+  const loadPermissionsForRole = async (roleId: string) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
+      const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${roleId}`, { headers });
+      
+      if (permResponse.ok) {
+        const permData = await permResponse.json();
+        
+        let rolePermissions: RoleMenuPermission[] = [];
+        if (Array.isArray(permData)) {
+          rolePermissions = permData;
+        } else if (permData?.permissions && Array.isArray(permData.permissions)) {
+          rolePermissions = permData.permissions;
+        } else if (permData?.data && Array.isArray(permData.data)) {
+          rolePermissions = permData.data;
+        }
+        
+        setPermissions(prev => ({
+          ...prev,
+          [roleId]: rolePermissions,
+        }));
+      }
+    } catch (error) {
+      console.warn(`Error loading permissions for role ${roleId}:`, error);
+    }
+  };
 
   // Load data
   useEffect(() => {
@@ -58,11 +124,12 @@ const RoleMenuPermissionsManager: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      setError('');
 
       // Get auth token
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        console.error('No authentication token found');
+        setError('Không tìm thấy token xác thực. Vui lòng đăng nhập lại.');
         return;
       }
 
@@ -71,86 +138,130 @@ const RoleMenuPermissionsManager: React.FC = () => {
         'Content-Type': 'application/json'
       };
 
-      // Load roles with detailed error handling
+      // Load roles with enhanced error handling
       try {
-        const rolesResponse = await fetch('/api/admin/roles', {
-          headers
-        });
-        console.log('Roles response status:', rolesResponse.status);
+        console.log('Loading roles...');
+        const rolesResponse = await fetch('/api/admin/roles', { headers });
         
         if (!rolesResponse.ok) {
-          throw new Error(`Failed to load roles: ${rolesResponse.status} ${rolesResponse.statusText}`);
+          if (rolesResponse.status === 401) {
+            setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            return;
+          }
+          if (rolesResponse.status === 403) {
+            setError('Bạn không có quyền truy cập chức năng này.');
+            return;
+          }
+          throw new Error(`HTTP ${rolesResponse.status}: ${rolesResponse.statusText}`);
         }
         
         const rolesResponseData = await rolesResponse.json();
-        console.log('Loaded roles data:', rolesResponseData);
+        console.log('Roles response:', rolesResponseData);
         
         // Handle different response formats
-        let rolesData = [];
+        let rolesData: Role[] = [];
         if (Array.isArray(rolesResponseData)) {
           rolesData = rolesResponseData;
         } else if (rolesResponseData?.roles && Array.isArray(rolesResponseData.roles)) {
           rolesData = rolesResponseData.roles;
         } else if (rolesResponseData?.data && Array.isArray(rolesResponseData.data)) {
           rolesData = rolesResponseData.data;
-        } else {
-          console.warn('Unexpected roles response format:', rolesResponseData);
-          // Fallback: create default roles if none found
+        } else if (rolesResponseData?.success && rolesResponseData?.roles) {
+          rolesData = rolesResponseData.roles;
+        }
+        
+        if (!Array.isArray(rolesData) || rolesData.length === 0) {
+          console.warn('No roles found, using fallback roles');
           rolesData = [
-            { id: '1', name: 'Super Administrator', description: 'Full access', level: 10 },
-            { id: '2', name: 'Admin', description: 'Admin access', level: 9 },
-            { id: '3', name: 'Manager', description: 'Manager access', level: 5 },
-            { id: '4', name: 'User', description: 'Basic access', level: 1 }
+            { id: 'super_admin', name: 'Super Administrator', description: 'Full system access', level: 10 },
+            { id: 'admin', name: 'Administrator', description: 'Admin access', level: 9 },
+            { id: 'manager', name: 'Manager', description: 'Manager access', level: 5 },
+            { id: 'user', name: 'User', description: 'Basic user access', level: 1 }
           ];
         }
         
-        console.log('Extracted roles array:', rolesData);
+        console.log('Final roles data:', rolesData);
+        setRoles(rolesData);
         
-        if (!Array.isArray(rolesData)) {
-          throw new Error('Roles data is not an array');
+        // Set default selected role
+        if (rolesData.length > 0 && rolesData[0] && !selectedRole) {
+          setSelectedRole(rolesData[0].id);
         }
         
-        setRoles(rolesData);
       } catch (rolesError) {
         console.error('Error loading roles:', rolesError);
-        // Set fallback roles
-        const fallbackRoles = [
-          { id: '1', name: 'Super Administrator', description: 'Full access', level: 10 },
-          { id: '2', name: 'Admin', description: 'Admin access', level: 9 },
-          { id: '3', name: 'Manager', description: 'Manager access', level: 5 },
-          { id: '4', name: 'User', description: 'Basic access', level: 1 }
-        ];
-        setRoles(fallbackRoles);
-      }      // Load all menu items
-      const menuResponse = await fetch('/api/admin/menu-items?adminView=true', {
-        headers
-      });
-      
-      if (!menuResponse.ok) {
-        throw new Error(`Failed to load menu items: ${menuResponse.status} ${menuResponse.statusText}`);
+        setError(`Lỗi tải danh sách vai trò: ${rolesError instanceof Error ? rolesError.message : 'Unknown error'}`);
+        return;
       }
-      
-      const menuData = await menuResponse.json();
-      setMenuItems(menuData);
 
-      // Load permissions for each role (use current roles state)
-      const currentRoles = roles.length > 0 ? roles : [
-        { id: '1', name: 'Super Administrator', description: 'Full access', level: 10 },
-        { id: '2', name: 'Admin', description: 'Admin access', level: 9 }
-      ];
-      
+      // Load menu items with enhanced error handling
+      try {
+        console.log('Loading menu items...');
+        const menuResponse = await fetch('/api/admin/menu-items?adminView=true', { headers });
+        
+        if (!menuResponse.ok) {
+          throw new Error(`HTTP ${menuResponse.status}: ${menuResponse.statusText}`);
+        }
+        
+        const menuData = await menuResponse.json();
+        console.log('Menu items response:', menuData);
+        
+        // Handle different response formats
+        let menuItemsData: MenuItem[] = [];
+        if (Array.isArray(menuData)) {
+          menuItemsData = menuData;
+        } else if (menuData?.menuItems && Array.isArray(menuData.menuItems)) {
+          menuItemsData = menuData.menuItems;
+        } else if (menuData?.data && Array.isArray(menuData.data)) {
+          menuItemsData = menuData.data;
+        }
+        
+        console.log('Final menu items data:', menuItemsData);
+        setMenuItems(menuItemsData);
+        
+      } catch (menuError) {
+        console.error('Error loading menu items:', menuError);
+        setError(`Lỗi tải danh sách menu: ${menuError instanceof Error ? menuError.message : 'Unknown error'}`);
+        return;
+      }
+
+      // Load permissions for all roles
+      await loadAllPermissions(headers);
+
+    } catch (error) {
+      console.error('Error in loadData:', error);
+      setError(`Lỗi tải dữ liệu: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAllPermissions = async (headers: Record<string, string>) => {
+    try {
       const permissionsData: Record<string, RoleMenuPermission[]> = {};
-      for (const role of currentRoles) {
+      
+      for (const role of roles) {
         try {
-          const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${role.id}`, {
-            headers
-          });
+          console.log(`Loading permissions for role: ${role.name} (${role.id})`);
+          const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${role.id}`, { headers });
           
           if (permResponse.ok) {
             const permData = await permResponse.json();
-            permissionsData[role.id] = permData;
+            console.log(`Permissions for ${role.name}:`, permData);
+            
+            // Handle different response formats
+            if (Array.isArray(permData)) {
+              permissionsData[role.id] = permData;
+            } else if (permData?.permissions && Array.isArray(permData.permissions)) {
+              permissionsData[role.id] = permData.permissions;
+            } else if (permData?.data && Array.isArray(permData.data)) {
+              permissionsData[role.id] = permData.data;
+            } else {
+              console.warn(`Unexpected permissions format for ${role.name}:`, permData);
+              permissionsData[role.id] = [];
+            }
           } else {
-            console.warn(`Failed to load permissions for role ${role.name}`);
+            console.warn(`Failed to load permissions for role ${role.name}: ${permResponse.status}`);
             permissionsData[role.id] = [];
           }
         } catch (permError) {
@@ -158,31 +269,38 @@ const RoleMenuPermissionsManager: React.FC = () => {
           permissionsData[role.id] = [];
         }
       }
+      
+      console.log('All permissions loaded:', permissionsData);
       setPermissions(permissionsData);
-
-      if (currentRoles.length > 0 && currentRoles[0]?.id) {
-        setSelectedRole(currentRoles[0].id);
-      }
-
+      
     } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error loading permissions:', error);
+      setError(`Lỗi tải quyền: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
   const updatePermission = async (roleId: string, menuItemId: string, type: 'view' | 'access', value: boolean) => {
     try {
       setSaving(true);
+      setError('');
 
       // Get auth token
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        console.error('No authentication token found');
+        setError('Không tìm thấy token xác thực. Vui lòng đăng nhập lại.');
         return;
       }
 
       const currentPermission = permissions[roleId]?.find(p => p.menuItemId === menuItemId);
+      
+      const requestData = {
+        roleId,
+        menuItemId,
+        canView: type === 'view' ? value : currentPermission?.canView ?? true,
+        canAccess: type === 'access' ? value : currentPermission?.canAccess ?? true,
+      };
+
+      console.log('Updating permission:', requestData);
       
       const response = await fetch('/api/admin/role-menu-permissions', {
         method: 'POST',
@@ -190,34 +308,79 @@ const RoleMenuPermissionsManager: React.FC = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          roleId,
-          menuItemId,
-          canView: type === 'view' ? value : currentPermission?.canView ?? true,
-          canAccess: type === 'access' ? value : currentPermission?.canAccess ?? true,
-        }),
+        body: JSON.stringify(requestData),
       });
 
-      if (response.ok) {
-        // Reload permissions for this role
-        const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${roleId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
-        });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Permission update result:', result);
+
+      // Reload permissions for this role to ensure data consistency
+      const permResponse = await fetch(`/api/admin/role-menu-permissions?roleId=${roleId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (permResponse.ok) {
         const permData = await permResponse.json();
+        console.log('Refreshed permissions:', permData);
+        
+        // Handle different response formats
+        let updatedPermissions: RoleMenuPermission[] = [];
+        if (Array.isArray(permData)) {
+          updatedPermissions = permData;
+        } else if (permData?.permissions && Array.isArray(permData.permissions)) {
+          updatedPermissions = permData.permissions;
+        } else if (permData?.data && Array.isArray(permData.data)) {
+          updatedPermissions = permData.data;
+        }
+        
         setPermissions(prev => ({
           ...prev,
-          [roleId]: permData,
+          [roleId]: updatedPermissions,
         }));
+        
+        setSuccessMessage('Cập nhật quyền thành công!');
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to update permission: ${response.status}`);
+        console.warn('Failed to refresh permissions after update');
+        // If refresh fails, manually update the local state
+        const updatedPermissions = [...(permissions[roleId] || [])];
+        const existingIndex = updatedPermissions.findIndex(p => p.menuItemId === menuItemId);
+        
+        if (existingIndex >= 0 && updatedPermissions[existingIndex]) {
+          const existing = updatedPermissions[existingIndex];
+          updatedPermissions[existingIndex] = {
+            ...existing,
+            [type === 'view' ? 'canView' : 'canAccess']: value,
+          };
+        } else {
+          const newPermission: RoleMenuPermission = {
+            id: `${roleId}_${menuItemId}`,
+            roleId,
+            menuItemId,
+            canView: type === 'view' ? value : true,
+            canAccess: type === 'access' ? value : true,
+          };
+          updatedPermissions.push(newPermission);
+        }
+        
+        setPermissions(prev => ({
+          ...prev,
+          [roleId]: updatedPermissions,
+        }));
+        
+        setSuccessMessage('Cập nhật quyền thành công!');
       }
 
     } catch (error) {
       console.error('Error updating permission:', error);
+      setError(`Lỗi cập nhật quyền: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -378,22 +541,79 @@ const RoleMenuPermissionsManager: React.FC = () => {
         </p>
       </div>
 
-      {/* Role Selector */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Chọn Vai trò
-        </label>
-        <select
-          value={selectedRole}
-          onChange={(e) => setSelectedRole(e.target.value)}
-          className="w-full max-w-xs px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="flex items-center">
+            <XMarkIcon className="h-5 w-5 text-red-500 mr-2" />
+            <p className="text-red-700 dark:text-red-300">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-800 rounded-lg">
+          <div className="flex items-center">
+            <CheckIcon className="h-5 w-5 text-green-500 mr-2" />
+            <p className="text-green-700 dark:text-green-300">{successMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Role Selector and Controls */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Chọn Vai trò
+            </label>
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+              className="w-64 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              {roles.map(role => (
+                <option key={role.id} value={role.id}>
+                  {role.name} (Level {role.level})
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Current role info */}
+          {selectedRole && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {(() => {
+                const currentRole = roles.find(r => r.id === selectedRole);
+                const permCount = permissions[selectedRole]?.length || 0;
+                return (
+                  <div>
+                    <div><strong>Vai trò:</strong> {currentRole?.name}</div>
+                    <div><strong>Quyền đã cấp:</strong> {permCount} menu</div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+        
+        <button
+          onClick={loadData}
+          disabled={loading}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {roles.map(role => (
-            <option key={role.id} value={role.id}>
-              {role.name} (Level {role.level})
-            </option>
-          ))}
-        </select>
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Đang tải...
+            </>
+          ) : (
+            <>
+              🔄 Làm mới
+            </>
+          )}
+        </button>
       </div>
 
       {/* Legend */}
@@ -423,11 +643,23 @@ const RoleMenuPermissionsManager: React.FC = () => {
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Menu Items
-            </h3>
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Menu Items
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Tổng cộng: {menuItems.length} menu
+                {selectedRole && (() => {
+                  const permCount = permissions[selectedRole]?.length || 0;
+                  const canViewCount = permissions[selectedRole]?.filter(p => p.canView).length || 0;
+                  const canAccessCount = permissions[selectedRole]?.filter(p => p.canAccess).length || 0;
+                  return ` • Đã cấp quyền: ${permCount} • Có thể xem: ${canViewCount} • Có thể truy cập: ${canAccessCount}`;
+                })()}
+              </p>
+            </div>
             {saving && (
-              <div className="text-sm text-blue-600 dark:text-blue-400">
+              <div className="flex items-center text-sm text-blue-600 dark:text-blue-400">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
                 Đang lưu...
               </div>
             )}
@@ -435,7 +667,20 @@ const RoleMenuPermissionsManager: React.FC = () => {
         </div>
 
         <div className="max-h-96 overflow-y-auto">
-          {menuItems.map(menuItem => renderMenuItem(menuItem))}
+          {menuItems.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div className="text-4xl mb-4">📂</div>
+              <p>Không có menu items nào được tìm thấy.</p>
+              <button
+                onClick={loadData}
+                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                🔄 Thử lại
+              </button>
+            </div>
+          ) : (
+            menuItems.map(menuItem => renderMenuItem(menuItem))
+          )}
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { authService } from '@/lib/auth/unified-auth.service';
 
-// Middleware to check admin permissions
+// Middleware to check admin permissions with enhanced validation
 async function checkAdminPermissions(request: NextRequest) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -15,17 +15,64 @@ async function checkAdminPermissions(request: NextRequest) {
     const decoded = await authService.verifyToken(token);
     const user = await authService.getUserById(decoded.userId);
 
-    if (!user || !user.role) {
+    if (!user) {
       throw new Error('User not found');
     }
 
+    if (!user.isActive) {
+      throw new Error('Account is deactivated');
+    }
+
+    if (!user.role) {
+      throw new Error('User has no role assigned');
+    }
+
     // Check if user has admin permissions or is super admin
-    const isSuperAdmin = user.role.name === 'Super Administrator' || user.role.level >= 10;
-    const hasAdminPermission = user.permissions?.includes('admin:system') || 
-                              user.permissions?.includes('manage:users');
+    const isSuperAdmin = user.role.name === 'Super Administrator' || 
+                        user.roleId === 'super_admin' ||
+                        (user.role.level && user.role.level >= 10);
+    
+    // Check permissions from multiple sources
+    let hasAdminPermission = false;
+    
+    // Check user-level permissions
+    if (Array.isArray(user.permissions)) {
+      hasAdminPermission = user.permissions.some(p => 
+        p === 'admin:system' || 
+        p === 'manage:users' || 
+        p === 'admin:*' ||
+        p === 'manage:*'
+      );
+    }
+    
+    // Check role-level permissions
+    if (!hasAdminPermission && user.role.permissions) {
+      try {
+        let rolePermissions = [];
+        if (Array.isArray(user.role.permissions)) {
+          rolePermissions = user.role.permissions;
+        } else if (typeof user.role.permissions === 'string') {
+          rolePermissions = JSON.parse(user.role.permissions);
+        }
+        
+        hasAdminPermission = rolePermissions.some((p: any) => {
+          if (typeof p === 'string') {
+            return p === 'admin:system' || p === 'manage:users' || p === 'admin:*' || p === 'manage:*';
+          } else if (typeof p === 'object' && p.action && p.resource) {
+            return (p.action === 'admin' && p.resource === 'system') ||
+                   (p.action === 'manage' && p.resource === 'users') ||
+                   (p.action === 'admin' && p.resource === '*') ||
+                   (p.action === 'manage' && p.resource === '*');
+          }
+          return false;
+        });
+      } catch (parseError) {
+        console.error('Error parsing role permissions:', parseError);
+      }
+    }
 
     if (!isSuperAdmin && !hasAdminPermission) {
-      throw new Error('Insufficient permissions');
+      throw new Error('Insufficient permissions to manage user roles');
     }
 
     return user;

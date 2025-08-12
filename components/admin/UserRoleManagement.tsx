@@ -129,10 +129,16 @@ export default function UserRoleManagement() {
     loadRoles();
   }, [currentPage, searchTerm, statusFilter, roleFilter, moduleFilter]);
 
-  // Load users
+  // Load users with enhanced error handling
   const loadUsers = async () => {
     setLoading(true);
+    setError(null);
     try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: itemsPerPage.toString(),
@@ -144,27 +150,50 @@ export default function UserRoleManagement() {
 
       const response = await fetch(`/api/admin/users?${params}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load users');
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('You do not have permission to view users.');
+        } else if (response.status === 500) {
+          throw new Error('Server error. Please try again later.');
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to load users (${response.status})`);
+        }
       }
 
       const data = await response.json();
+      
+      if (!data.success || !Array.isArray(data.users)) {
+        throw new Error('Invalid response format from server');
+      }
+
       setUsers(data.users);
-      setTotalItems(data.pagination.total);
+      setTotalItems(data.pagination?.total || 0);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error loading users:', err);
+      setError(err.message || 'Unknown error occurred while loading users');
+      setUsers([]);
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
   };
 
-  // Load roles
+  // Load roles with enhanced error handling
   const loadRoles = async () => {
     try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
       const params = new URLSearchParams({
         page: '1',
         limit: '100',
@@ -174,28 +203,54 @@ export default function UserRoleManagement() {
 
       const response = await fetch(`/api/admin/roles?${params}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load roles');
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('You do not have permission to view roles.');
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to load roles (${response.status})`);
+        }
       }
 
       const data = await response.json();
-      setRoles(data.roles);
-      setPermissions(data.availablePermissions);
-      setModules(data.modules);
+      
+      if (!Array.isArray(data.roles)) {
+        console.warn('Invalid roles data format, using empty array');
+        setRoles([]);
+      } else {
+        setRoles(data.roles);
+      }
+      
+      if (Array.isArray(data.availablePermissions)) {
+        setPermissions(data.availablePermissions);
+      }
+      
+      if (Array.isArray(data.modules)) {
+        setModules(data.modules);
+      }
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error loading roles:', err);
+      setError(err.message || 'Unknown error occurred while loading roles');
+      setRoles([]);
+      setPermissions([]);
+      setModules([]);
     }
   };
 
-  // Filter users based on current filters
+  // Filter users based on current filters with null safety
   const filteredUsers = users.filter((user) => {
+    if (!user) return false;
+    
     const matchesSearch =
-      user.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.displayName && user.displayName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
@@ -203,27 +258,32 @@ export default function UserRoleManagement() {
       (statusFilter === 'active' && user.isActive) ||
       (statusFilter === 'inactive' && !user.isActive);
 
-    const matchesRole = roleFilter === 'all' || user.role.id === roleFilter;
+    const matchesRole = roleFilter === 'all' || (user.role && user.role.id === roleFilter);
 
     const matchesModule =
-      moduleFilter === 'all' || (user.systemRole && user.systemRole.modules.includes(moduleFilter));
+      moduleFilter === 'all' || 
+      (user.systemRole && user.systemRole.modules && user.systemRole.modules.includes(moduleFilter));
 
     return matchesSearch && matchesStatus && matchesRole && matchesModule;
   });
 
-  // Filter roles based on current filters
+  // Filter roles based on current filters with null safety
   const filteredRoles = roles.filter((role) => {
+    if (!role) return false;
+    
     const matchesSearch =
-      role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      role.description.toLowerCase().includes(searchTerm.toLowerCase());
+      (role.name && role.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (role.description && role.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesModule = moduleFilter === 'all' || role.modules.includes(moduleFilter);
+    const matchesModule = moduleFilter === 'all' || 
+                         (role.modules && Array.isArray(role.modules) && role.modules.includes(moduleFilter));
 
+    const roleLevel = role.level || 1;
     const matchesLevel =
       levelFilter === 'all' ||
-      (levelFilter === 'low' && role.level <= 3) ||
-      (levelFilter === 'medium' && role.level > 3 && role.level <= 7) ||
-      (levelFilter === 'high' && role.level > 7);
+      (levelFilter === 'low' && roleLevel <= 3) ||
+      (levelFilter === 'medium' && roleLevel > 3 && roleLevel <= 7) ||
+      (levelFilter === 'high' && roleLevel > 7);
 
     return matchesSearch && matchesModule && matchesLevel;
   });

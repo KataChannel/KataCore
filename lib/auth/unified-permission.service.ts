@@ -150,7 +150,7 @@ export class UnifiedPermissionService {
     // console.log('🔍 [UnifiedPermissionService] Constructor called with user:', user);
     this.user = user;
     
-    // Convert UserRole to Role if needed
+    // Convert UserRole to Role if needed with enhanced null safety
     if (user.role) {
       // console.log('🔍 [UnifiedPermissionService] User has role object:', user.role);
       // Kiểm tra và xử lý permissions an toàn
@@ -192,10 +192,10 @@ export class UnifiedPermissionService {
       }
 
       this.role = {
-        id: user.role.id,
-        name: user.role.name,
+        id: user.role.id || user.roleId || 'unknown',
+        name: user.role.name || 'Unknown Role',
         description: user.role.description || '',
-        level: user.role.level,
+        level: Math.max(user.role.level || 1, 1), // Ensure minimum level of 1
         permissions: permissions,
         modules: Array.isArray(user.role.modules) ? user.role.modules : [],
       };
@@ -203,10 +203,27 @@ export class UnifiedPermissionService {
      // console.log('🔍 [UnifiedPermissionService] Created role object:', this.role);
      // console.log('🔍 [UnifiedPermissionService] Role level set to:', this.role.level);
     } else {
-      // Find role from SYSTEM_ROLES
+      // Find role from SYSTEM_ROLES with null safety
      // console.log('🔍 [UnifiedPermissionService] No role object, looking up by roleId:', user.roleId);
-      this.role = SYSTEM_ROLES.find((r) => r.id === user.roleId) || null;
+      if (user.roleId) {
+        this.role = SYSTEM_ROLES.find((r) => r.id === user.roleId) || null;
+      } else {
+        this.role = null;
+      }
      // console.log('🔍 [UnifiedPermissionService] Found system role:', this.role);
+    }
+
+    // Fallback: If no role found, assign basic employee role
+    if (!this.role && user.roleId !== 'guest') {
+      console.warn(`No role found for user ${user.id}, assigning basic employee role`);
+      this.role = SYSTEM_ROLES.find((r) => r.id === 'employee') || {
+        id: 'employee',
+        name: 'Employee',
+        description: 'Basic employee access',
+        level: 2,
+        permissions: [],
+        modules: [],
+      };
     }
   }
 
@@ -215,7 +232,7 @@ export class UnifiedPermissionService {
   // ==========================================================================
 
   /**
-   * Checks if user has specific permission
+   * Checks if user has specific permission with enhanced validation
    */
   hasPermission(
     action: string,
@@ -223,18 +240,35 @@ export class UnifiedPermissionService {
     scope: 'own' | 'team' | 'department' | 'all' = 'all',
     targetData?: { userId?: string; departmentId?: string; teamId?: string }
   ): boolean {
+    // Validate inputs
+    if (!action || !resource) {
+      console.warn('hasPermission called with invalid parameters:', { action, resource });
+      return false;
+    }
+
     // Super admin has all permissions
     if (this.isSuperAdmin()) {
       return true;
     }
 
+    // If no role, deny access (except for guests)
+    if (!this.role) {
+      console.warn('User has no role assigned:', this.user.id);
+      return false;
+    }
+
     // Check role permissions
-    const rolePermissions = this.role?.permissions || [];
+    const rolePermissions = this.role.permissions || [];
     const customPermissions = this.user.customPermissions || [];
     const allPermissions = [...rolePermissions, ...customPermissions];
 
     // Check for exact permission match
     const hasExactPermission = allPermissions.some((permission) => {
+      // Validate permission object
+      if (!permission || typeof permission !== 'object') {
+        return false;
+      }
+
       // Universal permission patterns
       if (permission.resource === '*' && permission.action === 'manage') {
         return true; // Universal manage permission
@@ -254,6 +288,11 @@ export class UnifiedPermissionService {
       }
 
       if (permission.action === '*' && permission.resource === resource) {
+        return this.checkScope(permission.scope || 'all', scope, targetData);
+      }
+
+      // Check manage permissions
+      if (permission.action === 'manage' && permission.resource === resource) {
         return this.checkScope(permission.scope || 'all', scope, targetData);
       }
 

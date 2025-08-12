@@ -338,7 +338,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${actualMode === 'dark' ? 'dark' : ''}`}>
-      <div className="flex h-screen bg-background">
+      <div className="flex bg-background">
         {/* Desktop Sidebar */}
         <aside className={`
           hidden lg:flex flex-col bg-surface border-r border-border transition-all duration-300 z-20
@@ -392,7 +392,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           )}
 
           {/* Sidebar Menu */}
-          <nav className="flex-1 px-4 py-4 space-y-2">
+          <nav className="relative flex-1 px-4 py-4 space-y-2 overflow-y-auto">
             {/* No search results message */}
             {hasSearchResults && (
               <div className="text-center py-8">
@@ -493,7 +493,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
 
           {/* Mobile Menu */}
-          <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          <nav className="relative flex-1 px-4 py-4 space-y-2 overflow-y-auto">
             {/* Mobile Search */}
             <div className="mb-4">
               <div className="relative">

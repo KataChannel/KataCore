@@ -4,39 +4,64 @@ import { prisma } from '@/lib/prisma';
 import { authService } from '@/lib/auth/unified-auth.service';
 import { SYSTEM_ROLES, ALL_MODULE_PERMISSIONS } from '@/lib/auth/modules-permissions';
 
-// Middleware to check authentication
+// Middleware to check authentication with enhanced error handling
 async function authenticate(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
-  console.log('Fetching roles...', request);
   const token = authHeader?.replace('Bearer ', '');
+  
   if (!token) {
-    throw new Error('Token not found');
+    throw new Error('Authentication token not found');
   }
 
-  const decoded = await authService.verifyToken(token);
-  const user = await authService.getUserById(decoded.userId);
- 
-  if (!user) {
-    throw new Error('User not found');
-  }
+  try {
+    const decoded = await authService.verifyToken(token);
+    const user = await authService.getUserById(decoded.userId);
+   
+    if (!user) {
+      throw new Error('User not found or account deactivated');
+    }
 
-  return user;
+    if (!user.isActive) {
+      throw new Error('Account is deactivated');
+    }
+
+    return user;
+  } catch (error: any) {
+    throw new Error(`Authentication failed: ${error.message}`);
+  }
 }
 
 // GET - List all roles with their permissions
 export async function GET(request: NextRequest) {
   try {    
     const user = await authenticate(request); 
-    console.log('Authenticated user:', user);
     
-    // Check permissions
+    // Check permissions with enhanced validation
     const userRole = SYSTEM_ROLES.find((role) => role.id === user.roleId);
-    const canReadRoles = userRole?.permissions.some(
-      (p: any) => p.action === 'read' && p.resource === 'roles'
-    );
-    console.log('User role:', userRole);
-    console.log('Can read roles:', canReadRoles);
-    if (!canReadRoles && (!userRole || userRole.level < 8)) {
+    let canReadRoles = false;
+    
+    if (userRole) {
+      canReadRoles = userRole.permissions.some(
+        (p: any) => {
+          // Handle both string and object permissions
+          if (typeof p === 'string') {
+            return p === 'read:roles' || p === 'admin:*' || p === 'manage:*';
+          } else if (typeof p === 'object' && p.action && p.resource) {
+            return (p.action === 'read' && p.resource === 'roles') ||
+                   (p.action === 'admin' && p.resource === '*') ||
+                   (p.action === 'manage' && p.resource === '*');
+          }
+          return false;
+        }
+      );
+    }
+    
+    // Super admin check
+    const isSuperAdmin = user.roleId === 'super_admin' || 
+                        (userRole && userRole.level >= 10) ||
+                        (user.role && user.role.name === 'Super Administrator');
+    
+    if (!canReadRoles && !isSuperAdmin && (!userRole || userRole.level < 8)) {
       return NextResponse.json(
         { error: 'Insufficient permissions to view roles' },
         { status: 403 }
@@ -61,7 +86,7 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Get database roles
+    // Get database roles with error handling
     const [dbRoles, total] = await Promise.all([
       prisma.roles.findMany({
         where,
@@ -88,7 +113,13 @@ export async function GET(request: NextRequest) {
           sr.id === dbRole.name.toLowerCase().replace(/ /g, '_')
       );
 
-      const dbPermissions = dbRole.permissions ? JSON.parse(dbRole.permissions as string) : [];
+      let dbPermissions = [];
+      try {
+        dbPermissions = dbRole.permissions ? JSON.parse(dbRole.permissions as string) : [];
+      } catch (error) {
+        console.error('Error parsing role permissions:', error);
+        dbPermissions = [];
+      }
 
       return {
         id: dbRole.id,
