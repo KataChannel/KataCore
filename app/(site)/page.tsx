@@ -24,7 +24,8 @@ import {
   ExclamationTriangleIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
-import ThemeManager, { ColorSchemeToggle } from '@/components/ThemeManager';
+import { SimpleThemeToggle } from '@/components/common/SimpleThemeToggle';
+import { useTheme } from '@/hooks/useSimpleTheme';
 import {
   useUnifiedAuth,
   LoginModal,
@@ -379,34 +380,9 @@ function HomePageContent() {
               }`}
             ></div>
             <div className="flex flex-row space-x-2 items-center justify-center mt-4">
-              <button
-              onClick={toggleTheme}
-              className={`h-11 px-3 rounded-lg backdrop-blur-md transition-all duration-500 hover:scale-110 group flex items-center justify-center ${
-                isDarkMode
-                ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 shadow-lg shadow-white/5'
-                : 'bg-black/10 text-black hover:bg-black/20 border border-black/20 shadow-lg shadow-black/5'
-              }`}
-              aria-label="Toggle theme"
-              >
-              <div className="relative w-5 h-5 sm:w-6 sm:h-6">
-                <SunIcon
-                className={`w-full h-full transition-all duration-500 absolute inset-0 ${
-                  isDarkMode ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'
-                }`}
-                />
-                <MoonIcon
-                className={`w-full h-full transition-all duration-500 absolute inset-0 ${
-                  isDarkMode
-                  ? 'opacity-100 rotate-0 scale-100'
-                  : 'opacity-0 -rotate-180 scale-0'
-                }`}
-                />
-              </div>
-              </button>
-
               <ClientOnly>
-              <ColorSchemeToggle
-                showLabel={false}
+              <SimpleThemeToggle
+                variant="icon"
                 className={`h-11 px-2 rounded-lg transition-all duration-500 hover:scale-110 group flex items-center justify-center ${
                 isDarkMode
                   ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20 shadow-lg shadow-white/5'

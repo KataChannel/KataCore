@@ -1,0 +1,157 @@
+/* Simple Theme CSS for Joy UI + Tailwind CSS 4 */
+
+/* Theme transition for smooth switching */
+* {
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Root theme variables */
+:root {
+  color-scheme: light;
+  
+  /* Joy UI palette integration */
+  --joy-palette-primary-plainColor: #0ea5e9;
+  --joy-palette-neutral-plainColor: #737373;
+  
+  /* Custom semantic colors */
+  --theme-bg: #ffffff;
+  --theme-fg: #171717;
+  --theme-card: #fafafa;
+  --theme-border: #e5e5e5;
+  --theme-muted: #737373;
+  --theme-accent: #0ea5e9;
+  
+  /* Shadows */
+  --theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  
+  /* Border radius */
+  --theme-radius: 8px;
+  --theme-radius-lg: 12px;
+}
+
+/* Light theme */
+.light {
+  color-scheme: light;
+  
+  --theme-bg: #ffffff;
+  --theme-fg: #171717;
+  --theme-card: #fafafa;
+  --theme-border: #e5e5e5;
+  --theme-muted: #737373;
+  --theme-accent: #0ea5e9;
+}
+
+/* Dark theme */
+.dark {
+  color-scheme: dark;
+  
+  --theme-bg: #171717;
+  --theme-fg: #fafafa;
+  --theme-card: #262626;
+  --theme-border: #404040;
+  --theme-muted: #a3a3a3;
+  --theme-accent: #38bdf8;
+  
+  /* Update Joy UI variables for dark mode */
+  --joy-palette-primary-plainColor: #38bdf8;
+  --joy-palette-neutral-plainColor: #a3a3a3;
+}
+
+/* Base body styling */
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-fg);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Utility classes for theme-aware styling */
+.theme-bg {
+  background-color: var(--theme-bg);
+}
+
+.theme-fg {
+  color: var(--theme-fg);
+}
+
+.theme-card {
+  background-color: var(--theme-card);
+}
+
+.theme-border {
+  border-color: var(--theme-border);
+}
+
+.theme-muted {
+  color: var(--theme-muted);
+}
+
+.theme-accent {
+  color: var(--theme-accent);
+}
+
+/* Theme-aware component styles */
+.theme-card-elevated {
+  background-color: var(--theme-card);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--theme-radius-lg);
+  box-shadow: var(--theme-shadow-sm);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.theme-card-elevated:hover {
+  box-shadow: var(--theme-shadow-md);
+}
+
+.theme-button {
+  background-color: var(--theme-accent);
+  color: white;
+  border: none;
+  border-radius: var(--theme-radius);
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.theme-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--theme-shadow-md);
+}
+
+.theme-input {
+  background-color: var(--theme-bg);
+  color: var(--theme-fg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--theme-radius);
+  padding: 0.5rem 0.75rem;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.theme-input:focus {
+  outline: none;
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 0 3px rgb(14 165 233 / 0.1);
+}
+
+/* Override any conflicting styles from old theme system */
+.monochrome-mode,
+.colorful-mode,
+.unified-theme,
+.custom-colors {
+  /* Reset any old theme classes */
+  all: unset;
+}
+
+/* Print styles */
+@media print {
+  :root {
+    color-scheme: light;
+    --theme-bg: #ffffff;
+    --theme-fg: #000000;
+    --theme-card: #ffffff;
+    --theme-border: #000000;
+  }
+}

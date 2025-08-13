@@ -7,9 +7,8 @@ import type { Metadata, Viewport } from 'next';
 import './styles/globals.css';
 import { UnifiedAuthProvider } from '@/components/auth/UnifiedAuthProvider';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
-import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
+import { SimpleThemeProvider } from '@/components/providers/SimpleThemeProvider';
 import { GraphQLProvider } from '@/components/providers/GraphQLProvider';
-import { JoyUIProvider } from '@/components/providers/JoyUIProvider';
 
 // Fix: Loại bỏ viewport khỏi metadata
 export const metadata: Metadata = {
@@ -68,24 +67,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className="font-sans" suppressHydrationWarning>
-        <UnifiedThemeProvider
-          defaultConfig={{
-            mode: 'light',
-            language: 'vi',
-            colorScheme: 'colorful',
-          }}
-          enablePersistence={true}
-          enableSystemListener={true}
-        >
-          <JoyUIProvider>
-            <GraphQLProvider>
-              <UnifiedAuthProvider>
-                {children}
-                <PWAInstallPrompt />
-              </UnifiedAuthProvider>
-            </GraphQLProvider>
-          </JoyUIProvider>
-        </UnifiedThemeProvider>
+        <SimpleThemeProvider>
+          <GraphQLProvider>
+            <UnifiedAuthProvider>
+              {children}
+              <PWAInstallPrompt />
+            </UnifiedAuthProvider>
+          </GraphQLProvider>
+        </SimpleThemeProvider>
       </body>
     </html>
   );

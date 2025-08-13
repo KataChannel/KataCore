@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ReactNode } from 'react';
-import { UnifiedThemeProvider } from '@/hooks/useUnifiedTheme';
+import { SimpleThemeProvider } from '@/components/providers/SimpleThemeProvider';
 import { UnifiedAuthProvider } from '@/components/auth/UnifiedAuthProvider';
 
 interface SafeLayoutProps {
@@ -10,21 +10,13 @@ interface SafeLayoutProps {
 
 export function SafeLayout({ children }: SafeLayoutProps) {
   return (
-    <UnifiedThemeProvider
-      defaultConfig={{
-        mode: 'light',
-        language: 'vi',
-        colorScheme: 'monochrome',
-      }}
-      enablePersistence={true}
-      enableSystemListener={true}
-    >
+    <SimpleThemeProvider>
       <UnifiedAuthProvider>
-        <div className="min-h-screen bg-background transition-all duration-300">
+        <div className="min-h-screen bg-theme-bg text-theme-fg transition-all duration-300">
           {children}
         </div>
       </UnifiedAuthProvider>
-    </UnifiedThemeProvider>
+    </SimpleThemeProvider>
   );
 }
 

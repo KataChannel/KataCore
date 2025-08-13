@@ -2,5 +2,30 @@
 export * from './ui';
 export * from './forms';
 export * from './layout';
-export * from './features';
 export * from './common';
+
+// Simple theme system
+export { SimpleThemeProvider } from './providers/SimpleThemeProvider';
+export { 
+  ThemeToggle, 
+  ThemeSwitch, 
+  ThemeSelect, 
+  CompactThemeControls, 
+  FullThemeControls 
+} from './theme/SimpleThemeManager';
+
+// Demo components
+export { SimpleThemeDemo } from './demo/SimpleThemeDemo';
+export { OptimizedThemeDemo } from './demo/OptimizedThemeDemo';
+
+// Layout components  
+export { OptimizedLayout } from './layout/OptimizedLayout';
+
+// UI components
+export { 
+  OptimizedCard, 
+  InfoCard, 
+  SuccessCard, 
+  WarningCard, 
+  DangerCard 
+} from './ui/OptimizedCard';

@@ -8,9 +8,11 @@ const config: Config = {
     './lib/**/*.{js,ts,jsx,tsx,mdx}',
     './hooks/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        // Legacy support for existing components
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -51,11 +53,34 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        
+        // New simplified theme system
+        theme: {
+          bg: 'var(--theme-bg)',
+          fg: 'var(--theme-fg)',
+          card: 'var(--theme-card)',
+          border: 'var(--theme-border)',
+          muted: 'var(--theme-muted)',
+          accent: 'var(--theme-accent)',
+        },
       },
       borderRadius: {
+        // Legacy support
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        
+        // New theme system
+        'theme': 'var(--theme-radius)',
+        'theme-lg': 'var(--theme-radius-lg)',
+      },
+      boxShadow: {
+        'theme-sm': 'var(--theme-shadow-sm)',
+        'theme-md': 'var(--theme-shadow-md)',
+        'theme-lg': 'var(--theme-shadow-lg)',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

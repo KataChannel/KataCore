@@ -1,8 +1,8 @@
-/* TazaCore Unified Theme System - Global Styles */
+/* Simple Theme System - Global Styles */
 @import "tailwindcss";
 
-@import '../styles/unified-theme.css';
-@import '../styles/colorfull.css';
+/* Import simple theme CSS */
+@import './simple-theme.css';
 
 /* Shadcn/UI CSS Variables */
 :root {

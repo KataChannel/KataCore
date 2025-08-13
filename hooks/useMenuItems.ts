@@ -1,6 +1,5 @@
 // Hook to load dynamic menu items from database
 import { useState, useEffect } from 'react';
-import { useUnifiedAuth } from '@/lib/auth';
 
 interface MenuItem {
   id: string;
@@ -10,6 +9,7 @@ interface MenuItem {
   icon: string;
   permission?: string;
   sortOrder: number;
+  canAccess: boolean;
   children?: MenuItem[];
 }
 
@@ -27,15 +27,18 @@ export function useMenuItems(options?: { userId?: string; roleId?: string; admin
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useUnifiedAuth();
 
   const fetchMenuItems = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      if (!user && !options?.userId && !options?.roleId) {
+      // Try to get user info from localStorage for now
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token && !options?.userId && !options?.roleId && !options?.adminView) {
         setMenuItems([]);
+        setLoading(false);
         return;
       }
 
@@ -48,8 +51,22 @@ export function useMenuItems(options?: { userId?: string; roleId?: string; admin
         params.append('roleId', options.roleId);
       } else if (options?.userId) {
         params.append('userId', options.userId);
-      } else if (user?.roleId) {
-        params.append('roleId', user.roleId);
+      } else {
+        // Try to get user from current session/API
+        try {
+          const userResponse = await fetch('/api/auth/me', {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+          
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            if (userData.roleId) {
+              params.append('roleId', userData.roleId);
+            }
+          }
+        } catch (userError) {
+          console.warn('Could not fetch user data for menu items');
+        }
       }
 
       // Fetch menu items for current user's role
@@ -61,7 +78,7 @@ export function useMenuItems(options?: { userId?: string; roleId?: string; admin
 
       const data = await response.json();
       
-      // Transform data to match expected structure
+      // Transform data to match expected structure with permission checking
       const transformedMenus = data.map((item: any) => ({
         id: item.id,
         title: item.title,
@@ -70,6 +87,7 @@ export function useMenuItems(options?: { userId?: string; roleId?: string; admin
         icon: item.icon,
         permission: item.permission,
         sortOrder: item.sortOrder,
+        canAccess: item.canAccess !== false, // Default to true if not specified
         children: item.children?.map((child: any) => ({
           id: child.id,
           title: child.title,
@@ -78,6 +96,7 @@ export function useMenuItems(options?: { userId?: string; roleId?: string; admin
           icon: child.icon,
           permission: child.permission,
           sortOrder: child.sortOrder,
+          canAccess: child.canAccess !== false, // Default to true if not specified
         })) || []
       }));
 
@@ -103,7 +122,7 @@ export function useMenuItems(options?: { userId?: string; roleId?: string; admin
 
   useEffect(() => {
     fetchMenuItems();
-  }, [user?.roleId, options?.userId, options?.roleId, options?.adminView]);
+  }, [options?.userId, options?.roleId, options?.adminView]);
 
   return {
     menuItems,

@@ -26,9 +26,9 @@ import {
   SwatchIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
-import { useUnifiedTheme } from '@/hooks';
-import { useUnifiedAuth } from '@/components/auth/UnifiedAuthProvider';
-import ThemeManager from '@/components/ThemeManager';
+import { useTheme } from '@/hooks/useSimpleTheme';
+import { useTranslation } from '@/hooks/useTranslation';
+import { SimpleThemeToggle } from '@/components/common/SimpleThemeToggle';
 
 
 interface AdminLayoutProps {
@@ -63,15 +63,62 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Authentication
-  const { user, loading, logout, hasModuleAccess, refreshAuth } = useUnifiedAuth();
+  // Authentication - get from localStorage for now
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Try to get user info from API
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          const response = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUser();
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    setUser(null);
+    router.push('/login');
+  };
+  
+  const hasModuleAccess = (module: string) => {
+    if (!user) return false;
+    if (user.role?.level && user.role.level >= 3) return true;
+    return user.permissions?.includes(`${module}:*`) || user.permissions?.includes(`read:${module}`) || false;
+  };
+  
+  const refreshAuth = async () => {
+    // Refresh auth logic here
+  };
   
   // Theme
-  const { actualMode, toggleMode, isLoading } = useUnifiedTheme();
+  const { mode, setMode } = useTheme();
 
-  // Menu items from database
+  const toggleMode = () => {
+    setMode(mode === 'light' ? 'dark' : 'light');
+  };
+
+  // Menu items from database with user permissions
   const { menuItems: dbMenuItems, loading: menuLoading, error: menuError } = useMenuItems({
     userId: user?.id,
+    roleId: user?.roleId,
   });
 
   // Mount check
@@ -99,41 +146,20 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   }, [searchQuery]);
 
   // Authentication check
+  // Authentication check
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        const isAuthenticated = sessionStorage.getItem('user-authenticated');
-        const hasToken = localStorage.getItem('accessToken');
-        
-        if (isAuthenticated && hasToken) {
-          refreshAuth().then(() => {});
-          
-          const timeoutId = setTimeout(() => {
-            if (!user) {
-              sessionStorage.removeItem('user-authenticated');
-              router.push('/login?redirect=' + encodeURIComponent(pathname));
-            }
-          }, 3000);
-
-          return () => clearTimeout(timeoutId);
-        } else {
-          router.push('/login?redirect=' + encodeURIComponent(pathname));
-        }
-      } else {
-        sessionStorage.removeItem('user-authenticated');
+    if (!loading && !user) {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        router.push('/login?redirect=' + encodeURIComponent(pathname));
       }
     }
-    
-    return undefined;
-  }, [user, loading, router, pathname, refreshAuth]);
+  }, [user, loading, router, pathname]);
 
   // Admin access check
   useEffect(() => {
     if (user && !loading) {
-      const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
       const hasAdminAccess = hasModuleAccess('admin') || 
-                            userPermissions.includes('admin:*') ||
-                            userPermissions.includes('admin:system') ||
                             user.role?.name === 'Super Administrator' ||
                             (user.role?.level && user.role.level >= 3);
             
@@ -141,7 +167,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
         router.push('/?error=access-denied&reason=insufficient-permissions');
       }
     }
-  }, [user, loading, hasModuleAccess, router]);
+  }, [user, loading, router]);
 
   // Transform database menu items to match the existing structure
   const transformMenuItems = useMemo(() => {
@@ -337,7 +363,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${actualMode === 'dark' ? 'dark' : ''}`}>
+    <div className={`min-h-screen transition-colors duration-300 ${mode === 'dark' ? 'dark' : ''}`}>
       <div className="flex bg-background">
         {/* Desktop Sidebar */}
         <aside className={`
@@ -474,7 +500,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
         <aside className={`
           fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          ${actualMode === 'dark' ? 'bg-gray-900' : 'bg-white'}
+          ${mode === 'dark' ? 'bg-gray-900' : 'bg-white'}
         `}>
           {/* Mobile Sidebar Header */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-border">
@@ -626,7 +652,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 className="p-2 rounded-lg hover:bg-hover transition-colors"
                 title="Toggle theme"
               >
-                {actualMode === 'dark' ? (
+                {mode === 'dark' ? (
                   <SunIcon className="h-5 w-5 text-text-secondary" />
                 ) : (
                   <MoonIcon className="h-5 w-5 text-text-secondary" />
@@ -679,12 +705,10 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   );
 };
 
-// Main AdminLayout component với ThemeManager wrapper
+// Main AdminLayout component với simple theme system
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
-    <ThemeManager>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </ThemeManager>
+    <AdminLayoutContent>{children}</AdminLayoutContent>
   );
 };
 

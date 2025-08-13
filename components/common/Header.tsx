@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Menu, X, ChevronDown, Search, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { siteConfig } from '../../lib/config/site';
-import { ThemeModeToggle } from '../ThemeManager'; // Import component có sẵn
+import { SimpleThemeToggle } from './SimpleThemeToggle';
 import SearchDialog, {
   SearchDialogTrigger,
   SearchDialogContent,
@@ -222,8 +222,8 @@ const Header: React.FC<HeaderProps> = ({
             </SearchDialogContent>
           </SearchDialog>
 
-          {/* Thay thế button cũ bằng ThemeModeToggle */}
-          <ThemeModeToggle className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 transition-all duration-200" />
+          {/* Thay thế button cũ bằng SimpleThemeToggle */}
+          <SimpleThemeToggle className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 transition-all duration-200" />
 
           {showAuthButton && (
             <button
@@ -259,7 +259,7 @@ const Header: React.FC<HeaderProps> = ({
                   </button>
 
                   {/* Dark Mode Toggle in Mobile Menu */}
-                  <ThemeModeToggle className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 transition-all duration-200" />
+                  <SimpleThemeToggle className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 transition-all duration-200" />
                 </div>
 
                 {/* Mobile Navigation - giữ nguyên */}
