@@ -16,7 +16,7 @@ interface FacebookCredentials {
 // Helper function to get Facebook credentials
 async function getFacebookCredentials(pageId?: string): Promise<FacebookCredentials> {
   // Get access token from environment or database
-  const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+  const accessToken = process.env.NEXT_PUBLIC_FACEBOOK_LONG_LIVED_TOKEN;
   
   if (!accessToken) {
     throw new Error('Facebook access token not configured');

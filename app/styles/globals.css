@@ -1,4 +1,6 @@
 /* TazaCore Unified Theme System - Global Styles */
+@import "tailwindcss";
+
 @import '../styles/unified-theme.css';
 @import '../styles/colorfull.css';
 

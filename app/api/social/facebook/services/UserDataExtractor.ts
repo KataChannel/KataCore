@@ -272,7 +272,7 @@ export class FacebookUserDataExtractor {
    */
   private async fetchFacebookUserData(userId: string): Promise<Partial<ExtractedUserData>> {
     try {
-      const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+      const accessToken = process.env.NEXT_PUBLIC_FACEBOOK_LONG_LIVED_TOKEN;
       if (!accessToken) return {};
 
       const response = await fetch(
