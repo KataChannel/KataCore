@@ -122,13 +122,20 @@ const ResizableTable: React.FC = () => {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
+      // Only disable selection on table during resize, not entire body
+      const tableElement = document.querySelector('.resizable-table');
+      if (tableElement) {
+        (tableElement as HTMLElement).style.userSelect = 'none';
+      }
 
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
         document.body.style.cursor = '';
-        document.body.style.userSelect = '';
+        // Re-enable selection
+        if (tableElement) {
+          (tableElement as HTMLElement).style.userSelect = '';
+        }
       };
     }
   }, [isResizing, handleMouseMove, handleMouseUp]);

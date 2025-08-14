@@ -3,6 +3,11 @@
 /* Theme transition for smooth switching */
 * {
   transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  /* Ensure text selection is enabled globally */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 /* Root theme variables */
