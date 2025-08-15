@@ -83,13 +83,25 @@ interface SyncResult {
   message: string;
 }
 
-interface SyncProgress {
+interface SyncStatus {
   isActive: boolean;
-  type: string;
+  currentType?: string;
   progress: number;
-  currentOperation: string;
-  errors: string[];
+  message: string;
   startTime?: Date;
+  estimatedTimeRemaining?: number;
+  processedCount: number;
+  totalCount: number;
+  errors: string[];
+  lastSyncTime?: Date;
+  syncHistory: Array<{
+    type: string;
+    startTime: Date;
+    endTime: Date;
+    success: boolean;
+    itemsProcessed: number;
+    errors: string[];
+  }>;
 }
 
 interface PaginationInfo {
@@ -110,13 +122,15 @@ export default function AdminFacebookPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [pages, setPages] = useState<Array<{id: string, name: string}>>([]);
   
-  // New state for sync progress
-  const [syncProgress, setSyncProgress] = useState<SyncProgress>({
+  // New state for sync progress and status
+  const [syncProgress, setSyncProgress] = useState<SyncStatus>({
     isActive: false,
-    type: '',
     progress: 0,
-    currentOperation: '',
-    errors: []
+    message: '',
+    processedCount: 0,
+    totalCount: 0,
+    errors: [],
+    syncHistory: []
   });
 
   // New state for pagination
@@ -183,8 +197,16 @@ export default function AdminFacebookPage() {
       const response = await fetch('/api/admin/social/facebook/sync/status');
       const data = await response.json();
       
-      if (data.lastSync) {
-        setLastSyncTime(new Date(data.lastSync));
+      if (data.success) {
+        setSyncProgress(prev => ({
+          ...prev,
+          lastSyncTime: data.lastSync ? new Date(data.lastSync) : undefined,
+          isActive: data.isActive || false
+        }));
+        
+        if (data.lastSync) {
+          setLastSyncTime(new Date(data.lastSync));
+        }
       }
     } catch (error) {
       console.error('Failed to load sync status:', error);
@@ -257,11 +279,14 @@ export default function AdminFacebookPage() {
     setSyncLoading(true);
     setSyncProgress({
       isActive: true,
-      type,
+      currentType: type,
       progress: 0,
-      currentOperation: `Initializing ${type} sync...`,
+      message: `Initializing ${type} sync...`,
+      processedCount: 0,
+      totalCount: 0,
       errors: [],
-      startTime: new Date()
+      startTime: new Date(),
+      syncHistory: []
     });
 
     try {
@@ -272,7 +297,7 @@ export default function AdminFacebookPage() {
       setSyncProgress(prev => ({
         ...prev,
         progress: 10,
-        currentOperation: `Connecting to Facebook API...`
+        message: `Connecting to Facebook API...`
       }));
 
       const response = await fetch('/api/admin/social/facebook/sync', {
@@ -284,7 +309,7 @@ export default function AdminFacebookPage() {
       setSyncProgress(prev => ({
         ...prev,
         progress: 30,
-        currentOperation: `Processing ${type} data...`
+        message: `Processing ${type} data...`
       }));
 
       const result: SyncResult = await response.json();
@@ -292,14 +317,16 @@ export default function AdminFacebookPage() {
       setSyncProgress(prev => ({
         ...prev,
         progress: 80,
-        currentOperation: `Finalizing sync...`
+        message: `Finalizing sync...`
       }));
 
       if (result.success) {
         setSyncProgress(prev => ({
           ...prev,
           progress: 100,
-          currentOperation: `Sync completed successfully!`
+          message: `Sync completed successfully!`,
+          processedCount: result.synced || 0,
+          totalCount: result.processed || 0
         }));
 
         console.log(result.message);
@@ -315,7 +342,7 @@ export default function AdminFacebookPage() {
         setSyncProgress(prev => ({
           ...prev,
           progress: 100,
-          currentOperation: `Sync failed`,
+          message: `Sync failed`,
           errors: result.errors || ['Unknown error occurred']
         }));
         console.error(`Sync failed: ${result.errors.join(', ')}`);
@@ -324,7 +351,7 @@ export default function AdminFacebookPage() {
       setSyncProgress(prev => ({
         ...prev,
         progress: 100,
-        currentOperation: `Sync failed`,
+        message: `Sync failed`,
         errors: [error instanceof Error ? error.message : 'Unknown error occurred']
       }));
       console.error('Sync failed:', error);
@@ -333,13 +360,15 @@ export default function AdminFacebookPage() {
       
       // Clear progress after 3 seconds
       setTimeout(() => {
-        setSyncProgress({
+        setSyncProgress(prev => ({
+          ...prev,
           isActive: false,
-          type: '',
           progress: 0,
-          currentOperation: '',
+          message: '',
+          processedCount: 0,
+          totalCount: 0,
           errors: []
-        });
+        }));
       }, 3000);
     }
   };
@@ -408,7 +437,8 @@ export default function AdminFacebookPage() {
       (filterType === 'phone' && user.phone) ||
       (filterType === 'no-phone' && !user.phone) ||
       (filterType === 'comment' && user.commentCount > 0) ||
-      (filterType === 'message' && user.messageCount > 0);
+      (filterType === 'message' && user.messageCount > 0) ||
+      (filterType === 'high-interaction' && user.totalInteractions >= 10);
     
     return matchesSearch && matchesFilter;
   });
@@ -646,7 +676,7 @@ export default function AdminFacebookPage() {
                 <Box className="w-full">
                   <Box className="flex items-center justify-between mb-3">
                     <Typography level="body-md" className="font-semibold text-blue-900">
-                      Syncing {syncProgress.type}...
+                      Syncing {syncProgress.currentType || 'data'}...
                     </Typography>
                     <Typography level="body-sm" className="text-blue-700">
                       {syncProgress.progress}%
@@ -660,9 +690,25 @@ export default function AdminFacebookPage() {
                     color="primary"
                   />
                   
-                  <Typography level="body-sm" className="text-blue-700">
-                    {syncProgress.currentOperation}
-                  </Typography>
+                  <Box className="flex items-center justify-between mb-2">
+                    <Typography level="body-sm" className="text-blue-700">
+                      {syncProgress.message}
+                    </Typography>
+                    {syncProgress.totalCount > 0 && (
+                      <Typography level="body-sm" className="text-blue-600">
+                        {syncProgress.processedCount}/{syncProgress.totalCount} items
+                      </Typography>
+                    )}
+                  </Box>
+                  
+                  {syncProgress.startTime && (
+                    <Typography level="body-xs" className="text-blue-600">
+                      Started: {syncProgress.startTime.toLocaleTimeString()}
+                      {syncProgress.estimatedTimeRemaining && (
+                        <span> • Est. {Math.round(syncProgress.estimatedTimeRemaining / 1000)}s remaining</span>
+                      )}
+                    </Typography>
+                  )}
                   
                   {syncProgress.errors.length > 0 && (
                     <Alert color="danger" variant="soft" className="mt-3">
@@ -672,7 +718,7 @@ export default function AdminFacebookPage() {
                           Errors encountered:
                         </Typography>
                         <Box component="ul" className="mt-1 text-sm list-disc list-inside">
-                          {syncProgress.errors.map((error, index) => (
+                          {syncProgress.errors.map((error: string, index: number) => (
                             <li key={index}>{error}</li>
                           ))}
                         </Box>
@@ -691,10 +737,10 @@ export default function AdminFacebookPage() {
                 placeholder="Select page (optional)"
                 className="min-w-48"
               >
-                <Option value="all-pages">All pages</Option>
+                <Option value="all-pages">🌐 All pages ({pages.length} pages)</Option>
                 {pages.map(page => (
                   <Option key={page.id} value={page.id}>
-                    {page.name}
+                    📘 {page.name}
                   </Option>
                 ))}
               </Select>
@@ -708,6 +754,18 @@ export default function AdminFacebookPage() {
                   className="hover:bg-blue-50"
                 >
                   Sync Pages
+                  {selectedPage !== 'all-pages' && <Chip size="sm" color="primary">Selected</Chip>}
+                </Button>
+                
+                <Button 
+                  onClick={() => handleSync('posts')} 
+                  disabled={syncLoading}
+                  variant="outlined"
+                  startDecorator={syncLoading ? <RefreshRounded className="animate-spin" /> : <ChatBubbleRounded />}
+                  className="hover:bg-green-50"
+                >
+                  Sync Posts
+                  {selectedPage !== 'all-pages' && <Chip size="sm" color="success">Selected</Chip>}
                 </Button>
                 
                 <Button 
@@ -718,6 +776,7 @@ export default function AdminFacebookPage() {
                   className="hover:bg-orange-50"
                 >
                   Sync Comments
+                  {selectedPage !== 'all-pages' && <Chip size="sm" color="warning">Selected</Chip>}
                 </Button>
                 
                 <Button 
@@ -728,6 +787,7 @@ export default function AdminFacebookPage() {
                   className="hover:bg-purple-50"
                 >
                   Sync Messages
+                  {selectedPage !== 'all-pages' && <Chip size="sm" color="neutral">Selected</Chip>}
                 </Button>
                 
                 <Button 
@@ -738,6 +798,11 @@ export default function AdminFacebookPage() {
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   Sync All
+                  {selectedPage !== 'all-pages' ? (
+                    <Chip size="sm" color="primary" variant="solid">Selected Page</Chip>
+                  ) : (
+                    <Chip size="sm" color="neutral" variant="solid">All Pages</Chip>
+                  )}
                 </Button>
               </Box>
             </Box>
@@ -747,149 +812,254 @@ export default function AdminFacebookPage() {
         {/* User Data Analysis */}
         <Card className="bg-white shadow-lg">
           <CardContent className="p-6">
+            {/* Advanced Filter Controls */}
             <Box className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
               <Box>
                 <Typography level="h3" className="text-xl font-bold flex items-center gap-2 text-gray-900">
                   <GroupRounded className="text-green-600" />
                   User Data Analysis
+                  <Chip color="primary" variant="soft" size="sm">
+                    {filteredData.length} records
+                  </Chip>
                 </Typography>
                 <Typography level="body-md" className="text-gray-600 mt-1">
                   Comprehensive data processing and extraction from Facebook interactions
                 </Typography>
               </Box>
+              
               <Box className="flex items-center gap-3 flex-wrap">
+                {/* Quick Stats */}
+                <Box className="flex gap-2">
+                  <Chip color="success" variant="soft" size="sm">
+                    📞 {userData.filter(u => u.phone).length} with phone
+                  </Chip>
+                  <Chip color="warning" variant="soft" size="sm">
+                    💬 {userData.filter(u => u.commentCount > 0).length} commenters
+                  </Chip>
+                  <Chip color="neutral" variant="soft" size="sm">
+                    📧 {userData.filter(u => u.messageCount > 0).length} messagers
+                  </Chip>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Filter and Search Controls */}
+            <Box className="flex flex-col lg:flex-row gap-4 mb-6 p-4 bg-gray-50 rounded-lg border">
+              <Box className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Select 
                   value={filterType} 
                   onChange={(_, value) => setFilterType(value || 'all')}
-                  placeholder="Filter records"
-                  className="min-w-48"
+                  placeholder="Filter by type"
+                  startDecorator={<TuneRounded />}
                 >
-                  <Option value="all">All records</Option>
-                  <Option value="phone">Has phone</Option>
-                  <Option value="no-phone">No phone</Option>
-                  <Option value="comment">Comments only</Option>
-                  <Option value="message">Messages only</Option>
+                  <Option value="all">🌐 All records</Option>
+                  <Option value="phone">📞 Has phone ({userData.filter(u => u.phone).length})</Option>
+                  <Option value="no-phone">❌ No phone ({userData.filter(u => !u.phone).length})</Option>
+                  <Option value="comment">💬 Comments only ({userData.filter(u => u.commentCount > 0).length})</Option>
+                  <Option value="message">📧 Messages only ({userData.filter(u => u.messageCount > 0).length})</Option>
+                  <Option value="high-interaction">🔥 High interaction (≥10)</Option>
                 </Select>
                 
-                <Box className="relative">
-                  <Input
-                    placeholder="Search by name, phone, or user ID..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    startDecorator={<SearchRounded />}
-                    className="w-64"
-                  />
-                </Box>
-                
+                <Select 
+                  value={selectedPage} 
+                  onChange={(_, value) => setSelectedPage(value || 'all-pages')}
+                  placeholder="Filter by page"
+                  startDecorator={<FacebookRounded />}
+                >
+                  <Option value="all-pages">🌐 All pages</Option>
+                  {pages.map(page => (
+                    <Option key={page.id} value={page.id}>
+                      📘 {page.name}
+                    </Option>
+                  ))}
+                </Select>
+
+                <Select 
+                  value={`${sortField}-${sortDirection}`} 
+                  onChange={(_, value) => {
+                    const [field, direction] = (value || 'totalInteractions-desc').split('-');
+                    setSortField(field || 'totalInteractions');
+                    setSortDirection((direction as 'asc' | 'desc') || 'desc');
+                  }}
+                  placeholder="Sort by"
+                  startDecorator={<BarChartRounded />}
+                >
+                  <Option value="totalInteractions-desc">🔥 Interactions ↓</Option>
+                  <Option value="totalInteractions-asc">🔥 Interactions ↑</Option>
+                  <Option value="lastTime-desc">⏰ Last activity ↓</Option>
+                  <Option value="lastTime-asc">⏰ Last activity ↑</Option>
+                  <Option value="firstTime-desc">📅 First seen ↓</Option>
+                  <Option value="firstTime-asc">📅 First seen ↑</Option>
+                  <Option value="userName-asc">👤 Name A-Z</Option>
+                  <Option value="userName-desc">👤 Name Z-A</Option>
+                  <Option value="pageName-asc">📘 Page A-Z</Option>
+                  <Option value="pageName-desc">📘 Page Z-A</Option>
+                </Select>
+              </Box>
+              
+              <Box className="flex-1 max-w-md">
+                <Input
+                  placeholder="🔍 Search by name, phone, user ID, or page..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  startDecorator={<SearchRounded />}
+                  endDecorator={
+                    searchTerm && (
+                      <IconButton 
+                        size="sm" 
+                        variant="plain"
+                        onClick={() => setSearchTerm('')}
+                      >
+                        ❌
+                      </IconButton>
+                    )
+                  }
+                />
+              </Box>
+              
+              <Box className="flex gap-2">
                 <Button 
                   onClick={loadUserData} 
                   variant="outlined" 
                   startDecorator={<RefreshRounded />}
                   size="sm"
+                  loading={loading}
                 >
-                  Apply Filters
+                  Apply
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterType('all');
+                    setSelectedPage('all-pages');
+                    setSortField('totalInteractions');
+                    setSortDirection('desc');
+                  }} 
+                  variant="outlined" 
+                  color="neutral"
+                  size="sm"
+                >
+                  Clear
                 </Button>
               </Box>
             </Box>
 
-            {/* User Data Table */}
-            <Sheet className="border rounded-lg overflow-hidden">
+            {/* Enhanced User Data Table */}
+            <Sheet 
+              className="border rounded-lg overflow-hidden" 
+              sx={{ 
+                '& *': { userSelect: 'text !important' }, 
+                '& button': { userSelect: 'none !important' },
+                '& .copy-button': { userSelect: 'none !important' }
+              }}
+            >
               <Table hoverRow stickyHeader>
                 <thead>
                   <tr>
                     <th className="p-3">
-                      <Button
-                        variant="plain"
-                        onClick={() => setSortField(sortField === 'pageName' && sortDirection === 'asc' ? 'pageName_desc' : 'pageName')}
-                        className="text-left hover:text-blue-600 font-semibold"
-                        endDecorator={
-                          sortField === 'pageName' && (
+                      <Box className="flex items-center justify-between">
+                        <Typography level="body-sm" className="font-semibold text-gray-700">
+                          📘 Fanpage
+                        </Typography>
+                        <IconButton 
+                          size="sm" 
+                          onClick={() => handleSort('pageName')}
+                          className="copy-button"
+                        >
+                          {sortField === 'pageName' && (
                             sortDirection === 'asc' ? 
                             <KeyboardArrowUpRounded /> : 
                             <KeyboardArrowDownRounded />
-                          )
-                        }
-                      >
-                        Tên/ID Fanpage
-                      </Button>
+                          )}
+                        </IconButton>
+                      </Box>
                     </th>
                     <th className="p-3">
-                      <Button
-                        variant="plain"
-                        onClick={() => setSortField(sortField === 'userName' && sortDirection === 'asc' ? 'userName_desc' : 'userName')}
-                        className="text-left hover:text-blue-600 font-semibold"
-                        endDecorator={
-                          sortField === 'userName' && (
+                      <Box className="flex items-center justify-between">
+                        <Typography level="body-sm" className="font-semibold text-gray-700">
+                          👤 User Info
+                        </Typography>
+                        <IconButton 
+                          size="sm" 
+                          onClick={() => handleSort('userName')}
+                          className="copy-button"
+                        >
+                          {sortField === 'userName' && (
                             sortDirection === 'asc' ? 
                             <KeyboardArrowUpRounded /> : 
                             <KeyboardArrowDownRounded />
-                          )
-                        }
-                      >
-                        Họ tên/ID User
-                      </Button>
+                          )}
+                        </IconButton>
+                      </Box>
                     </th>
                     <th className="p-3">
                       <Typography level="body-sm" className="font-semibold text-gray-700">
-                        Link Facebook User
+                        🔗 Profile Link
                       </Typography>
                     </th>
                     <th className="p-3">
                       <Typography level="body-sm" className="font-semibold text-gray-700">
-                        Phone User
+                        📞 Phone
                       </Typography>
                     </th>
                     <th className="p-3">
-                      <Button
-                        variant="plain"
-                        onClick={() => setSortField(sortField === 'firstTime' && sortDirection === 'asc' ? 'firstTime_desc' : 'firstTime')}
-                        className="text-left hover:text-blue-600 font-semibold"
-                        endDecorator={
-                          sortField === 'firstTime' && (
+                      <Box className="flex items-center justify-between">
+                        <Typography level="body-sm" className="font-semibold text-gray-700">
+                          📅 First Seen
+                        </Typography>
+                        <IconButton 
+                          size="sm" 
+                          onClick={() => handleSort('firstTime')}
+                          className="copy-button"
+                        >
+                          {sortField === 'firstTime' && (
                             sortDirection === 'asc' ? 
                             <KeyboardArrowUpRounded /> : 
                             <KeyboardArrowDownRounded />
-                          )
-                        }
-                      >
-                        FirstTime
-                      </Button>
+                          )}
+                        </IconButton>
+                      </Box>
                     </th>
                     <th className="p-3">
-                      <Button
-                        variant="plain"
-                        onClick={() => setSortField(sortField === 'lastTime' && sortDirection === 'asc' ? 'lastTime_desc' : 'lastTime')}
-                        className="text-left hover:text-blue-600 font-semibold"
-                        endDecorator={
-                          sortField === 'lastTime' && (
+                      <Box className="flex items-center justify-between">
+                        <Typography level="body-sm" className="font-semibold text-gray-700">
+                          ⏰ Last Activity
+                        </Typography>
+                        <IconButton 
+                          size="sm" 
+                          onClick={() => handleSort('lastTime')}
+                          className="copy-button"
+                        >
+                          {sortField === 'lastTime' && (
                             sortDirection === 'asc' ? 
                             <KeyboardArrowUpRounded /> : 
                             <KeyboardArrowDownRounded />
-                          )
-                        }
-                      >
-                        LastTime
-                      </Button>
+                          )}
+                        </IconButton>
+                      </Box>
                     </th>
                     <th className="p-3">
-                      <Button
-                        variant="plain"
-                        onClick={() => setSortField(sortField === 'totalInteractions' && sortDirection === 'asc' ? 'totalInteractions_desc' : 'totalInteractions')}
-                        className="text-left hover:text-blue-600 font-semibold"
-                        endDecorator={
-                          sortField === 'totalInteractions' && (
+                      <Box className="flex items-center justify-between">
+                        <Typography level="body-sm" className="font-semibold text-gray-700">
+                          🔥 Interactions
+                        </Typography>
+                        <IconButton 
+                          size="sm" 
+                          onClick={() => handleSort('totalInteractions')}
+                          className="copy-button"
+                        >
+                          {sortField === 'totalInteractions' && (
                             sortDirection === 'asc' ? 
                             <KeyboardArrowUpRounded /> : 
                             <KeyboardArrowDownRounded />
-                          )
-                        }
-                      >
-                        Interactions
-                      </Button>
+                          )}
+                        </IconButton>
+                      </Box>
                     </th>
                     <th className="p-3">
                       <Typography level="body-sm" className="font-semibold text-gray-700">
-                        Types
+                        📊 Activity Types
                       </Typography>
                     </th>
                   </tr>
@@ -908,87 +1078,158 @@ export default function AdminFacebookPage() {
                     <tr>
                       <td colSpan={8} className="text-center py-8">
                         <Typography level="body-md" className="text-gray-500">
-                          No user data found
+                          {searchTerm || filterType !== 'all' ? 
+                            '🔍 No results found for current filters' : 
+                            '📭 No user data available'
+                          }
                         </Typography>
+                        {(searchTerm || filterType !== 'all') && (
+                          <Button 
+                            variant="outlined" 
+                            size="sm" 
+                            onClick={() => {
+                              setSearchTerm('');
+                              setFilterType('all');
+                            }}
+                            className="mt-2"
+                          >
+                            Clear filters
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ) : (
                     getCurrentPageUsers().map((user, index) => (
-                      <tr key={`${user.pageId}-${user.userId}`} className="hover:bg-gray-50">
-                        <td className="p-3">
-                          <Box>
-                            <Typography level="body-sm" className="font-medium">
-                              {user.pageName}
-                            </Typography>
-                            <Typography level="body-xs" className="text-gray-500">
-                              {user.pageId}
-                            </Typography>
+                      <tr key={`${user.pageId}-${user.userId}`} className="hover:bg-gray-50 group">
+                        <td className="p-3" style={{ userSelect: 'text' }}>
+                          <Box className="flex items-center justify-between">
+                            <Box>
+                              <Typography level="body-sm" className="font-medium select-text">
+                                {user.pageName}
+                              </Typography>
+                              <Typography level="body-xs" className="text-gray-500 select-text font-mono">
+                                {user.pageId}
+                              </Typography>
+                            </Box>
+                            <IconButton 
+                              size="sm" 
+                              variant="plain"
+                              onClick={() => copyToClipboard(`${user.pageName}\n${user.pageId}`)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity copy-button"
+                              title="Copy page info"
+                            >
+                              <ContentCopyRounded />
+                            </IconButton>
                           </Box>
                         </td>
-                        <td className="p-3">
-                          <Box>
-                            <Typography level="body-sm" className="font-medium">
-                              {user.userName}
-                            </Typography>
-                            <Typography level="body-xs" className="text-gray-500">
-                              {user.userId}
-                            </Typography>
+                        <td className="p-3" style={{ userSelect: 'text' }}>
+                          <Box className="flex items-center justify-between">
+                            <Box>
+                              <Typography level="body-sm" className="font-medium select-text">
+                                {user.userName}
+                              </Typography>
+                              <Typography level="body-xs" className="text-gray-500 select-text font-mono">
+                                {user.userId}
+                              </Typography>
+                            </Box>
+                            <IconButton 
+                              size="sm" 
+                              variant="plain"
+                              onClick={() => copyToClipboard(`${user.userName}\n${user.userId}`)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity copy-button"
+                              title="Copy user info"
+                            >
+                              <ContentCopyRounded />
+                            </IconButton>
                           </Box>
                         </td>
-                        <td className="p-3">
-                          <Button
-                            component="a"
-                            href={user.userLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            variant="plain"
-                            size="sm"
-                            className="text-blue-600 hover:underline"
-                          >
-                            View Profile
-                          </Button>
+                        <td className="p-3" style={{ userSelect: 'text' }}>
+                          <Box className="flex items-center justify-between">
+                            <Button
+                              component="a"
+                              href={user.userLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              variant="plain"
+                              size="sm"
+                              className="text-blue-600 hover:underline"
+                            >
+                              View Profile
+                            </Button>
+                            <IconButton 
+                              size="sm" 
+                              variant="plain"
+                              onClick={() => copyToClipboard(user.userLink)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity copy-button"
+                              title="Copy profile link"
+                            >
+                              <ContentCopyRounded />
+                            </IconButton>
+                          </Box>
                         </td>
-                        <td className="p-3">
+                        <td className="p-3" style={{ userSelect: 'text' }}>
                           {user.phone ? (
-                            <Box className="flex items-center gap-1">
-                              <PhoneRounded className="text-sm text-green-600" />
-                              <Typography level="body-sm">{user.phone}</Typography>
+                            <Box className="flex items-center justify-between">
+                              <Box className="flex items-center gap-1">
+                                <PhoneRounded className="text-sm text-green-600" />
+                                <Typography level="body-sm" className="select-text font-mono">
+                                  {user.phone}
+                                </Typography>
+                              </Box>
+                              <IconButton 
+                                size="sm" 
+                                variant="plain"
+                                onClick={() => copyToClipboard(user.phone || '')}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity copy-button"
+                                title="Copy phone number"
+                              >
+                                <ContentCopyRounded />
+                              </IconButton>
                             </Box>
                           ) : (
                             <Typography level="body-sm" className="text-gray-400">-</Typography>
                           )}
                         </td>
-                        <td className="p-3">
+                        <td className="p-3" style={{ userSelect: 'text' }}>
                           <Box className="flex items-center gap-1">
-                            <AccessTimeRounded className="text-sm text-gray-500" />
-                            <Typography level="body-sm">
+                            <AccessTimeRounded className="text-sm text-blue-500" />
+                            <Typography level="body-sm" className="select-text">
                               {new Date(user.firstTime).toLocaleDateString()}
                             </Typography>
                           </Box>
                         </td>
-                        <td className="p-3">
+                        <td className="p-3" style={{ userSelect: 'text' }}>
                           <Box className="flex items-center gap-1">
-                            <AccessTimeRounded className="text-sm text-gray-500" />
-                            <Typography level="body-sm">
+                            <AccessTimeRounded className="text-sm text-green-500" />
+                            <Typography level="body-sm" className="select-text">
                               {new Date(user.lastTime).toLocaleDateString()}
                             </Typography>
                           </Box>
                         </td>
-                        <td className="p-3">
-                          <Chip color="primary" variant="soft" size="sm">
-                            {user.totalInteractions}
+                        <td className="p-3" style={{ userSelect: 'text' }}>
+                          <Chip 
+                            color={user.totalInteractions >= 10 ? "success" : "primary"} 
+                            variant="soft" 
+                            size="sm"
+                          >
+                            {user.totalInteractions >= 10 ? '🔥' : '📊'} {user.totalInteractions}
                           </Chip>
                         </td>
-                        <td className="p-3">
+                        <td className="p-3" style={{ userSelect: 'text' }}>
                           <Box className="flex gap-1 flex-wrap">
                             {user.commentCount > 0 && (
                               <Chip color="success" variant="soft" size="sm">
-                                COMMENT ({user.commentCount})
+                                💬 {user.commentCount}
                               </Chip>
                             )}
                             {user.messageCount > 0 && (
                               <Chip color="warning" variant="soft" size="sm">
-                                MESSAGE ({user.messageCount})
+                                📧 {user.messageCount}
+                              </Chip>
+                            )}
+                            {user.commentCount === 0 && user.messageCount === 0 && (
+                              <Chip color="neutral" variant="outlined" size="sm">
+                                No activity
                               </Chip>
                             )}
                           </Box>
@@ -1000,27 +1241,52 @@ export default function AdminFacebookPage() {
               </Table>
             </Sheet>
             
-            {/* Pagination */}
+            {/* Enhanced Pagination with Performance Indicators */}
             {filteredData.length > 0 && (
-              <Box className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-                <Box className="flex items-center gap-3">
-                  <Typography level="body-sm" className="text-gray-700">Show</Typography>
-                  <Select 
-                    value={pagination.pageSize.toString()} 
-                    onChange={(_, value) => setPagination(prev => ({ ...prev, pageSize: parseInt(value || '25'), currentPage: 1 }))}
-                    size="sm"
-                  >
-                    <Option value="10">10</Option>
-                    <Option value="25">25</Option>
-                    <Option value="50">50</Option>
-                    <Option value="100">100</Option>
-                  </Select>
-                  <Typography level="body-sm" className="text-gray-700">
-                    of {filteredData.length} records | Page {pagination.currentPage} of {Math.ceil(filteredData.length / pagination.pageSize)}
-                  </Typography>
+              <Box className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border">
+                <Box className="flex items-center gap-4">
+                  <Box className="flex items-center gap-2">
+                    <Typography level="body-sm" className="text-gray-700">Show</Typography>
+                    <Select 
+                      value={pagination.pageSize.toString()} 
+                      onChange={(_, value) => setPagination(prev => ({ 
+                        ...prev, 
+                        pageSize: parseInt(value || '25'), 
+                        currentPage: 1 
+                      }))}
+                      size="sm"
+                    >
+                      <Option value="10">10 per page</Option>
+                      <Option value="25">25 per page</Option>
+                      <Option value="50">50 per page</Option>
+                      <Option value="100">100 per page</Option>
+                    </Select>
+                  </Box>
+                  
+                  <Box className="flex items-center gap-2">
+                    <Chip color="primary" variant="soft" size="sm">
+                      📊 {filteredData.length} total
+                    </Chip>
+                    <Chip color="success" variant="soft" size="sm">
+                      📄 Page {pagination.currentPage}/{Math.ceil(filteredData.length / pagination.pageSize)}
+                    </Chip>
+                    <Chip color="neutral" variant="soft" size="sm">
+                      👀 Showing {((pagination.currentPage - 1) * pagination.pageSize) + 1}-{Math.min(pagination.currentPage * pagination.pageSize, filteredData.length)}
+                    </Chip>
+                  </Box>
                 </Box>
 
                 <Box className="flex items-center gap-2">
+                  <Button
+                    variant="outlined"
+                    size="sm"
+                    onClick={() => setPagination(prev => ({ ...prev, currentPage: 1 }))}
+                    disabled={pagination.currentPage === 1}
+                    startDecorator={<NavigateBeforeRounded />}
+                  >
+                    First
+                  </Button>
+                  
                   <Button
                     variant="outlined"
                     size="sm"
@@ -1039,6 +1305,7 @@ export default function AdminFacebookPage() {
                         size="sm"
                         onClick={() => typeof pageNum === 'number' && setPagination(prev => ({ ...prev, currentPage: pageNum }))}
                         disabled={typeof pageNum !== 'number'}
+                        color={pageNum === pagination.currentPage ? "primary" : "neutral"}
                         className="w-10"
                       >
                         {pageNum === '...' ? '…' : pageNum}
@@ -1054,6 +1321,67 @@ export default function AdminFacebookPage() {
                     endDecorator={<NavigateNextRounded />}
                   >
                     Next
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    size="sm"
+                    onClick={() => setPagination(prev => ({ 
+                      ...prev, 
+                      currentPage: Math.ceil(filteredData.length / pagination.pageSize) 
+                    }))}
+                    disabled={pagination.currentPage === Math.ceil(filteredData.length / pagination.pageSize)}
+                    endDecorator={<NavigateNextRounded />}
+                  >
+                    Last
+                  </Button>
+                </Box>
+              </Box>
+            )}
+
+            {/* Export and Bulk Actions */}
+            {filteredData.length > 0 && (
+              <Box className="flex items-center justify-between mt-4 p-4 bg-gray-50 rounded-lg border">
+                <Box className="flex items-center gap-2">
+                  <Typography level="body-sm" className="text-gray-600">
+                    📈 Data insights:
+                  </Typography>
+                  <Chip color="success" variant="soft" size="sm">
+                    📞 {filteredData.filter(u => u.phone).length} contacts
+                  </Chip>
+                  <Chip color="warning" variant="soft" size="sm">
+                    🔥 {filteredData.filter(u => u.totalInteractions >= 10).length} high engagement
+                  </Chip>
+                  <Chip color="neutral" variant="soft" size="sm">
+                    ⭐ {filteredData.reduce((sum, u) => sum + u.totalInteractions, 0)} total interactions
+                  </Chip>
+                </Box>
+                
+                <Box className="flex gap-2">
+                  <Button 
+                    onClick={exportData} 
+                    variant="outlined" 
+                    startDecorator={<DownloadRounded />}
+                    size="sm"
+                    color="success"
+                  >
+                    Export CSV ({filteredData.length} records)
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => {
+                      const highEngagement = filteredData.filter(u => u.totalInteractions >= 10);
+                      const exportText = highEngagement.map(u => 
+                        `${u.userName}\t${u.phone || 'N/A'}\t${u.userLink}\t${u.totalInteractions}`
+                      ).join('\n');
+                      copyToClipboard(`Name\tPhone\tProfile\tInteractions\n${exportText}`);
+                    }} 
+                    variant="outlined" 
+                    startDecorator={<ContentCopyRounded />}
+                    size="sm"
+                    color="primary"
+                  >
+                    Copy High Engagement
                   </Button>
                 </Box>
               </Box>

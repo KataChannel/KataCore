@@ -162,11 +162,16 @@ export class UnifiedAuthService {
   }
 
   /**
-   * Verifies JWT token
+   * Verifies JWT token with timeout protection
    */
   async verifyToken(token: string): Promise<any> {
     try {
-      const { payload } = await jwtVerify(token, this.secret);
+      const verifyPromise = jwtVerify(token, this.secret);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Token verification timeout')), 5000)
+      );
+      
+      const { payload } = await Promise.race([verifyPromise, timeoutPromise]) as any;
       return payload;
     } catch (error) {
       throw new Error('Invalid or expired token');
@@ -425,17 +430,22 @@ export class UnifiedAuthService {
   // ==========================================================================
 
   /**
-   * Gets user by ID
+   * Gets user by ID with timeout protection
    */
   async getUserById(userId: string): Promise<User | null> {
     try {
-      const user = await prisma.users.findUnique({
+      const userPromise = prisma.users.findUnique({
         where: { id: userId },
         include: {
           roles: true,
         },
       });
-      // console.log('Fetched user by ID:', user);
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timeout')), 10000)
+      );
+      
+      const user = await Promise.race([userPromise, timeoutPromise]) as any;
       
       if (!user) return null;
 

@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// Create a singleton prisma instance to avoid connection issues
+let prisma: PrismaClient;
+
+declare global {
+  var __prisma: PrismaClient | undefined;
+}
+
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient();
+} else {
+  if (!global.__prisma) {
+    global.__prisma = new PrismaClient();
+  }
+  prisma = global.__prisma;
+}
 
 // Facebook Graph API configuration
 const FACEBOOK_API_VERSION = 'v21.0';
@@ -54,11 +68,22 @@ async function getFacebookCredentials(pageId?: string): Promise<FacebookCredenti
 
 // Helper function to make Facebook API requests with retry logic
 async function fetchFacebookAPI(endpoint: string, accessToken: string, retries = 3) {
-  const url = `${FACEBOOK_BASE_URL}${endpoint}`;
+  const url = `${FACEBOOK_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}access_token=${accessToken}`;
   
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await fetch(url);
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'TazaCore/1.0'
+        }
+      });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         const error = await response.json();
@@ -75,6 +100,10 @@ async function fetchFacebookAPI(endpoint: string, accessToken: string, retries =
       
       return response.json();
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Request timed out, retrying...');
+      }
+      
       if (i === retries - 1) throw error;
       
       const delay = Math.pow(2, i) * 1000;
@@ -527,12 +556,21 @@ async function syncMessages(accessToken: string, pageId?: string, limit: number 
 
 // POST handler for sync operations
 export async function POST(request: NextRequest) {
-  let requestBody: any;
+  let requestBody: any = null;
   
   try {
-    requestBody = await request.json();
+    // Safely parse request body
+    try {
+      requestBody = await request.json();
+    } catch (parseError) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid JSON in request body',
+        details: parseError instanceof Error ? parseError.message : 'Failed to parse request'
+      }, { status: 400 });
+    }
     
-    const { type, pageId, limit = 100 } = requestBody;
+    const { type, pageId, limit = 100 } = requestBody || {};
     
     if (!type) {
       return NextResponse.json({
@@ -600,8 +638,6 @@ export async function POST(request: NextRequest) {
       details: error instanceof Error ? error.message : 'Unknown error',
       requestData: requestBody || null
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -651,7 +687,5 @@ export async function GET(request: NextRequest) {
       error: 'Failed to get sync status',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
