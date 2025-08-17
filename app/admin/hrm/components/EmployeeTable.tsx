@@ -318,8 +318,10 @@ export const EmployeeTable: React.FC<Props> = () => {
                         value={filter.operator}
                         onChange={(e) => {
                           const newFilters = [...filters];
-                          newFilters[index].operator = e.target.value as FilterState['operator'];
-                          setFilters(newFilters);
+                          if (newFilters[index]) {
+                            newFilters[index].operator = e.target.value as FilterState['operator'];
+                            setFilters(newFilters);
+                          }
                         }}
                         className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
@@ -335,8 +337,10 @@ export const EmployeeTable: React.FC<Props> = () => {
                         value={filter.value}
                         onChange={(e) => {
                           const newFilters = [...filters];
-                          newFilters[index].value = e.target.value;
-                          setFilters(newFilters);
+                          if (newFilters[index]) {
+                            newFilters[index].value = e.target.value;
+                            setFilters(newFilters);
+                          }
                         }}
                         className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Value..."

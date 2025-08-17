@@ -2,6 +2,7 @@
 
 import React from 'react';
 import EmployeeTable from './components/EmployeeTable';
+import EmployeeTableAdvanced from './components/EmployeeTableAdvanced';
 
 export default function HRMAdminPage() {
   return (
@@ -10,7 +11,8 @@ export default function HRMAdminPage() {
         <h1 className="text-2xl font-bold mb-2">HRM - Employee Management</h1>
       </div>
       <div className="mt-6">
-        <EmployeeTable />
+        {/* <EmployeeTable /> */}
+        <EmployeeTableAdvanced />
       </div>
     </div>
   );
