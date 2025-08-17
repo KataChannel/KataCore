@@ -34,13 +34,39 @@ import { PermissionManager } from './components/PermissionManager';
 // Services
 import { PermissionService } from './services/PermissionService';
 
+// Hooks
+import { useFacebookData } from './hooks/useFacebookData';
+
 export default function FacebookAdminPage() {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
   
   const userInfo = PermissionService.getCurrentUserInfo();
 
-  // Demo data for components
+  // Initialize filters for Facebook data
+  const initialFilters = {
+    type: 'all' as const,
+    searchTerm: '',
+    sortField: 'lastTime',
+    sortDirection: 'desc' as const,
+    selectedPage: 'all-pages'
+  };
+
+  // Use real Facebook data hook
+  const {
+    userData,
+    loading,
+    error,
+    pagination,
+    pages,
+    filters,
+    updateFilters,
+    updatePagination,
+    refreshData,
+    exportData
+  } = useFacebookData(initialFilters);
+
+  // Demo data for other components
   const demoSyncStatus = {
     isActive: false,
     progress: 0,
@@ -55,14 +81,6 @@ export default function FacebookAdminPage() {
     syncHistory: []
   };
 
-  const demoUserData: any[] = [];
-
-  const demoPagination = {
-    currentPage: 1,
-    pageSize: 10,
-    totalItems: 0
-  };
-
   const demoConfig = {
     appId: '',
     appSecret: '',
@@ -73,16 +91,9 @@ export default function FacebookAdminPage() {
     source: 'user_input' as const
   };
 
-  const demoFilters = {
-    type: 'all' as const,
-    searchTerm: '',
-    sortField: 'name',
-    sortDirection: 'asc' as const,
-    selectedPage: ''
-  };
-
   const handleRefresh = () => {
     setRefreshKey(prev => prev + 1);
+    refreshData(); // Also refresh Facebook data
   };
 
   const handleRoleChange = () => {
@@ -270,15 +281,20 @@ export default function FacebookAdminPage() {
         {/* User Data Tab */}
         {currentTab === 'users' && userInfo.permissions.canViewDashboard && (
           <Box>
+            {error && (
+              <Alert color="danger" variant="soft" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
             <UserDataTable 
-              userData={demoUserData}
-              loading={false}
-              pagination={demoPagination}
-              filters={demoFilters}
-              pages={[]}
-              onUpdateFilters={() => {}}
-              onUpdatePagination={() => {}}
-              onExportData={() => {}}
+              userData={userData}
+              loading={loading}
+              pagination={pagination}
+              filters={filters}
+              pages={pages}
+              onUpdateFilters={updateFilters}
+              onUpdatePagination={updatePagination}
+              onExportData={exportData}
             />
           </Box>
         )}

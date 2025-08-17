@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import {
   Card,
@@ -93,7 +94,7 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
     <Card>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography level="title-md" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography level="title-md" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <PersonRounded />
             User Data Analysis
             <Chip color="primary" variant="soft" size="sm">
@@ -167,7 +168,7 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
         {/* Active Filters */}
         {(filters.type !== 'all' || filters.searchTerm || filters.selectedPage !== 'all-pages') && (
           <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-            <Typography level="body-sm" sx={{ color: 'text.secondary', mr: 1 }}>
+            <Typography level="body-sm" sx={{ color: 'text.secondary', mr: 1 }} component="span">
               Active filters:
             </Typography>
             {filters.type !== 'all' && (
@@ -314,11 +315,11 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <PersonRounded fontSize="small" color="primary" />
                           <Box>
-                            <Typography level="body-sm" fontWeight="bold">
+                            <Typography level="body-sm" fontWeight="bold" component="div">
                               {user.userName}
                             </Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
+                              <Typography level="body-xs" sx={{ color: 'text.secondary' }} component="span">
                                 ID: {user.userId.slice(0, 8)}...
                               </Typography>
                               <Tooltip title={copiedField === `userId-${copyId}` ? 'Copied!' : 'Copy User ID'}>
@@ -335,13 +336,13 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
                         </Box>
                       </td>
                       <td>
-                        <Typography level="body-sm">{user.pageName}</Typography>
+                        <Typography level="body-sm" component="div">{user.pageName}</Typography>
                       </td>
                       <td>
                         {user.phone ? (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <PhoneRounded fontSize="small" color="success" />
-                            <Typography level="body-sm">{user.phone}</Typography>
+                            <Typography level="body-sm" component="span">{user.phone}</Typography>
                             <Tooltip title={copiedField === `phone-${copyId}` ? 'Copied!' : 'Copy Phone'}>
                               <IconButton
                                 size="sm"
@@ -353,7 +354,7 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
                             </Tooltip>
                           </Box>
                         ) : (
-                          <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                          <Typography level="body-sm" sx={{ color: 'text.secondary' }} component="div">
                             No phone
                           </Typography>
                         )}
@@ -389,7 +390,7 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
                         </Chip>
                       </td>
                       <td>
-                        <Typography level="body-xs">
+                        <Typography level="body-xs" component="div">
                           {new Date(user.lastTime).toLocaleDateString()}
                         </Typography>
                       </td>
@@ -404,7 +405,7 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
         {/* Pagination */}
         {totalPages > 1 && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-            <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+            <Typography level="body-sm" sx={{ color: 'text.secondary' }} component="div">
               Showing {((pagination.currentPage - 1) * pagination.pageSize) + 1} to{' '}
               {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)} of{' '}
               {pagination.totalItems.toLocaleString()} entries
@@ -420,7 +421,7 @@ export const UserDataTable: React.FC<UserDataTableProps> = ({
                 <NavigateBeforeRounded />
               </IconButton>
               
-              <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+              <Typography level="body-sm" sx={{ display: 'flex', alignItems: 'center', px: 2 }} component="div">
                 Page {pagination.currentPage} of {totalPages}
               </Typography>
               
