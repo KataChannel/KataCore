@@ -242,6 +242,7 @@ export default function AdminFacebookPage() {
       
       const response = await fetch(`/api/admin/social/facebook/data?${params}`);
       const data = await response.json();
+      console.log('User data loaded:', data);
       
       if (data.success) {
         setUserData(data.userData || data.data || []);
@@ -1260,6 +1261,7 @@ export default function AdminFacebookPage() {
                       <Option value="25">25 per page</Option>
                       <Option value="50">50 per page</Option>
                       <Option value="100">100 per page</Option>
+                      <Option value="999999">All</Option>
                     </Select>
                   </Box>
                   
