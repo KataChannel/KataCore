@@ -46,15 +46,13 @@ import {
 } from '@mui/icons-material';
 import { 
   ThemeToggle, 
-  ThemeSwitch, 
-  ThemeSelect, 
-  FullThemeControls 
-} from '@/components/theme/SimpleThemeManager';
+  ThemeSelect 
+} from '@/components/theme/ThemeToggle';
 import { OptimizedCard, InfoCard, SuccessCard, WarningCard, DangerCard } from '@/components/ui/OptimizedCard';
-import { useTheme } from '@/hooks/useSimpleTheme';
+import { useSimpleTheme } from '@/hooks/useSimpleTheme';
 
 export function OptimizedThemeDemo() {
-  const { mode, actualMode } = useTheme();
+  const { theme } = useSimpleTheme();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [sliderValue, setSliderValue] = React.useState(50);
   const [switchChecked, setSwitchChecked] = React.useState(false);
@@ -84,7 +82,7 @@ export function OptimizedThemeDemo() {
             Theme Status
           </Typography>
           <Typography level="body-sm">
-            Mode: <strong>{mode}</strong> | Actual: <strong>{actualMode}</strong>
+            Current Theme: <strong>{theme}</strong>
           </Typography>
         </Box>
       </Box>
@@ -102,13 +100,13 @@ export function OptimizedThemeDemo() {
                 <Typography level="title-sm" sx={{ mb: 1 }}>Toggle Buttons</Typography>
                 <Stack direction="row" spacing={2}>
                   <ThemeToggle showLabel />
-                  <ThemeToggle size="sm" variant="soft" />
+                  <ThemeToggle variant="icon" />
                 </Stack>
               </Box>
 
               <Box>
                 <Typography level="title-sm" sx={{ mb: 1 }}>Switch Control</Typography>
-                <ThemeSwitch />
+                <ThemeToggle variant="switch" showLabel />
               </Box>
 
               <Box>
@@ -375,7 +373,10 @@ export function OptimizedThemeDemo() {
                 <Typography level="h4" sx={{ mb: 2 }}>
                   Theme Settings
                 </Typography>
-                <FullThemeControls />
+                <div className="space-y-4">
+                  <ThemeSelect showLabel />
+                  <ThemeToggle variant="switch" showLabel />
+                </div>
               </ModalDialog>
             </Modal>
           </OptimizedCard>

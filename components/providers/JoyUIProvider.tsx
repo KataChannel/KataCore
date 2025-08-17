@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import { joyUITheme } from '@/lib/config/joy-ui-theme';
-import { useTheme } from '@/hooks/useSimpleTheme';
+import { useSimpleTheme } from '@/hooks/useSimpleTheme';
 
 interface JoyUIProviderProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ interface JoyUIProviderProps {
  * Handles SSR/hydration safely
  */
 export function JoyUIProvider({ children }: JoyUIProviderProps) {
-  const { mode } = useTheme();
+  const { theme } = useSimpleTheme();
   const [mounted, setMounted] = useState(false);
   
   // Handle hydration mismatch
@@ -27,7 +27,7 @@ export function JoyUIProvider({ children }: JoyUIProviderProps) {
   
   // Use 'light' as default for SSR, actual theme after hydration
   const colorScheme = mounted 
-    ? (mode === 'dark' ? 'dark' : 'light')
+    ? (theme === 'dark' ? 'dark' : 'light')
     : 'light';
   
   return (

@@ -2,20 +2,26 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeType = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
-  mode: ThemeMode;
-  actualMode: 'light' | 'dark';
-  setMode: (mode: ThemeMode) => void;
-  toggleMode: () => void;
+  theme: ThemeType;
+  setTheme: (theme: ThemeType) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function useSimpleTheme() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useSimpleTheme must be used within a ThemeProvider');
+  }
+  return context;
+}
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  defaultMode?: ThemeMode;
+  defaultMode?: ThemeType;
   enableSystemPreference?: boolean;
   enablePersistence?: boolean;
 }
@@ -26,78 +32,63 @@ export function ThemeProvider({
   enableSystemPreference = true,
   enablePersistence = true,
 }: ThemeProviderProps) {
-  const [mode, setModeState] = useState<ThemeMode>(defaultMode);
-  const [actualMode, setActualMode] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<ThemeType>(defaultMode as ThemeType);
 
   // Load saved theme from localStorage on mount
   useEffect(() => {
     if (enablePersistence && typeof window !== 'undefined') {
-      const saved = localStorage.getItem('theme-mode') as ThemeMode;
+      const saved = localStorage.getItem('theme') as ThemeType;
       if (saved && ['light', 'dark', 'system'].includes(saved)) {
-        setModeState(saved);
+        setThemeState(saved);
       }
     }
   }, [enablePersistence]);
 
-  // Calculate actual mode based on system preference
-  useEffect(() => {
-    const calculateActualMode = () => {
-      if (mode === 'system' && enableSystemPreference) {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      return mode === 'dark' ? 'dark' : 'light';
-    };
-
-    setActualMode(calculateActualMode());
-
-    if (mode === 'system' && enableSystemPreference) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handler = () => setActualMode(calculateActualMode());
-      
-      mediaQuery.addEventListener('change', handler);
-      return () => mediaQuery.removeEventListener('change', handler);
-    }
-  }, [mode, enableSystemPreference]);
-
-  // Apply theme to document
+  // Calculate and apply actual theme
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const root = document.documentElement;
+      const actualTheme = theme === 'system' && enableSystemPreference
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        : theme === 'dark' ? 'dark' : 'light';
       
       // Remove all theme classes
       root.classList.remove('light', 'dark');
       
       // Add current theme class
-      root.classList.add(actualMode);
+      root.classList.add(actualTheme);
       
-      // Set Joy UI color scheme
-      root.setAttribute('data-joy-color-scheme', actualMode);
+      // Set color scheme for browser
+      root.style.setProperty('color-scheme', actualTheme);
       
-      // Set CSS custom property for Tailwind
-      root.style.setProperty('color-scheme', actualMode);
+      // Add event listener for system theme changes
+      if (theme === 'system' && enableSystemPreference) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handler = (e: MediaQueryListEvent) => {
+          root.classList.remove('light', 'dark');
+          root.classList.add(e.matches ? 'dark' : 'light');
+          root.style.setProperty('color-scheme', e.matches ? 'dark' : 'light');
+        };
+        
+        mediaQuery.addEventListener('change', handler);
+        return () => mediaQuery.removeEventListener('change', handler);
+      }
     }
-  }, [actualMode]);
+  }, [theme, enableSystemPreference]);
 
-  const setMode = (newMode: ThemeMode) => {
-    setModeState(newMode);
+  const setTheme = (newTheme: ThemeType) => {
+    setThemeState(newTheme);
     
     if (enablePersistence && typeof window !== 'undefined') {
-      localStorage.setItem('theme-mode', newMode);
+      localStorage.setItem('theme', newTheme);
     }
-  };
-
-  const toggleMode = () => {
-    const newMode = actualMode === 'light' ? 'dark' : 'light';
-    setMode(newMode);
   };
 
   return (
     <ThemeContext.Provider
       value={{
-        mode,
-        actualMode,
-        setMode,
-        toggleMode,
+        theme,
+        setTheme,
       }}
     >
       {children}
@@ -105,24 +96,14 @@ export function ThemeProvider({
   );
 }
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-}
-
 // Safe hooks with fallbacks
 export function useSafeTheme() {
   try {
-    return useTheme();
+    return useSimpleTheme();
   } catch {
     return {
-      mode: 'light' as ThemeMode,
-      actualMode: 'light' as const,
-      setMode: () => {},
-      toggleMode: () => {},
+      theme: 'light' as ThemeType,
+      setTheme: () => {},
     };
   }
 }

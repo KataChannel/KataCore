@@ -26,9 +26,7 @@ import {
   SwatchIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
-import { useTheme } from '@/hooks/useSimpleTheme';
-import { useTranslation } from '@/hooks/useTranslation';
-import { SimpleThemeToggle } from '@/components/common/SimpleThemeToggle';
+import { useSimpleTheme } from '@/hooks/useSimpleTheme';
 
 
 interface AdminLayoutProps {
@@ -109,10 +107,10 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   };
   
   // Theme
-  const { mode, setMode } = useTheme();
+  const { theme, setTheme } = useSimpleTheme();
 
   const toggleMode = () => {
-    setMode(mode === 'light' ? 'dark' : 'light');
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   // Menu items from database with user permissions
@@ -363,7 +361,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${mode === 'dark' ? 'dark' : ''}`}>
+    <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'dark' : ''}`}>
       <div className="flex bg-background">
         {/* Desktop Sidebar */}
         <aside className={`
@@ -500,7 +498,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
         <aside className={`
           fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          ${mode === 'dark' ? 'bg-gray-900' : 'bg-white'}
+          ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}
         `}>
           {/* Mobile Sidebar Header */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-border">
@@ -652,7 +650,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 className="p-2 rounded-lg hover:bg-hover transition-colors"
                 title="Toggle theme"
               >
-                {mode === 'dark' ? (
+                {theme === 'dark' ? (
                   <SunIcon className="h-5 w-5 text-text-secondary" />
                 ) : (
                   <MoonIcon className="h-5 w-5 text-text-secondary" />

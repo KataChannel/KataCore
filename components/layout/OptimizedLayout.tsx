@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { Box, Sheet, Typography, IconButton, Stack } from '@mui/joy';
-import { ThemeToggle } from '@/components/theme/SimpleThemeManager';
-import { useTheme } from '@/hooks/useSimpleTheme';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useSimpleTheme } from '@/hooks/useSimpleTheme';
 import { Menu, Close, Settings } from '@mui/icons-material';
 
 interface OptimizedLayoutProps {
@@ -21,7 +21,7 @@ export function OptimizedLayout({
   showThemeToggle = true,
   maxWidth = 'lg'
 }: OptimizedLayoutProps) {
-  const { actualMode } = useTheme();
+  const { theme } = useSimpleTheme();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   return (
@@ -76,7 +76,7 @@ export function OptimizedLayout({
                 level="h4"
                 sx={{
                   fontWeight: 'bold',
-                  background: actualMode === 'dark' 
+                  background: theme === 'dark' 
                     ? 'linear-gradient(45deg, #38bdf8, #7dd3fc)'
                     : 'linear-gradient(45deg, #0ea5e9, #38bdf8)',
                   backgroundClip: 'text',
@@ -90,7 +90,7 @@ export function OptimizedLayout({
 
             {/* Right side */}
             <Stack direction="row" spacing={1} alignItems="center">
-              {showThemeToggle && <ThemeToggle size="sm" variant="outlined" />}
+              {showThemeToggle && <ThemeToggle variant="icon" />}
               
               <IconButton
                 variant="outlined"

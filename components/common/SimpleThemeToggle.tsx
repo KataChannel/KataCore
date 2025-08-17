@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@mui/joy';
-import { useTheme } from '@/hooks/useSimpleTheme';
+import { useSimpleTheme, type ThemeType } from '@/hooks/useSimpleTheme';
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/react/24/outline';
 
 interface SimpleThemeToggleProps {
@@ -11,20 +10,20 @@ interface SimpleThemeToggleProps {
 }
 
 export function SimpleThemeToggle({ className = '', variant = 'icon' }: SimpleThemeToggleProps) {
-  const { mode, setMode } = useTheme();
+  const { theme, setTheme } = useSimpleTheme();
 
   const cycleTheme = () => {
-    if (mode === 'light') {
-      setMode('dark');
-    } else if (mode === 'dark') {
-      setMode('system');
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('system');
     } else {
-      setMode('light');
+      setTheme('light');
     }
   };
 
   const getIcon = () => {
-    switch (mode) {
+    switch (theme) {
       case 'light':
         return <SunIcon className="h-5 w-5" />;
       case 'dark':
@@ -37,7 +36,7 @@ export function SimpleThemeToggle({ className = '', variant = 'icon' }: SimpleTh
   };
 
   const getLabel = () => {
-    switch (mode) {
+    switch (theme) {
       case 'light':
         return 'Light';
       case 'dark':
@@ -51,15 +50,13 @@ export function SimpleThemeToggle({ className = '', variant = 'icon' }: SimpleTh
 
   if (variant === 'button') {
     return (
-      <Button
-        variant="outlined"
-        size="sm"
+      <button
         onClick={cycleTheme}
-        className={className}
-        startDecorator={getIcon()}
+        className={`inline-flex items-center gap-2 px-3 py-2 rounded-md bg-white dark:bg-gray-800 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${className}`}
       >
+        {getIcon()}
         {getLabel()}
-      </Button>
+      </button>
     );
   }
 

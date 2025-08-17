@@ -7,12 +7,9 @@ export * from './common';
 // Simple theme system
 export { SimpleThemeProvider } from './providers/SimpleThemeProvider';
 export { 
-  ThemeToggle, 
-  ThemeSwitch, 
-  ThemeSelect, 
-  CompactThemeControls, 
-  FullThemeControls 
-} from './theme/SimpleThemeManager';
+  ThemeToggle,
+  ThemeSelect
+} from './theme/ThemeToggle';
 
 // Demo components
 export { SimpleThemeDemo } from './demo/SimpleThemeDemo';

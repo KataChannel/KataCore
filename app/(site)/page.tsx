@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, JSX } from 'react';
 import Link from 'next/link';
 import {
   ChartBarIcon,
@@ -25,7 +25,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import { SimpleThemeToggle } from '@/components/common/SimpleThemeToggle';
-import { useTheme } from '@/hooks/useSimpleTheme';
+import { useSimpleTheme } from '@/hooks/useSimpleTheme';
 import {
   useUnifiedAuth,
   LoginModal,
@@ -34,20 +34,31 @@ import {
 } from '@/components/auth/UnifiedAuthProvider';
 import { ClientOnly } from '@/components/ClientOnly';
 
-function HomePageContent() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+function HomePageContent(): JSX.Element {
+  const { theme, setTheme } = useSimpleTheme();
   const [mounted, setMounted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const isDarkMode = theme === 'dark' || (theme === 'system' && window?.matchMedia('(prefers-color-scheme: dark)').matches);
   const [accessCheckResults, setAccessCheckResults] = useState<Record<string, any>>({});
 
   const { user, loading, hasModuleAccess, logout } = useUnifiedAuth();
 
-  // Debug logging
+  // Enhanced user logging and debug information
   useEffect(() => {
-    console.log('🔍 [PAGE DEBUG] Auth state:', { user: !!user, loading, userDetails: user });
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
-      console.log('🔍 [PAGE DEBUG] Token in localStorage:', !!token);
+    if (user) {
+      console.log('=== User Authentication Status ===');
+      console.log('User:', user);
+      console.log('Role:', user.role);
+      console.log('Permissions:', user.role?.permissions);
+      console.log('Is Active:', user.isActive);
+      console.log('Is Verified:', user.isVerified);
+      console.log('=====================================');
+      
+      console.log('🔍 [PAGE DEBUG] Auth state:', { user: !!user, loading, userDetails: user });
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        console.log('🔍 [PAGE DEBUG] Token in localStorage:', !!token);
+      }
     }
   }, [user, loading]);
 
@@ -184,26 +195,11 @@ function HomePageContent() {
     },
   ];
 
-  // Load theme from localStorage on component mount
+  // Set mounted state for hydration with cleanup
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
-    }
-
-    // Enhanced user logging with authentication details
-    if (user) {
-      console.log('=== User Authentication Status ===');
-      console.log('User:', user);
-      console.log('Role:', user.role);
-      console.log('Permissions:', user.role?.permissions);
-      console.log('Is Active:', user.isActive);
-      console.log('Is Verified:', user.isVerified);
-      console.log('=====================================');
-    }
-  }, [user]);
+    return () => setMounted(false);
+  }, []);
 
   // Check access for all modules when user changes
   useEffect(() => {
@@ -230,17 +226,26 @@ function HomePageContent() {
     }
   }, [user, mounted, hasModuleAccess]);
 
-  // Save theme to localStorage when it changes
+  // Listen for system theme changes
+  useEffect(() => {
+    if (mounted && typeof window !== 'undefined' && theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent) => {
+        document.documentElement.classList.toggle('dark', e.matches);
+      };
+      
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [theme, mounted]);
+
+  // Handle theme changes with proper cleanup
   useEffect(() => {
     if (mounted && typeof window !== 'undefined') {
-      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-      document.documentElement.classList.toggle('dark', isDarkMode);
+      const darkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', darkMode);
     }
-  }, [isDarkMode, mounted]);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  }, [theme, mounted]);
 
   // Enhanced module click handler with detailed access checking
   const handleModuleClick = (module: any, e: React.MouseEvent) => {
@@ -348,7 +353,7 @@ function HomePageContent() {
   };
 
   if (!mounted) {
-    return null; // Prevent hydration mismatch
+    return <></>; // Prevent hydration mismatch
   }
 
   return (
@@ -419,11 +424,11 @@ function HomePageContent() {
            
             {user && (
               <div className="mt-8">
-                <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                <p               className="text-sm text-gray-600 dark:text-gray-300">
                   Welcome back, <span className="font-semibold">{user.displayName}</span>
                 </p>
                 <div className="mt-2 flex items-center justify-center gap-4 text-xs">
-                  <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className="text-gray-500 dark:text-gray-400">
                     Role: {user.role?.name}
                   </span>
                   <span className={`${user.isActive ? 'text-green-400' : 'text-red-400'}`}>
@@ -597,7 +602,7 @@ function HomePageContent() {
   );
 }
 
-export default function HomePage() {
+export default function HomePage(): JSX.Element {
   return (
     <AuthProvider>
       <HomePageContent />

@@ -1,84 +1,82 @@
 'use client';
 
 import React from 'react';
-import { Box, Card, Typography, Button, Input, Divider } from '@mui/joy';
-import { 
-  ThemeToggle, 
-  ThemeSwitch, 
-  ThemeSelect, 
-  CompactThemeControls, 
-  FullThemeControls 
-} from '@/components/theme/SimpleThemeManager';
-import { useTheme } from '@/hooks/useSimpleTheme';
+import {
+  ThemeToggle,
+  ThemeSelect
+} from '@/components/theme/ThemeToggle';
+import { useSimpleTheme } from '@/hooks/useSimpleTheme';
 
 export function SimpleThemeDemo() {
-  const { mode, actualMode } = useTheme();
+  const { theme } = useSimpleTheme();
 
   return (
-    <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Card variant="outlined" sx={{ p: 3 }}>
-        <Typography level="h2" sx={{ mb: 2 }}>
+    <div className="p-6 space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
           Simple Theme System Demo
-        </Typography>
+        </h2>
         
-        <Typography level="body-md" sx={{ mb: 3 }}>
-          Current mode: <strong>{mode}</strong> (actual: <strong>{actualMode}</strong>)
-        </Typography>
+        <p className="text-gray-700 dark:text-gray-300">
+          Current theme: <strong>{theme}</strong>
+        </p>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
-          <ThemeToggle showLabel />
-          <CompactThemeControls />
-        </Box>
+        <div className="flex flex-wrap gap-4">
+          <ThemeToggle showLabel variant="icon" />
+          <ThemeToggle showLabel variant="switch" />
+        </div>
 
-        <Divider sx={{ my: 3 }} />
+        <div className="border-t border-gray-200 dark:border-gray-700 my-6" />
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-          <Card variant="soft" sx={{ p: 3 }}>
-            <Typography level="h4" sx={{ mb: 2 }}>Theme Controls</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <ThemeSwitch />
-              <ThemeSelect />
-            </Box>
-          </Card>
-
-          <Card variant="soft" sx={{ p: 3 }}>
-            <Typography level="h4" sx={{ mb: 2 }}>Component Showcase</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Button variant="solid" color="primary">
-                Primary Button
-              </Button>
-              <Button variant="outlined" color="neutral">
-                Secondary Button
-              </Button>
-              <Input placeholder="Sample input field" />
-            </Box>
-          </Card>
-        </Box>
-      </Card>
-
-      <Card variant="outlined" sx={{ p: 3 }}>
-        <Typography level="h3" sx={{ mb: 3 }}>Full Theme Settings</Typography>
-        <FullThemeControls />
-      </Card>
-
-      <Card variant="outlined" sx={{ p: 3 }}>
-        <Typography level="h3" sx={{ mb: 3 }}>Tailwind + Theme Variables</Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
-          <div className="theme-card-elevated p-4">
-            <h4 className="theme-fg font-semibold mb-2">Theme Card</h4>
-            <p className="theme-muted text-sm">Using theme variables with Tailwind</p>
-            <button className="theme-button mt-2">Theme Button</button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+            <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-4">Theme Controls</h3>
+            <div className="space-y-4">
+              <ThemeSelect showLabel />
+            </div>
           </div>
-          
-          <div className="bg-theme-card border border-theme-border rounded-theme-lg p-4">
-            <h4 className="text-theme-fg font-semibold mb-2">Tailwind Classes</h4>
-            <p className="text-theme-muted text-sm">Using Tailwind utility classes</p>
-            <button className="bg-theme-accent text-white px-4 py-2 rounded-theme mt-2 hover:opacity-90 transition-all">
-              Utility Button
+
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+            <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-4">Component Showcase</h3>
+            <div className="space-y-4">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Primary Button
+              </button>
+              <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                Secondary Button
+              </button>
+              <input 
+                type="text" 
+                placeholder="Sample input field"
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 dark:bg-gray-800 sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Theme Classes Demo
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+            <h4 className="text-gray-900 dark:text-gray-100 font-semibold mb-2">Light/Dark Mode</h4>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Automatically adapts to the current theme</p>
+            <button className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+              Themed Button
             </button>
           </div>
-        </Box>
-      </Card>
-    </Box>
+          
+          <div className="bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900 dark:to-gray-900 rounded-lg p-4">
+            <h4 className="text-gray-900 dark:text-gray-100 font-semibold mb-2">Gradient Theme</h4>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Using gradient backgrounds with theme</p>
+            <button className="mt-2 bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-gray-100 px-4 py-2 rounded hover:bg-white dark:hover:bg-gray-800 transition-all">
+              Gradient Button
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
