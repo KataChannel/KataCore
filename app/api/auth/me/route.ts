@@ -12,16 +12,22 @@ export async function GET(request: NextRequest) {
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return NextResponse.json({ error: 'Token not found' }, { status: 401 });
+      return new Response(JSON.stringify({ error: 'Token not found' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Direct token verification without external service
-    let decoded;
+    let decoded: any;
     try {
       const { payload } = await jwtVerify(token, JWT_SECRET);
       decoded = payload;
     } catch (tokenError) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Direct database query without external service
@@ -48,11 +54,14 @@ export async function GET(request: NextRequest) {
     });
     
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return new Response(JSON.stringify({ error: 'User not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Single response with all data
-    return NextResponse.json({
+    const responseBody = {
       id: user.id,
       email: user.email,
       phone: user.phone,
@@ -71,12 +80,21 @@ export async function GET(request: NextRequest) {
         tokenOptimized: true,
         fetchedAt: new Date().toISOString()
       }
+    };
+
+    return new Response(JSON.stringify(responseBody), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
     console.error('Auth /me error:', error);
-    return NextResponse.json({ 
+    const body = {
       error: 'Internal server error',
       details: process.env.NODE_ENV === 'development' ? error?.message : undefined
-    }, { status: 500 });
+    };
+    return new Response(JSON.stringify(body), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

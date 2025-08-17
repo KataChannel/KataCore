@@ -1,3 +1,19 @@
+model Employee {
+  id            String   @id @default(uuid())
+  name          String
+  phone         String?
+  email         String?
+  position      String?
+  department    String?
+  company       String?
+  startDate     DateTime?
+  employeeCode  String? @unique
+  status        String  @default("active")
+  userId        String? @unique
+  user          users?  @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
@@ -389,6 +405,7 @@ model users {
   conversations_ConversationParticipants                    conversations[]        @relation("ConversationParticipants")
   users_UserFriends_A                                       users[]                @relation("UserFriends")
   users_UserFriends_B                                       users[]                @relation("UserFriends")
+  employee Employee?
 }
 
 enum ConversationType {
