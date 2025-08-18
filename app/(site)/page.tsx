@@ -23,6 +23,13 @@ import {
   XCircleIcon,
   ExclamationTriangleIcon,
   ShieldCheckIcon,
+  HomeIcon,
+  BuildingOfficeIcon,
+  BriefcaseIcon,
+  ClockIcon,
+  CalendarIcon,
+  DocumentTextIcon,
+  SwatchIcon,
 } from '@heroicons/react/24/outline';
 import { SimpleThemeToggle } from '@/components/common/SimpleThemeToggle';
 import { useSimpleTheme } from '@/hooks/useSimpleTheme';
@@ -33,6 +40,30 @@ import {
   AuthProvider,
 } from '@/components/auth/UnifiedAuthProvider';
 import { ClientOnly } from '@/components/ClientOnly';
+import { useModules } from '@/hooks/useModules';
+
+// Icon mapping from string to component
+const iconMapping: Record<string, React.ComponentType<any>> = {
+  'home': HomeIcon,
+  'chart-bar': ChartBarIcon,
+  'users': UsersIcon,
+  'user': UserIcon,
+  'user-group': UserGroupIcon,
+  'cube': CubeIcon,
+  'currency-dollar': CurrencyDollarIcon,
+  'clipboard-document-list': ClipboardDocumentListIcon,
+  'cog': CogIcon,
+  'megaphone': MegaphoneIcon,
+  'chat-bubble-left-right': ChatBubbleLeftRightIcon,
+  'document-chart-bar': DocumentChartBarIcon,
+  'computer-desktop': ComputerDesktopIcon,
+  'building-office': BuildingOfficeIcon,
+  'briefcase': BriefcaseIcon,
+  'clock': ClockIcon,
+  'calendar': CalendarIcon,
+  'document-text': DocumentTextIcon,
+  'swatch': SwatchIcon,
+};
 
 function HomePageContent(): JSX.Element {
   const { theme, setTheme } = useSimpleTheme();
@@ -42,6 +73,16 @@ function HomePageContent(): JSX.Element {
   const [accessCheckResults, setAccessCheckResults] = useState<Record<string, any>>({});
 
   const { user, loading, hasModuleAccess, logout } = useUnifiedAuth();
+
+  // Fetch modules from database
+  const { 
+    modules: dbModules, 
+    loading: modulesLoading, 
+    error: modulesError 
+  } = useModules({
+    userId: user?.id,
+    roleId: user?.roleId,
+  });
 
   // Enhanced user logging and debug information
   useEffect(() => {
@@ -74,126 +115,67 @@ function HomePageContent(): JSX.Element {
     return 'no-access';
   };
 
-  // Enhanced modules with access control integration
-  const modules = [
-    {
-      title: 'Quản lý Bán hàng',
-      subtitle: 'Sales Management',
-      description:
-        'Quản lý quy trình bán hàng, theo dõi đơn hàng và doanh thu. Cốt lõi để tạo dòng tiền cho doanh nghiệp.',
-      icon: ChartBarIcon,
-      href: '/sales',
-      color: 'from-blue-500 to-cyan-500',
-      module: 'sales',
-      permissions: ['read:order', 'create:order', 'manage:pipeline'],
-    },
-    {
-      title: 'Quản lý Khách hàng',
-      subtitle: 'CRM',
-      description:
-        'Tổ chức thông tin khách hàng, tăng cường quan hệ và cải thiện tỷ lệ chuyển đổi đơn hàng.',
-      icon: UsersIcon,
-      href: '/admin/crm',
-      color: 'from-green-500 to-emerald-500',
-      module: 'crm',
-      permissions: ['read:admin', 'read:customer', 'read:lead', 'manage:campaign'],
-    },
-    {
-      title: 'Quản lý Kho',
-      subtitle: 'Inventory Management',
-      description:
-        'Theo dõi tồn kho, nhập/xuất hàng. Thiết yếu cho bán lẻ, phân phối hoặc sản xuất.',
-      icon: CubeIcon,
-      href: '/inventory',
-      color: 'from-orange-500 to-red-500',
-      module: 'inventory',
-      permissions: ['read:product', 'read:stock', 'manage:warehouse'],
-    },
-    {
-      title: 'Quản lý Tài chính',
-      subtitle: 'Accounting & Finance',
-      description: 'Quản lý dòng tiền, hóa đơn điện tử, báo cáo thuế, đảm bảo tuân thủ pháp luật.',
-      icon: CurrencyDollarIcon,
-      href: '/finance',
-      color: 'from-yellow-500 to-orange-500',
-      module: 'finance',
-      permissions: ['read:invoice', 'read:payment', 'read:financial_reports'],
-    },
-    {
-      title: 'Quản lý Nhân sự',
-      subtitle: 'HRM',
-      description:
-        'Quản lý thông tin nhân viên, lương thưởng, chấm công. Quan trọng cho SMEs có đội ngũ lớn.',
-      icon: UserGroupIcon,
-      href: '/hrm',
-      color: 'from-purple-500 to-pink-500',
-      module: 'hrm',
-      permissions: ['read:employee', 'read:attendance', 'read:payroll'],
-    },
-    {
-      title: 'Quản lý Dự án',
-      subtitle: 'Project Management',
-      description: 'Theo dõi tiến độ dự án, phân công nhiệm vụ, hỗ trợ quản lý nội bộ.',
-      icon: ClipboardDocumentListIcon,
-      href: '/projects',
-      color: 'from-indigo-500 to-purple-500',
-      module: 'projects',
-      permissions: ['read:project', 'read:task', 'manage:team'],
-    },
-    {
-      title: 'Quản lý Sản xuất',
-      subtitle: 'Manufacturing',
-      description:
-        'Quản lý quy trình sản xuất, tối ưu hóa nguồn lực. Chỉ cần cho SMEs trong ngành sản xuất.',
-      icon: CogIcon,
-      href: '/manufacturing',
-      color: 'from-gray-500 to-slate-500',
-      module: 'manufacturing',
-      permissions: ['read:production_plan', 'read:work_order', 'manage:quality_control'],
-    },
-    {
-      title: 'Marketing',
-      subtitle: 'Digital Marketing',
-      description:
-        'Hỗ trợ xây dựng chiến dịch tiếp thị, quản lý kênh truyền thông. Thường tận dụng kênh miễn phí cho SMEs nhỏ.',
-      icon: MegaphoneIcon,
-      href: '/marketing',
-      color: 'from-pink-500 to-rose-500',
-      module: 'marketing',
-      permissions: ['read:campaign', 'create:content', 'manage:social_media'],
-    },
-    {
-      title: 'Chăm sóc Khách hàng',
-      subtitle: 'Customer Support',
-      description: 'Quản lý yêu cầu hỗ trợ, cải thiện trải nghiệm khách hàng.',
-      icon: ChatBubbleLeftRightIcon,
-      href: '/support',
-      color: 'from-teal-500 to-cyan-500',
-      module: 'support',
-      permissions: ['read:ticket', 'create:ticket', 'read:knowledge_base'],
-    },
-    {
-      title: 'Báo cáo & Phân tích',
-      subtitle: 'Analytics',
-      description: 'Cung cấp dữ liệu để ra quyết định, phân tích hiệu suất kinh doanh.',
-      icon: DocumentChartBarIcon,
-      href: '/analytics',
-      color: 'from-violet-500 to-purple-500',
-      module: 'analytics',
-      permissions: ['read:dashboard', 'read:report', 'read:business_intelligence'],
-    },
-    {
-      title: 'Thương mại Điện tử',
-      subtitle: 'E-commerce',
-      description:
-        'Quản lý nền tảng bán hàng online, tối ưu website. Phù hợp cho SMEs có kênh bán hàng trực tuyến.',
-      icon: ComputerDesktopIcon,
-      href: '/ecommerce',
-      color: 'from-emerald-500 to-teal-500',
-      module: 'ecommerce',
-      permissions: ['read:catalog', 'read:online_order', 'manage:website'],
-    },
-  ];
+  // Transform database modules to include icon components and fallback for missing modules
+  const modules = React.useMemo(() => {
+    if (dbModules && dbModules.length > 0) {
+      return dbModules.map(module => {
+        const IconComponent = iconMapping[module.icon] || HomeIcon;
+        
+        return {
+          ...module,
+          icon: IconComponent,
+          // Ensure we have proper access control
+          canAccess: user ? module.hasAccess : false,
+        };
+      });
+    }
+
+    // Fallback static modules if database is empty or loading
+    return [
+      {
+        id: 'sales',
+        title: 'Quản lý Bán hàng',
+        titleVi: 'Quản lý Bán hàng',
+        subtitle: 'Sales Management',
+        description: 'Quản lý quy trình bán hàng, theo dõi đơn hàng và doanh thu. Cốt lõi để tạo dòng tiền cho doanh nghiệp.',
+        icon: ChartBarIcon,
+        href: '/sales',
+        color: 'from-blue-500 to-cyan-500',
+        module: 'sales',
+        permissions: ['read:order', 'create:order', 'manage:pipeline'],
+        canAccess: true,
+        hasAccess: false,
+      },
+      {
+        id: 'crm',
+        title: 'Quản lý Khách hàng',
+        titleVi: 'Quản lý Khách hàng',
+        subtitle: 'CRM',
+        description: 'Tổ chức thông tin khách hàng, tăng cường quan hệ và cải thiện tỷ lệ chuyển đổi đơn hàng.',
+        icon: UsersIcon,
+        href: '/admin/crm',
+        color: 'from-green-500 to-emerald-500',
+        module: 'crm',
+        permissions: ['read:admin', 'read:customer', 'read:lead', 'manage:campaign'],
+        canAccess: true,
+        hasAccess: false,
+      },
+      {
+        id: 'hrm',
+        title: 'Quản lý Nhân sự',
+        titleVi: 'Quản lý Nhân sự',
+        subtitle: 'HRM',
+        description: 'Quản lý thông tin nhân viên, lương thưởng, chấm công. Quan trọng cho SMEs có đội ngũ lớn.',
+        icon: UserGroupIcon,
+        href: '/admin/hrm',
+        color: 'from-purple-500 to-pink-500',
+        module: 'hrm',
+        permissions: ['read:employee', 'read:attendance', 'read:payroll'],
+        canAccess: true,
+        hasAccess: false,
+      },
+    ];
+  }, [dbModules, user]);
 
   // Set mounted state for hydration with cleanup
   useEffect(() => {
@@ -203,14 +185,17 @@ function HomePageContent(): JSX.Element {
 
   // Check access for all modules when user changes
   useEffect(() => {
-    if (user && mounted) {
+    if (user && mounted && modules.length > 0) {
       const results: Record<string, any> = {};
 
       modules.forEach((module) => {
-        const moduleAccess = hasModuleAccess(module.module);
+        // Use database access info if available, otherwise fallback to hasModuleAccess
+        const moduleAccess = module.hasAccess !== undefined ? 
+          module.hasAccess : hasModuleAccess(module.module);
+          
         const permissionChecks = module.permissions.map((permission) => ({
           permission,
-          hasAccess: false, // Set to false since hasPermission is not available
+          hasAccess: false, // Set to false since detailed permission checking isn't implemented yet
         }));
 
         results[module.module] = {
@@ -224,7 +209,7 @@ function HomePageContent(): JSX.Element {
       setAccessCheckResults(results);
       console.log('Module Access Results:', results);
     }
-  }, [user, mounted, hasModuleAccess]);
+  }, [user, mounted, hasModuleAccess, modules]);
 
   // Listen for system theme changes
   useEffect(() => {
@@ -274,8 +259,9 @@ function HomePageContent(): JSX.Element {
       return;
     }
 
-    // Check module access
-    const hasAccess = hasModuleAccess(module.module);
+    // Check module access - use database info if available
+    const hasAccess = module.hasAccess !== undefined ? 
+      module.hasAccess : hasModuleAccess(module.module);
     console.log(`User has access to module ${module.module}:`, hasAccess);
 
     if (!hasAccess) {
@@ -440,10 +426,36 @@ function HomePageContent(): JSX.Element {
             )}
           </div>
 
+          {/* Loading state for modules */}
+          {(loading || modulesLoading) && (
+            <div className="col-span-full text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600 dark:text-gray-400">
+                {loading ? 'Đang xác thực...' : 'Đang tải modules...'}
+              </p>
+            </div>
+          )}
+
+          {/* Error state for modules */}
+          {modulesError && (
+            <div className="col-span-full text-center py-12">
+              <p className="text-red-600 dark:text-red-400 mb-4">
+                Lỗi tải modules: {modulesError}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Thử lại
+              </button>
+            </div>
+          )}
+
+          {/* Modules grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {modules.map((module, index) => {
+            {!loading && !modulesLoading && !modulesError && modules.map((module, index) => {
               const IconComponent = module.icon;
-              const hasAccess = user ? hasModuleAccess(module.module) : false;
+              const hasAccess = user ? (module.hasAccess !== undefined ? module.hasAccess : hasModuleAccess(module.module)) : false;
               const accessResult = accessCheckResults[module.module];
               const isDisabled = user && !hasAccess;
               const badgeInfo = getAccessBadgeInfo(module);

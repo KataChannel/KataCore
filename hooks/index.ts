@@ -10,3 +10,6 @@ export { useTheme, useSafeTheme, ThemeProvider } from './useSimpleTheme';
 // Admin permissions hooks
 export { useResponsive } from './useResponsive';
 export { usePermissionData } from './usePermissionData';
+
+// Modules hook
+export { useModules } from './useModules';

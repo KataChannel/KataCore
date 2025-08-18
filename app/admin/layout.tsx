@@ -475,21 +475,21 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               isCollapsed ? 'justify-center w-full' : 'space-x-3'
             }`}>
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-sm">K</span>
+          <span className="text-white font-bold text-sm">K</span>
               </div>
               {!isCollapsed && (
-                <span className="text-lg font-semibold text-primary whitespace-nowrap overflow-hidden">
-                  KataCore
-                </span>
+          <span className="text-lg font-semibold text-primary whitespace-nowrap overflow-hidden">
+            KataCore
+          </span>
               )}
             </div>
             {!isCollapsed && (
               <button
-                onClick={toggleSidebar}
-                className="p-2 rounded-lg hover:bg-hover transition-colors flex-shrink-0"
-                title="Toggle sidebar (Ctrl+B)"
+          onClick={toggleSidebar}
+          className="p-2 rounded-lg hover:bg-hover transition-colors flex-shrink-0"
+          title="Toggle sidebar (Ctrl+B)"
               >
-                <Bars3Icon className="h-5 w-5 text-text-secondary" />
+          <Bars3Icon className="h-5 w-5 text-text-secondary" />
               </button>
             )}
           </div>
@@ -498,25 +498,25 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           {sidebarOpen && !isCollapsed && (
             <div className="px-4 py-3 border-b border-border">
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Tìm kiếm menu... (Ctrl+K)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 bg-background border border-border rounded-lg text-sm 
-                           focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent
-                           placeholder-text-secondary transition-colors"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-hover rounded"
-                  >
-                    <XMarkIcon className="h-3 w-3 text-text-secondary" />
-                  </button>
-                )}
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Tìm kiếm menu... (Ctrl+K)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 bg-background border border-border rounded-lg text-sm 
+               focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent
+               placeholder-text-secondary transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-hover rounded"
+            >
+              <XMarkIcon className="h-3 w-3 text-text-secondary" />
+            </button>
+          )}
               </div>
             </div>
           )}
@@ -525,125 +525,122 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           {sidebarOpen && isCollapsed && (
             <div className="px-2 py-3 border-b border-border flex justify-center">
               <button
-                onClick={() => {
-                  setIsCollapsed(false);
-                  setTimeout(() => searchInputRef.current?.focus(), 300);
-                }}
-                className="p-2 rounded-lg hover:bg-hover transition-colors"
-                title="Expand to search (Ctrl+K)"
+          onClick={() => {
+            setIsCollapsed(false);
+            setTimeout(() => searchInputRef.current?.focus(), 300);
+          }}
+          className="p-2 rounded-lg hover:bg-hover transition-colors"
+          title="Expand to search (Ctrl+K)"
               >
-                <MagnifyingGlassIcon className="h-5 w-5 text-text-secondary" />
+          <MagnifyingGlassIcon className="h-5 w-5 text-text-secondary" />
               </button>
             </div>
           )}
 
           {/* Sidebar Menu */}
           <nav className={`
-            relative flex-1 px-2 py-4 space-y-1 overflow-y-auto transition-all duration-300
-            ${isCollapsed ? 'px-2' : 'px-4'}
+            relative flex-1 overflow-y-auto transition-all duration-300
+            ${isCollapsed ? 'px-2 py-4 space-y-2' : 'px-4 py-4 space-y-1'}
           `}>
             {/* No search results message */}
             {hasSearchResults && !isCollapsed && (
-              <div className="text-center py-8">
-                <div className="text-text-secondary text-sm">
-                  <MagnifyingGlassIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>Không tìm thấy menu nào</p>
-                  <p className="text-xs mt-1">với từ khóa "{searchQuery}"</p>
-                </div>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+          <MagnifyingGlassIcon className="w-8 h-8 mb-2 text-gray-400" />
+          <p className="text-sm text-gray-500">Không tìm thấy menu nào</p>
+          <p className="text-xs text-gray-400 mt-1">với từ khóa "{searchQuery}"</p>
               </div>
             )}
 
             {filteredMenuItems.filter(item => item.canAccess).map((item) => (
               <div key={item.path}>
-                <button
-                  onClick={() => {
-                    if (item.children && !isCollapsed) {
-                      toggleMenuExpansion(item.path);
-                    } else if (item.children && isCollapsed) {
-                      // Expand sidebar first, then expand menu
-                      setIsCollapsed(false);
-                      setTimeout(() => toggleMenuExpansion(item.path), 300);
-                    } else {
-                      router.push(item.path);
-                    }
-                  }}
-                  className={`
-                    group relative w-full flex items-center px-3 py-2.5 rounded-lg transition-all duration-200
-                    ${item.active 
-                      ? 'bg-gray-300 text-primary shadow-sm' 
-                      : 'text-text-secondary hover:bg-hover hover:text-primary'
-                    }
-                    ${isCollapsed ? 'justify-center' : 'justify-between'}
-                  `}
-                  title={isCollapsed ? item.title : undefined}
-                >
-                  <div className={`flex items-center transition-all duration-200 ${
-                    isCollapsed ? 'justify-center' : 'space-x-3'
-                  }`}>
-                    <item.icon className="h-5 w-5 flex-shrink-0" />
-                    {!isCollapsed && (
-                      <span className="font-medium truncate">
-                        {searchQuery.trim() ? highlightSearchTerm(item.title, searchQuery) : item.title}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Tooltip for collapsed state */}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                      {item.title}
-                      {item.children && (
-                        <span className="ml-2 text-xs opacity-75">▶</span>
-                      )}
-                    </div>
-                  )}
-                  
-                  {!isCollapsed && item.children && (
-                    <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${
-                      shouldExpand(item) ? 'rotate-180' : ''
-                    }`} />
-                  )}
-                </button>
-                
-                {/* Submenu */}
-                {!isCollapsed && item.children && shouldExpand(item) && (
-                  <div className="ml-6 mt-1 space-y-1">
-                    {item.children.filter((child: any) => child.canAccess).map((subItem: any) => (
-                      <button
-                        key={subItem.href}
-                        onClick={() => router.push(subItem.href)}
-                        className={`
-                          w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
-                          ${pathname === subItem.href 
-                            ? 'bg-gray-300 text-primary' 
-                            : 'text-text-secondary hover:bg-hover hover:text-primary'
-                          }
-                        `}
-                      >
-                        <subItem.icon className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate">
-                          {searchQuery.trim() ? highlightSearchTerm(subItem.nameVi, searchQuery) : subItem.nameVi}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+          <button
+            onClick={() => {
+              if (item.children && !isCollapsed) {
+                toggleMenuExpansion(item.path);
+              } else if (item.children && isCollapsed) {
+                setIsCollapsed(false);
+                setTimeout(() => toggleMenuExpansion(item.path), 300);
+              } else {
+                router.push(item.path);
+              }
+            }}
+            className={`
+              group relative w-full flex items-center rounded-lg transition-all duration-200
+              ${isCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2.5'}
+              ${item.active 
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm' 
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
+              }
+            `}
+            title={isCollapsed ? item.title : undefined}
+          >
+            <div className={`flex items-center transition-all duration-200 ${
+              isCollapsed ? 'justify-center' : 'space-x-3'
+            }`}>
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {!isCollapsed && (
+                <span className="font-medium truncate">
+            {searchQuery.trim() ? highlightSearchTerm(item.title, searchQuery) : item.title}
+                </span>
+              )}
+            </div>
+            
+            {/* Tooltip for collapsed state */}
+            {isCollapsed && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+                {item.title}
+                {item.children && (
+            <span className="ml-2 text-xs opacity-75">▶</span>
                 )}
+              </div>
+            )}
+            
+            {!isCollapsed && item.children && (
+              <ChevronDownIcon className={`w-4 h-4 transition-transform duration-200 ${
+                shouldExpand(item) ? 'rotate-180' : ''
+              }`} />
+            )}
+          </button>
+          
+          {/* Submenu */}
+          {!isCollapsed && item.children && shouldExpand(item) && (
+            <div className="ml-6 mt-1 space-y-1">
+              {item.children.filter((child: any) => child.canAccess).map((subItem: any) => (
+                <button
+            key={subItem.href}
+            onClick={() => router.push(subItem.href)}
+            className={`
+              w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
+              ${pathname === subItem.href 
+                ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
+              }
+            `}
+                >
+            <subItem.icon className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">
+              {searchQuery.trim() ? highlightSearchTerm(subItem.nameVi, searchQuery) : subItem.nameVi}
+            </span>
+                </button>
+              ))}
+            </div>
+          )}
               </div>
             ))}
 
             {/* Expand button at bottom for collapsed state */}
             {isCollapsed && (
-              <div className="pt-4 border-t border-border">
-                <button
-                  onClick={() => setIsCollapsed(false)}
-                  className="w-full p-2 rounded-lg hover:bg-hover transition-colors group"
-                  title="Expand sidebar (Ctrl+B)"
-                >
-                  <ChevronRightIcon className="h-5 w-5 text-text-secondary mx-auto" />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                    Expand sidebar
-                  </div>
-                </button>
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setIsCollapsed(false)}
+            className="w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+            title="Expand sidebar (Ctrl+B)"
+          >
+            <ChevronRightIcon className="w-5 h-5 text-gray-400 mx-auto" />
+            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+              Expand sidebar
+            </div>
+          </button>
               </div>
             )}
           </nav>
