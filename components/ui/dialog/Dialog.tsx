@@ -148,7 +148,7 @@ export const Dialog: React.FC<DialogProps> = ({
   const overlayClasses = [
     'fixed inset-0 z-50 flex items-center justify-center',
     fullScreen ? 'p-0' : 'p-4',
-    'bg-black bg-opacity-50 backdrop-blur-sm',
+    'bg-black/50 backdrop-blur-sm',
     overlayClassName,
   ].filter(Boolean).join(' ');
 

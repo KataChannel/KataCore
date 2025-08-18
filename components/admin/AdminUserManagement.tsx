@@ -505,7 +505,7 @@ export function AdminUserManagement() {
 
       {/* User Details Modal */}
       {showUserModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-background rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-background border-b border-border px-6 py-4">
               <div className="flex items-center justify-between">

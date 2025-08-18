@@ -156,7 +156,7 @@ export default function Page() {
             ></circle>
           </svg>
         </div>
-        <div className="z-10 p-8 bg-black bg-opacity-30 rounded-xl shadow-2xl backdrop-filter backdrop-blur-sm border-4 border-white border-opacity-30">
+        <div className="z-10 p-8 bg-black/30 rounded-xl shadow-2xl backdrop-filter backdrop-blur-sm border-4 border-white/30">
           <h1 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">
             CÂU CHUYỆN VỀ InnerBright
           </h1>
@@ -470,7 +470,7 @@ const InfoCard = ({
 
 // Reusable component for contact information
 const ContactInfo = ({ icon, text }: { icon: string; text: string }) => (
-  <div className="flex items-center space-x-3 bg-white bg-opacity-20 p-4 rounded-lg shadow-md">
+  <div className="flex items-center space-x-3 bg-white/20 p-4 rounded-lg shadow-md">
     <div className="text-3xl">{icon}</div>
     <span className="text-xl font-medium">{text}</span>
   </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import EmployeeTable from './components/EmployeeTable.new';
+import EmployeeTable from '../components/EmployeeTable.new';
 
 export default function HRMAdminPageNew() {
   return (

@@ -3,9 +3,10 @@ import React from 'react';
 import { DialogProvider } from '@/components/ui/dialog';
 import EmployeeTableAdvanced from './components/EmployeeTableAdvanced';
 
+
 export default function HRMAdvancedPage() {
   return (
-        <DialogProvider>
+  <DialogProvider>
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

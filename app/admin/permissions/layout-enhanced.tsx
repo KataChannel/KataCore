@@ -45,16 +45,16 @@ const EnhancedLayout: React.FC<EnhancedLayoutProps> = ({
   return (
     <div className="h-screen flex bg-gray-50 dark:bg-gray-900">
       {/* Sidebar */}
-      <AdminPermissionsSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+      {/* <AdminPermissionsSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} /> */}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <AdminPermissionsHeader 
+        {/* <AdminPermissionsHeader 
           onMenuToggle={toggleSidebar} 
           title={title}
           subtitle={subtitle}
-        />
+        /> */}
 
         {/* Main Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
@@ -67,7 +67,7 @@ const EnhancedLayout: React.FC<EnhancedLayoutProps> = ({
         </main>
 
         {/* Footer */}
-        <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+        {/* <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between">
             <div className="text-sm text-gray-500 dark:text-gray-400">
               © 2025 TazaGroup. All rights reserved.
@@ -84,7 +84,7 @@ const EnhancedLayout: React.FC<EnhancedLayoutProps> = ({
               </div>
             </div>
           </div>
-        </footer>
+        </footer> */}
       </div>
     </div>
   );
