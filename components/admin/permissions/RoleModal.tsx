@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Role, Permission, RoleForm } from '../types';
+import { Role, Permission, RoleForm } from '@/types/admin/permissions';
 
 interface RoleModalProps {
   role: Role | null;

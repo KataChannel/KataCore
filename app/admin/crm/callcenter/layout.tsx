@@ -134,7 +134,7 @@ export default function CallCenterLayout({ children }: CallCenterLayoutProps) {
 
   return (
     <CallCenterContext.Provider value={contextValue}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen">
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { TabType } from '../types';
+import { TabType } from '@/types/admin/permissions';
 
 interface LoadingErrorProps {
   loading: boolean;

@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
       },
       accessToken: result.tokens.accessToken,
     });
-
+    console.log('Login successful:', result.tokens.accessToken);
+    
     // Set both refresh and access token cookies
     response.cookies.set('refreshToken', result.tokens.refreshToken, {
       httpOnly: true,

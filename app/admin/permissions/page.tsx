@@ -20,8 +20,8 @@ import {
   TrashIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import { FilterControls } from './components';
-import PermissionSyncManager from './components/PermissionSyncManager';
+import { FilterControls } from '@/components/admin/permissions';
+import PermissionSyncManager from '@/components/admin/permissions/PermissionSyncManager';
 
 interface Role {
   id: string;

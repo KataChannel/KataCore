@@ -6,3 +6,7 @@ export { default as useTranslation } from './useTranslation';
 
 // Simple theme system - only theme hooks
 export { useTheme, useSafeTheme, ThemeProvider } from './useSimpleTheme';
+
+// Admin permissions hooks
+export { useResponsive } from './useResponsive';
+export { usePermissionData } from './usePermissionData';

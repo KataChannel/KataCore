@@ -3,6 +3,7 @@ export * from './ui';
 export * from './forms';
 export * from './layout';
 export * from './common';
+export * from './admin';
 
 // Simple theme system
 export { SimpleThemeProvider } from './providers/SimpleThemeProvider';

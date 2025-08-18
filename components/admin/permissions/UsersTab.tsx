@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { UsersIcon, PencilIcon, TrashIcon, KeyIcon, EyeIcon, LockClosedIcon, LockOpenIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { User } from '../types';
+import { User } from '@/types/admin/permissions';
 
 interface UsersTabProps {
   users: User[];

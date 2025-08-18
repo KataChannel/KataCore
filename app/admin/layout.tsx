@@ -8,6 +8,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
   UserIcon,
   BellIcon,
   Cog6ToothIcon,
@@ -52,11 +53,12 @@ const iconMapping: Record<string, React.ComponentType<any>> = {
 };
 
 const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed for better mobile UX
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(false); // For collapsed sidebar state
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -124,24 +126,97 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     setMounted(true);
   }, []);
 
-  // Keyboard shortcut for search (Ctrl+K or Cmd+K)
+  // Auto-detect screen size and adjust sidebar behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      
+      // Large screens: keep sidebar open by default
+      if (width >= 1024) {
+        setSidebarOpen(true);
+        setMobileMenuOpen(false);
+        setIsCollapsed(false);
+      }
+      // Medium screens: collapse sidebar to save space
+      else if (width >= 768) {
+        setSidebarOpen(true);
+        setMobileMenuOpen(false);
+        setIsCollapsed(true);
+      }
+      // Mobile screens: hide sidebar, use mobile menu
+      else {
+        setSidebarOpen(false);
+        setIsCollapsed(false);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+    
+    // Listen for resize events
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (mobileMenuOpen && !target.closest('[data-sidebar="mobile"]')) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [mobileMenuOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
+
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+K or Cmd+K for search
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         searchInputRef.current?.focus();
       }
       
-      // ESC to clear search
-      if (e.key === 'Escape' && searchQuery.trim()) {
-        setSearchQuery('');
-        searchInputRef.current?.blur();
+      // ESC to clear search or close mobile menu
+      if (e.key === 'Escape') {
+        if (searchQuery.trim()) {
+          setSearchQuery('');
+          searchInputRef.current?.blur();
+        } else if (mobileMenuOpen) {
+          setMobileMenuOpen(false);
+        }
+      }
+
+      // Ctrl+B or Cmd+B to toggle sidebar
+      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+        e.preventDefault();
+        if (window.innerWidth >= 1024) {
+          toggleSidebar();
+        } else {
+          toggleMobileMenu();
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [searchQuery]);
+  }, [searchQuery, mobileMenuOpen]);
 
   // Authentication check
   // Authentication check
@@ -321,7 +396,26 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    // Desktop/tablet behavior
+    if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
+        // Large screens: toggle between open and collapsed
+        if (sidebarOpen && !isCollapsed) {
+          setIsCollapsed(true);
+        } else if (sidebarOpen && isCollapsed) {
+          setSidebarOpen(false);
+        } else {
+          setSidebarOpen(true);
+          setIsCollapsed(false);
+        }
+      } else {
+        // Medium screens: toggle collapsed state
+        setIsCollapsed(!isCollapsed);
+      }
+    } else {
+      // Mobile: use mobile menu instead
+      toggleMobileMenu();
+    }
   };
 
   const toggleMobileMenu = () => {
@@ -363,33 +457,45 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'dark' : ''}`}>
       <div className="flex bg-background">
+
+
         {/* Desktop Sidebar */}
         <aside className={`
-          hidden lg:flex flex-col bg-surface border-r border-border transition-all duration-300 z-20
-          ${sidebarOpen ? 'w-64' : 'w-16'}
+          hidden md:flex flex-col bg-surface border-r border-border transition-all duration-300 z-20
+          ${sidebarOpen ? (isCollapsed ? 'w-16' : 'w-64') : 'w-0 border-r-0'}
+          ${!sidebarOpen ? 'overflow-hidden' : ''}
         `}>
           {/* Sidebar Header */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-            <div className={`flex items-center ${sidebarOpen ? 'space-x-3' : 'justify-center'}`}>
-              {sidebarOpen && (
-                <>
-                  <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">K</span>
-                  </div>
-                  <span className="text-lg font-semibold text-primary">KataCore</span>
-                </>
+          <div className={`
+            flex items-center h-16 px-4 border-b border-border transition-all duration-300
+            ${isCollapsed ? 'justify-center px-2' : 'justify-between'}
+            ${!sidebarOpen ? 'opacity-0' : 'opacity-100'}
+          `}>
+            <div className={`flex items-center transition-all duration-300 ${
+              isCollapsed ? 'justify-center w-full' : 'space-x-3'
+            }`}>
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-sm">K</span>
+              </div>
+              {!isCollapsed && (
+                <span className="text-lg font-semibold text-primary whitespace-nowrap overflow-hidden">
+                  KataCore
+                </span>
               )}
             </div>
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-lg hover:bg-hover transition-colors"
-            >
-              <Bars3Icon className="h-5 w-5 text-text-secondary" />
-            </button>
+            {!isCollapsed && (
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-lg hover:bg-hover transition-colors flex-shrink-0"
+                title="Toggle sidebar (Ctrl+B)"
+              >
+                <Bars3Icon className="h-5 w-5 text-text-secondary" />
+              </button>
+            )}
           </div>
 
           {/* Search Box */}
-          {sidebarOpen && (
+          {sidebarOpen && !isCollapsed && (
             <div className="px-4 py-3 border-b border-border">
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
@@ -415,10 +521,29 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
             </div>
           )}
 
+          {/* Collapsed Search Icon */}
+          {sidebarOpen && isCollapsed && (
+            <div className="px-2 py-3 border-b border-border flex justify-center">
+              <button
+                onClick={() => {
+                  setIsCollapsed(false);
+                  setTimeout(() => searchInputRef.current?.focus(), 300);
+                }}
+                className="p-2 rounded-lg hover:bg-hover transition-colors"
+                title="Expand to search (Ctrl+K)"
+              >
+                <MagnifyingGlassIcon className="h-5 w-5 text-text-secondary" />
+              </button>
+            </div>
+          )}
+
           {/* Sidebar Menu */}
-          <nav className="relative flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          <nav className={`
+            relative flex-1 px-2 py-4 space-y-1 overflow-y-auto transition-all duration-300
+            ${isCollapsed ? 'px-2' : 'px-4'}
+          `}>
             {/* No search results message */}
-            {hasSearchResults && (
+            {hasSearchResults && !isCollapsed && (
               <div className="text-center py-8">
                 <div className="text-text-secondary text-sm">
                   <MagnifyingGlassIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -432,52 +557,71 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               <div key={item.path}>
                 <button
                   onClick={() => {
-                    if (item.children) {
+                    if (item.children && !isCollapsed) {
                       toggleMenuExpansion(item.path);
+                    } else if (item.children && isCollapsed) {
+                      // Expand sidebar first, then expand menu
+                      setIsCollapsed(false);
+                      setTimeout(() => toggleMenuExpansion(item.path), 300);
                     } else {
                       router.push(item.path);
                     }
                   }}
                   className={`
-                    hover:bg-gray-300 w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors
+                    group relative w-full flex items-center px-3 py-2.5 rounded-lg transition-all duration-200
                     ${item.active 
-                      ? 'bg-gray-300' 
+                      ? 'bg-gray-300 text-primary shadow-sm' 
                       : 'text-text-secondary hover:bg-hover hover:text-primary'
                     }
+                    ${isCollapsed ? 'justify-center' : 'justify-between'}
                   `}
+                  title={isCollapsed ? item.title : undefined}
                 >
-                  <div className="flex items-center space-x-3">
-                    <item.icon className="h-5 w-5" />
-                    {sidebarOpen && (
-                      <span className="font-medium">
+                  <div className={`flex items-center transition-all duration-200 ${
+                    isCollapsed ? 'justify-center' : 'space-x-3'
+                  }`}>
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    {!isCollapsed && (
+                      <span className="font-medium truncate">
                         {searchQuery.trim() ? highlightSearchTerm(item.title, searchQuery) : item.title}
                       </span>
                     )}
                   </div>
-                  {sidebarOpen && item.children && (
-                    <ChevronDownIcon className={`h-4 w-4 transition-transform ${
+                  
+                  {/* Tooltip for collapsed state */}
+                  {isCollapsed && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+                      {item.title}
+                      {item.children && (
+                        <span className="ml-2 text-xs opacity-75">▶</span>
+                      )}
+                    </div>
+                  )}
+                  
+                  {!isCollapsed && item.children && (
+                    <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${
                       shouldExpand(item) ? 'rotate-180' : ''
                     }`} />
                   )}
                 </button>
                 
                 {/* Submenu */}
-                {sidebarOpen && item.children && shouldExpand(item) && (
-                  <div className="ml-6 mt-2 space-y-1">
+                {!isCollapsed && item.children && shouldExpand(item) && (
+                  <div className="ml-6 mt-1 space-y-1">
                     {item.children.filter((child: any) => child.canAccess).map((subItem: any) => (
                       <button
                         key={subItem.href}
                         onClick={() => router.push(subItem.href)}
                         className={`
-                         hover:bg-gray-300 w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
+                          w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-sm
                           ${pathname === subItem.href 
-                            ? 'bg-gray-300' 
+                            ? 'bg-gray-300 text-primary' 
                             : 'text-text-secondary hover:bg-hover hover:text-primary'
                           }
                         `}
                       >
-                        <subItem.icon className="h-4 w-4" />
-                        <span>
+                        <subItem.icon className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">
                           {searchQuery.trim() ? highlightSearchTerm(subItem.nameVi, searchQuery) : subItem.nameVi}
                         </span>
                       </button>
@@ -486,20 +630,43 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
                 )}
               </div>
             ))}
+
+            {/* Expand button at bottom for collapsed state */}
+            {isCollapsed && (
+              <div className="pt-4 border-t border-border">
+                <button
+                  onClick={() => setIsCollapsed(false)}
+                  className="w-full p-2 rounded-lg hover:bg-hover transition-colors group"
+                  title="Expand sidebar (Ctrl+B)"
+                >
+                  <ChevronRightIcon className="h-5 w-5 text-text-secondary mx-auto" />
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+                    Expand sidebar
+                  </div>
+                </button>
+              </div>
+            )}
           </nav>
         </aside>
 
         {/* Mobile Sidebar Overlay */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={toggleMobileMenu} />
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300" 
+            onClick={toggleMobileMenu}
+            data-sidebar="overlay"
+          />
         )}
 
         {/* Mobile Sidebar */}
-        <aside className={`
-          fixed inset-y-0 left-0 w-64 border-r border-border z-50 transform transition-transform duration-300 lg:hidden
-          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}
-        `}>
+        <aside 
+          className={`
+            fixed inset-y-0 left-0 w-64 max-w-[80vw] bg-surface border-r border-border z-50 
+            transform transition-transform duration-300 md:hidden
+            ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          `}
+          data-sidebar="mobile"
+        >
           {/* Mobile Sidebar Header */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-border">
             <div className="flex items-center space-x-3">
@@ -616,24 +783,41 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           </nav>
         </aside>
 
+
+
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className={`
+          flex-1 flex flex-col overflow-hidden transition-all duration-300
+          ${sidebarOpen && !isCollapsed ? 'md:ml-0' : ''}
+        `}>
           {/* Top Header */}
-          <header className="bg-surface border-b border-border h-16 flex items-center justify-between px-4 lg:px-6">
+          <header className="bg-surface border-b border-border h-16 flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
             <div className="flex items-center space-x-4">
               {/* Mobile Menu Toggle */}
               <button
                 onClick={toggleMobileMenu}
-                className="p-2 rounded-lg hover:bg-hover transition-colors lg:hidden"
+                className="p-2 rounded-lg hover:bg-hover transition-colors md:hidden"
+                title="Open menu"
               >
                 <Bars3Icon className="h-5 w-5 text-text-secondary" />
               </button>
+
+              {/* Desktop Sidebar Toggle - only show when sidebar is hidden */}
+              {!sidebarOpen && (
+                <button
+                  onClick={toggleSidebar}
+                  className="hidden md:flex p-2 rounded-lg hover:bg-hover transition-colors"
+                  title="Open sidebar (Ctrl+B)"
+                >
+                  <Bars3Icon className="h-5 w-5 text-text-secondary" />
+                </button>
+              )}
               
               {/* Breadcrumb */}
               <div className="hidden sm:flex items-center space-x-2 text-sm">
                 <span className="text-text-secondary">Admin</span>
                 <span className="text-text-secondary">/</span>
-                <span className="text-primary font-medium">
+                <span className="text-primary font-medium truncate max-w-[200px]">
                   {(() => {
                     const segments = pathname.split('/');
                     const lastSegment = segments[segments.length - 1];
@@ -643,7 +827,22 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Search Toggle for Mobile */}
+              <button
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    toggleMobileMenu();
+                  } else {
+                    searchInputRef.current?.focus();
+                  }
+                }}
+                className="p-2 rounded-lg hover:bg-hover transition-colors sm:hidden"
+                title="Search"
+              >
+                <MagnifyingGlassIcon className="h-5 w-5 text-text-secondary" />
+              </button>
+
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
@@ -666,14 +865,14 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* User Profile */}
               <div className="flex items-center space-x-3">
                 <div className="hidden sm:block text-right">
-                  <p className="text-sm font-medium text-primary">
+                  <p className="text-sm font-medium text-primary truncate max-w-[120px]">
                     {user?.displayName || 'Admin User'}
                   </p>
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs text-text-secondary truncate max-w-[120px]">
                     {user?.role?.name || 'Administrator'}
                   </p>
                 </div>
-                <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-sm font-bold">
                     {user?.displayName?.charAt(0) || 'A'}
                   </span>
@@ -691,10 +890,8 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
 
           {/* Main Content Area */}
           <main className="flex-1 relative overflow-y-auto focus:outline-none bg-background transition-colors duration-300">
-            <div className="py-6">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                {children}
-              </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+              {children}
             </div>
           </main>
         </div>

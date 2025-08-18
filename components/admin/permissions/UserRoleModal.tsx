@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { User, Role, UserForm } from '../types';
+import { User, Role, UserForm } from '@/types/admin/permissions';
 
 interface UserRoleModalProps {
   user: User;

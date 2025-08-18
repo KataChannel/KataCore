@@ -190,7 +190,7 @@ export class UnifiedAuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: 15 * 60, // 15 minutes in seconds
+      expiresIn: 24 * 60 * 60, // 15 minutes in seconds
     };
   }
 

@@ -5,7 +5,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import { Role } from '../types';
+import { Role } from '@/types/admin/permissions';
 
 interface RolesTabProps {
   roles: Role[];
