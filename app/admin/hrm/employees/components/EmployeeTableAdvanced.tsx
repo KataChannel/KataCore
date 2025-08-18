@@ -7,43 +7,42 @@ import { TablePaginationComponent as TablePagination } from '@/components/ui/tab
 import { createColumn, createActionsColumn, defaultTableProps } from '@/components/ui/table/index';
 import { TableDialogActions, TableActions } from '@/components/ui/table/TableDialogActions';
 import { useDialog, useConfirm, FormDialog } from '@/components/ui/dialog';
+import { useEmployees, Employee as EmployeeType } from '@/hooks';
 import type { TableColumn } from '@/components/ui/table/types';
 import type { FormField } from '@/components/ui/dialog/types';
-
-interface Employee {
-  id: string;
-  employeeId: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  department: string;
-  position: string;
-  salary: number;
-  startDate: string;
-  status: 'active' | 'inactive' | 'terminated';
-  avatar?: string;
-}
 
 interface EmployeeTableAdvancedProps {
   className?: string;
 }
 
 export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvancedProps) {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   
   // Dialog hooks
   const addDialog = useDialog();
   const editDialog = useDialog();
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [editingEmployee, setEditingEmployee] = useState<EmployeeType | null>(null);
   const confirm = useConfirm();
+
+  // Use the database hook instead of local state
+  const {
+    employees,
+    loading,
+    error,
+    total,
+    page,
+    pageSize,
+    refresh,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee,
+    bulkDeleteEmployees,
+  } = useEmployees();
 
   // Form field definitions for employee dialog
   const employeeFormFields: FormField[] = [
     {
-      name: 'employeeId',
+      name: 'employeeCode',
       label: 'Mã nhân viên',
       type: 'text',
       placeholder: 'Nhập mã nhân viên (VD: EMP001)',
@@ -58,7 +57,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       }
     },
     {
-      name: 'fullName',
+      name: 'name',
       label: 'Họ và tên',
       type: 'text',
       placeholder: 'Nhập họ và tên đầy đủ',
@@ -124,21 +123,6 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       required: true
     },
     {
-      name: 'salary',
-      label: 'Lương (VNĐ)',
-      type: 'number',
-      placeholder: '15000000',
-      required: true,
-      validation: {
-        min: 1000000,
-        custom: (value: number) => {
-          if (!value) return 'Lương là bắt buộc';
-          if (value < 1000000) return 'Lương phải từ 1,000,000 VNĐ trở lên';
-          return null;
-        }
-      }
-    },
-    {
       name: 'startDate',
       label: 'Ngày bắt đầu làm việc',
       type: 'date',
@@ -157,118 +141,44 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     }
   ];
 
-  // Sample data for demonstration
-  useEffect(() => {
-    const sampleData: Employee[] = [
-      {
-        id: '1',
-        employeeId: 'EMP001',
-        fullName: 'Nguyễn Văn An',
-        email: 'an.nguyen@company.com',
-        phone: '0123456789',
-        department: 'Công nghệ thông tin',
-        position: 'Lập trình viên Senior',
-        salary: 25000000,
-        startDate: '2020-01-15',
-        status: 'active',
-        avatar: '/images/avatars/1.jpg'
-      },
-      {
-        id: '2',
-        employeeId: 'EMP002',
-        fullName: 'Trần Thị Bình',
-        email: 'binh.tran@company.com',
-        phone: '0123456790',
-        department: 'Nhân sự',
-        position: 'Quản lý nhân sự',
-        salary: 20000000,
-        startDate: '2019-03-20',
-        status: 'active'
-      },
-      {
-        id: '3',
-        employeeId: 'EMP003',
-        fullName: 'Lê Minh Cường',
-        email: 'cuong.le@company.com',
-        phone: '0123456791',
-        department: 'Kinh doanh',
-        position: 'Nhân viên kinh doanh',
-        salary: 15000000,
-        startDate: '2021-06-10',
-        status: 'inactive'
-      },
-      {
-        id: '4',
-        employeeId: 'EMP004',
-        fullName: 'Phạm Thị Dung',
-        email: 'dung.pham@company.com',
-        phone: '0123456792',
-        department: 'Tài chính',
-        position: 'Kế toán trưởng',
-        salary: 30000000,
-        startDate: '2018-02-01',
-        status: 'active'
-      },
-      {
-        id: '5',
-        employeeId: 'EMP005',
-        fullName: 'Võ Văn Phúc',
-        email: 'phuc.vo@company.com',
-        phone: '0123456793',
-        department: 'Marketing',
-        position: 'Marketing Specialist',
-        salary: 18000000,
-        startDate: '2022-01-15',
-        status: 'active'
-      },
-    ];
-
-    // Simulate API call
-    setTimeout(() => {
-      setEmployees(sampleData);
-      setLoading(false);
-    }, 1000);
-  }, []);
-
   // Define columns using the table library
-  const columns: TableColumn<Employee>[] = [
-    createColumn<Employee>({
+  const columns: TableColumn<EmployeeType>[] = [
+    createColumn<EmployeeType>({
       id: 'avatar',
       header: '',
-      accessorKey: 'avatar',
       sortable: false,
       filterable: false,
       resizable: false,
       width: 60,
-      cell: (value: string | undefined, row: Employee) => (
+      cell: (value: string | undefined, row: EmployeeType) => (
         <div className="flex items-center justify-center">
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-            {row.fullName.charAt(0)}
+            {row.name.charAt(0)}
           </div>
         </div>
       ),
     }),
-    createColumn<Employee>({
-      id: 'employeeId',
+    createColumn<EmployeeType>({
+      id: 'employeeCode',
       header: 'Mã NV',
-      accessorKey: 'employeeId',
+      accessorKey: 'employeeCode',
       sortable: true,
       filterable: true,
       width: 100,
       sticky: 'left',
     }),
-    createColumn<Employee>({
-      id: 'fullName',
+    createColumn<EmployeeType>({
+      id: 'name',
       header: 'Họ và tên',
-      accessorKey: 'fullName',
+      accessorKey: 'name',
       sortable: true,
       filterable: true,
       minWidth: 200,
       sticky: 'left',
-      cell: (value: string, row: Employee) => (
+      cell: (value: string, row: EmployeeType) => (
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-            {row.fullName.charAt(0)}
+            {row.name.charAt(0)}
           </div>
           <div>
             <div className="font-medium text-gray-900 dark:text-gray-100">{value}</div>
@@ -277,7 +187,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
         </div>
       ),
     }),
-    createColumn<Employee>({
+    createColumn<EmployeeType>({
       id: 'phone',
       header: 'Số điện thoại',
       accessorKey: 'phone',
@@ -285,7 +195,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       filterable: true,
       width: 150,
     }),
-    createColumn<Employee>({
+    createColumn<EmployeeType>({
       id: 'department',
       header: 'Phòng ban',
       accessorKey: 'department',
@@ -298,7 +208,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
         </span>
       ),
     }),
-    createColumn<Employee>({
+    createColumn<EmployeeType>({
       id: 'position',
       header: 'Chức vụ',
       accessorKey: 'position',
@@ -306,23 +216,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       filterable: true,
       width: 200,
     }),
-    createColumn<Employee>({
-      id: 'salary',
-      header: 'Lương',
-      accessorKey: 'salary',
-      sortable: true,
-      filterable: true,
-      width: 150,
-      cell: (value: number) => (
-        <span className="font-medium text-green-600 dark:text-green-400">
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-          }).format(value)}
-        </span>
-      ),
-    }),
-    createColumn<Employee>({
+    createColumn<EmployeeType>({
       id: 'startDate',
       header: 'Ngày bắt đầu',
       accessorKey: 'startDate',
@@ -331,24 +225,24 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       width: 130,
       cell: (value: string) => (
         <span className="text-gray-600 dark:text-gray-400">
-          {new Date(value).toLocaleDateString('vi-VN')}
+          {value ? new Date(value).toLocaleDateString('vi-VN') : ''}
         </span>
       ),
     }),
-    createColumn<Employee>({
+    createColumn<EmployeeType>({
       id: 'status',
       header: 'Trạng thái',
       accessorKey: 'status',
       sortable: true,
       filterable: true,
       width: 120,
-      cell: (value: 'active' | 'inactive' | 'terminated') => {
-        const statusConfig = {
+      cell: (value: string) => {
+        const statusConfig: Record<string, { label: string; color: string }> = {
           active: { label: 'Hoạt động', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
           inactive: { label: 'Tạm nghỉ', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
           terminated: { label: 'Đã nghỉ', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
         };
-        const config = statusConfig[value];
+        const config = statusConfig[value] || statusConfig.active;
         return (
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
             {config.label}
@@ -356,12 +250,12 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
         );
       },
     }),
-    createActionsColumn<Employee>({
+    createActionsColumn<EmployeeType>({
       id: 'actions',
       header: 'Thao tác',
       sticky: 'right',
       width: 120,
-      cell: (_: any, row: Employee) => (
+      cell: (_: any, row: EmployeeType) => (
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handleEdit(row.id)}
@@ -405,16 +299,20 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
 
     const confirmed = await confirm({
       title: 'Xác nhận xóa nhân viên',
-      message: `Bạn có chắc chắn muốn xóa nhân viên "${employee.fullName}"? Hành động này không thể hoàn tác.`,
+      message: `Bạn có chắc chắn muốn xóa nhân viên "${employee.name}"? Hành động này không thể hoàn tác.`,
       confirmText: 'Xóa',
       cancelText: 'Hủy',
       destructive: true
     });
 
     if (confirmed) {
-      setEmployees(prev => prev.filter(emp => emp.id !== id));
-      // Here you would typically call an API to delete the employee
-      console.log('Deleted employee:', id);
+      try {
+        await deleteEmployee(id);
+        console.log('Deleted employee:', id);
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        // You could add a toast notification here
+      }
     }
   };
 
@@ -428,59 +326,44 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     });
 
     if (confirmed) {
-      setEmployees(prev => prev.filter(emp => !selectedIds.includes(emp.id)));
-      setSelectedRows([]); // Clear selection after deletion
-      console.log('Bulk deleted employees:', selectedIds);
+      try {
+        await bulkDeleteEmployees(selectedIds);
+        setSelectedRows([]); // Clear selection after deletion
+        console.log('Bulk deleted employees:', selectedIds);
+      } catch (error) {
+        console.error('Error bulk deleting employees:', error);
+        // You could add a toast notification here
+      }
     }
   };
 
-  const handleAddSubmit = (data: Partial<Employee>) => {
-    const newEmployee: Employee = {
-      id: `emp_${Date.now()}`,
-      employeeId: data.employeeId!,
-      fullName: data.fullName!,
-      email: data.email!,
-      phone: data.phone!,
-      department: data.department!,
-      position: data.position!,
-      salary: Number(data.salary!),
-      startDate: data.startDate!,
-      status: (data.status as 'active' | 'inactive' | 'terminated') || 'active'
-    };
-
-    setEmployees(prev => [...prev, newEmployee]);
-    addDialog.close();
-    console.log('Added new employee:', newEmployee);
+  const handleAddSubmit = async (data: Partial<EmployeeType>) => {
+    try {
+      await createEmployee(data);
+      addDialog.close();
+      console.log('Added new employee:', data);
+    } catch (error) {
+      console.error('Error creating employee:', error);
+      // You could add a toast notification here
+    }
   };
 
-  const handleEditSubmit = (data: Partial<Employee>) => {
+  const handleEditSubmit = async (data: Partial<EmployeeType>) => {
     if (!editingEmployee) return;
 
-    const updatedEmployee: Employee = {
-      ...editingEmployee,
-      employeeId: data.employeeId!,
-      fullName: data.fullName!,
-      email: data.email!,
-      phone: data.phone!,
-      department: data.department!,
-      position: data.position!,
-      salary: Number(data.salary!),
-      startDate: data.startDate!,
-      status: (data.status as 'active' | 'inactive' | 'terminated') || 'active'
-    };
-
-    setEmployees(prev => prev.map(emp => 
-      emp.id === editingEmployee.id ? updatedEmployee : emp
-    ));
-    editDialog.close();
-    setEditingEmployee(null);
-    console.log('Updated employee:', updatedEmployee);
+    try {
+      await updateEmployee(editingEmployee.id, data);
+      editDialog.close();
+      setEditingEmployee(null);
+      console.log('Updated employee:', data);
+    } catch (error) {
+      console.error('Error updating employee:', error);
+      // You could add a toast notification here
+    }
   };
 
   const handleRefresh = () => {
-    setLoading(true);
-    // Simulate refresh
-    setTimeout(() => setLoading(false), 1000);
+    refresh();
   };
 
   const handleExport = (format: 'csv' | 'json') => {
@@ -488,7 +371,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     // Export functionality will be handled by the table library
   };
 
-  const handleRowClick = (row: Employee) => {
+  const handleRowClick = (row: EmployeeType) => {
     console.log('Row clicked:', row);
     // Navigate to employee detail or open modal
   };
@@ -562,7 +445,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
         columns={columns}
         loading={loading}
         {...defaultTableProps}
-        getRowId={(row: Employee) => row.id}
+        getRowId={(row: EmployeeType) => row.id}
         onRowClick={handleRowClick}
         onSelectionChange={handleSelectionChange}
         enableColumnResize={true}
@@ -626,7 +509,16 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
         size="lg"
         formFields={employeeFormFields}
         submitText="Cập nhật"
-        defaultValues={editingEmployee || undefined}
+        defaultValues={editingEmployee ? {
+          employeeCode: editingEmployee.employeeCode || '',
+          name: editingEmployee.name,
+          email: editingEmployee.email || '',
+          phone: editingEmployee.phone || '',
+          department: editingEmployee.department || '',
+          position: editingEmployee.position || '',
+          startDate: editingEmployee.startDate ? editingEmployee.startDate.split('T')[0] : '',
+          status: editingEmployee.status
+        } : undefined}
       />
     </div>
   );

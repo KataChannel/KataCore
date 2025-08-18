@@ -1,10 +1,27 @@
 'use client';
 import React from 'react';
 import { DialogProvider } from '@/components/ui/dialog';
+import { useEmployees } from '@/hooks';
 import EmployeeTableAdvanced from './components/EmployeeTableAdvanced';
 
-
 export default function HRMAdvancedPage() {
+  const { employees, loading } = useEmployees();
+
+  // Calculate stats from real data
+  const totalEmployees = employees.length;
+  const activeEmployees = employees.filter(emp => emp.status === 'active').length;
+  const inactiveEmployees = employees.filter(emp => emp.status === 'inactive').length;
+  
+  // Calculate new employees this month
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const newEmployeesThisMonth = employees.filter(emp => {
+    if (!emp.createdAt) return false;
+    const createdDate = new Date(emp.createdAt);
+    return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear;
+  }).length;
+
   return (
   <DialogProvider>
     <div className="p-6 space-y-6">
@@ -26,7 +43,9 @@ export default function HRMAdvancedPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tổng nhân viên</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">245</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {loading ? '...' : totalEmployees}
+              </p>
             </div>
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,8 +54,7 @@ export default function HRMAdvancedPage() {
             </div>
           </div>
           <div className="mt-4 flex items-center">
-            <span className="text-sm text-green-600 dark:text-green-400">+12%</span>
-            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">so với tháng trước</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Tổng số nhân viên trong hệ thống</span>
           </div>
         </div>
 
@@ -44,7 +62,9 @@ export default function HRMAdvancedPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Đang làm việc</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">223</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {loading ? '...' : activeEmployees}
+              </p>
             </div>
             <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +73,9 @@ export default function HRMAdvancedPage() {
             </div>
           </div>
           <div className="mt-4 flex items-center">
-            <span className="text-sm text-green-600 dark:text-green-400">91%</span>
+            <span className="text-sm text-green-600 dark:text-green-400">
+              {loading ? '...' : totalEmployees > 0 ? Math.round((activeEmployees / totalEmployees) * 100) : 0}%
+            </span>
             <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">tỷ lệ hoạt động</span>
           </div>
         </div>
@@ -61,8 +83,10 @@ export default function HRMAdvancedPage() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nghỉ phép</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">15</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tạm nghỉ</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {loading ? '...' : inactiveEmployees}
+              </p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,8 +95,10 @@ export default function HRMAdvancedPage() {
             </div>
           </div>
           <div className="mt-4 flex items-center">
-            <span className="text-sm text-yellow-600 dark:text-yellow-400">6%</span>
-            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">tỷ lệ nghỉ phép</span>
+            <span className="text-sm text-yellow-600 dark:text-yellow-400">
+              {loading ? '...' : totalEmployees > 0 ? Math.round((inactiveEmployees / totalEmployees) * 100) : 0}%
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">tỷ lệ tạm nghỉ</span>
           </div>
         </div>
 
@@ -80,7 +106,9 @@ export default function HRMAdvancedPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nhân viên mới</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">7</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {loading ? '...' : newEmployeesThisMonth}
+              </p>
             </div>
             <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

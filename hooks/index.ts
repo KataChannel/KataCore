@@ -13,3 +13,7 @@ export { usePermissionData } from './usePermissionData';
 
 // Modules hook
 export { useModules } from './useModules';
+
+// HRM hooks
+export { useEmployees } from './useEmployees';
+export type { Employee, EmployeeFilters, UseEmployeesResult } from './useEmployees';
