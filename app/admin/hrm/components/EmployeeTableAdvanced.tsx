@@ -5,7 +5,10 @@ import { AdvancedTable } from '@/components/ui/table/AdvancedTable';
 import { TableToolbar } from '@/components/ui/table/TableToolbar';
 import { TablePaginationComponent as TablePagination } from '@/components/ui/table/TablePagination';
 import { createColumn, createActionsColumn, defaultTableProps } from '@/components/ui/table/index';
+import { TableDialogActions, TableActions } from '@/components/ui/table/TableDialogActions';
+import { useDialog, useConfirm, FormDialog } from '@/components/ui/dialog';
 import type { TableColumn } from '@/components/ui/table/types';
+import type { FormField } from '@/components/ui/dialog/types';
 
 interface Employee {
   id: string;
@@ -29,6 +32,130 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  
+  // Dialog hooks
+  const addDialog = useDialog();
+  const editDialog = useDialog();
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const confirm = useConfirm();
+
+  // Form field definitions for employee dialog
+  const employeeFormFields: FormField[] = [
+    {
+      name: 'employeeId',
+      label: 'Mã nhân viên',
+      type: 'text',
+      placeholder: 'Nhập mã nhân viên (VD: EMP001)',
+      required: true,
+      validation: {
+        pattern: /^EMP\d{3,}$/,
+        custom: (value: string) => {
+          if (!value) return 'Mã nhân viên là bắt buộc';
+          if (!/^EMP\d{3,}$/.test(value)) return 'Mã nhân viên phải có dạng EMP + ít nhất 3 chữ số (VD: EMP001)';
+          return null;
+        }
+      }
+    },
+    {
+      name: 'fullName',
+      label: 'Họ và tên',
+      type: 'text',
+      placeholder: 'Nhập họ và tên đầy đủ',
+      required: true,
+      validation: {
+        minLength: 2,
+        custom: (value: string) => {
+          if (!value) return 'Họ tên là bắt buộc';
+          if (value.length < 2) return 'Họ tên phải có ít nhất 2 ký tự';
+          return null;
+        }
+      }
+    },
+    {
+      name: 'email',
+      label: 'Email',
+      type: 'email',
+      placeholder: 'example@company.com',
+      required: true,
+      validation: {
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        custom: (value: string) => {
+          if (!value) return 'Email là bắt buộc';
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Email không hợp lệ';
+          return null;
+        }
+      }
+    },
+    {
+      name: 'phone',
+      label: 'Số điện thoại',
+      type: 'text',
+      placeholder: '0123456789',
+      required: true,
+      validation: {
+        pattern: /^[0-9]{10,11}$/,
+        custom: (value: string) => {
+          if (!value) return 'Số điện thoại là bắt buộc';
+          if (!/^[0-9]{10,11}$/.test(value)) return 'Số điện thoại phải có 10-11 chữ số';
+          return null;
+        }
+      }
+    },
+    {
+      name: 'department',
+      label: 'Phòng ban',
+      type: 'select',
+      required: true,
+      options: [
+        { value: 'Công nghệ thông tin', label: 'Công nghệ thông tin' },
+        { value: 'Nhân sự', label: 'Nhân sự' },
+        { value: 'Tài chính', label: 'Tài chính' },
+        { value: 'Kinh doanh', label: 'Kinh doanh' },
+        { value: 'Marketing', label: 'Marketing' },
+        { value: 'Vận hành', label: 'Vận hành' }
+      ]
+    },
+    {
+      name: 'position',
+      label: 'Chức vụ',
+      type: 'text',
+      placeholder: 'Nhập chức vụ',
+      required: true
+    },
+    {
+      name: 'salary',
+      label: 'Lương (VNĐ)',
+      type: 'number',
+      placeholder: '15000000',
+      required: true,
+      validation: {
+        min: 1000000,
+        custom: (value: number) => {
+          if (!value) return 'Lương là bắt buộc';
+          if (value < 1000000) return 'Lương phải từ 1,000,000 VNĐ trở lên';
+          return null;
+        }
+      }
+    },
+    {
+      name: 'startDate',
+      label: 'Ngày bắt đầu làm việc',
+      type: 'date',
+      required: true
+    },
+    {
+      name: 'status',
+      label: 'Trạng thái',
+      type: 'select',
+      required: true,
+      options: [
+        { value: 'active', label: 'Hoạt động' },
+        { value: 'inactive', label: 'Tạm nghỉ' },
+        { value: 'terminated', label: 'Đã nghỉ việc' }
+      ]
+    }
+  ];
 
   // Sample data for demonstration
   useEffect(() => {
@@ -238,8 +365,8 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handleEdit(row.id)}
-            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            title="Chỉnh sửa"
+            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors"
+            title="Chỉnh sửa nhân viên"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -247,8 +374,8 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
           </button>
           <button
             onClick={() => handleDelete(row.id)}
-            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            title="Xóa"
+            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 transition-colors"
+            title="Xóa nhân viên"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -260,14 +387,94 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
   ];
 
   // Event handlers
-  const handleEdit = (id: string) => {
-    console.log('Edit employee:', id);
-    // Implement edit logic
+  const handleAdd = () => {
+    addDialog.open();
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Delete employee:', id);
-    // Implement delete logic
+  const handleEdit = (id: string) => {
+    const employee = employees.find(emp => emp.id === id);
+    if (employee) {
+      setEditingEmployee(employee);
+      editDialog.open();
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const employee = employees.find(emp => emp.id === id);
+    if (!employee) return;
+
+    const confirmed = await confirm({
+      title: 'Xác nhận xóa nhân viên',
+      message: `Bạn có chắc chắn muốn xóa nhân viên "${employee.fullName}"? Hành động này không thể hoàn tác.`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      destructive: true
+    });
+
+    if (confirmed) {
+      setEmployees(prev => prev.filter(emp => emp.id !== id));
+      // Here you would typically call an API to delete the employee
+      console.log('Deleted employee:', id);
+    }
+  };
+
+  const handleBulkDelete = async (selectedIds: string[]) => {
+    const confirmed = await confirm({
+      title: 'Xác nhận xóa nhiều nhân viên',
+      message: `Bạn có chắc chắn muốn xóa ${selectedIds.length} nhân viên đã chọn? Hành động này không thể hoàn tác.`,
+      confirmText: 'Xóa tất cả',
+      cancelText: 'Hủy',
+      destructive: true
+    });
+
+    if (confirmed) {
+      setEmployees(prev => prev.filter(emp => !selectedIds.includes(emp.id)));
+      setSelectedRows([]); // Clear selection after deletion
+      console.log('Bulk deleted employees:', selectedIds);
+    }
+  };
+
+  const handleAddSubmit = (data: Partial<Employee>) => {
+    const newEmployee: Employee = {
+      id: `emp_${Date.now()}`,
+      employeeId: data.employeeId!,
+      fullName: data.fullName!,
+      email: data.email!,
+      phone: data.phone!,
+      department: data.department!,
+      position: data.position!,
+      salary: Number(data.salary!),
+      startDate: data.startDate!,
+      status: (data.status as 'active' | 'inactive' | 'terminated') || 'active'
+    };
+
+    setEmployees(prev => [...prev, newEmployee]);
+    addDialog.close();
+    console.log('Added new employee:', newEmployee);
+  };
+
+  const handleEditSubmit = (data: Partial<Employee>) => {
+    if (!editingEmployee) return;
+
+    const updatedEmployee: Employee = {
+      ...editingEmployee,
+      employeeId: data.employeeId!,
+      fullName: data.fullName!,
+      email: data.email!,
+      phone: data.phone!,
+      department: data.department!,
+      position: data.position!,
+      salary: Number(data.salary!),
+      startDate: data.startDate!,
+      status: (data.status as 'active' | 'inactive' | 'terminated') || 'active'
+    };
+
+    setEmployees(prev => prev.map(emp => 
+      emp.id === editingEmployee.id ? updatedEmployee : emp
+    ));
+    editDialog.close();
+    setEditingEmployee(null);
+    console.log('Updated employee:', updatedEmployee);
   };
 
   const handleRefresh = () => {
@@ -286,9 +493,9 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     // Navigate to employee detail or open modal
   };
 
-  const handleSelectionChange = (selectedRows: string[]) => {
-    console.log('Selected rows:', selectedRows);
-    // Handle bulk actions
+  const handleSelectionChange = (selectedRowIds: string[]) => {
+    setSelectedRows(selectedRowIds);
+    console.log('Selected rows:', selectedRowIds);
   };
 
   if (error) {
@@ -313,6 +520,42 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
 
   return (
     <div className={`bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+      {/* Toolbar with Add button and bulk actions */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Quản lý nhân viên
+            </h2>
+            {selectedRows.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Đã chọn {selectedRows.length} nhân viên
+                </span>
+                <button
+                  onClick={() => handleBulkDelete(selectedRows)}
+                  className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors flex items-center space-x-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Xóa đã chọn</span>
+                </button>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleAdd}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Thêm nhân viên</span>
+          </button>
+        </div>
+      </div>
+
       {/* Advanced Table with all features */}
       <AdvancedTable
         data={employees}
@@ -337,7 +580,10 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
             <p className="text-gray-500 dark:text-gray-400 mb-4">
               Bắt đầu bằng cách thêm nhân viên đầu tiên
             </p>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={handleAdd}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
               Thêm nhân viên
             </button>
           </div>
@@ -351,6 +597,36 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
           </div>
         }
         className="min-h-[400px]"
+      />
+
+      {/* Add Employee Dialog */}
+      <FormDialog
+        isOpen={addDialog.isOpen}
+        onClose={addDialog.close}
+        onSubmit={handleAddSubmit}
+        title="Thêm nhân viên mới"
+        size="lg"
+        formFields={employeeFormFields}
+        submitText="Thêm nhân viên"
+        defaultValues={{
+          startDate: new Date().toISOString().split('T')[0],
+          status: 'active'
+        }}
+      />
+
+      {/* Edit Employee Dialog */}
+      <FormDialog
+        isOpen={editDialog.isOpen}
+        onClose={() => {
+          editDialog.close();
+          setEditingEmployee(null);
+        }}
+        onSubmit={handleEditSubmit}
+        title="Chỉnh sửa thông tin nhân viên"
+        size="lg"
+        formFields={employeeFormFields}
+        submitText="Cập nhật"
+        defaultValues={editingEmployee || undefined}
       />
     </div>
   );

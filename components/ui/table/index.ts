@@ -7,6 +7,15 @@ export { AdvancedTable } from './AdvancedTable';
 export { TableToolbar } from './TableToolbar';
 export { TablePaginationComponent as TablePagination } from './TablePagination';
 
+// Dialog integration
+export { 
+  TableActions, 
+  TableToolbarActions, 
+  createActionsColumn as createDialogActionsColumn,
+  type TableDialogActions,
+  type TableDialogConfig
+} from './TableDialogActions';
+
 // Type exports
 export type {
   TableColumn,
