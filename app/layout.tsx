@@ -8,7 +8,10 @@ import './styles/globals.css';
 import { UnifiedAuthProvider } from '@/components/auth/UnifiedAuthProvider';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import { SimpleThemeProvider } from '@/components/providers/SimpleThemeProvider';
+import { ToastProvider } from '@/components/ui/toast/ToastProvider';
 import { GraphQLProvider } from '@/components/providers/GraphQLProvider';
+import { Suspense } from 'react';
+import { ClientOnly } from '@/components/ClientOnly';
 
 // Fix: Loại bỏ viewport khỏi metadata
 export const metadata: Metadata = {
@@ -45,35 +48,25 @@ export const viewport: Viewport = {
   themeColor: '#000000',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="vi" suppressHydrationWarning>
-      <head>
-        {/* ThemeInitScript will be added after fixing import */}
-        {/* PWA meta tags */}
-        <meta name="application-name" content="TazaCore" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="TazaCore" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#4F46E5" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        
-        {/* Link tags for PWA */}
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-      </head>
-      <body className="font-sans" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <head />
+      <body>
         <SimpleThemeProvider>
-          <GraphQLProvider>
-            <UnifiedAuthProvider>
-              {children}
-              <PWAInstallPrompt />
-            </UnifiedAuthProvider>
-          </GraphQLProvider>
+          <UnifiedAuthProvider>
+            <ToastProvider>
+              <Suspense fallback={<div>Loading...</div>}>
+                <ClientOnly>
+                  {children}
+                </ClientOnly>
+              </Suspense>
+            </ToastProvider>
+          </UnifiedAuthProvider>
         </SimpleThemeProvider>
       </body>
     </html>

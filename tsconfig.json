@@ -23,6 +23,7 @@
       "@/components/*": ["./components/*"],
       "@/app-components/*": ["./app/components/*"],
       "@/lib/*": ["./lib/*"],
+      "@/auth": ["./lib/auth"],
       "@/hooks/*": ["./hooks/*"],
       "@/app-hooks/*": ["./app/hooks/*"],
       "@/types/*": ["./types/*"],

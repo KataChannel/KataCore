@@ -2,14 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { AdvancedTable } from '@/components/ui/table/AdvancedTable';
-import { TableToolbar } from '@/components/ui/table/TableToolbar';
 import { TablePaginationComponent as TablePagination } from '@/components/ui/table/TablePagination';
 import { createColumn, createActionsColumn, defaultTableProps } from '@/components/ui/table/index';
 import { TableDialogActions, TableActions } from '@/components/ui/table/TableDialogActions';
 import { useDialog, useConfirm, FormDialog } from '@/components/ui/dialog';
 import { useEmployees, Employee as EmployeeType } from '@/hooks';
+import { useToastActions } from '@/components/ui/toast/ToastProvider';
+import { BatchOperations } from '@/components/ui/table/BatchOperations';
+import { EmployeeDetailView } from '@/components/ui/dialogs/EmployeeDetailView';
 import type { TableColumn } from '@/components/ui/table/types';
 import type { FormField } from '@/components/ui/dialog/types';
+import EmployeeToolbar from '@/components/ui/table/EmployeeToolbar';
+import ImportDialog from '@/components/ui/table/ImportDialog';
 
 interface EmployeeTableAdvancedProps {
   className?: string;
@@ -17,6 +21,9 @@ interface EmployeeTableAdvancedProps {
 
 export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvancedProps) {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeType | null>(null);
+  const { success, error: showError, warning } = useToastActions();
   
   // Dialog hooks
   const addDialog = useDialog();
@@ -24,7 +31,7 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
   const [editingEmployee, setEditingEmployee] = useState<EmployeeType | null>(null);
   const confirm = useConfirm();
 
-  // Use the database hook instead of local state
+  // Use the enhanced database hook
   const {
     employees,
     loading,
@@ -37,6 +44,12 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     updateEmployee,
     deleteEmployee,
     bulkDeleteEmployees,
+    // Enhanced functionality
+    exportEmployees,
+    importEmployees,
+    setFilters,
+    clearFilters,
+    currentFilters,
   } = useEmployees();
 
   // Form field definitions for employee dialog
@@ -244,8 +257,8 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
         };
         const config = statusConfig[value] || statusConfig.active;
         return (
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
-            {config.label}
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${config?.color || ''}`}>
+            {config?.label || value}
           </span>
         );
       },
@@ -258,8 +271,18 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       cell: (_: any, row: EmployeeType) => (
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => handleEdit(row.id)}
+            onClick={() => handleView(row)}
             className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors"
+            title="Xem chi tiết"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => handleEdit(row.id)}
+            className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/20 transition-colors"
             title="Chỉnh sửa nhân viên"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,6 +308,10 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     addDialog.open();
   };
 
+  const handleView = (employee: EmployeeType) => {
+    setSelectedEmployee(employee);
+  };
+
   const handleEdit = (id: string) => {
     const employee = employees.find(emp => emp.id === id);
     if (employee) {
@@ -308,10 +335,9 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     if (confirmed) {
       try {
         await deleteEmployee(id);
-        console.log('Deleted employee:', id);
-      } catch (error) {
-        console.error('Error deleting employee:', error);
-        // You could add a toast notification here
+        success('Xóa thành công', `Đã xóa nhân viên "${employee.name}"`);
+      } catch (err) {
+        showError('Lỗi xóa nhân viên', 'Không thể xóa nhân viên. Vui lòng thử lại.');
       }
     }
   };
@@ -329,10 +355,9 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       try {
         await bulkDeleteEmployees(selectedIds);
         setSelectedRows([]); // Clear selection after deletion
-        console.log('Bulk deleted employees:', selectedIds);
-      } catch (error) {
-        console.error('Error bulk deleting employees:', error);
-        // You could add a toast notification here
+        success('Xóa hàng loạt thành công', `Đã xóa ${selectedIds.length} nhân viên`);
+      } catch (err) {
+        showError('Lỗi xóa hàng loạt', 'Không thể xóa một số nhân viên. Vui lòng thử lại.');
       }
     }
   };
@@ -341,10 +366,9 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
     try {
       await createEmployee(data);
       addDialog.close();
-      console.log('Added new employee:', data);
-    } catch (error) {
-      console.error('Error creating employee:', error);
-      // You could add a toast notification here
+      success('Thêm thành công', `Đã thêm nhân viên "${data.name}"`);
+    } catch (err) {
+      showError('Lỗi thêm nhân viên', 'Không thể thêm nhân viên. Vui lòng kiểm tra thông tin.');
     }
   };
 
@@ -355,20 +379,66 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
       await updateEmployee(editingEmployee.id, data);
       editDialog.close();
       setEditingEmployee(null);
-      console.log('Updated employee:', data);
-    } catch (error) {
-      console.error('Error updating employee:', error);
-      // You could add a toast notification here
+      success('Cập nhật thành công', `Đã cập nhật thông tin nhân viên "${data.name}"`);
+    } catch (err) {
+      showError('Lỗi cập nhật nhân viên', 'Không thể cập nhật thông tin. Vui lòng thử lại.');
     }
+  };
+
+  // Enhanced handlers for import and filtering
+  const handleImport = async (file: File) => {
+    try {
+      const result = await importEmployees(file);
+      setShowImportDialog(false);
+      
+      if (result.success) {
+        success(
+          'Import thành công', 
+          `Đã import dữ liệu thành công`,
+          {
+            action: {
+              label: 'Làm mới',
+              onClick: () => refresh()
+            }
+          }
+        );
+      } else if (result.errors.length > 0) {
+        warning('Import hoàn tất với lỗi', `Có ${result.errors.length} lỗi trong quá trình import`);
+      }
+      
+      return {
+        success: result.success,
+        data: [],
+        errors: result.errors,
+        imported: 0,
+        total: 0
+      };
+    } catch (err) {
+      showError('Lỗi import', 'Không thể import dữ liệu. Vui lòng kiểm tra định dạng file.');
+      return {
+        success: false,
+        data: [],
+        errors: [{ message: 'Có lỗi xảy ra khi nhập dữ liệu' }],
+        imported: 0,
+        total: 0
+      };
+    }
+  };
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters);
   };
 
   const handleRefresh = () => {
     refresh();
   };
 
-  const handleExport = (format: 'csv' | 'json') => {
-    console.log('Export data as:', format);
-    // Export functionality will be handled by the table library
+  const handleExport = async (format: 'xlsx' | 'csv') => {
+    try {
+      await exportEmployees(format);
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   const handleRowClick = (row: EmployeeType) => {
@@ -379,6 +449,51 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
   const handleSelectionChange = (selectedRowIds: string[]) => {
     setSelectedRows(selectedRowIds);
     console.log('Selected rows:', selectedRowIds);
+  };
+
+  // Batch operation handlers
+  const handleBulkUpdate = async (employeeIds: string[], updates: Partial<EmployeeType>) => {
+    // Since there's no bulkUpdateEmployees, we'll update each individually
+    for (const employeeId of employeeIds) {
+      await updateEmployee(employeeId, updates);
+    }
+  };
+
+  const handleBulkDeleteFromBatch = async (employeeIds: string[]) => {
+    await bulkDeleteEmployees(employeeIds);
+  };
+
+  const handleExportSelected = async (employeeIds: string[]) => {
+    await exportEmployees('xlsx');
+  };
+
+  const handleClearSelection = () => {
+    setSelectedRows([]);
+  };
+
+  // Employee detail handlers
+  const handleEmployeeUpdate = async (updates: Partial<EmployeeType>) => {
+    if (!selectedEmployee) return;
+    await updateEmployee(selectedEmployee.id, updates);
+    setSelectedEmployee(null);
+  };
+
+  const handleEmployeeDelete = async () => {
+    if (!selectedEmployee) return;
+    
+    const confirmed = await confirm({
+      title: 'Xác nhận xóa nhân viên',
+      message: `Bạn có chắc chắn muốn xóa nhân viên "${selectedEmployee.name}"? Hành động này không thể hoàn tác.`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      destructive: true
+    });
+
+    if (confirmed) {
+      await deleteEmployee(selectedEmployee.id);
+      setSelectedEmployee(null);
+      success('Xóa thành công', `Đã xóa nhân viên "${selectedEmployee.name}"`);
+    }
   };
 
   if (error) {
@@ -403,41 +518,28 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
 
   return (
     <div className={`bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
-      {/* Toolbar with Add button and bulk actions */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Quản lý nhân viên
-            </h2>
-            {selectedRows.length > 0 && (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Đã chọn {selectedRows.length} nhân viên
-                </span>
-                <button
-                  onClick={() => handleBulkDelete(selectedRows)}
-                  className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors flex items-center space-x-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  <span>Xóa đã chọn</span>
-                </button>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={handleAdd}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Thêm nhân viên</span>
-          </button>
-        </div>
-      </div>
+      {/* Enhanced Toolbar */}
+      <EmployeeToolbar
+        filters={currentFilters}
+        onFiltersChange={handleFiltersChange}
+        onClearFilters={clearFilters}
+        onRefresh={handleRefresh}
+        onExport={handleExport}
+        onImport={() => setShowImportDialog(true)}
+        onAddEmployee={handleAdd}
+        loading={loading}
+        totalCount={total}
+      />
+
+      {/* Batch Operations */}
+      <BatchOperations
+        selectedEmployees={selectedRows}
+        employees={employees}
+        onBulkUpdate={handleBulkUpdate}
+        onBulkDelete={handleBulkDeleteFromBatch}
+        onExport={handleExportSelected}
+        onClearSelection={handleClearSelection}
+      />
 
       {/* Advanced Table with all features */}
       <AdvancedTable
@@ -520,6 +622,25 @@ export default function EmployeeTableAdvanced({ className }: EmployeeTableAdvanc
           status: editingEmployee.status
         } : undefined}
       />
+
+      {/* Import Dialog */}
+      <ImportDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onImport={handleImport}
+        title="Nhập dữ liệu nhân viên"
+        description="Chọn file Excel hoặc CSV để nhập dữ liệu nhân viên vào hệ thống"
+      />
+
+      {/* Employee Detail View */}
+      {selectedEmployee && (
+        <EmployeeDetailView
+          employee={selectedEmployee}
+          onClose={() => setSelectedEmployee(null)}
+          onUpdate={handleEmployeeUpdate}
+          onDelete={handleEmployeeDelete}
+        />
+      )}
     </div>
   );
 }

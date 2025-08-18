@@ -11,8 +11,17 @@ export async function GET(request: Request) {
     const department = url.searchParams.get('department') || undefined;
     const position = url.searchParams.get('position') || undefined;
     const status = url.searchParams.get('status') || undefined;
+    const company = url.searchParams.get('company') || undefined;
+    const sortBy = url.searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = url.searchParams.get('sortOrder') || 'desc';
+    const startDateFrom = url.searchParams.get('startDateFrom') || undefined;
+    const startDateTo = url.searchParams.get('startDateTo') || undefined;
+    const salaryFrom = url.searchParams.get('salaryFrom') || undefined;
+    const salaryTo = url.searchParams.get('salaryTo') || undefined;
 
     const where: any = {};
+    
+    // Search functionality
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -21,16 +30,43 @@ export async function GET(request: Request) {
         { employeeCode: { contains: search, mode: 'insensitive' } }
       ];
     }
+    
+    // Filter functionality
     if (department) where.department = department;
-    if (position) where.position = position;
+    if (position) where.position = { contains: position, mode: 'insensitive' };
     if (status) where.status = status;
+    if (company) where.company = { contains: company, mode: 'insensitive' };
+    
+    // Date range filtering
+    if (startDateFrom || startDateTo) {
+      where.startDate = {};
+      if (startDateFrom) where.startDate.gte = new Date(startDateFrom);
+      if (startDateTo) where.startDate.lte = new Date(startDateTo);
+    }
+
+    // Salary range filtering (if you have salary field in your schema)
+    // Note: This assumes you have a salary field in your Employee model
+    // if (salaryFrom || salaryTo) {
+    //   where.salary = {};
+    //   if (salaryFrom) where.salary.gte = parseFloat(salaryFrom);
+    //   if (salaryTo) where.salary.lte = parseFloat(salaryTo);
+    // }
+
+    // Sorting
+    const validSortFields = ['name', 'employeeCode', 'department', 'position', 'startDate', 'createdAt', 'updatedAt'];
+    const orderBy: any = {};
+    if (validSortFields.includes(sortBy)) {
+      orderBy[sortBy] = sortOrder === 'desc' ? 'desc' : 'asc';
+    } else {
+      orderBy.createdAt = 'desc'; // Default sort
+    }
 
     const total = await prisma.employee.count({ where });
     const data = await prisma.employee.findMany({
       where,
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: { createdAt: 'desc' }
+      orderBy
     });
 
     return NextResponse.json({ data, total, page, pageSize });

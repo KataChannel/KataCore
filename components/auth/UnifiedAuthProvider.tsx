@@ -179,14 +179,14 @@ export function UnifiedAuthProvider({ children }: { children: React.ReactNode })
       }
       } catch (fetchError) {
         clearTimeout(timeoutId);
-        if (fetchError.name === 'AbortError') {
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
           console.warn('[AUTH] Request timeout - continuing without auth');
         } else {
           console.error('[AUTH] Fetch error:', fetchError);
         }
         // Don't clear tokens on network error, just continue
       }
-    } catch (error) {
+    } catch (error:any) {
     //  console.error('[AUTH] Failed to load user:', error);
       // Only clear tokens on auth-related errors, not network issues
       if (error.message?.includes('token') || error.message?.includes('auth')) {
