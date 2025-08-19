@@ -1,272 +1,180 @@
 'use client';
 
 import React from 'react';
-import { 
-  Button as JoyButton, 
-  Card as JoyCard, 
+
+// This file now imports and re-exports Tailwind-based components
+// for backward compatibility with existing code
+
+export {
+  Button,
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Input,
+  Textarea,
+  Sheet,
+  Box,
+  Stack,
+  Chip,
+  IconButton,
+  Avatar,
+  Divider,
+  Alert,
+  LinearProgress,
+  CircularProgress,
+  FormControl,
+  FormLabel,
+  FormHelperText,
+} from './tailwind-ui';
+
+// Legacy compatibility exports with Joy prefix
+export {
+  Button as JoyButton,
+  Card as JoyCard,
   Input as JoyInput,
   Textarea as JoyTextarea,
   Typography as JoyTypography,
   Sheet as JoySheet,
   Chip as JoyChip,
   Avatar as JoyAvatar,
-  Badge as JoyBadge,
   IconButton as JoyIconButton,
-  Modal as JoyModal,
   Divider as JoyDivider,
   Stack as JoyStack,
   Box as JoyBox,
-  Grid as JoyGrid,
-  CardContent,
-  CardActions,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Option,
-  Select,
-  Switch,
-  Checkbox,
-  Radio,
-  RadioGroup,
-  List,
-  ListItem,
-  ListItemContent,
-  ListItemDecorator,
-  AspectRatio,
-  Alert,
-  LinearProgress,
-  CircularProgress,
-  Breadcrumbs,
-  Link,
-  Tooltip,
-  ButtonGroup,
-  AccordionGroup,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel
-} from '@mui/joy';
+} from './tailwind-ui';
 
-// Re-export Joy UI components with consistent naming
-export {
-  JoyButton as Button,
-  JoyCard as Card,
-  JoyInput as Input,
-  JoyTextarea as Textarea,
-  JoyTypography as Typography,
-  JoySheet as Sheet,
-  JoyChip as Chip,
-  JoyAvatar as Avatar,
-  JoyBadge as Badge,
-  JoyIconButton as IconButton,
-  JoyModal as Modal,
-  JoyDivider as Divider,
-  JoyStack as Stack,
-  JoyBox as Box,
-  JoyGrid as Grid,
-  CardContent,
-  CardActions,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Option,
-  Select,
-  Switch,
-  Checkbox,
-  Radio,
-  RadioGroup,
-  List,
-  ListItem,
-  ListItemContent,
-  ListItemDecorator,
-  AspectRatio,
-  Alert,
-  LinearProgress,
-  CircularProgress,
-  Breadcrumbs,
-  Link,
-  Tooltip,
-  ButtonGroup,
-  AccordionGroup,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel
+// Table Component
+export const Table = ({ children, hoverRow, ...props }: any) => (
+  <table 
+    className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${
+      hoverRow ? '[&_tbody_tr:hover]:bg-gray-50 [&_tbody_tr:hover]:dark:bg-gray-800' : ''
+    }`} 
+    {...props}
+  >
+    {children}
+  </table>
+);
+
+export const TableHead = ({ children, ...props }: any) => (
+  <thead className="bg-gray-50 dark:bg-gray-900" {...props}>
+    {children}
+  </thead>
+);
+
+export const TableBody = ({ children, ...props }: any) => (
+  <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700" {...props}>
+    {children}
+  </tbody>
+);
+
+export const TableRow = ({ children, ...props }: any) => (
+  <tr {...props}>
+    {children}
+  </tr>
+);
+
+export const TableCell = ({ children, ...props }: any) => (
+  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100" {...props}>
+    {children}
+  </td>
+);
+
+export const TableHeaderCell = ({ children, ...props }: any) => (
+  <th 
+    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400" 
+    {...props}
+  >
+    {children}
+  </th>
+);
+
+// Additional compatibility components
+export const Modal = ({ children, open, onClose, ...props }: any) => {
+  if (!open) return null;
+  
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4" onClick={e => e.stopPropagation()} {...props}>
+        {children}
+      </div>
+    </div>
+  );
 };
 
-// Custom Joy UI style variants using Tailwind classes
-export const joyVariants = {
-  button: {
-    solid: 'bg-joy-primary text-white hover:bg-joy-primary-600 shadow-joy-sm hover:shadow-joy-md transition-all duration-200',
-    outlined: 'border border-joy-primary text-joy-primary hover:bg-joy-primary-50 dark:hover:bg-joy-primary-900/10',
-    soft: 'bg-joy-primary-50 text-joy-primary-700 hover:bg-joy-primary-100 dark:bg-joy-primary-900/20 dark:text-joy-primary-300',
-    plain: 'text-joy-primary hover:bg-joy-primary-50 dark:hover:bg-joy-primary-900/10',
-  },
-  card: {
-    elevated: 'bg-surface shadow-joy-lg border border-joy-neutral-200 dark:border-joy-neutral-700 rounded-joy-lg',
-    outlined: 'border border-joy-neutral-200 dark:border-joy-neutral-700 rounded-joy-lg bg-surface',
-    soft: 'bg-joy-neutral-50 dark:bg-joy-neutral-900/20 rounded-joy-lg',
-    plain: 'bg-transparent rounded-joy-lg',
-  },
-  input: {
-    outlined: 'border border-joy-neutral-300 dark:border-joy-neutral-600 rounded-joy-md px-joy-sm py-joy-xs focus:border-joy-primary focus:ring-2 focus:ring-joy-primary/20',
-    soft: 'bg-joy-neutral-50 dark:bg-joy-neutral-900/20 border-0 rounded-joy-md px-joy-sm py-joy-xs focus:bg-background',
-    plain: 'border-0 border-b border-joy-neutral-300 dark:border-joy-neutral-600 rounded-none px-0 py-joy-xs focus:border-joy-primary',
-  },
-  typography: {
-    h1: 'text-joy-xl4 font-bold text-joy-neutral-900 dark:text-joy-neutral-100 leading-tight',
-    h2: 'text-joy-xl3 font-bold text-joy-neutral-900 dark:text-joy-neutral-100 leading-tight',
-    h3: 'text-joy-xl2 font-semibold text-joy-neutral-900 dark:text-joy-neutral-100 leading-snug',
-    h4: 'text-joy-xl font-semibold text-joy-neutral-900 dark:text-joy-neutral-100 leading-snug',
-    body1: 'text-joy-md text-joy-neutral-800 dark:text-joy-neutral-200 leading-relaxed',
-    body2: 'text-joy-sm text-joy-neutral-700 dark:text-joy-neutral-300 leading-relaxed',
-    caption: 'text-joy-xs text-joy-neutral-600 dark:text-joy-neutral-400',
-  }
-} as const;
+export const Select = ({ children, value, onChange, placeholder, ...props }: any) => (
+  <select 
+    value={value} 
+    onChange={(e) => onChange?.(e.target.value)}
+    className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+    {...props}
+  >
+    {placeholder && <option value="">{placeholder}</option>}
+    {children}
+  </select>
+);
 
-// Joy UI + Tailwind utility classes
-export const joyClasses = {
-  // Spacing
-  spacing: {
-    xs: 'p-joy-xs',
-    sm: 'p-joy-sm',
-    md: 'p-joy-md',
-    lg: 'p-joy-lg',
-    xl: 'p-joy-xl',
-  },
-  margin: {
-    xs: 'm-joy-xs',
-    sm: 'm-joy-sm',
-    md: 'm-joy-md',
-    lg: 'm-joy-lg',
-    xl: 'm-joy-xl',
-  },
-  // Radius
-  radius: {
-    xs: 'rounded-joy-xs',
-    sm: 'rounded-joy-sm',
-    md: 'rounded-joy-md',
-    lg: 'rounded-joy-lg',
-    xl: 'rounded-joy-xl',
-  },
-  // Shadow
-  shadow: {
-    xs: 'shadow-joy-xs',
-    sm: 'shadow-joy-sm',
-    md: 'shadow-joy-md',
-    lg: 'shadow-joy-lg',
-    xl: 'shadow-joy-xl',
-  },
-  // Colors
-  colors: {
-    primary: 'text-joy-primary',
-    secondary: 'text-joy-neutral-500',
-    success: 'text-joy-success',
-    warning: 'text-joy-warning',
-    danger: 'text-joy-danger',
-  },
-  backgrounds: {
-    primary: 'bg-joy-primary',
-    secondary: 'bg-joy-neutral-100 dark:bg-joy-neutral-800',
-    success: 'bg-joy-success',
-    warning: 'bg-joy-warning',
-    danger: 'bg-joy-danger',
-    surface: 'bg-surface',
-  },
-} as const;
+export const Option = ({ children, value, ...props }: any) => (
+  <option value={value} {...props}>{children}</option>
+);
 
-// Responsive Joy UI utility classes
-export const joyResponsive = {
-  // Grid system
-  grid: {
-    container: 'grid gap-joy-md',
-    cols1: 'grid-cols-1',
-    cols2: 'grid-cols-1 md:grid-cols-2',
-    cols3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-    cols4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
-  },
-  // Flex system
-  flex: {
-    row: 'flex flex-row items-center gap-joy-sm',
-    col: 'flex flex-col gap-joy-sm',
-    center: 'flex items-center justify-center',
-    between: 'flex items-center justify-between',
-    wrap: 'flex flex-wrap gap-joy-sm',
-  },
-  // Typography responsive
-  text: {
-    xs: 'text-joy-xs',
-    sm: 'text-joy-sm md:text-joy-md',
-    md: 'text-joy-md md:text-joy-lg',
-    lg: 'text-joy-lg md:text-joy-xl',
-    xl: 'text-joy-xl md:text-joy-xl2',
-    '2xl': 'text-joy-xl2 md:text-joy-xl3',
-    '3xl': 'text-joy-xl3 md:text-joy-xl4',
-  },
-} as const;
+export const Switch = ({ checked, onChange, ...props }: any) => (
+  <button
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange?.(!checked)}
+    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+      checked ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+    }`}
+    {...props}
+  >
+    <span
+      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+        checked ? 'translate-x-6' : 'translate-x-1'
+      }`}
+    />
+  </button>
+);
 
-// Joy UI Animation classes with Tailwind
-export const joyAnimations = {
-  // Transitions
-  transition: {
-    all: 'transition-all duration-200 ease-in-out',
-    colors: 'transition-colors duration-200 ease-in-out',
-    transform: 'transition-transform duration-200 ease-in-out',
-    opacity: 'transition-opacity duration-200 ease-in-out',
-  },
-  // Hover effects
-  hover: {
-    scale: 'hover:scale-105 transition-transform duration-200',
-    lift: 'hover:-translate-y-1 hover:shadow-joy-lg transition-all duration-200',
-    glow: 'hover:shadow-joy-md hover:shadow-joy-primary/25 transition-all duration-200',
-    fade: 'hover:opacity-80 transition-opacity duration-200',
-  },
-  // Focus effects
-  focus: {
-    ring: 'focus:outline-none focus:ring-2 focus:ring-joy-primary/30 focus:border-joy-primary',
-    glow: 'focus:outline-none focus:shadow-joy-md focus:shadow-joy-primary/25',
-  },
-} as const;
+export const Checkbox = ({ checked, onChange, children, ...props }: any) => (
+  <label className="flex items-center space-x-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={(e) => onChange?.(e.target.checked)}
+      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+      {...props}
+    />
+    {children && <span className="text-sm text-gray-700 dark:text-gray-300">{children}</span>}
+  </label>
+);
 
-// Joy UI layout patterns
-export const joyLayouts = {
-  // Card layouts
-  card: {
-    default: `${joyVariants.card.elevated} ${joyClasses.spacing.md}`,
-    interactive: `${joyVariants.card.elevated} ${joyClasses.spacing.md} ${joyAnimations.hover.lift} cursor-pointer`,
-    compact: `${joyVariants.card.outlined} ${joyClasses.spacing.sm}`,
-  },
-  // Container layouts
-  container: {
-    page: 'max-w-7xl mx-auto px-joy-md py-joy-lg',
-    section: 'py-joy-xl',
-    content: 'max-w-4xl mx-auto',
-  },
-  // Form layouts
-  form: {
-    group: `${joyResponsive.flex.col} gap-joy-md`,
-    field: `${joyResponsive.flex.col} gap-joy-xs`,
-    actions: `${joyResponsive.flex.row} justify-end gap-joy-sm pt-joy-md`,
-  },
-} as const;
+export const Badge = ({ children, badgeContent, color = 'primary', ...props }: any) => (
+  <div className="relative inline-flex" {...props}>
+    {children}
+    {badgeContent && (
+      <span className={`absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none rounded-full ${
+        color === 'primary' ? 'text-white bg-blue-600' : 
+        color === 'danger' ? 'text-white bg-red-600' :
+        'text-white bg-gray-600'
+      }`}>
+        {badgeContent}
+      </span>
+    )}
+  </div>
+);
 
-// Export utility function to combine Joy UI classes
-export function joyClsx(...classes: (string | undefined | false | null)[]): string {
-  return classes.filter(Boolean).join(' ');
-}
+export const Grid = ({ children, container, spacing = 2, ...props }: any) => (
+  <div 
+    className={`${container ? 'grid' : ''} gap-${spacing}`} 
+    style={container ? { gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' } : undefined}
+    {...props}
+  >
+    {children}
+  </div>
+);
 
-// Export all utilities as default
-export default {
-  variants: joyVariants,
-  classes: joyClasses,
-  responsive: joyResponsive,
-  animations: joyAnimations,
-  layouts: joyLayouts,
-  clsx: joyClsx,
-};
+// Legacy exports
+export const JoyModal = Modal;
+export const JoyBadge = Badge;
+export const JoyGrid = Grid;

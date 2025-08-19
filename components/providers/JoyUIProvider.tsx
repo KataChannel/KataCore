@@ -1,64 +1,22 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { CssVarsProvider } from '@mui/joy/styles';
-import CssBaseline from '@mui/joy/CssBaseline';
-import { joyUITheme } from '@/lib/config/joy-ui-theme';
-import { useSimpleTheme } from '@/hooks/useSimpleTheme';
+import React from 'react';
+import { TailwindThemeProvider } from './TailwindThemeProvider';
 
 interface JoyUIProviderProps {
   children: React.ReactNode;
 }
 
 /**
- * Joy UI Provider Component
+ * Joy UI Provider Component (Now using Tailwind)
  * 
- * Provides Joy UI theme context with simple theme system integration
- * Handles SSR/hydration safely
+ * Migrated to use TailwindThemeProvider for backward compatibility
+ * Maintains the same interface but uses Tailwind CSS instead of Joy UI
  */
 export function JoyUIProvider({ children }: JoyUIProviderProps) {
-  const { theme } = useSimpleTheme();
-  const [mounted, setMounted] = useState(false);
-  
-  // Handle hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  
-  // Use 'light' as default for SSR, actual theme after hydration
-  const colorScheme = mounted 
-    ? (theme === 'dark' ? 'dark' : 'light')
-    : 'light';
-  
   return (
-    <CssVarsProvider 
-      theme={joyUITheme}
-      defaultColorScheme={colorScheme}
-      modeStorageKey="joy-ui-mode"
-      disableTransitionOnChange
-      colorSchemeStorageKey="joy-ui-color-scheme"
-    >
-      <CssBaseline />
+    <TailwindThemeProvider defaultTheme="light" storageKey="joy-theme">
       {children}
-    </CssVarsProvider>
+    </TailwindThemeProvider>
   );
 }
-
-/**
- * Higher-order component to wrap components with Joy UI provider
- */
-export function withJoyUI<P extends object>(
-  Component: React.ComponentType<P>
-): React.ComponentType<P> {
-  const WrappedComponent = (props: P) => (
-    <JoyUIProvider>
-      <Component {...props} />
-    </JoyUIProvider>
-  );
-
-  WrappedComponent.displayName = `withJoyUI(${Component.displayName || Component.name})`;
-  
-  return WrappedComponent;
-}
-
-export default JoyUIProvider;

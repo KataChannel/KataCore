@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Typography, Button, Card, Table, Sheet } from '@mui/joy';
+import { Box, Typography, Button, Card, Table, Sheet } from '@/components/ui/joy-ui';
 import { ContentCopyRounded } from '@mui/icons-material';
 
 export default function TestSelectionPage() {
