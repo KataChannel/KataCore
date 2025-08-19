@@ -2,21 +2,24 @@
 
 import React from 'react';
 import { TailwindThemeProvider } from './TailwindThemeProvider';
+import { ThemeProvider } from '@/hooks/useSimpleTheme';
 
 interface SimpleThemeProviderProps {
   children: React.ReactNode;
 }
 
 /**
- * Simple Theme Provider Component (Now using Tailwind)
+ * Simple Theme Provider Component (Backward Compatible)
  * 
- * Migrated to use TailwindThemeProvider for backward compatibility
- * Maintains the same interface but uses Tailwind CSS instead of Joy UI
+ * Provides both TailwindThemeProvider and the original ThemeProvider
+ * to maintain backward compatibility during migration
  */
 export function SimpleThemeProvider({ children }: SimpleThemeProviderProps) {
   return (
     <TailwindThemeProvider defaultTheme="light" storageKey="simple-theme">
-      {children}
+      <ThemeProvider defaultMode="light" enableSystemPreference={true} enablePersistence={true}>
+        {children}
+      </ThemeProvider>
     </TailwindThemeProvider>
   );
 }
