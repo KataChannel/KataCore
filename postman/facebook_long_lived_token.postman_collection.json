@@ -1,0 +1,690 @@
+{
+  "info": {
+    "_postman_id": "7b3a6f8d-4c2a-4e1b-9f2e-3a8c5e4b7d9f",
+    "name": "Facebook Long-Lived Token & API Endpoints",
+    "description": "Complete Facebook Graph API collection with authentication and all project endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "description": "Facebook OAuth authentication flow",
+      "item": [
+        {
+          "name": "Get Short-Lived User Access Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://www.facebook.com/v19.0/dialog/oauth?client_id={{APP_ID}}&redirect_uri={{REDIRECT_URI}}&scope={{SCOPE}}&response_type=token",
+              "protocol": "https",
+              "host": ["www", "facebook", "com"],
+              "path": ["v19.0", "dialog", "oauth"],
+              "query": [
+                {
+                  "key": "client_id",
+                  "value": "{{APP_ID}}",
+                  "description": "Your Facebook App ID"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{REDIRECT_URI}}",
+                  "description": "Your app's redirect URI (e.g., https://your-app.com/callback)"
+                },
+                {
+                  "key": "scope",
+                  "value": "{{SCOPE}}",
+                  "description": "Comma-separated permissions (e.g., pages_show_list,pages_read_engagement,pages_manage_posts)"
+                },
+                {
+                  "key": "response_type",
+                  "value": "token",
+                  "description": "Set to 'token' for client-side flow"
+                }
+              ]
+            },
+            "description": "Open this URL in a browser, log in, and extract the short-lived access token from the redirect URL (in the access_token parameter). Then, store it in the SHORT_LIVED_TOKEN variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Exchange Short-Lived Token for Long-Lived Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id={{APP_ID}}&client_secret={{APP_SECRET}}&fb_exchange_token={{SHORT_LIVED_TOKEN}}",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v19.0", "oauth", "access_token"],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "fb_exchange_token"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{APP_ID}}",
+                  "description": "Your Facebook App ID"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{APP_SECRET}}",
+                  "description": "Your Facebook App Secret"
+                },
+                {
+                  "key": "fb_exchange_token",
+                  "value": "{{SHORT_LIVED_TOKEN}}",
+                  "description": "Short-lived token from the previous step"
+                }
+              ]
+            },
+            "description": "Exchanges a short-lived user access token for a long-lived one (valid for ~60 days)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/me?access_token={{LONG_LIVED_TOKEN}}&fields=id",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "me"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{LONG_LIVED_TOKEN}}",
+                  "description": "Long-lived user access token from the previous step"
+                },
+                {
+                  "key": "fields",
+                  "value": "id",
+                  "description": "Fields to retrieve"
+                }
+              ]
+            },
+            "description": "Fetches the user ID for use in the next step to get page access tokens. Store the 'id' from the response in the USER_ID variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Page Access Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{USER_ID}}/accounts?access_token={{LONG_LIVED_TOKEN}}&fields=id,name,category,fan_count,followers_count,link,about,phone,website,access_token",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{USER_ID}}", "accounts"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{LONG_LIVED_TOKEN}}",
+                  "description": "Long-lived user access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,name,category,fan_count,followers_count,link,about,phone,website,access_token",
+                  "description": "Page fields to retrieve"
+                }
+              ]
+            },
+            "description": "Fetches page access tokens for all pages the user manages. These tokens typically never expire unless permissions are revoked."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📄 Pages Management",
+      "description": "Facebook Pages API endpoints",
+      "item": [
+        {
+          "name": "Get Page Info (Basic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,name,category",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,name,category",
+                  "description": "Basic page fields"
+                }
+              ]
+            },
+            "description": "Get basic page information for validation"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Page Info (Detailed)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,name,category,fan_count,followers_count,link,about,phone,website,picture",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,name,category,fan_count,followers_count,link,about,phone,website,picture",
+                  "description": "Detailed page fields"
+                }
+              ]
+            },
+            "description": "Get detailed page information including stats and profile data"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📝 Posts Management",
+      "description": "Facebook Posts API endpoints",
+      "item": [
+        {
+          "name": "Get Posts (Basic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}/posts?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,message,created_time&limit=10",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}", "posts"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,message,created_time",
+                  "description": "Basic post fields"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of posts to retrieve"
+                }
+              ]
+            },
+            "description": "Get basic post information for debugging"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts (Production - Full)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}/posts?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,message,story,created_time,updated_time,likes.summary(true),comments.summary(true),shares,type,attachments{media,target,type,url,title,description},permalink_url,is_published&limit=50",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}", "posts"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,message,story,created_time,updated_time,likes.summary(true),comments.summary(true),shares,type,attachments{media,target,type,url,title,description},permalink_url,is_published",
+                  "description": "Complete post fields for production sync"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of posts to retrieve"
+                }
+              ]
+            },
+            "description": "Get complete post information with engagement metrics and attachments for production sync"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts (With Engagement)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}/posts?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,message,created_time,likes.summary(true)&limit=10",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}", "posts"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,message,created_time,likes.summary(true)",
+                  "description": "Post fields with likes summary"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of posts to retrieve"
+                }
+              ]
+            },
+            "description": "Get posts with engagement metrics for testing"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Post Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{POST_ID}}?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,message,created_time,likes.summary(true),comments.summary(true),shares",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{POST_ID}}"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,message,created_time,likes.summary(true),comments.summary(true),shares",
+                  "description": "Detailed post fields"
+                }
+              ]
+            },
+            "description": "Get detailed information for a specific post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "💬 Comments Management",
+      "description": "Facebook Comments API endpoints",
+      "item": [
+        {
+          "name": "Get Post Comments (Basic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{POST_ID}}/comments?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,from,message,created_time&limit=10",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{POST_ID}}", "comments"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,from,message,created_time",
+                  "description": "Basic comment fields"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of comments to retrieve"
+                }
+              ]
+            },
+            "description": "Get basic comments for debugging"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post Comments (With Engagement)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{POST_ID}}/comments?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,from,message,created_time,likes.summary(true)&limit=10",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{POST_ID}}", "comments"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,from,message,created_time,likes.summary(true)",
+                  "description": "Comment fields with likes"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of comments to retrieve"
+                }
+              ]
+            },
+            "description": "Get comments with engagement metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post Comments (Production - Full)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{POST_ID}}/comments?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,from,message,created_time,likes.summary(true),can_reply,can_hide,can_like,is_hidden,parent&limit=50",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{POST_ID}}", "comments"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,from,message,created_time,likes.summary(true),can_reply,can_hide,can_like,is_hidden,parent",
+                  "description": "Complete comment fields for production sync"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of comments to retrieve"
+                }
+              ]
+            },
+            "description": "Get complete comment information with moderation capabilities for production sync"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📨 Messages & Conversations",
+      "description": "Facebook Messages API endpoints",
+      "item": [
+        {
+          "name": "Get Page Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}/conversations?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,participants,message_count,unread_count,can_reply,snippet,updated_time&limit=50",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}", "conversations"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,participants,message_count,unread_count,can_reply,snippet,updated_time",
+                  "description": "Conversation fields"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of conversations to retrieve"
+                }
+              ]
+            },
+            "description": "Get page conversations with metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{CONVERSATION_ID}}/messages?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,from,message,attachments,created_time,tags,is_echo&limit=50",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{CONVERSATION_ID}}", "messages"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,from,message,attachments,created_time,tags,is_echo",
+                  "description": "Message fields"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of messages to retrieve"
+                }
+              ]
+            },
+            "description": "Get messages from a specific conversation"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversations (v20.0 - Legacy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v20.0/{{PAGE_ID}}/conversations?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,participants,snippet,updated_time&limit=5",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v20.0", "{{PAGE_ID}}", "conversations"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,participants,snippet,updated_time",
+                  "description": "Basic conversation fields"
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "description": "Number of conversations to retrieve"
+                }
+              ]
+            },
+            "description": "Get conversations using legacy API version for debugging"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔧 Development & Testing",
+      "description": "Testing and development endpoints",
+      "item": [
+        {
+          "name": "Test Progressive Fields",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}/posts?access_token={{PAGE_ACCESS_TOKEN}}&fields={{TEST_FIELDS}}&limit=2",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}", "posts"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "{{TEST_FIELDS}}",
+                  "description": "Dynamic fields for testing (set in TEST_FIELDS variable)"
+                },
+                {
+                  "key": "limit",
+                  "value": "2",
+                  "description": "Limited results for testing"
+                }
+              ]
+            },
+            "description": "Test different field combinations dynamically"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Page with Posts (Nested)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/{{PAGE_ID}}?access_token={{PAGE_ACCESS_TOKEN}}&fields=id,name,posts.limit(3)",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "{{PAGE_ID}}"],
+              "query": [
+                {
+                  "key": "access_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Page access token"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,name,posts.limit(3)",
+                  "description": "Page info with nested posts"
+                }
+              ]
+            },
+            "description": "Get page info with nested posts data"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate API Access",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://graph.facebook.com/v23.0/debug_token?input_token={{PAGE_ACCESS_TOKEN}}&access_token={{APP_ID}}|{{APP_SECRET}}",
+              "protocol": "https",
+              "host": ["graph", "facebook", "com"],
+              "path": ["v23.0", "debug_token"],
+              "query": [
+                {
+                  "key": "input_token",
+                  "value": "{{PAGE_ACCESS_TOKEN}}",
+                  "description": "Token to validate"
+                },
+                {
+                  "key": "access_token",
+                  "value": "{{APP_ID}}|{{APP_SECRET}}",
+                  "description": "App access token for validation"
+                }
+              ]
+            },
+            "description": "Validate access token and check permissions"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "APP_ID",
+      "value": "YOUR_APP_ID",
+      "description": "Replace with your Facebook App ID"
+    },
+    {
+      "key": "APP_SECRET",
+      "value": "YOUR_APP_SECRET",
+      "description": "Replace with your Facebook App Secret"
+    },
+    {
+      "key": "REDIRECT_URI",
+      "value": "https://your-app.com/callback",
+      "description": "Replace with your app's redirect URI"
+    },
+    {
+      "key": "SCOPE",
+      "value": "pages_show_list,pages_read_engagement,pages_manage_posts,pages_messaging",
+      "description": "Replace with the permissions your app needs"
+    },
+    {
+      "key": "SHORT_LIVED_TOKEN",
+      "value": "",
+      "description": "Paste the short-lived token obtained from the first request"
+    },
+    {
+      "key": "LONG_LIVED_TOKEN",
+      "value": "",
+      "description": "Paste the long-lived token obtained from the second request"
+    },
+    {
+      "key": "USER_ID",
+      "value": "",
+      "description": "Paste the user ID obtained from the third request"
+    },
+    {
+      "key": "PAGE_ID",
+      "value": "",
+      "description": "Facebook Page ID (e.g., 272459726955766)"
+    },
+    {
+      "key": "PAGE_ACCESS_TOKEN",
+      "value": "",
+      "description": "Page-specific access token from Get Page Access Token request"
+    },
+    {
+      "key": "POST_ID",
+      "value": "",
+      "description": "Specific Facebook Post ID for comment testing"
+    },
+    {
+      "key": "CONVERSATION_ID",
+      "value": "",
+      "description": "Specific Facebook Conversation ID for message testing"
+    },
+    {
+      "key": "TEST_FIELDS",
+      "value": "id,message,created_time",
+      "description": "Dynamic fields for testing different API responses"
+    }
+  ]
+}
