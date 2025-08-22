@@ -139,7 +139,7 @@ export default function PostManager() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Post Management</h1>
         <button
-          onClick={() => router.push('/admin/cms/posts/new')}
+          onClick={() => router.push('/admin/seo/posts/new')}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
         >
           Create New Post
@@ -297,7 +297,7 @@ export default function PostManager() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <button
-                        onClick={() => router.push(`/admin/cms/posts/${post.id}/edit`)}
+                        onClick={() => router.push(`/admin/seo/posts/${post.id}/edit`)}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         Edit

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { SEOOptimization } from '@/components/seo'
 
 export default function NewPostPage() {
   const router = useRouter()
+  const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -24,6 +25,29 @@ export default function NewPostPage() {
   const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(false)
 
+  // Fetch current user
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          const response = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      }
+    };
+    
+    fetchUser();
+  }, []);
+
   const handleSEOChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -31,30 +55,61 @@ export default function NewPostPage() {
     }))
   }
 
+  // Auto-generate slug from title
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+  }
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value
+    setFormData(prev => ({
+      ...prev,
+      title,
+      slug: generateSlug(title),
+      metaTitle: title // Auto-populate meta title
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!user) {
+      alert('You must be logged in to create a post');
+      return;
+    }
+    
     setLoading(true)
 
     try {
       const response = await fetch('/api/cms/posts', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         },
         body: JSON.stringify({
           ...formData,
-          authorId: 'current-user-id' // Sẽ được thay thế bằng user ID thực
+          authorId: user.id
         })
       })
 
       if (response.ok) {
-        const { data } = await response.json()
-        router.push(`/admin/seo/posts/${data.id}/edit`)
+        const result = await response.json()
+        console.log('Post created successfully:', result)
+        router.push(`/admin/seo/posts`)
       } else {
-        console.error('Failed to create post')
+        const error = await response.json()
+        console.error('Failed to create post:', error)
+        alert(`Failed to create post: ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error creating post:', error)
+      alert('Network error occurred while creating post')
     } finally {
       setLoading(false)
     }
@@ -62,15 +117,27 @@ export default function NewPostPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Create New Post</h1>
-        <button
-          onClick={() => router.back()}
-          className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-      </div>
+      {!user ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading user information...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Create New Post</h1>
+              <p className="text-gray-600 mt-1">Author: {user.displayName}</p>
+            </div>
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+          </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -85,10 +152,27 @@ export default function NewPostPage() {
                 type="text"
                 required
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                onChange={handleTitleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter post title..."
               />
+            </div>
+
+            {/* Slug */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                URL Slug
+              </label>
+              <input
+                type="text"
+                value={formData.slug}
+                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                placeholder="url-slug"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                URL: /posts/{formData.slug}
+              </p>
             </div>
 
             {/* Content */}
@@ -199,6 +283,8 @@ export default function NewPostPage() {
           />
         </div>
       </form>
+        </>
+      )}
     </div>
   )
 }
