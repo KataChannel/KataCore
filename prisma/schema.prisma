@@ -411,6 +411,9 @@ model users {
   posts                                                     Post[]
   uploadedMedia                                            Media[]
   pages                                                    Page[]
+  
+  // Facebook Leads Relations
+  assignedLeads                                            facebook_leads[]       @relation("LeadAssignedTo")
 }
 
 enum ConversationType {
@@ -546,4 +549,46 @@ model Page {
   author users @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@map("pages")
+}
+
+// Facebook Lead Ads Model - Thu thập thông tin người dùng hợp pháp
+model facebook_leads {
+  id              String    @id @default(uuid())
+  facebookLeadId  String    @unique
+  formId          String
+  formName        String?
+  pageId          String?
+  pageName        String?
+  userName        String?
+  email           String?
+  phone           String?
+  firstName       String?
+  lastName        String?
+  company         String?
+  jobTitle        String?
+  location        String?
+  city            String?
+  state           String?
+  country         String?
+  zipCode         String?
+  rawData         Json?     // Toàn bộ field_data từ Facebook
+  leadScore       Int       @default(0)
+  leadSource      String    @default("FACEBOOK_LEAD_AD")
+  leadStatus      String    @default("NEW") // NEW, CONTACTED, QUALIFIED, CONVERTED, LOST
+  assignedTo      String?   // User ID của người được assign
+  notes           String?
+  lastContactAt   DateTime?
+  convertedAt     DateTime?
+  createdTime     DateTime? // Thời gian tạo lead trên Facebook
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  assignedUser    users?    @relation("LeadAssignedTo", fields: [assignedTo], references: [id])
+
+  @@index([email])
+  @@index([phone])
+  @@index([leadScore])
+  @@index([leadStatus])
+  @@index([createdTime])
 }

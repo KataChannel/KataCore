@@ -623,6 +623,109 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "📧 Lead Ads - Contact Data Extraction",
+      "description": "Facebook Lead Ads API endpoints for legal contact information collection",
+      "item": [
+        {
+          "name": "Get All Lead Forms & Leads",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/facebook/lead-ads",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "facebook", "lead-ads"]
+            },
+            "description": "Get all Lead Forms and their leads from all connected Facebook pages"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Lead Forms by Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/facebook/lead-ads?pageId={{PAGE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "facebook", "lead-ads"],
+              "query": [
+                {
+                  "key": "pageId",
+                  "value": "{{PAGE_ID}}",
+                  "description": "Specific Facebook Page ID"
+                }
+              ]
+            },
+            "description": "Get Lead Forms and leads for a specific Facebook page"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🚀 Comprehensive User Data Extraction",
+      "description": "All-in-one user data extraction with highest success rate",
+      "item": [
+        {
+          "name": "Extract All User Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/facebook/comprehensive-extraction",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "facebook", "comprehensive-extraction"]
+            },
+            "description": "Extract user data using ALL available methods (Lead Ads, Facebook, Instagram, etc.)"
+          },
+          "response": []
+        },
+        {
+          "name": "Extract by Method - Lead Ads Only",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/facebook/comprehensive-extraction?method=lead-ads",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "facebook", "comprehensive-extraction"],
+              "query": [
+                {
+                  "key": "method",
+                  "value": "lead-ads",
+                  "description": "Extract only from Lead Ads (highest quality)"
+                }
+              ]
+            },
+            "description": "Extract user data only from Facebook Lead Ads (highest quality contact info)"
+          },
+          "response": []
+        },
+        {
+          "name": "Export to CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/facebook/comprehensive-extraction?format=csv",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "facebook", "comprehensive-extraction"],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv",
+                  "description": "Export extracted data as CSV file"
+                }
+              ]
+            },
+            "description": "Export all extracted user data as CSV file for analysis"
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -643,8 +746,8 @@
     },
     {
       "key": "SCOPE",
-      "value": "pages_show_list,pages_read_engagement,pages_manage_posts,pages_messaging",
-      "description": "Replace with the permissions your app needs"
+      "value": "pages_show_list,pages_read_engagement,pages_manage_posts,pages_messaging,leads_retrieval",
+      "description": "Enhanced permissions for user data extraction"
     },
     {
       "key": "SHORT_LIVED_TOKEN",
@@ -667,6 +770,11 @@
       "description": "Facebook Page ID (e.g., 272459726955766)"
     },
     {
+      "key": "PAGE_ID_2",
+      "value": "",
+      "description": "Second Facebook Page ID for batch operations"
+    },
+    {
       "key": "PAGE_ACCESS_TOKEN",
       "value": "",
       "description": "Page-specific access token from Get Page Access Token request"
@@ -680,6 +788,36 @@
       "key": "CONVERSATION_ID",
       "value": "",
       "description": "Specific Facebook Conversation ID for message testing"
+    },
+    {
+      "key": "FORM_ID",
+      "value": "",
+      "description": "Facebook Lead Form ID"
+    },
+    {
+      "key": "WHATSAPP_BUSINESS_ID",
+      "value": "",
+      "description": "WhatsApp Business Account ID"
+    },
+    {
+      "key": "WHATSAPP_PHONE_ID",
+      "value": "",
+      "description": "WhatsApp Phone Number ID"
+    },
+    {
+      "key": "IG_USER_ID",
+      "value": "",
+      "description": "Instagram Business User ID"
+    },
+    {
+      "key": "USER_EMAIL",
+      "value": "",
+      "description": "User email for GDPR deletion"
+    },
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3000",
+      "description": "Your application base URL"
     },
     {
       "key": "TEST_FIELDS",
