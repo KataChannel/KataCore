@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Menu API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        .info { background-color: #d1ecf1; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>TazaGroup Admin Menu API Test</h1>
+    
+    <div id="results"></div>
+
+    <script>
+        async function testMenuAPI() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                resultsDiv.innerHTML += '<div class="section info"><h3>🔍 Testing Menu API...</h3></div>';
+                
+                // Test 1: Admin view (all menus)
+                const adminResponse = await fetch('/api/admin/menu-items?adminView=true');
+                if (adminResponse.ok) {
+                    const adminMenus = await adminResponse.json();
+                    resultsDiv.innerHTML += `
+                        <div class="section success">
+                            <h3>✅ Admin Menus Loaded</h3>
+                            <p><strong>Count:</strong> ${adminMenus.length} items</p>
+                            <details>
+                                <summary>View Menu Data</summary>
+                                <pre>${JSON.stringify(adminMenus, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`Admin API failed: ${adminResponse.status}`);
+                }
+                
+                // Test 2: Role-based menus
+                const roleResponse = await fetch('/api/admin/menu-items?roleId=clix0ym930000v1dgjvkgexel');
+                if (roleResponse.ok) {
+                    const roleMenus = await roleResponse.json();
+                    resultsDiv.innerHTML += `
+                        <div class="section success">
+                            <h3>✅ Role-based Menus Loaded</h3>
+                            <p><strong>Count:</strong> ${roleMenus.length} items</p>
+                            <details>
+                                <summary>View Role Menu Data</summary>
+                                <pre>${JSON.stringify(roleMenus, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="section error">
+                            <h3>⚠️ Role Menu API Warning</h3>
+                            <p>Status: ${roleResponse.status} - This is normal if role doesn't have menu permissions</p>
+                        </div>
+                    `;
+                }
+                
+                // Test 3: Hook simulation
+                resultsDiv.innerHTML += `
+                    <div class="section info">
+                        <h3>📋 useMenuItems Hook Test</h3>
+                        <p>Testing how the React hook would work...</p>
+                        <button onclick="testReactHook()">Simulate Hook Call</button>
+                        <div id="hookResults"></div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="section error">
+                        <h3>❌ API Test Failed</h3>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testReactHook() {
+            const hookResults = document.getElementById('hookResults');
+            hookResults.innerHTML = '<p>🔄 Loading...</p>';
+            
+            try {
+                // Simulate the hook's behavior
+                const params = new URLSearchParams();
+                params.append('adminView', 'true'); // Fallback behavior
+                
+                const response = await fetch(`/api/admin/menu-items?${params.toString()}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    hookResults.innerHTML = `
+                        <div style="margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 3px;">
+                            <strong>✅ Hook Simulation Success</strong><br>
+                            Menu items received: ${data.length}<br>
+                            First item: ${data[0]?.title || 'N/A'}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`Hook simulation failed: ${response.status}`);
+                }
+                
+            } catch (error) {
+                hookResults.innerHTML = `
+                    <div style="margin-top: 10px; padding: 10px; background: #f8e8e8; border-radius: 3px;">
+                        <strong>❌ Hook Simulation Failed</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-run test on page load
+        window.onload = testMenuAPI;
+    </script>
+</body>
+</html>

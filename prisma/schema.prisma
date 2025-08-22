@@ -406,6 +406,11 @@ model users {
   users_UserFriends_A                                       users[]                @relation("UserFriends")
   users_UserFriends_B                                       users[]                @relation("UserFriends")
   employee Employee?
+  
+  // CMS Relations
+  posts                                                     Post[]
+  uploadedMedia                                            Media[]
+  pages                                                    Page[]
 }
 
 enum ConversationType {
@@ -433,4 +438,112 @@ enum UserStatus {
   OFFLINE
   AWAY
   BUSY
+}
+
+// CMS ENUMS
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// CMS MODELS
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  posts Post[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  posts Post[]
+
+  @@map("tags")
+}
+
+model Post {
+  id              String     @id @default(uuid())
+  title           String
+  slug            String     @unique
+  excerpt         String?    // Brief description/summary
+  content         Json       // JSONB content
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?    // Canonical URL for SEO
+  featuredImage   String?    // Featured image URL
+  status          PostStatus @default(DRAFT)
+  publishedAt     DateTime?  // When published
+  viewCount       Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Foreign keys
+  authorId String
+
+  // Relations
+  author     users      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories Category[]
+  tags       Tag[]
+  media      Media[]
+
+  @@map("posts")
+}
+
+model Media {
+  id           String   @id @default(uuid())
+  filename     String   // stored filename
+  originalName String   // original filename
+  url          String
+  altText      String?
+  mimeType     String   // MIME type
+  size         Int      // file size in bytes
+  width        Int?     // image width
+  height       Int?     // image height
+  uploadedAt   DateTime @default(now())
+  
+  // Foreign keys
+  postId       String?  // Optional - media can exist without post
+  uploadedById String   // Required - who uploaded
+
+  // Relations
+  post       Post?  @relation(fields: [postId], references: [id], onDelete: SetNull)
+  uploadedBy users  @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
+
+model Page {
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  content         Json     // JSONB content
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  isPublished     Boolean  @default(false)
+  template        String?  // page template
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Foreign keys
+  authorId String
+
+  // Relations
+  author users @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("pages")
 }

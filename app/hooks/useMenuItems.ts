@@ -29,8 +29,15 @@ export const useMenuItems = (options: UseMenuItemsOptions = {}) => {
       setError(null);
 
       const params = new URLSearchParams();
-      if (options.userId) params.append('userId', options.userId);
-      if (options.roleId) params.append('roleId', options.roleId);
+      
+      // For admin view, get all menu items
+      if (options.userId || options.roleId) {
+        if (options.userId) params.append('userId', options.userId);
+        if (options.roleId) params.append('roleId', options.roleId);
+      } else {
+        // Fallback to admin view to get all menu items
+        params.append('adminView', 'true');
+      }
 
       const response = await fetch(`/api/admin/menu-items?${params.toString()}`);
       
@@ -49,9 +56,8 @@ export const useMenuItems = (options: UseMenuItemsOptions = {}) => {
   };
 
   useEffect(() => {
-    if (options.userId || options.roleId) {
-      fetchMenuItems();
-    }
+    // Always fetch menu items, even without user credentials (will use adminView)
+    fetchMenuItems();
   }, [options.userId, options.roleId]);
 
   return {

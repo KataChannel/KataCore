@@ -16,7 +16,9 @@ import {
   HomeIcon,
   UsersIcon,
   BuildingOfficeIcon,
+  BuildingOffice2Icon,
   ChartBarIcon,
+  ChartPieIcon,
   ComputerDesktopIcon,
   CogIcon,
   BriefcaseIcon,
@@ -24,8 +26,44 @@ import {
   CalendarIcon,
   CurrencyDollarIcon,
   DocumentTextIcon,
+  DocumentIcon,
   SwatchIcon,
   MagnifyingGlassIcon,
+  UserGroupIcon,
+  UserPlusIcon,
+  ShieldCheckIcon,
+  KeyIcon,
+  ServerIcon,
+  CircleStackIcon,
+  GlobeAltIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  CameraIcon,
+  PhotoIcon,
+  MegaphoneIcon,
+  ShareIcon,
+  LinkIcon,
+  TagIcon,
+  StarIcon,
+  TrophyIcon,
+  SparklesIcon,
+  EyeIcon,
+  PencilIcon,
+  FolderIcon,
+  ArchiveBoxIcon,
+  TicketIcon,
+  InformationCircleIcon,
+  BookOpenIcon,
+  WrenchScrewdriverIcon,
+  CommandLineIcon,
+  CodeBracketIcon,
+  BugAntIcon,
+  BeakerIcon,
+  CpuChipIcon,
+  BoltIcon,
+  PuzzlePieceIcon,
+  AdjustmentsHorizontalIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { useSimpleTheme } from '@/hooks/useSimpleTheme';
 
@@ -34,8 +72,65 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-// Icon mapping from string to component
+// Icon mapping from string to component - Direct mapping for Heroicons
 const iconMapping: Record<string, React.ComponentType<any>> = {
+  // Direct icon names (as stored in database)
+  'HomeIcon': HomeIcon,
+  'UsersIcon': UsersIcon,
+  'UserIcon': UserIcon,
+  'UserGroupIcon': UserGroupIcon,
+  'UserPlusIcon': UserPlusIcon,
+  'BuildingOfficeIcon': BuildingOfficeIcon,
+  'BuildingOffice2Icon': BuildingOffice2Icon,
+  'ChartBarIcon': ChartBarIcon,
+  'ChartPieIcon': ChartPieIcon,
+  'ComputerDesktopIcon': ComputerDesktopIcon,
+  'CogIcon': CogIcon,
+  'BriefcaseIcon': BriefcaseIcon,
+  'ClockIcon': ClockIcon,
+  'CalendarIcon': CalendarIcon,
+  'CurrencyDollarIcon': CurrencyDollarIcon,
+  'DocumentTextIcon': DocumentTextIcon,
+  'DocumentIcon': DocumentIcon,
+  'SwatchIcon': SwatchIcon,
+  'BellIcon': BellIcon,
+  'MagnifyingGlassIcon': MagnifyingGlassIcon,
+  'ShieldCheckIcon': ShieldCheckIcon,
+  'KeyIcon': KeyIcon,
+  'ServerIcon': ServerIcon,
+  'CircleStackIcon': CircleStackIcon,
+  'GlobeAltIcon': GlobeAltIcon,
+  'PhoneIcon': PhoneIcon,
+  'EnvelopeIcon': EnvelopeIcon,
+  'CameraIcon': CameraIcon,
+  'PhotoIcon': PhotoIcon,
+  'MegaphoneIcon': MegaphoneIcon,
+  'ShareIcon': ShareIcon,
+  'LinkIcon': LinkIcon,
+  'TagIcon': TagIcon,
+  'StarIcon': StarIcon,
+  'TrophyIcon': TrophyIcon,
+  'SparklesIcon': SparklesIcon,
+  'EyeIcon': EyeIcon,
+  'PencilIcon': PencilIcon,
+  'FolderIcon': FolderIcon,
+  'ArchiveBoxIcon': ArchiveBoxIcon,
+  'TicketIcon': TicketIcon,
+  'InformationCircleIcon': InformationCircleIcon,
+  'BookOpenIcon': BookOpenIcon,
+  'WrenchScrewdriverIcon': WrenchScrewdriverIcon,
+  'CommandLineIcon': CommandLineIcon,
+  'CodeBracketIcon': CodeBracketIcon,
+  'BugAntIcon': BugAntIcon,
+  'BeakerIcon': BeakerIcon,
+  'CpuChipIcon': CpuChipIcon,
+  'BoltIcon': BoltIcon,
+  'PuzzlePieceIcon': PuzzlePieceIcon,
+  'AdjustmentsHorizontalIcon': AdjustmentsHorizontalIcon,
+  'ArrowDownTrayIcon': ArrowDownTrayIcon,
+  'Bars3Icon': Bars3Icon,
+  
+  // Legacy support for old format (lowercase with dashes)
   'home': HomeIcon,
   'users': UsersIcon,
   'user': UserIcon,
@@ -50,6 +145,7 @@ const iconMapping: Record<string, React.ComponentType<any>> = {
   'document-text': DocumentTextIcon,
   'swatch': SwatchIcon,
   'bell': BellIcon,
+  'magnifying-glass': MagnifyingGlassIcon,
 };
 
 const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
@@ -120,6 +216,21 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
     userId: user?.id,
     roleId: user?.roleId,
   });
+
+  // Debug menu loading
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Menu Debug Info:', {
+        user: user,
+        userId: user?.id,
+        roleId: user?.roleId,
+        dbMenuItems: dbMenuItems,
+        menuLoading,
+        menuError,
+        dbMenuItemsLength: dbMenuItems?.length || 0
+      });
+    }
+  }, [user, dbMenuItems, menuLoading, menuError]);
 
   // Mount check
   useEffect(() => {
@@ -246,6 +357,7 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
   const transformMenuItems = useMemo(() => {
     return (items: any[]) => {
       return items.map(item => {
+        // Get icon component - try direct mapping first, then fallback to HomeIcon
         const IconComponent = iconMapping[item.icon] || HomeIcon;
         
         return {
@@ -254,14 +366,15 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
           path: item.path,
           active: pathname === item.path || pathname.startsWith(item.path + '/'),
           permission: item.permission,
-          canAccess: item.canAccess,
-          children: item.children ? item.children.map((child: any) => ({
+          canAccess: item.canAccess !== false, // Default to true if not specified
+          children: item.children && item.children.length > 0 ? item.children.map((child: any) => ({
             name: child.titleVi || child.title,
             nameVi: child.titleVi || child.title,
             href: child.path,
             icon: iconMapping[child.icon] || HomeIcon,
             permission: child.permission,
-            canAccess: child.canAccess,
+            canAccess: child.canAccess !== false,
+            active: pathname === child.path
           })) : undefined,
         };
       });
@@ -301,6 +414,48 @@ const AdminLayoutContent: React.FC<AdminLayoutProps> = ({ children }) => {
             canAccess: true,
           },
           // ... other HR menu items
+        ],
+      },
+      {
+        title: 'SEO & CMS',
+        icon: MagnifyingGlassIcon,
+        path: '/admin/seo',
+        active: pathname.startsWith('/admin/seo'),
+        permission: 'read:seo',
+        canAccess: true,
+        children: [
+          {
+            name: 'Dashboard',
+            nameVi: 'Tổng quan SEO',
+            href: '/admin/seo',
+            icon: ChartBarIcon,
+            permission: 'read:seo',
+            canAccess: true,
+          },
+          {
+            name: 'Posts',
+            nameVi: 'Quản lý Bài viết',
+            href: '/admin/seo/posts',
+            icon: DocumentTextIcon,
+            permission: 'read:posts',
+            canAccess: true,
+          },
+          {
+            name: 'Categories',
+            nameVi: 'Danh mục',
+            href: '/admin/seo/categories',
+            icon: SwatchIcon,
+            permission: 'read:categories',
+            canAccess: true,
+          },
+          {
+            name: 'Tags',
+            nameVi: 'Thẻ từ khóa',
+            href: '/admin/seo/tags',
+            icon: SwatchIcon,
+            permission: 'read:tags',
+            canAccess: true,
+          },
         ],
       },
       // ... other static menu items

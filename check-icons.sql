@@ -1,0 +1,1 @@
+SELECT DISTINCT icon FROM menu_items WHERE icon IS NOT NULL ORDER BY icon;

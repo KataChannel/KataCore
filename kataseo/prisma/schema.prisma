@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  GUEST
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      UserRole @default(GUEST)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  posts       Post[]
+  uploadedMedia Media[]
+
+  @@map("users")
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+
+  // Relations
+  posts Post[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+
+  // Relations
+  posts Post[]
+
+  @@map("tags")
+}
+
+model Post {
+  id              String     @id @default(uuid())
+  title           String
+  slug            String     @unique
+  excerpt         String?    // Brief description/summary
+  content         Json       // JSONB content
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?    // Canonical URL for SEO
+  status          PostStatus @default(DRAFT)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Foreign keys
+  authorId String
+
+  // Relations
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories Category[]
+  tags       Tag[]
+  media      Media[]
+
+  @@map("posts")
+}
+
+model Media {
+  id           String   @id @default(uuid())
+  filename     String   // stored filename
+  originalName String   // original filename
+  url          String
+  altText      String?
+  mimeType     String   // MIME type
+  size         Int      // file size in bytes
+  uploadedAt   DateTime @default(now())
+  
+  // Foreign keys
+  postId       String?  // Optional - media can exist without post
+  uploadedById String   // Required - who uploaded
+
+  // Relations
+  post       Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+  uploadedBy User  @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
