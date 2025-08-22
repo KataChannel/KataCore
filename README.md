@@ -82,3 +82,19 @@ For technical support, contact the development team.
 ---
 
 **TazaGroup** - Professional Business Management Solution
+
+
+
+
+
+
+#codebase cập nhật dựa án admin.social/facebook với
+1. Configuration Tab : NEXT_PUBLIC_FACEBOOK_APP_ID, NEXT_PUBLIC_FACEBOOK_APP_SECRET,NEXT_PUBLIC_FACEBOOK_SHORT_LIVED_TOKEN,NEXT_PUBLIC_FACEBOOK_LONG_LIVED_TOKEN,NEXT_PUBLIC_FACEBOOK_API_VERSION các thông số này ưu tiên được lấy từ .env nếu không có lấy từ localstorage, có thể nhập từ người dùng
+2.Sync Tab theo các bước
+2.1 Nếu không có thông số NEXT_PUBLIC_FACEBOOK_SHORT_LIVED_TOKEN popup login hoặc nhập NEXT_PUBLIC_FACEBOOK_SHORT_LIVED_TOKEN vào rồi generate NEXT_PUBLIC_FACEBOOK_LONG_LIVED_TOKEN
+2.2 sử dụng các thông số để tiến hành Sync : 
+Fanpage -> Post -> Comment
+ Fanpage -> Massenger
+ 2.3 Hiển thị đươi dạng bảng.
+ 3. User data tab giữ nguyên
+ lữu ý không thay đổi nhiều với cấu trúc hiện tại để userdata hiển thị ra chính xác dữ liệu

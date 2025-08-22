@@ -303,6 +303,108 @@ export async function GET(request: NextRequest) {
           }
         });
 
+      case 'users':
+        const usersPage = searchParams.get('page') || '1';
+        const usersLimit = parseInt(searchParams.get('limit') || '10');
+        const usersSearch = searchParams.get('search') || '';
+        const usersPageId = searchParams.get('pageId') || '';
+        const usersSort = searchParams.get('sort') || 'firstInteractionDate';
+        const usersOrder = searchParams.get('order') || 'desc';
+
+        const usersOffset = (parseInt(usersPage) - 1) * usersLimit;
+
+        // Build where clause for users (interactions)
+        const usersWhere: any = {};
+        if (usersSearch) {
+          usersWhere.OR = [
+            { userName: { contains: usersSearch, mode: 'insensitive' } },
+            { message: { contains: usersSearch, mode: 'insensitive' } }
+          ];
+        }
+        if (usersPageId) {
+          usersWhere.facebookPageId = usersPageId;
+        }
+
+        // Get unique users from interactions
+        const uniqueUsers = await prisma.facebook_interactions.groupBy({
+          by: ['userId', 'userName', 'facebookPageId'],
+          where: usersWhere,
+          _count: {
+            id: true
+          },
+          _min: {
+            createdAt: true
+          },
+          _max: {
+            updatedAt: true
+          }
+        });
+
+        // Get page names for the results
+        const pageIds = [...new Set(uniqueUsers.map(u => u.facebookPageId))];
+        const userPages = await prisma.facebook_pages.findMany({
+          where: { facebookPageId: { in: pageIds } },
+          select: { facebookPageId: true, name: true }
+        });
+        const pageMap = new Map(userPages.map(p => [p.facebookPageId, p.name]));
+
+        // Get latest message for each user
+        const userIds = uniqueUsers.map(u => u.userId);
+        const latestMessages = await prisma.facebook_interactions.findMany({
+          where: {
+            userId: { in: userIds },
+            ...(usersPageId ? { facebookPageId: usersPageId } : {})
+          },
+          orderBy: { createdAt: 'desc' },
+          distinct: ['userId']
+        });
+        const messageMap = new Map(latestMessages.map(m => [m.userId, m.message || '']));
+
+        // Transform to match frontend interface
+        const transformedUsers = uniqueUsers.map(user => ({
+          fanpage: pageMap.get(user.facebookPageId) || 'Unknown Page',
+          fullName: user.userName || 'Unknown User',
+          phoneNumber: '', // Not available in current schema
+          facebookLink: `https://facebook.com/${user.userId}`,
+          firstInteractionDate: user._min.createdAt?.toISOString() || '',
+          lastInteractionDate: user._max.updatedAt?.toISOString() || '',
+          totalInteractions: user._count.id,
+          latestMessage: messageMap.get(user.userId) || '',
+          interactionType: 'VARIOUS' // Mixed types for users
+        }));
+
+        // Sort results
+        const sortField = usersSort === 'firstInteractionDate' ? 'firstInteractionDate' :
+                         usersSort === 'lastInteractionDate' ? 'lastInteractionDate' :
+                         usersSort === 'totalInteractions' ? 'totalInteractions' :
+                         usersSort === 'fullName' ? 'fullName' : 'firstInteractionDate';
+
+        transformedUsers.sort((a, b) => {
+          const aVal = a[sortField as keyof typeof a];
+          const bVal = b[sortField as keyof typeof b];
+          
+          if (typeof aVal === 'string' && typeof bVal === 'string') {
+            return usersOrder === 'desc' ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+          }
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return usersOrder === 'desc' ? bVal - aVal : aVal - bVal;
+          }
+          return 0;
+        });
+
+        // Apply pagination
+        const paginatedUsers = transformedUsers.slice(usersOffset, usersOffset + usersLimit);
+
+        return NextResponse.json({
+          data: paginatedUsers,
+          pagination: {
+            current: parseInt(usersPage),
+            limit: usersLimit,
+            total: transformedUsers.length,
+            pages: Math.ceil(transformedUsers.length / usersLimit)
+          }
+        });
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }

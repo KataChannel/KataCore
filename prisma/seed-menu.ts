@@ -118,6 +118,39 @@ const menuStructure: MenuItemData[] = [
     sortOrder: 1,
     isActive: true
   },
+  {
+    id: 'social-facebook-config',
+    title: 'Facebook Configuration',
+    titleVi: 'Cấu hình Facebook',
+    path: '/admin/social/facebook#configuration',
+    icon: 'CogIcon',
+    permission: 'admin.social.facebook.config',
+    parentId: 'social-facebook',
+    sortOrder: 1,
+    isActive: true
+  },
+  {
+    id: 'social-facebook-sync',
+    title: 'Facebook Sync',
+    titleVi: 'Đồng bộ Facebook',
+    path: '/admin/social/facebook#sync',
+    icon: 'ArrowPathIcon',
+    permission: 'admin.social.facebook.sync',
+    parentId: 'social-facebook',
+    sortOrder: 2,
+    isActive: true
+  },
+  {
+    id: 'social-facebook-users',
+    title: 'Facebook User Data',
+    titleVi: 'Dữ liệu người dùng Facebook',
+    path: '/admin/social/facebook#users',
+    icon: 'UsersIcon',
+    permission: 'admin.social.facebook.users',
+    parentId: 'social-facebook',
+    sortOrder: 3,
+    isActive: true
+  },
 
   // Chat System
   {
@@ -226,7 +259,7 @@ const defaultRolePermissions = {
   // Sales Manager - Sales related permissions
   'SALES_MANAGER': {
     level: 7,
-    permissions: ['dashboard', 'social', 'social-facebook', 'chat', 'information-hub', 'call-center', 'reports']
+    permissions: ['dashboard', 'social', 'social-facebook', 'social-facebook-config', 'social-facebook-sync', 'social-facebook-users', 'chat', 'information-hub', 'call-center', 'reports']
   },
   
   // Department Manager - Basic management permissions

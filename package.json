@@ -163,6 +163,7 @@
     "@types/node-fetch": "^2.6.12",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
+    "@types/xlsx": "^0.0.36",
     "dotenv": "^17.2.1",
     "eslint-config-next": "^15.4.6",
     "prettier": "^3.6.2",

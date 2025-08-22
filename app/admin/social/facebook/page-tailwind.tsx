@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/tailwind-ui';
+import { TailwindCard } from '@/components/ui/TailwindCard';
 import FacebookConfigurationTab from './components/FacebookConfigurationTab';
 import FacebookSyncTab from './components/FacebookSyncTab';
 import FacebookUserDataTab from './components/FacebookUserDataTab';
-import { TailwindCard } from '@/components/ui/TailwindCard';
 
 interface FacebookConfig {
   appId: string;
@@ -39,6 +40,7 @@ export default function FacebookAdminPage() {
   });
 
   useEffect(() => {
+    // Load initial configuration
     loadInitialConfig();
   }, []);
 
