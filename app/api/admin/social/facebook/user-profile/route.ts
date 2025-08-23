@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         console.log(`📡 Fetching Facebook profile for ${userId}`);
         
         const profileResponse = await fetch(
-          `https://graph.facebook.com/v23.0/${userId}?access_token=${userInteraction.facebook_pages.accessToken}&fields=id,name,email,picture,location,hometown,work,education,relationship_status,birthday,gender,about,phone,locale,timezone,updated_time`
+          `https://graph.facebook.com/v23.0/${userId}?access_token=${userInteraction.facebook_pages.accessToken}&fields=id,name,email,picture,location,hometown,work,education,relationship_status,birthday,about,age_range,locale,updated_time`
         );
 
         if (profileResponse.ok) {
@@ -87,11 +87,9 @@ export async function GET(request: NextRequest) {
             })) : [],
             relationshipStatus: profileData.relationship_status || null,
             birthday: profileData.birthday || null,
-            gender: profileData.gender || null,
             about: profileData.about || null,
-            phone: profileData.phone || null,
+            ageRange: profileData.age_range ? `${profileData.age_range.min}-${profileData.age_range.max || 'unknown'}` : null,
             locale: profileData.locale || null,
-            timezone: profileData.timezone || null,
             lastUpdated: profileData.updated_time || null
           };
           

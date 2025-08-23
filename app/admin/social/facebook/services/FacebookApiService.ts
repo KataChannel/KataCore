@@ -48,6 +48,50 @@ export class FacebookApiService {
   }
 
   /**
+   * Fetch ALL data with pagination support
+   */
+  private async fetchAllData(endpoint: string, params: Record<string, any> = {}, maxPages: number = 10): Promise<any[]> {
+    const allData: any[] = [];
+    let after: string | undefined = undefined;
+    let pageCount = 0;
+
+    while (pageCount < maxPages) {
+      try {
+        const requestParams = { ...params };
+        if (after) {
+          requestParams.after = after;
+        }
+
+        console.log(`📄 Fetching page ${pageCount + 1} for ${endpoint}...`);
+        const response = await this.makeApiRequest(endpoint, requestParams);
+
+        if (response.data && Array.isArray(response.data)) {
+          allData.push(...response.data);
+          console.log(`✅ Page ${pageCount + 1}: ${response.data.length} items fetched (Total: ${allData.length})`);
+        }
+
+        // Check for next page
+        after = response.paging?.cursors?.after;
+        if (!after) {
+          break;
+        }
+
+        pageCount++;
+
+        // Add small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+      } catch (error: any) {
+        console.error(`❌ Error fetching page ${pageCount + 1}:`, error.message);
+        break;
+      }
+    }
+
+    console.log(`🎯 Total fetched for ${endpoint}: ${allData.length} items across ${pageCount} pages`);
+    return allData;
+  }
+
+  /**
    * Make API request to Facebook Graph API
    */
   private async makeApiRequest(endpoint: string, params: Record<string, any> = {}): Promise<any> {
@@ -135,6 +179,39 @@ export class FacebookApiService {
   }
 
   /**
+   * Get ALL posts from a specific page using pagination
+   */
+  async getAllPagePosts(pageId: string, maxPages: number = 20): Promise<FacebookPost[]> {
+    try {
+      console.log(`📊 Fetching ALL posts for page ${pageId} (max ${maxPages} pages)`);
+      
+      const allPosts = await this.fetchAllData(
+        `${pageId}/posts`,
+        {
+          fields: 'id,message,created_time,updated_time,permalink_url,likes.summary(true),comments.summary(true),shares',
+          limit: 100
+        },
+        maxPages
+      );
+
+      return allPosts.map((post: any) => ({
+        id: post.id,
+        message: post.message || '',
+        createdTime: new Date(post.created_time),
+        updatedTime: new Date(post.updated_time),
+        permalinkUrl: post.permalink_url,
+        likesCount: post.likes?.summary?.total_count || 0,
+        commentsCount: post.comments?.summary?.total_count || 0,
+        sharesCount: post.shares?.count || 0,
+        pageId
+      }));
+    } catch (error) {
+      console.error(`Error fetching all posts for page ${pageId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Get comments from a specific post
    */
   async getPostComments(postId: string, limit: number = 25): Promise<any[]> {
@@ -147,6 +224,29 @@ export class FacebookApiService {
       return response.data || [];
     } catch (error) {
       console.error(`Error fetching comments for post ${postId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get ALL comments from a specific post using pagination
+   */
+  async getAllPostComments(postId: string, maxPages: number = 10): Promise<any[]> {
+    try {
+      console.log(`💬 Fetching ALL comments for post ${postId} (max ${maxPages} pages)`);
+      
+      const allComments = await this.fetchAllData(
+        `${postId}/comments`,
+        {
+          fields: 'id,message,created_time,from,like_count,parent',
+          limit: 100
+        },
+        maxPages
+      );
+
+      return allComments;
+    } catch (error) {
+      console.error(`Error fetching all comments for post ${postId}:`, error);
       throw error;
     }
   }

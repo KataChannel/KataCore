@@ -41,6 +41,49 @@ async function fetchFacebookAPI(endpoint: string, accessToken: string) {
   return response.json();
 }
 
+// Enhanced function to fetch ALL data with pagination support
+async function fetchAllFacebookData(endpoint: string, accessToken: string, maxPages = 10): Promise<any[]> {
+  const allData: any[] = [];
+  let nextUrl = `${FACEBOOK_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}access_token=${accessToken}`;
+  let pageCount = 0;
+  
+  while (nextUrl && pageCount < maxPages) {
+    try {
+      console.log(`📄 Fetching page ${pageCount + 1} for ${endpoint}...`);
+      
+      const response = await fetch(nextUrl);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Facebook API error: ${error.error?.message || response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.data && Array.isArray(data.data)) {
+        allData.push(...data.data);
+        console.log(`✅ Page ${pageCount + 1}: ${data.data.length} items fetched (Total: ${allData.length})`);
+      }
+      
+      // Check for next page
+      nextUrl = data.paging?.next || null;
+      pageCount++;
+      
+      // Add small delay to avoid rate limiting
+      if (nextUrl) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+    } catch (error: any) {
+      console.error(`❌ Error fetching page ${pageCount + 1}:`, error.message);
+      break;
+    }
+  }
+  
+  console.log(`🎯 Total fetched for ${endpoint}: ${allData.length} items across ${pageCount} pages`);
+  return allData;
+}
+
 // Sync Facebook Pages
 async function syncPages(accessToken: string) {
   try {
@@ -130,15 +173,18 @@ async function syncPosts(pageId?: string) {
     for (const page of pages) {
       if (!page.accessToken) continue;
 
-      // Get posts from the page
-      const postsData = await fetchFacebookAPI(
-        `/${page.facebookPageId}/posts?fields=id,message,story,created_time,updated_time,likes.summary(true),comments.summary(true),shares,type,attachments,permalink_url,is_published&limit=100&access_token=${page.accessToken}`,
-        page.accessToken
+      console.log(`📊 Syncing posts for page: ${page.name || page.facebookPageId}`);
+      
+      // Get ALL posts from the page using pagination
+      const allPosts = await fetchAllFacebookData(
+        `/${page.facebookPageId}/posts?fields=id,message,story,created_time,updated_time,likes.summary(true),comments.summary(true),shares,type,attachments,permalink_url,is_published&limit=100`,
+        page.accessToken,
+        20 // Max 20 pages of posts per page
       );
 
-      if (!postsData.data) continue;
+      console.log(`📈 Found ${allPosts.length} total posts for page ${page.name || page.facebookPageId}`);
 
-      const posts = postsData.data.map((post: any) => ({
+      const posts = allPosts.map((post: any) => ({
         facebookPostId: post.id,
         facebookPageId: page.facebookPageId,
         message: post.message,
@@ -149,7 +195,7 @@ async function syncPosts(pageId?: string) {
         commentsCount: post.comments?.summary?.total_count || 0,
         sharesCount: post.shares?.count || 0,
         postType: post.type,
-        attachments: post.attachments ? JSON.stringify(post.attachments) : null,
+        attachments: post.attachments ? JSON.stringify(post.attachments) : undefined,
         permalink: post.permalink_url,
         isPublished: post.is_published !== false,
         updatedAt: new Date()
@@ -213,15 +259,18 @@ async function syncComments(pageId?: string) {
     for (const post of posts) {
       if (!post.facebook_pages?.accessToken) continue;
 
-      // Get comments for the post
-      const commentsData = await fetchFacebookAPI(
-        `/${post.facebookPostId}/comments?fields=id,from,message,created_time,like_count,can_reply,can_hide,can_like,is_hidden,parent&limit=100&access_token=${post.facebook_pages.accessToken}`,
-        post.facebook_pages.accessToken
+      console.log(`💬 Syncing comments for post: ${post.facebookPostId}`);
+      
+      // Get ALL comments for the post using pagination
+      const allComments = await fetchAllFacebookData(
+        `/${post.facebookPostId}/comments?fields=id,from,message,created_time,like_count,can_reply,can_hide,can_like,is_hidden,parent&limit=100`,
+        post.facebook_pages.accessToken,
+        10 // Max 10 pages of comments per post
       );
 
-      if (!commentsData.data) continue;
+      console.log(`💭 Found ${allComments.length} total comments for post ${post.facebookPostId}`);
 
-      const comments = commentsData.data.map((comment: any) => ({
+      const comments = allComments.map((comment: any) => ({
         facebookCommentId: comment.id,
         facebookPostId: post.facebookPostId,
         parentCommentId: comment.parent?.id || null,
@@ -308,16 +357,19 @@ async function syncMessages(pageId?: string) {
     for (const page of pages) {
       if (!page.accessToken) continue;
 
-      // Get conversations for the page
-      const conversationsData = await fetchFacebookAPI(
-        `/${page.facebookPageId}/conversations?fields=id,participants,message_count,unread_count,can_reply,snippet,updated_time&limit=100&access_token=${page.accessToken}`,
-        page.accessToken
+      console.log(`💬 Syncing conversations for page: ${page.name || page.facebookPageId}`);
+      
+      // Get ALL conversations for the page using pagination
+      const allConversations = await fetchAllFacebookData(
+        `/${page.facebookPageId}/conversations?fields=id,participants,message_count,unread_count,can_reply,snippet,updated_time&limit=100`,
+        page.accessToken,
+        15 // Max 15 pages of conversations per page
       );
 
-      if (!conversationsData.data) continue;
+      console.log(`📞 Found ${allConversations.length} total conversations for page ${page.name || page.facebookPageId}`);
 
       // Sync conversations first
-      const conversations = conversationsData.data.map((conv: any) => ({
+      const conversations = allConversations.map((conv: any) => ({
         facebookConversationId: conv.id,
         facebookPageId: page.facebookPageId,
         participants: conv.participants ? JSON.stringify(conv.participants) : null,
@@ -335,22 +387,25 @@ async function syncMessages(pageId?: string) {
       });
 
       // Sync messages for each conversation
-      for (const conv of conversationsData.data) {
-        const messagesData = await fetchFacebookAPI(
-          `/${conv.id}/messages?fields=id,from,message,attachments,created_time,tags&limit=50&access_token=${page.accessToken}`,
-          page.accessToken
+      for (const conv of allConversations) {
+        console.log(`💌 Syncing messages for conversation: ${conv.id}`);
+        
+        const allMessages = await fetchAllFacebookData(
+          `/${conv.id}/messages?fields=id,from,message,attachments,created_time,tags&limit=100`,
+          page.accessToken,
+          5 // Max 5 pages of messages per conversation
         );
 
-        if (!messagesData.data) continue;
+        console.log(`📨 Found ${allMessages.length} total messages for conversation ${conv.id}`);
 
-        const messages = messagesData.data.map((msg: any) => ({
+        const messages = allMessages.map((msg: any) => ({
           facebookMessageId: msg.id,
           facebookPageId: page.facebookPageId,
           conversationId: conv.id,
           fromId: msg.from?.id || '',
           fromName: msg.from?.name || 'Unknown',
           message: msg.message,
-          attachments: msg.attachments ? JSON.stringify(msg.attachments) : null,
+          attachments: msg.attachments ? JSON.stringify(msg.attachments) : undefined,
           createdTime: msg.created_time ? new Date(msg.created_time) : null,
           tags: msg.tags ? JSON.stringify(msg.tags) : null,
           messageType: msg.attachments?.length > 0 ? 'ATTACHMENT' : 'TEXT',

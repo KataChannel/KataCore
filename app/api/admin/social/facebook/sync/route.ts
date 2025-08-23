@@ -97,20 +97,76 @@ async function fetchFacebookAPI(endpoint: string, accessToken: string, retries =
         
         throw new Error(`Facebook API error: ${error.error?.message || response.statusText}`);
       }
-      
-      return response.json();
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.log('Request timed out, retrying...');
+
+      return await response.json();
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log(`Request timeout, retry ${i + 1}/${retries}`);
+      } else {
+        console.error(`Request failed, retry ${i + 1}/${retries}:`, error.message);
       }
       
-      if (i === retries - 1) throw error;
+      if (i === retries - 1) {
+        throw error;
+      }
       
       const delay = Math.pow(2, i) * 1000;
-      console.log(`Request failed, retrying in ${delay}ms (${i + 1}/${retries})`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
+}
+
+// Enhanced function to fetch ALL data with pagination support
+async function fetchAllFacebookData(endpoint: string, accessToken: string, maxPages = 10): Promise<any[]> {
+  const allData: any[] = [];
+  let nextUrl = `${FACEBOOK_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}access_token=${accessToken}`;
+  let pageCount = 0;
+  
+  while (nextUrl && pageCount < maxPages) {
+    try {
+      console.log(`📄 Fetching page ${pageCount + 1} for ${endpoint}...`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
+      const response = await fetch(nextUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'TazaCore/1.0'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Facebook API error: ${error.error?.message || response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.data && Array.isArray(data.data)) {
+        allData.push(...data.data);
+        console.log(`✅ Page ${pageCount + 1}: ${data.data.length} items fetched (Total: ${allData.length})`);
+      }
+      
+      // Check for next page
+      nextUrl = data.paging?.next || null;
+      pageCount++;
+      
+      // Add small delay to avoid rate limiting
+      if (nextUrl) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+    } catch (error: any) {
+      console.error(`❌ Error fetching page ${pageCount + 1}:`, error.message);
+      break;
+    }
+  }
+  
+  console.log(`🎯 Total fetched for ${endpoint}: ${allData.length} items across ${pageCount} pages`);
+  return allData;
 }
 
 // Helper function to extract phone numbers from text
@@ -260,14 +316,16 @@ async function syncComments(accessToken: string, pageId?: string, limit: number 
       try {
         console.log(`📝 Syncing comments for page: ${page.name} (${page.facebookPageId})`);
         
-        const postsData = await fetchFacebookAPI(
-          `/${page.facebookPageId}/posts?fields=id,message,created_time,updated_time&limit=${limit}&access_token=${page.accessToken}`,
-          page.accessToken
+        // Get ALL posts using pagination
+        const allPosts = await fetchAllFacebookData(
+          `/${page.facebookPageId}/posts?fields=id,message,created_time,updated_time&limit=100`,
+          page.accessToken,
+          20 // Max 20 pages of posts per page
         );
 
-        if (!postsData.data) continue;
+        console.log(`📊 Found ${allPosts.length} total posts for page ${page.name}`);
 
-        for (const post of postsData.data) {
+        for (const post of allPosts) {
           try {
             // Upsert post
             await prisma.facebook_posts.upsert({
@@ -286,15 +344,16 @@ async function syncComments(accessToken: string, pageId?: string, limit: number 
               }
             });
 
-            // Get comments for this post
-            const commentsData = await fetchFacebookAPI(
-              `/${post.id}/comments?fields=id,message,created_time,from&limit=${limit}&access_token=${page.accessToken}`,
-              page.accessToken
+            // Get ALL comments for this post using pagination
+            const allComments = await fetchAllFacebookData(
+              `/${post.id}/comments?fields=id,message,created_time,from&limit=100`,
+              page.accessToken,
+              10 // Max 10 pages of comments per post
             );
 
-            if (!commentsData.data) continue;
+            console.log(`💬 Found ${allComments.length} total comments for post ${post.id}`);
 
-            for (const comment of commentsData.data) {
+            for (const comment of allComments) {
               try {
                 totalProcessed++;
 
@@ -425,15 +484,16 @@ async function syncMessages(accessToken: string, pageId?: string, limit: number 
       try {
         console.log(`💬 Syncing messages for page: ${page.name} (${page.facebookPageId})`);
         
-        // Get conversations for this page
-        const conversationsData = await fetchFacebookAPI(
-          `/${page.facebookPageId}/conversations?fields=id,updated_time,participants&limit=${limit}&access_token=${page.accessToken}`,
-          page.accessToken
+        // Get ALL conversations for this page using pagination
+        const allConversations = await fetchAllFacebookData(
+          `/${page.facebookPageId}/conversations?fields=id,updated_time,participants&limit=100`,
+          page.accessToken,
+          15 // Max 15 pages of conversations per page
         );
 
-        if (!conversationsData.data) continue;
+        console.log(`📞 Found ${allConversations.length} total conversations for page ${page.name}`);
 
-        for (const conversation of conversationsData.data) {
+        for (const conversation of allConversations) {
           try {
             // Upsert conversation
             await prisma.facebook_conversations.upsert({
@@ -450,15 +510,16 @@ async function syncMessages(accessToken: string, pageId?: string, limit: number 
               }
             });
 
-            // Get messages for this conversation
-            const messagesData = await fetchFacebookAPI(
-              `/${conversation.id}/messages?fields=id,message,created_time,from&limit=${limit}&access_token=${page.accessToken}`,
-              page.accessToken
+            // Get ALL messages for this conversation using pagination
+            const allMessages = await fetchAllFacebookData(
+              `/${conversation.id}/messages?fields=id,message,created_time,from&limit=100`,
+              page.accessToken,
+              5 // Max 5 pages of messages per conversation (to avoid too many API calls)
             );
 
-            if (!messagesData.data) continue;
+            console.log(`💌 Found ${allMessages.length} total messages for conversation ${conversation.id}`);
 
-            for (const message of messagesData.data) {
+            for (const message of allMessages) {
               try {
                 totalProcessed++;
 

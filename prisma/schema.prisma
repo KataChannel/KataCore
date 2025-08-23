@@ -1,19 +1,3 @@
-model Employee {
-  id            String   @id @default(uuid())
-  name          String
-  phone         String?
-  email         String?
-  position      String?
-  department    String?
-  company       String?
-  startDate     DateTime?
-  employeeCode  String? @unique
-  status        String  @default("active")
-  userId        String? @unique
-  user          users?  @relation(fields: [userId], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
@@ -22,6 +6,23 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id           String    @id @default(uuid())
+  name         String
+  phone        String?
+  email        String?
+  position     String?
+  department   String?
+  company      String?
+  startDate    DateTime?
+  employeeCode String?   @unique
+  status       String    @default("active")
+  userId       String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         users?    @relation(fields: [userId], references: [id])
 }
 
 model audit_logs {
@@ -139,85 +140,85 @@ model facebook_pages {
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   facebook_interactions facebook_interactions[]
-  facebook_posts        facebook_posts[]
   facebook_messages     facebook_messages[]
+  facebook_posts        facebook_posts[]
 }
 
 model facebook_posts {
-  id                 String          @id @default(uuid())
-  facebookPostId     String          @unique
-  facebookPageId     String
-  message            String?
-  story              String?
-  createdTime        DateTime?
-  updatedTime        DateTime?
-  likesCount         Int             @default(0)
-  commentsCount      Int             @default(0)
-  sharesCount        Int             @default(0)
-  postType           String?
-  attachments        Json?
-  permalink          String?
-  isPublished        Boolean         @default(true)
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  facebook_pages     facebook_pages  @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
-  facebook_comments  facebook_comments[]
+  id                String              @id @default(uuid())
+  facebookPostId    String              @unique
+  facebookPageId    String
+  message           String?
+  story             String?
+  createdTime       DateTime?
+  updatedTime       DateTime?
+  likesCount        Int                 @default(0)
+  commentsCount     Int                 @default(0)
+  sharesCount       Int                 @default(0)
+  postType          String?
+  attachments       Json?
+  permalink         String?
+  isPublished       Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  facebook_comments facebook_comments[]
+  facebook_pages    facebook_pages      @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
 }
 
 model facebook_comments {
-  id                String          @id @default(uuid())
-  facebookCommentId String          @unique
+  id                String              @id @default(uuid())
+  facebookCommentId String              @unique
   facebookPostId    String?
   parentCommentId   String?
   fromId            String
   fromName          String
   message           String
   createdTime       DateTime?
-  likesCount        Int             @default(0)
-  canReply          Boolean         @default(true)
-  canHide           Boolean         @default(false)
-  canLike           Boolean         @default(true)
-  isHidden          Boolean         @default(false)
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  facebook_posts    facebook_posts? @relation(fields: [facebookPostId], references: [facebookPostId], onDelete: Cascade)
-  parent_comment    facebook_comments? @relation("CommentReplies", fields: [parentCommentId], references: [facebookCommentId])
+  likesCount        Int                 @default(0)
+  canReply          Boolean             @default(true)
+  canHide           Boolean             @default(false)
+  canLike           Boolean             @default(true)
+  isHidden          Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  facebook_posts    facebook_posts?     @relation(fields: [facebookPostId], references: [facebookPostId], onDelete: Cascade)
+  parent_comment    facebook_comments?  @relation("CommentReplies", fields: [parentCommentId], references: [facebookCommentId])
   replies           facebook_comments[] @relation("CommentReplies")
 }
 
 model facebook_messages {
-  id                   String          @id @default(uuid())
-  facebookMessageId    String          @unique
-  facebookPageId       String
-  conversationId       String
-  fromId               String
-  fromName             String
-  message              String?
-  attachments          Json?
-  createdTime          DateTime?
-  tags                 Json?
-  messageType          String          @default("TEXT")
-  isEcho               Boolean         @default(false)
-  isRead               Boolean         @default(false)
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
-  facebook_pages       facebook_pages  @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
-  facebook_conversations facebook_conversations? @relation(fields: [conversationId], references: [facebookConversationId])
+  id                     String                 @id @default(uuid())
+  facebookMessageId      String                 @unique
+  facebookPageId         String
+  conversationId         String
+  fromId                 String
+  fromName               String
+  message                String?
+  attachments            Json?
+  createdTime            DateTime?
+  tags                   Json?
+  messageType            String                 @default("TEXT")
+  isEcho                 Boolean                @default(false)
+  isRead                 Boolean                @default(false)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  facebook_conversations facebook_conversations @relation(fields: [conversationId], references: [facebookConversationId])
+  facebook_pages         facebook_pages         @relation(fields: [facebookPageId], references: [facebookPageId], onDelete: Cascade)
 }
 
 model facebook_conversations {
-  id                      String              @id @default(uuid())
-  facebookConversationId  String              @unique
-  facebookPageId          String
-  participants            Json?
-  messageCount            Int                 @default(0)
-  unreadCount             Int                 @default(0)
-  canReply                Boolean             @default(true)
-  snippet                 String?
-  updatedTime             DateTime?
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
-  facebook_messages       facebook_messages[]
+  id                     String              @id @default(uuid())
+  facebookConversationId String              @unique
+  facebookPageId         String
+  participants           Json?
+  messageCount           Int                 @default(0)
+  unreadCount            Int                 @default(0)
+  canReply               Boolean             @default(true)
+  snippet                String?
+  updatedTime            DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  facebook_messages      facebook_messages[]
 }
 
 model friend_requests {
@@ -367,53 +368,173 @@ model user_settings {
 }
 
 model users {
-  id                                                        String                 @id @default(uuid())
-  email                                                     String?                @unique
-  username                                                  String?                @unique
-  phone                                                     String?                @unique
-  displayName                                               String
-  password                                                  String?
-  avatar                                                    String?
-  bio                                                       String?
-  status                                                    UserStatus             @default(OFFLINE)
-  isVerified                                                Boolean                @default(false)
-  isActive                                                  Boolean                @default(true)
-  lastSeen                                                  DateTime?
-  createdAt                                                 DateTime               @default(now())
-  updatedAt                                                 DateTime               @updatedAt
-  googleId                                                  String?                @unique
-  facebookId                                                String?                @unique
-  appleId                                                   String?                @unique
-  otpCode                                                   String?
-  otpExpiry                                                 DateTime?
-  roleId                                                    String
-  audit_logs                                                audit_logs[]
-  call_extension_users                                      call_extension_users[]
-  conversations_conversations_createdByIdTousers            conversations[]        @relation("conversations_createdByIdTousers")
-  friend_requests_friend_requests_receiverIdTousers         friend_requests[]      @relation("friend_requests_receiverIdTousers")
-  friend_requests_friend_requests_senderIdTousers           friend_requests[]      @relation("friend_requests_senderIdTousers")
-  message_reactions                                         message_reactions[]
-  messages                                                  messages[]
-  notifications                                             notifications[]
-  reports_reports_reportedUserIdTousers                     reports[]              @relation("reports_reportedUserIdTousers")
-  reports_reports_reporterIdTousers                         reports[]              @relation("reports_reporterIdTousers")
-  sessions                                                  sessions[]
-  user_settings                                             user_settings?
-  roles                                                     roles                  @relation(fields: [roleId], references: [id])
-  users_BlockedUsers_A                                      users[]                @relation("BlockedUsers")
-  users_BlockedUsers_B                                      users[]                @relation("BlockedUsers")
-  conversations_ConversationParticipants                    conversations[]        @relation("ConversationParticipants")
-  users_UserFriends_A                                       users[]                @relation("UserFriends")
-  users_UserFriends_B                                       users[]                @relation("UserFriends")
-  employee Employee?
-  
-  // CMS Relations
-  posts                                                     Post[]
-  uploadedMedia                                            Media[]
-  pages                                                    Page[]
-  
-  // Facebook Leads Relations
-  assignedLeads                                            facebook_leads[]       @relation("LeadAssignedTo")
+  id                                                String                 @id @default(uuid())
+  email                                             String?                @unique
+  username                                          String?                @unique
+  phone                                             String?                @unique
+  displayName                                       String
+  password                                          String?
+  avatar                                            String?
+  bio                                               String?
+  status                                            UserStatus             @default(OFFLINE)
+  isVerified                                        Boolean                @default(false)
+  isActive                                          Boolean                @default(true)
+  lastSeen                                          DateTime?
+  createdAt                                         DateTime               @default(now())
+  updatedAt                                         DateTime               @updatedAt
+  googleId                                          String?                @unique
+  facebookId                                        String?                @unique
+  appleId                                           String?                @unique
+  otpCode                                           String?
+  otpExpiry                                         DateTime?
+  roleId                                            String
+  employee                                          Employee?
+  audit_logs                                        audit_logs[]
+  call_extension_users                              call_extension_users[]
+  conversations_conversations_createdByIdTousers    conversations[]        @relation("conversations_createdByIdTousers")
+  assignedLeads                                     facebook_leads[]       @relation("LeadAssignedTo")
+  friend_requests_friend_requests_receiverIdTousers friend_requests[]      @relation("friend_requests_receiverIdTousers")
+  friend_requests_friend_requests_senderIdTousers   friend_requests[]      @relation("friend_requests_senderIdTousers")
+  uploadedMedia                                     Media[]
+  message_reactions                                 message_reactions[]
+  messages                                          messages[]
+  notifications                                     notifications[]
+  pages                                             Page[]
+  posts                                             Post[]
+  reports_reports_reportedUserIdTousers             reports[]              @relation("reports_reportedUserIdTousers")
+  reports_reports_reporterIdTousers                 reports[]              @relation("reports_reporterIdTousers")
+  sessions                                          sessions[]
+  user_settings                                     user_settings?
+  roles                                             roles                  @relation(fields: [roleId], references: [id])
+  users_BlockedUsers_A                              users[]                @relation("BlockedUsers")
+  users_BlockedUsers_B                              users[]                @relation("BlockedUsers")
+  conversations_ConversationParticipants            conversations[]        @relation("ConversationParticipants")
+  users_UserFriends_A                               users[]                @relation("UserFriends")
+  users_UserFriends_B                               users[]                @relation("UserFriends")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       Post[]   @relation("CategoryToPost")
+
+  @@map("categories")
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       Post[]   @relation("PostToTag")
+
+  @@map("tags")
+}
+
+model Post {
+  id              String     @id @default(uuid())
+  title           String
+  slug            String     @unique
+  excerpt         String?
+  content         Json
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  featuredImage   String?
+  status          PostStatus @default(DRAFT)
+  publishedAt     DateTime?
+  viewCount       Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  authorId        String
+  media           Media[]
+  author          users      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories      Category[] @relation("CategoryToPost")
+  tags            Tag[]      @relation("PostToTag")
+
+  @@map("posts")
+}
+
+model Media {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  url          String
+  altText      String?
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  uploadedAt   DateTime @default(now())
+  postId       String?
+  uploadedById String
+  post         Post?    @relation(fields: [postId], references: [id])
+  uploadedBy   users    @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
+
+model Page {
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  content         Json
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  isPublished     Boolean  @default(false)
+  template        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  authorId        String
+  author          users    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("pages")
+}
+
+model facebook_leads {
+  id             String    @id @default(uuid())
+  facebookLeadId String    @unique
+  formId         String
+  formName       String?
+  pageId         String?
+  pageName       String?
+  userName       String?
+  email          String?
+  phone          String?
+  firstName      String?
+  lastName       String?
+  company        String?
+  jobTitle       String?
+  location       String?
+  city           String?
+  state          String?
+  country        String?
+  zipCode        String?
+  rawData        Json?
+  leadScore      Int       @default(0)
+  leadSource     String    @default("FACEBOOK_LEAD_AD")
+  leadStatus     String    @default("NEW")
+  assignedTo     String?
+  notes          String?
+  lastContactAt  DateTime?
+  convertedAt    DateTime?
+  createdTime    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  assignedUser   users?    @relation("LeadAssignedTo", fields: [assignedTo], references: [id])
+
+  @@index([email])
+  @@index([phone])
+  @@index([leadScore])
+  @@index([leadStatus])
+  @@index([createdTime])
 }
 
 enum ConversationType {
@@ -443,152 +564,7 @@ enum UserStatus {
   BUSY
 }
 
-// CMS ENUMS
 enum PostStatus {
   DRAFT
   PUBLISHED
-}
-
-// CMS MODELS
-model Category {
-  id   String @id @default(uuid())
-  name String @unique
-  slug String @unique
-  description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  posts Post[]
-
-  @@map("categories")
-}
-
-model Tag {
-  id   String @id @default(uuid())
-  name String @unique
-  slug String @unique
-  description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  posts Post[]
-
-  @@map("tags")
-}
-
-model Post {
-  id              String     @id @default(uuid())
-  title           String
-  slug            String     @unique
-  excerpt         String?    // Brief description/summary
-  content         Json       // JSONB content
-  metaTitle       String?
-  metaDescription String?
-  canonicalUrl    String?    // Canonical URL for SEO
-  featuredImage   String?    // Featured image URL
-  status          PostStatus @default(DRAFT)
-  publishedAt     DateTime?  // When published
-  viewCount       Int        @default(0)
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  // Foreign keys
-  authorId String
-
-  // Relations
-  author     users      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  categories Category[]
-  tags       Tag[]
-  media      Media[]
-
-  @@map("posts")
-}
-
-model Media {
-  id           String   @id @default(uuid())
-  filename     String   // stored filename
-  originalName String   // original filename
-  url          String
-  altText      String?
-  mimeType     String   // MIME type
-  size         Int      // file size in bytes
-  width        Int?     // image width
-  height       Int?     // image height
-  uploadedAt   DateTime @default(now())
-  
-  // Foreign keys
-  postId       String?  // Optional - media can exist without post
-  uploadedById String   // Required - who uploaded
-
-  // Relations
-  post       Post?  @relation(fields: [postId], references: [id], onDelete: SetNull)
-  uploadedBy users  @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
-
-  @@map("media")
-}
-
-model Page {
-  id              String   @id @default(uuid())
-  title           String
-  slug            String   @unique
-  content         Json     // JSONB content
-  metaTitle       String?
-  metaDescription String?
-  canonicalUrl    String?
-  isPublished     Boolean  @default(false)
-  template        String?  // page template
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Foreign keys
-  authorId String
-
-  // Relations
-  author users @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  @@map("pages")
-}
-
-// Facebook Lead Ads Model - Thu thập thông tin người dùng hợp pháp
-model facebook_leads {
-  id              String    @id @default(uuid())
-  facebookLeadId  String    @unique
-  formId          String
-  formName        String?
-  pageId          String?
-  pageName        String?
-  userName        String?
-  email           String?
-  phone           String?
-  firstName       String?
-  lastName        String?
-  company         String?
-  jobTitle        String?
-  location        String?
-  city            String?
-  state           String?
-  country         String?
-  zipCode         String?
-  rawData         Json?     // Toàn bộ field_data từ Facebook
-  leadScore       Int       @default(0)
-  leadSource      String    @default("FACEBOOK_LEAD_AD")
-  leadStatus      String    @default("NEW") // NEW, CONTACTED, QUALIFIED, CONVERTED, LOST
-  assignedTo      String?   // User ID của người được assign
-  notes           String?
-  lastContactAt   DateTime?
-  convertedAt     DateTime?
-  createdTime     DateTime? // Thời gian tạo lead trên Facebook
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Relations
-  assignedUser    users?    @relation("LeadAssignedTo", fields: [assignedTo], references: [id])
-
-  @@index([email])
-  @@index([phone])
-  @@index([leadScore])
-  @@index([leadStatus])
-  @@index([createdTime])
 }

@@ -276,7 +276,7 @@ export class FacebookUserDataExtractor {
       if (!accessToken) return {};
 
       const response = await fetch(
-        `https://graph.facebook.com/v21.0/${userId}?fields=id,name,age_range,location,hometown,email&access_token=${accessToken}`
+        `https://graph.facebook.com/v23.0/${userId}?fields=id,name,age_range,location,hometown,email&access_token=${accessToken}`
       );
 
       if (!response.ok) return {};
