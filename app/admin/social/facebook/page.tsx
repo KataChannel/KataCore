@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import FacebookConfigurationTab from './components/FacebookConfigurationTab';
 import FacebookSyncTab from './components/FacebookSyncTab';
 import FacebookUserDataTab from './components/FacebookUserDataTab';
+import FacebookUserInteractionsTab from './components/FacebookUserInteractionsTab';
 import FacebookLeadAdsTab from './components/FacebookLeadAdsTab';
 import FacebookWhatsAppTab from './components/FacebookWhatsAppTab';
 import FacebookInstagramTab from './components/FacebookInstagramTab';
@@ -106,6 +107,12 @@ export default function FacebookAdminPage() {
       description: 'View and manage synchronized Facebook user data'
     },
     {
+      id: 'userinteractions',
+      label: 'User Interactions',
+      icon: '🤝',
+      description: 'Advanced user interaction management and analysis'
+    },
+    {
       id: 'leadads',
       label: 'Lead Ads',
       icon: '🎯',
@@ -190,6 +197,10 @@ export default function FacebookAdminPage() {
 
           {currentTab === 'userdata' && (
             <FacebookUserDataTab />
+          )}
+
+          {currentTab === 'userinteractions' && (
+            <FacebookUserInteractionsTab />
           )}
 
           {currentTab === 'leadads' && (
