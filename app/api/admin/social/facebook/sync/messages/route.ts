@@ -184,6 +184,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`✅ Successfully synced ${allConversations.length} conversations and ${allMessages.length} messages`);
+    console.log(allMessages);
     
     if (failedPages.length > 0) {
       console.log(`⚠️ Failed to sync ${failedPages.length} pages:`, failedPages);

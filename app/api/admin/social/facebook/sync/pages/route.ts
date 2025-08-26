@@ -15,6 +15,8 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔄 Starting Facebook pages sync...');
+    console.log('🔄 Starting Facebook pages sync...',accessToken);
+    console.log('🔄 Starting Facebook pages sync...');
 
     // Get Facebook pages using the access token
     const response = await fetch(

@@ -26,15 +26,57 @@ export interface TokenValidationResult {
  */
 export async function validateFacebookToken(accessToken: string): Promise<TokenValidationResult> {
   try {
-    const response = await fetch(`https://graph.facebook.com/v20.0/me?access_token=${accessToken}`);
-    const data = await response.json();
-    
-    if (!response.ok || data.error) {
+    if (!accessToken || accessToken.trim() === '') {
       return {
         isValid: false,
         error: {
-          message: data.error?.message || 'Token validation failed',
-          code: data.error?.code || 'INVALID_TOKEN',
+          message: 'Access token is empty or missing',
+          code: 'MISSING_TOKEN',
+          type: 'ValidationError'
+        }
+      };
+    }
+
+    // Use debug_token endpoint for more detailed validation
+    const debugResponse = await fetch(`https://graph.facebook.com/v23.0/debug_token?input_token=${accessToken}&access_token=${accessToken}`);
+    const debugData = await debugResponse.json();
+    
+    if (debugData.error) {
+      const errorInfo = formatFacebookError(debugData.error);
+      return {
+        isValid: false,
+        error: {
+          message: errorInfo.userMessage,
+          code: debugData.error.code?.toString() || 'VALIDATION_ERROR',
+          type: debugData.error.type || 'OAuthException'
+        }
+      };
+    }
+
+    // Check if token is valid according to debug endpoint
+    const tokenData = debugData.data;
+    if (!tokenData || !tokenData.is_valid) {
+      return {
+        isValid: false,
+        error: {
+          message: 'Access token is not valid or has expired',
+          code: '190',
+          type: 'OAuthException'
+        }
+      };
+    }
+
+    // Now try to get user info with the validated token
+    const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${accessToken}&fields=id,name,email`);
+    const data = await response.json();
+    
+    if (!response.ok || data.error) {
+      const errorInfo = formatFacebookError(data.error);
+      return {
+        isValid: false,
+        error: {
+          message: errorInfo.userMessage,
+          code: data.error?.code?.toString() || 'API_ERROR',
           type: data.error?.type || 'OAuthException'
         }
       };
@@ -49,13 +91,81 @@ export async function validateFacebookToken(accessToken: string): Promise<TokenV
       }
     };
   } catch (error) {
+    console.error('Token validation error:', error);
     return {
       isValid: false,
       error: {
-        message: error instanceof Error ? error.message : 'Network error during token validation',
+        message: 'Unable to validate Facebook token. Please check your internet connection and try again.',
         code: 'NETWORK_ERROR',
         type: 'NetworkException'
       }
+    };
+  }
+}
+
+/**
+ * Auto-refresh Facebook token when expired
+ * @param currentToken - Current access token
+ * @param appId - Facebook App ID
+ * @param appSecret - Facebook App Secret
+ * @returns Promise<{success: boolean, newToken?: string, error?: string}>
+ */
+export async function autoRefreshFacebookToken(
+  currentToken: string, 
+  appId?: string, 
+  appSecret?: string
+): Promise<{success: boolean, newToken?: string, error?: string}> {
+  try {
+    // First validate current token
+    const validation = await validateFacebookToken(currentToken);
+    
+    if (validation.isValid) {
+      return { success: true, newToken: currentToken };
+    }
+
+    // If token is invalid and we have app credentials, try to refresh
+    if (!appId || !appSecret) {
+      return { 
+        success: false, 
+        error: 'Cannot refresh token: App ID and App Secret are required' 
+      };
+    }
+
+    // Check if this is a token-related error that can be refreshed
+    const errorCode = parseInt(validation.error?.code || '0');
+    const refreshableCodes = [190, 463, 464]; // Expired, expired session, invalidated session
+    
+    if (!refreshableCodes.includes(errorCode)) {
+      return { 
+        success: false, 
+        error: `Cannot refresh token: ${validation.error?.message}` 
+      };
+    }
+
+    // Try to exchange for long-lived token (this sometimes works for refreshing)
+    const longLivedResult = await getLongLivedToken(currentToken, appId, appSecret);
+    
+    if (longLivedResult.success && longLivedResult.accessToken) {
+      // Validate the new token
+      const newValidation = await validateFacebookToken(longLivedResult.accessToken);
+      
+      if (newValidation.isValid) {
+        return { 
+          success: true, 
+          newToken: longLivedResult.accessToken 
+        };
+      }
+    }
+
+    return { 
+      success: false, 
+      error: 'Token refresh failed. Please reconnect your Facebook account manually.' 
+    };
+
+  } catch (error) {
+    return { 
+      success: false, 
+      error: `Token refresh error: ${error instanceof Error ? error.message : 'Unknown error'}` 
     };
   }
 }
@@ -171,7 +281,7 @@ export function formatFacebookError(error: any): {
   
   switch (parseInt(code.toString())) {
     case 190:
-      userMessage = 'Your Facebook access token has expired. Please reconnect your account.';
+      userMessage = 'Your Facebook access token has expired or is invalid. Please reconnect your account.';
       break;
     case 102:
       userMessage = 'Your Facebook session is invalid. Please log in again.';
@@ -180,12 +290,16 @@ export function formatFacebookError(error: any): {
       userMessage = 'The Facebook app is not properly installed. Please contact support.';
       break;
     case 460:
+      userMessage = 'Your Facebook password has been changed. Please reconnect your account with the new credentials.';
+      break;
     case 463:
+      userMessage = 'Your Facebook session has expired due to inactivity. Please reconnect your account.';
+      break;
     case 464:
-      userMessage = 'Your Facebook session has expired. Please reconnect your account.';
+      userMessage = 'Your Facebook session has been invalidated for security reasons. This can happen when you change your password or Facebook detects suspicious activity. Please reconnect your account.';
       break;
     case 467:
-      userMessage = 'Invalid Facebook access token. Please reconnect your account.';
+      userMessage = 'Invalid Facebook access token signature. Please reconnect your account.';
       break;
     case 4:
       userMessage = 'Too many requests to Facebook. Please try again later.';
@@ -196,6 +310,10 @@ export function formatFacebookError(error: any): {
     default:
       if (isTokenRelated) {
         userMessage = 'There is an issue with your Facebook authentication. Please reconnect your account.';
+      } else if (message.toLowerCase().includes('session') && message.toLowerCase().includes('invalidated')) {
+        userMessage = 'Your Facebook session has been invalidated. This usually happens when you change your password or for security reasons. Please reconnect your account.';
+      } else if (message.toLowerCase().includes('password') && message.toLowerCase().includes('changed')) {
+        userMessage = 'Your Facebook password has been changed. Please reconnect your account with the new credentials.';
       }
       break;
   }
